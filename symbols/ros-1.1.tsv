@@ -3501,6 +3501,11 @@
 00460a54	v	uTool	VMT_TPosList
 00460abc	v	uTool	VMT_TRectPos
 00460b14	v	uTool	VMT_TRectPosList
+00460b34	f	uTool	uTool.IMax
+00460b3c	f	uTool	uTool.IMin
+00460b44	f	uTool	uTool.FMax
+00460b78	f	uTool	uTool.FMin
+00460bac	f	uTool	uTool.Interpolate
 00460be0	s	uTool	6
 00460bf0	s	uTool	7
 00460c00	s	uTool	7
@@ -3508,17 +3513,51 @@
 00460c24	s	uTool	9
 00460c38	s	uTool	7
 00460c48	s	uTool	8
+00460c54	f	uTool	uTool.FreeList
+00460cd0	f	uTool	uTool.RandomString
+00460cf0	f	uTool	TPos.Create
+00460d20	f	uTool	TRectPos.Create
+00460d6c	f	uTool	TRectPos.CreateRect
+00460dd0	f	uTool	TRectPos.GetRect
+00460dec	f	uTool	TRectPos.SetRect
+00460e28	f	uTool	TRectPos.Intersects
+00460e64	f	uTool	TRectPos.Union
+00460ea4	f	uTool	TPosList.Create
+00460ee4	f	uTool	TPosList.Sort.Key
+00460f18	f	uTool	TPosList.Sort.SetKey
+00460f5c	f	uTool	TPosList.Sort.QuickSort
+00461024	f	uTool	TPosList.Sort
+00461054	f	uTool	TPosList.Add
+004610cc	f	uTool	TPosList.GetItem
+004610ec	f	uTool	uTool.IsEven
+00461104	f	uTool	TPosList.Find
+00461234	f	uTool	TPosList.Insert
+00461254	f	uTool	TPosList.IndexOf
+004612e4	f	uTool	TRectPosList.GetItem
+00461304	f	uTool	TRectPosList.Add
+00461324	f	uTool	TRectPosList.AddRect
+00461358	f	uTool	uTool.RectWidth
+00461378	f	uTool	uTool.RectHeight
+00461398	f	uTool	uTool.RoundUp
+004613d0	f	uTool	uTool.InPort
+004613ec	f	uTool	uTool.GetWinVersion
+00461428	f	uTool	uTool.FindFiles
 004614d0	f	uTool	uTool.Finalization
 0046152c	f	uTool	uTool.Initialization
 004615e4	s	uLog	1
+004615e8	f	uLog	uLog.ProcessMessage
 00461670	f	uLog	uLog.Finalization
 004616a0	f	uLog	uLog.Initialization
 004616f4	v	fShow	VMT_TformDebugShow
+00461898	f	fShow	TformDebugShow.ShowGraphic
 00461914	f	fShow	TformDebugShow.PaintBox1Paint
 004619d4	s	fShow	7
 004619e4	s	fShow	9
 004619f0	f	fShow	TformDebugShow.OKBtnKeyPress
 004619fc	f	fShow	TformDebugShow.FormResize
+00461a3c	f	fShow	fShow.CreateDebugShow
+00461a60	f	fShow	fShow.FreeDebugShow
+00461a7c	f	fShow	fShow.ShowBitmap
 00461ad8	f	fShow	fShow.Finalization
 00461b08	f	fShow	fShow.Initialization
 00461b18	s	Unit49	9
@@ -3532,99 +3571,150 @@
 00461bb0	f	Unit49	Unit49.Finalization
 00461bf8	f	Unit49	Unit49.Initialization
 00461c4c	v	SprBmp	VMT_TBmpSurface
-00461dc8	f	SprBmp	TBmpSurface.Virtual60
+00461d3c	f	SprBmp	SprBmp.SetupBitmap
+00461da4	f	SprBmp	SprBmp.RealizeBitmap
+00461dc8	f	SprBmp	TBmpSurface.CreateSize
 00461eac	f	SprBmp	TBmpSurface.Destroy
-00461ef0	f	SprBmp	TBmpSurface.Virtual88
-00461ef8	f	SprBmp	TBmpSurface.Virtual64
-00461f20	f	SprBmp	TBmpSurface.Virtual68
-00461f74	f	SprBmp	TBmpSurface.Virtual6C
-00461f80	f	SprBmp	TBmpSurface.Virtual70
-00461fc0	f	SprBmp	TBmpSurface.Virtual74
-00462004	f	SprBmp	TBmpSurface.Virtual78
-00462058	f	SprBmp	TBmpSurface.Virtual7C
-0046250c	f	SprBmp	TBmpSurface.Virtual80
-00462518	f	SprBmp	TBmpSurface.Virtual84
-00462524	f	SprBmp	TBmpSurface.Virtual2C
-00462530	f	SprBmp	TBmpSurface.Virtual20
-0046253c	f	SprBmp	TBmpSurface.Virtual8C
-00462544	f	SprBmp	TBmpSurface.Virtual98
-00462548	f	SprBmp	TBmpSurface.Virtual9C
-00462588	f	SprBmp	TBmpSurface.Virtual94
-004626c0	f	SprBmp	TBmpSurface.VirtualA0
+00461ef0	f	SprBmp	TBmpSurface.GetScreen
+00461ef8	f	SprBmp	TBmpSurface.GetPixel
+00461f20	f	SprBmp	TBmpSurface.SetPixel
+00461f74	f	SprBmp	TBmpSurface.GetCanvas
+00461f80	f	SprBmp	TBmpSurface.GetPaletteColor
+00461fc0	f	SprBmp	TBmpSurface.SetPaletteColor
+00462004	f	SprBmp	TBmpSurface.GetTransparentColor
+00462008	f	SprBmp	TBmpSurface.CreateMask
+00462058	f	SprBmp	TBmpSurface.SetTransparentColor
+0046250c	f	SprBmp	TBmpSurface.GetPaletteHandle
+00462518	f	SprBmp	TBmpSurface.GetHandle
+00462524	f	SprBmp	TBmpSurface.GetWidth
+00462530	f	SprBmp	TBmpSurface.GetHeight
+0046253c	f	SprBmp	TBmpSurface.GetPaletteCount
+00462544	f	SprBmp	TBmpSurface.ConvertTo
+00462548	f	SprBmp	TBmpSurface.CopyPalette
+00462588	f	SprBmp	TBmpSurface.SavePalette
+004626c0	f	SprBmp	TBmpSurface.CopyFrom
 004627b4	s	SprBmp	30
-00462980	f	SprBmp	TBmpSurface.VirtualA4
+004627d4	f	SprBmp	SprBmp.SwapInt
+004627e0	f	SprBmp	TBmpSurface.StretchDraw
+00462980	f	SprBmp	TBmpSurface.DrawTo
 00462a94	f	SprBmp	TBmpSurface.Assign
-00462b20	f	SprBmp	TBmpSurface.Virtual50
-00462bd4	f	SprBmp	TBmpSurface.Virtual54
-00462bf0	f	SprBmp	TBmpSurface.VirtualA8
-00462e3c	f	SprBmp	TBmpSurface.VirtualAC
-00462f24	f	SprBmp	TBmpSurface.Virtual90
-00462f70	f	SprBmp	TBmpSurface.VirtualB0
-00462fe4	f	SprBmp	TBmpSurface.VirtualB4
-00463058	f	SprBmp	TBmpSurface.VirtualB8
+00462b20	f	SprBmp	TBmpSurface.LoadFromStream
+00462bd4	f	SprBmp	TBmpSurface.SaveToStream
+00462bf0	f	SprBmp	TBmpSurface.SetSize
+00462e3c	f	SprBmp	TBmpSurface.TextOut
+00462f24	f	SprBmp	TBmpSurface.DebugShow
+00462f70	f	SprBmp	TBmpSurface.TextWidth
+00462fe4	f	SprBmp	TBmpSurface.TextHeight
+00463058	f	SprBmp	TBmpSurface.FillRect
 004631a4	f	SprBmp	SprBmp.Finalization
 004631d4	f	SprBmp	SprBmp.Initialization
 00463280	v	uSurface	VMT_TSurface
 00463370	f	uSurface	TSurface.Create
-004633b0	f	uSurface	TSurface.Virtual60
-004633ec	f	uSurface	TSurface.Virtual84
-004633f0	f	uSurface	TSurface.Virtual14
-0046343c	f	uSurface	TSurface.VirtualA8
-00463534	f	uSurface	TSurface.Virtual40
-00463560	f	uSurface	TSurface.Virtual34
-0046358c	f	uSurface	TSurface.Virtual1C
-004635b0	f	uSurface	TSurface.Virtual88
-00463674	f	uSurface	TSurface.VirtualBC
+004633b0	f	uSurface	TSurface.CreateSize
+004633ec	f	uSurface	TSurface.GetHandle
+004633f0	f	uSurface	TSurface.Draw
+0046343c	f	uSurface	TSurface.SetSize
+00463534	f	uSurface	TSurface.SetWidth
+00463560	f	uSurface	TSurface.SetHeight
+0046358c	f	uSurface	TSurface.GetEmpty
+004635b0	f	uSurface	TSurface.GetScreen
+004635b4	f	uSurface	TSurface.DrawSurface
+00463628	f	uSurface	TSurface.CopyTo
+00463674	f	uSurface	TSurface.Clear
+004636b0	f	uSurface	TSurface.ColorToIndex
+0046377c	f	uSurface	TSurface.IndexToColor
+004637b4	f	uSurface	uSurface.NewSurface
+004637d8	f	uSurface	uSurface.NewSurfaceSize
+00463800	f	uSurface	uSurface.SurfaceScreen
 0046380c	f	uSurface	uSurface.Finalization
 0046383c	f	uSurface	uSurface.Initialization
 0046389c	v	uPixie	VMT_TPixie
-004639e4	f	uPixie	TPixie.Virtual30
-004639e8	f	uPixie	TPixie.Virtual34
-004639f0	f	uPixie	TPixie.Virtual38
-004639f8	f	uPixie	TPixie.Virtual40
-00463a00	f	uPixie	TPixie.Virtual44
-00463a08	f	uPixie	TPixie.Virtual48
-00463a10	f	uPixie	TPixie.Virtual3C
-00463a18	f	uPixie	TPixie.Virtual4C
-00463a20	f	uPixie	TPixie.Virtual50
-00463a28	f	uPixie	TPixie.Virtual54
-00463a30	f	uPixie	TPixie.Virtual58
-00463a68	f	uPixie	TPixie.Virtual6C
-00463aa4	f	uPixie	TPixie.Virtual70
-00463ae4	f	uPixie	TPixie.Virtual74
-00463b68	f	uPixie	TPixie.Virtual80
-00463b94	f	uPixie	TPixie.Virtual84
-00463ba8	f	uPixie	TPixie.Virtual78
-00463bb4	f	uPixie	TPixie.Virtual7C
+004639e4	f	uPixie	TPixie.SetVisible
+004639e8	f	uPixie	TPixie.SetX
+004639f0	f	uPixie	TPixie.SetY
+004639f8	f	uPixie	TPixie.GetX
+00463a00	f	uPixie	TPixie.GetY
+00463a08	f	uPixie	TPixie.GetZ
+00463a10	f	uPixie	TPixie.SetZ
+00463a18	f	uPixie	TPixie.GetLeft
+00463a20	f	uPixie	TPixie.SetLeft
+00463a28	f	uPixie	TPixie.GetTop
+00463a30	f	uPixie	TPixie.SetTop
+00463a38	f	uPixie	TPixie.GetBoundsRect
+00463a68	f	uPixie	TPixie.Intersects
+00463aa4	f	uPixie	TPixie.GetState
+00463ae4	f	uPixie	TPixie.GetChange
+00463b68	f	uPixie	TPixie.MouseMove
+00463b94	f	uPixie	TPixie.MouseLeave
+00463ba8	f	uPixie	TPixie.MouseDown
+00463bb4	f	uPixie	TPixie.MouseUp
 00463bdc	f	uPixie	uPixie.Finalization
 00463c0c	f	uPixie	uPixie.Initialization
 00463c60	v	Sprframe	VMT_EFrame
 00463d10	v	Sprframe	VMT_TFrame
 00463d9c	v	Sprframe	VMT_TPersistentList
 00463e34	v	Sprframe	VMT_TFrameList
+00463e78	f	Sprframe	Sprframe.DoProgress
+00463ea8	f	Sprframe	TFrame.Init
+00463f24	f	Sprframe	TFrame.Create
 00463fd0	s	Sprframe	49
+00464004	f	Sprframe	TFrame.CreateEmpty
 00464088	s	Sprframe	49
 004640bc	f	Sprframe	TFrame.Destroy
 004640f8	f	Sprframe	TFrame.Assign
-004641dc	f	Sprframe	TFrame.Notification
-00464274	f	Sprframe	TFrame.Loaded
+00464194	f	Sprframe	TFrame.FreeData
+004641ac	f	Sprframe	TFrame.GetWidth
+004641b4	f	Sprframe	TFrame.SetWidth
+004641bc	f	Sprframe	TFrame.GetHeight
+004641c4	f	Sprframe	TFrame.SetHeight
+004641cc	f	Sprframe	TFrame.IncCount
+004641d4	f	Sprframe	TFrame.GetSurface
+004641dc	f	Sprframe	TFrame.DrawDC
+00464274	f	Sprframe	TFrame.Draw
+00464310	f	Sprframe	TFrame.ReadData
 004643ec	s	Sprframe	28
 00464414	s	Sprframe	40
+00464440	f	Sprframe	TFrame.WriteData
+004644c8	f	Sprframe	TPersistentList.Create
 0046450c	f	Sprframe	TPersistentList.Destroy
-00464540	f	Sprframe	TPersistentList.Virtual0C
+00464540	f	Sprframe	TPersistentList.Clear
+00464578	f	Sprframe	TPersistentList.GetCount
+00464580	f	Sprframe	TFrameList.Create
 004645d0	f	Sprframe	TFrameList.Destroy
-00464854	f	Sprframe	TFrameList.Virtual0C
+00464604	f	Sprframe	TFrameList.RemoveFrame
+0046470c	f	Sprframe	TFrameList.AddImage
+00464854	f	Sprframe	TFrameList.Clear
+00464894	f	Sprframe	TFrameList.IndexOf
 00464940	f	Sprframe	TFrameList.Assign
+004649f4	f	Sprframe	TFrameList.FrameByName
+00464b38	f	Sprframe	TFrameList.GetFrame
+00464b58	f	Sprframe	TFrameList.Add
+00464ba4	f	Sprframe	TFrameList.AddFrame
+00464c10	f	Sprframe	TFrameList.SetTransparentColor
 00464c28	f	Sprframe	TFrameList.DefineProperties
 00464c5c	s	Sprframe	4
+00464c64	f	Sprframe	TFrameList.ReadData
+00464d28	f	Sprframe	Sprframe.DebugStr
 00464d7c	s	Sprframe	1
+00464d80	f	Sprframe	TFrameList.WriteData
 00464ecc	s	Sprframe	3
 00464ed0	f	Sprframe	Sprframe.Finalization
 00464f00	f	Sprframe	Sprframe.Initialization
 00464f64	v	uResizeScreen	VMT_TScrnMode
 00464fbc	v	uResizeScreen	VMT_TScrnModeList
+00464fdc	f	uResizeScreen	TScrnMode.Create
 00465030	f	uResizeScreen	TScrnMode.Destroy
+00465058	f	uResizeScreen	TScrnMode.Apply
+004650d4	f	uResizeScreen	TScrnMode.Matches
+00465114	f	uResizeScreen	TScrnModeList.Create
 004651a0	f	uResizeScreen	TScrnModeList.Destroy
+004651cc	f	uResizeScreen	TScrnModeList.StoreCurrentMode
+00465240	f	uResizeScreen	TScrnModeList.Add
+00465250	f	uResizeScreen	TScrnModeList.Find
+004652b0	f	uResizeScreen	TScrnModeList.GetMode
+004652d0	f	uResizeScreen	uResizeScreen.SetScreenMode
+00465334	f	uResizeScreen	uResizeScreen.RestoreScreenMode
+00465370	f	uResizeScreen	uResizeScreen.IsScreenChanged
 00465378	f	uResizeScreen	uResizeScreen.Finalization
 004653a8	f	uResizeScreen	uResizeScreen.Initialization
 004653b0	f	Unit56	Unit56.Finalization
@@ -3633,9 +3723,11 @@
 00465654	f	uTextBalloon	TTextBalloon.Create
 004656f0	f	uTextBalloon	TTextBalloon.Destroy
 0046572c	f	uTextBalloon	TTextBalloon.SetFont
-00465750	f	uTextBalloon	TTextBalloon.Virtual5C
-00465758	f	uTextBalloon	TTextBalloon.Virtual60
+00465748	f	uTextBalloon	TTextBalloon.FontChanged
+00465750	f	uTextBalloon	TTextBalloon.GetWidth
+00465758	f	uTextBalloon	TTextBalloon.GetHeight
 00465760	f	uTextBalloon	TTextBalloon.SetBalloonText
+004657c0	f	uTextBalloon	TTextBalloon.UpdateLayout
 00465c08	f	uTextBalloon	TTextBalloon.SetBalloonLineWidth
 00465c18	f	uTextBalloon	TTextBalloon.SetRoundCorner
 00465c28	f	uTextBalloon	TTextBalloon.SetXOffset
@@ -3643,15 +3735,19 @@
 00465c50	f	uTextBalloon	TTextBalloon.SetSpriteBox
 00465c84	f	uTextBalloon	TTextBalloon.SetSideColor
 00465c90	f	uTextBalloon	TTextBalloon.SetBackGroundColor
-0046663c	f	uTextBalloon	TTextBalloon.Virtual64
+00465c9c	f	uTextBalloon	TTextBalloon.DrawBalloon
+0046663c	f	uTextBalloon	TTextBalloon.Draw
+00466688	f	uTextBalloon	TTextBalloon.LineRatio
 00466a4c	s	uTextBalloon	1
+00466a58	f	uTextBalloon	TTextBalloon.FitText
+00466bd4	f	uTextBalloon	TTextBalloon.DrawDC.DrawLines
 00466ddc	s	uTextBalloon	1
-00466de8	f	uTextBalloon	TTextBalloon.Virtual68
-00466f1c	f	uTextBalloon	TTextBalloon.Virtual34
-00466f28	f	uTextBalloon	TTextBalloon.Virtual38
-00466f34	f	uTextBalloon	TTextBalloon.Virtual3C
-00466f60	f	uTextBalloon	TTextBalloon.Virtual40
-00466f68	f	uTextBalloon	TTextBalloon.Virtual44
+00466de8	f	uTextBalloon	TTextBalloon.DrawDC
+00466f1c	f	uTextBalloon	TTextBalloon.SetX
+00466f28	f	uTextBalloon	TTextBalloon.SetY
+00466f34	f	uTextBalloon	TTextBalloon.SetZ
+00466f60	f	uTextBalloon	TTextBalloon.GetX
+00466f68	f	uTextBalloon	TTextBalloon.GetY
 00466f70	f	uTextBalloon	uTextBalloon.Finalization
 00466fa0	f	uTextBalloon	uTextBalloon.Initialization
 00466fa8	f	Unit61	Unit61.Finalization
@@ -3748,41 +3844,60 @@
 00469d50	v	uSprite	VMT_TBehaviourList
 00469d70	f	uSprite	TSprite.Create
 00469ec4	s	uSprite	4
-00469ecc	f	uSprite	TSprite.VirtualB4
+00469ecc	f	uSprite	TSprite.CreateCopy
 0046a150	f	uSprite	TSprite.Destroy
+0046a220	f	uSprite	TSprite.Kill
+0046a228	f	uSprite	TSprite.Redraw
+0046a2a4	f	uSprite	TSprite.MoveTo
+0046a30c	f	uSprite	TSprite.MoveTo3D
+0046a374	f	uSprite	TSprite.MoveBy
+0046a3b0	f	uSprite	TSprite.PlaySequence
+0046a408	f	uSprite	TSprite.PlaySequenceAt
 0046a5c8	s	uSprite	1
-0046a5ec	f	uSprite	TSprite.Virtual94
-0046a60c	f	uSprite	TSprite.Virtual98
-0046a69c	f	uSprite	TSprite.Virtual9C
-0046a720	f	uSprite	TSprite.VirtualA0
-0046a7ec	f	uSprite	TSprite.VirtualA8
-0046a924	f	uSprite	TSprite.VirtualAC
-0046a9d4	f	uSprite	TSprite.Virtual74
-0046aae8	f	uSprite	TSprite.VirtualA4
-0046ab14	f	uSprite	TSprite.Virtual80
-0046ab94	f	uSprite	TSprite.Virtual84
-0046abf0	f	uSprite	TSprite.Virtual78
-0046ac78	f	uSprite	TSprite.Virtual7C
-0046ad00	f	uSprite	TSprite.Virtual68
-0046ae50	f	uSprite	TSprite.Virtual64
-0046b2d0	f	uSprite	TSprite.Virtual90
-0046b2ec	f	uSprite	TSprite.VirtualB0
+0046a5d4	f	uSprite	TSprite.StopSequence
+0046a5ec	f	uSprite	TSprite.DoVisible
+0046a60c	f	uSprite	TSprite.DoMove
+0046a69c	f	uSprite	TSprite.DoFinishSequence
+0046a720	f	uSprite	TSprite.DoHit
+0046a7ec	f	uSprite	TSprite.DoAfterBlit
+0046a924	f	uSprite	TSprite.DoBeforeBlit
+0046a9d4	f	uSprite	TSprite.GetChange
+0046aae8	f	uSprite	TSprite.DoFrameSkipped
+0046ab14	f	uSprite	TSprite.MouseMove
+0046ab94	f	uSprite	TSprite.MouseLeave
+0046abf0	f	uSprite	TSprite.MouseDown
+0046ac78	f	uSprite	TSprite.MouseUp
+0046ad00	f	uSprite	TSprite.DrawDC
+0046ae50	f	uSprite	TSprite.Draw
+0046afe8	f	uSprite	TSprite.TimerSkip
+0046b008	f	uSprite	TSprite.TimerTick
+0046b2d0	f	uSprite	TSprite.GetScale
+0046b2ec	f	uSprite	TSprite.ChangeState
 0046b5a4	f	uSprite	TSprite.GetAbout
 0046b5c0	s	uSprite	4
-0046b688	f	uSprite	TSprite.Virtual30
+0046b5c8	f	uSprite	TSprite.GetSurface
+0046b5f0	f	uSprite	TSprite.GetSequence
+0046b614	f	uSprite	TSprite.SetSequence
+0046b65c	f	uSprite	TSprite.SetMouseCapture
+0046b688	f	uSprite	TSprite.SetVisible
 0046b710	f	uSprite	TSprite.SetMirrorX
 0046b724	f	uSprite	TSprite.SetMirrorY
-0046b738	f	uSprite	TSprite.Virtual34
-0046b7ac	f	uSprite	TSprite.Virtual38
-0046b820	f	uSprite	TSprite.Virtual50
-0046b84c	f	uSprite	TSprite.Virtual58
-0046b878	f	uSprite	TSprite.Virtual3C
-0046baf4	f	uSprite	TSprite.Virtual40
-0046bb50	f	uSprite	TSprite.Virtual44
-0046bbac	f	uSprite	TSprite.Virtual5C
-0046bbe0	f	uSprite	TSprite.Virtual60
-0046bc14	f	uSprite	TSprite.Virtual88
-0046bc50	f	uSprite	TSprite.Virtual8C
+0046b738	f	uSprite	TSprite.SetX
+0046b7ac	f	uSprite	TSprite.SetY
+0046b820	f	uSprite	TSprite.SetLeft
+0046b84c	f	uSprite	TSprite.SetTop
+0046b878	f	uSprite	TSprite.SetZ
+0046b8f8	f	uSprite	TSprite.SetZOrder
+0046b924	f	uSprite	TSprite.SetMarginLeft
+0046b998	f	uSprite	TSprite.SetMarginTop
+0046ba0c	f	uSprite	TSprite.SetMarginRight
+0046ba80	f	uSprite	TSprite.SetMarginBottom
+0046baf4	f	uSprite	TSprite.GetX
+0046bb50	f	uSprite	TSprite.GetY
+0046bbac	f	uSprite	TSprite.GetWidth
+0046bbe0	f	uSprite	TSprite.GetHeight
+0046bc14	f	uSprite	TSprite.GetHotSpotX
+0046bc50	f	uSprite	TSprite.GetHotSpotY
 0046bc8c	f	uSprite	TSprite.GetTransparent
 0046bc94	f	uSprite	TSprite.SetTransparent
 0046bca0	f	uSprite	TSprite.SetSpriteBox
@@ -3792,36 +3907,51 @@
 0046bd58	f	uSprite	TSprite.SetCurrentFrame
 0046be60	f	uSprite	TSprite.SetFrameIndex
 0046bf68	s	uSprite	36
+0046bf94	f	uSprite	TSprite.SetScale
+0046c010	f	uSprite	TSprite.GetFrozen
 0046c018	f	uSprite	TSprite.SetPriority
 0046c024	f	uSprite	TSprite.GetPriority
+0046c030	f	uSprite	TSprite.GetBehaviour
+0046c084	f	uSprite	TSprite.AddBehaviour
+0046c0f0	f	uSprite	TSpriteList.Add
+0046c100	f	uSprite	TSpriteList.SpriteByName
+0046c180	f	uSprite	TSpriteList.GetSprite
+0046c1a0	f	uSprite	TBehaviour.Create
 0046c1e4	f	uSprite	TBehaviour.Destroy
-0046c218	f	uSprite	TBehaviour.Virtual00
-0046c21c	f	uSprite	TBehaviour.Virtual04
-0046c220	f	uSprite	TBehaviour.Virtual08
-0046c228	f	uSprite	TBehaviour.Virtual0C
-0046c248	f	uSprite	TBehaviour.Virtual10
-0046c268	f	uSprite	TBehaviour.Virtual20
-0046c270	f	uSprite	TBehaviour.Virtual24
-0046c274	f	uSprite	TBehaviour.Virtual18
-0046c27c	f	uSprite	TBehaviour.Virtual1C
-0046c284	f	uSprite	TBehaviour.Virtual14
-0046c288	f	uSprite	TBehaviour.Virtual28
-0046c28c	f	uSprite	TBehaviour.Virtual2C
-0046c2ac	f	uSprite	TBehaviour.Virtual34
-0046c2b0	f	uSprite	TBehaviour.Virtual30
+0046c218	f	uSprite	TBehaviour.FinishSequence
+0046c21c	f	uSprite	TBehaviour.Hit
+0046c220	f	uSprite	TBehaviour.Move
+0046c228	f	uSprite	TBehaviour.AfterBlit
+0046c248	f	uSprite	TBehaviour.BeforeBlit
+0046c268	f	uSprite	TBehaviour.MouseMove
+0046c270	f	uSprite	TBehaviour.MouseLeave
+0046c274	f	uSprite	TBehaviour.MouseDown
+0046c27c	f	uSprite	TBehaviour.MouseUp
+0046c284	f	uSprite	TBehaviour.VisibleChange
+0046c288	f	uSprite	TBehaviour.SetSprite
+0046c28c	f	uSprite	TBehaviour.Detach
+0046c2ac	f	uSprite	TBehaviour.SetActive
+0046c2b0	f	uSprite	TBehaviour.Finish
+0046c2e8	f	uSprite	TBehaviourList.Add
+0046c2f8	f	uSprite	TBehaviourList.GetBehaviour
+0046c318	f	uSprite	TBehaviourList.Find
+0046c3a0	f	uSprite	TBehaviourList.Remove
+0046c3c0	f	uSprite	TBehaviourList.ClearItem
+0046c3d4	f	uSprite	TBehaviourList.Pack
+0046c400	f	uSprite	TBehaviourList.IsActive
 0046c42c	f	uSprite	uSprite.Finalization
 0046c470	f	uSprite	uSprite.Initialization
 0046c4c4	v	uGoblin	VMT_TGoblin
 0046c5bc	f	uGoblin	TGoblin.Create
 0046c600	f	uGoblin	TGoblin.Destroy
-0046c638	f	uGoblin	TGoblin.Virtual74
+0046c638	f	uGoblin	TGoblin.GetChange
 0046c674	f	uGoblin	TGoblin.SetSpriteBox
 0046c6a0	f	uGoblin	TGoblin.SetSurface
-0046c6b8	f	uGoblin	TGoblin.Virtual5C
-0046c6c4	f	uGoblin	TGoblin.Virtual60
-0046c6d0	f	uGoblin	TGoblin.Virtual64
-0046c71c	f	uGoblin	TGoblin.Virtual68
-0046c968	f	uGoblin	TGoblin.Virtual3C
+0046c6b8	f	uGoblin	TGoblin.GetWidth
+0046c6c4	f	uGoblin	TGoblin.GetHeight
+0046c6d0	f	uGoblin	TGoblin.Draw
+0046c71c	f	uGoblin	TGoblin.DrawDC
+0046c968	f	uGoblin	TGoblin.SetZ
 0046c994	f	uGoblin	uGoblin.Finalization
 0046c9c4	f	uGoblin	uGoblin.Initialization
 0046ca60	v	uSpritebox	VMT_TThreeD
@@ -3830,55 +3960,114 @@
 0046d1a8	f	uSpritebox	TSpriteBox.Create
 0046d2b8	s	uSpritebox	24
 0046d2d4	f	uSpritebox	TSpriteBox.Destroy
-0046d44c	f	uSpritebox	TSpriteBox.Dynamic0014
-0046d460	f	uSpritebox	TSpriteBox.Dynamic0402
+0046d410	f	uSpritebox	TSpriteBox.NoPicture
+0046d41c	f	uSpritebox	TSpriteBox.GetPixie
+0046d440	f	uSpritebox	TSpriteBox.PixieCount
+0046d44c	f	uSpritebox	TSpriteBox.WMEraseBkgnd
+0046d460	f	uSpritebox	TSpriteBox.WMStarted
 0046d4bc	f	uSpritebox	TSpriteBox.SetAutoSize
+0046d504	f	uSpritebox	TThreeD.Project
 0046d564	f	uSpritebox	TThreeD.Assign
-0046d5b8	f	uSpritebox	TSpriteBox.DynamicFFDA
-0046d620	f	uSpritebox	TSpriteBox.DynamicFFD9
-0046d6a8	f	uSpritebox	TSpriteBox.DynamicFFD8
+0046d5b8	f	uSpritebox	TSpriteBox.MouseDown
+0046d620	f	uSpritebox	TSpriteBox.MouseMove
+0046d6a8	f	uSpritebox	TSpriteBox.MouseUp
 0046d714	f	uSpritebox	TSpriteBox.Paint
+0046d800	f	uSpritebox	TSpriteBox.AddUpdateRect
 0046d858	f	uSpritebox	TSpriteBox.SetAutoFlip
-0046d914	f	uSpritebox	TSpriteBox.VirtualC0
-0046db0c	f	uSpritebox	TSpriteBox.VirtualC4
-0046de00	f	uSpritebox	TSpriteBox.VirtualC8
-0046dea8	f	uSpritebox	TSpriteBox.VirtualB8
-0046df60	f	uSpritebox	TSpriteBox.VirtualCC
-0046e0f0	f	uSpritebox	TSpriteBox.VirtualD0
-0046e1e4	f	uSpritebox	TSpriteBox.VirtualBC
+0046d880	f	uSpritebox	TSpriteBox.MergeRects
+0046d900	f	uSpritebox	TSpriteBox.GetDrawWindow
+0046d914	f	uSpritebox	TSpriteBox.FullFlip
+0046db0c	f	uSpritebox	TSpriteBox.DirtyFlip
+0046de00	f	uSpritebox	TSpriteBox.GDIFlip
+0046dea8	f	uSpritebox	TSpriteBox.InvalidateState
+0046df60	f	uSpritebox	TSpriteBox.Flip
+0046e0b0	f	uSpritebox	TSpriteBox.InvalidateRect
+0046e0f0	f	uSpritebox	TSpriteBox.InvalidateArea
+0046e1e4	f	uSpritebox	TSpriteBox.PaintBackground
+0046e294	f	uSpritebox	TSpriteBox.DrawRegion
+0046e690	f	uSpritebox	TSpriteBox.FindPixie
+0046e700	f	uSpritebox	TSpriteBox.PixieAt
+0046e718	f	uSpritebox	TSpriteBox.AddPixie
+0046e734	f	uSpritebox	TSpriteBox.RemovePixie
 0046e78c	f	uSpritebox	TSpriteBox.SetPicture
 0046e7a4	f	uSpritebox	TSpriteBox.SetPaletteImage
+0046e7d0	f	uSpritebox	TSpriteBox.UpdateZOrder
+0046e7f0	f	uSpritebox	TSpriteBox.ZOrderDirection
+0046e870	f	uSpritebox	TSpriteBox.UpdateZOrderAt
+0046e8a0	f	uSpritebox	TSpriteBox.UpdatePalette
+0046e928	f	uSpritebox	TSpriteBox.SetCapturePixie
+0046e94c	f	uSpritebox	TSpriteBoxList.Add
+0046e95c	f	uSpritebox	TSpriteBoxList.GetSpriteBox
+0046e97c	f	uSpritebox	TSpriteBoxList.FlipAll
+0046e9b4	f	uSpritebox	uSpritebox.SpriteBoxExit
 0046e9d8	f	uSpritebox	uSpritebox.Finalization
 0046ea08	f	uSpritebox	uSpritebox.Initialization
 0046ea90	v	uSequence	VMT_TFrameRef
 0046eb1c	v	uSequence	VMT_TSequence
 0046ebac	v	uSequence	VMT_TSequenceList
+0046ebf8	f	uSequence	TFrameRef.Create
+0046ec34	f	uSequence	TFrameRef.SetFrameName
+0046ec68	f	uSequence	TFrameRef.GetFrameIndex
+0046ec88	f	uSequence	TFrameRef.GetDX
+0046ec90	f	uSequence	TFrameRef.GetDY
+0046ec98	f	uSequence	TFrameRef.GetDZ
+0046eca0	f	uSequence	TFrameRef.ReadData
 0046ed84	s	uSequence	4
+0046ed8c	f	uSequence	TFrameRef.WriteData
 0046ede0	f	uSequence	TFrameRef.DefineProperties
 0046ee14	s	uSequence	4
 0046ee1c	f	uSequence	TFrameRef.Assign
+0046ee8c	f	uSequence	TSequence.Create
 0046eef4	f	uSequence	TSequence.Assign
+0046efa0	f	uSequence	TSequence.GetStep
+0046f04c	f	uSequence	TSequence.GetFrameRef
+0046f06c	f	uSequence	TSequence.ReadData
+0046f0cc	f	uSequence	TSequence.WriteData
 0046f128	f	uSequence	TSequence.DefineProperties
 0046f15c	s	uSequence	4
+0046f164	f	uSequence	TSequenceList.Create
 0046f1a0	f	uSequence	TSequenceList.Assign
+0046f230	f	uSequence	TSequenceList.GetSequence
+0046f250	f	uSequence	TSequenceList.SequenceByName
+0046f34c	f	uSequence	TSequenceList.IndexOf
+0046f410	f	uSequence	TSequenceList.Add
 0046f41c	f	uSequence	TSequenceList.DefineProperties
 0046f450	s	uSequence	4
+0046f458	f	uSequence	TSequenceList.ReadData
+0046f4ac	f	uSequence	TSequenceList.WriteData
 0046f4f8	f	uSequence	uSequence.Finalization
 0046f528	f	uSequence	uSequence.Initialization
 0046f57c	v	uTiming	VMT_TCustomFastTimer
 0046f654	v	uTiming	VMT_TFastTimer
 0046f7d4	v	uTiming	VMT_TFastTimerList
+0046f7f4	f	uTiming	uTiming.FreeWinMM
+0046f810	f	uTiming	uTiming.ReleaseMMTimer
+0046f838	f	uTiming	uTiming.GetTime
+0046f86c	f	uTiming	uTiming.SetMaxMessageLoops
 0046f874	f	uTiming	TCustomFastTimer.Create
 0046f924	s	uTiming	3
 0046f928	f	uTiming	TCustomFastTimer.Destroy
+0046f988	f	uTiming	TCustomFastTimer.WndProc
+0046fa0c	f	uTiming	TCustomFastTimer.UpdateTimer
 0046faa4	s	uTiming	28
-0046fac4	f	uTiming	TFastTimer.GetAbout
+0046fac4	f	uTiming	TCustomFastTimer.GetAbout
 0046fae0	s	uTiming	3
-0046fae4	f	uTiming	TFastTimer.SetEnabled
-0046fb34	f	uTiming	TFastTimer.SetInterval
-0046fb44	f	uTiming	TFastTimer.SetOnTimer
-0046fbc8	f	uTiming	TCustomFastTimer.DynamicFFF0
-0046fbd4	f	uTiming	TCustomFastTimer.Virtual30
+0046fae4	f	uTiming	TCustomFastTimer.SetEnabled
+0046faf4	f	uTiming	TCustomFastTimer.GetRealInterval
+0046fb34	f	uTiming	TCustomFastTimer.SetInterval
+0046fb44	f	uTiming	TCustomFastTimer.SetOnTimer
+0046fb5c	f	uTiming	TCustomFastTimer.DoTimer
+0046fbc8	f	uTiming	TCustomFastTimer.Timer
+0046fbd4	f	uTiming	TCustomFastTimer.SkipTimer
+0046fbe0	f	uTiming	TCustomFastTimer.GetTimerMode
+0046fc08	f	uTiming	TFastTimerList.Add
+0046fc18	f	uTiming	TFastTimerList.GetTimer
+0046fc38	f	uTiming	TFastTimerList.NextDue
+0046fca4	f	uTiming	uTiming.FastTimerLoop
+0046fe10	f	uTiming	uTiming.WaitRetrace
+0046fe2c	f	uTiming	uTiming.GetRetraceTime
+0046fe40	f	uTiming	uTiming.MeasureRetrace
+0046fe8c	f	uTiming	uTiming.CheckWinNT
 0046fec8	f	uTiming	uTiming.Finalization
 0046fef8	f	uTiming	uTiming.Initialization
 0046ff58	f	Unit72	Unit72.Finalization
@@ -3893,27 +4082,50 @@
 0047034c	v	Sprbehav	VMT_TBehavMemo
 004703e0	v	Sprbehav	VMT_TCaption
 00470448	v	Sprbehav	VMT_TBehavText
-0047058c	f	Sprbehav	TBehavControl.Virtual20
-004705f4	f	Sprbehav	TBehavControl.Virtual24
-004705fc	f	Sprbehav	TBehavControl.Virtual18
-00470620	f	Sprbehav	TBehavControl.Virtual1C
-004706b4	f	Sprbehav	TBehavControl.Virtual34
-004707e0	f	Sprbehav	TBehavControl.Virtual00
-00470850	f	Sprbehav	TBehavControl.Virtual38
-00470af8	f	Sprbehav	TBehavRadioButton.Virtual1C
-00470b48	f	Sprbehav	TBehavRadioButton.Virtual38
-00470c4c	f	Sprbehav	TBehavCursor.Virtual20
-00470c9c	f	Sprbehav	TBehavCursor.Virtual24
+0047048c	f	Sprbehav	TBehavControl.Create
+0047058c	f	Sprbehav	TBehavControl.MouseMove
+004705f4	f	Sprbehav	TBehavControl.MouseLeave
+004705fc	f	Sprbehav	TBehavControl.MouseDown
+00470620	f	Sprbehav	TBehavControl.MouseUp
+004706b4	f	Sprbehav	TBehavControl.SetActive
+004706d4	f	Sprbehav	TBehavControl.SetDown
+0047072c	f	Sprbehav	TBehavControl.SetHover
+004707e0	f	Sprbehav	TBehavControl.FinishSequence
+00470850	f	Sprbehav	TBehavControl.SetState
+00470860	f	Sprbehav	TBehavControl.GetFrameName
+0047089c	f	Sprbehav	TBehavControl.UpdateFrame
+0047091c	f	Sprbehav	TBehavCheckBox.Create
+004709f4	f	Sprbehav	TBehavCheckBox.CheckBoxClick
+00470a1c	f	Sprbehav	TBehavCheckBox.SetChecked
+00470a34	f	Sprbehav	TBehavCheckBox.GetChecked
+00470a3c	f	Sprbehav	TBehavRadioButton.Create
+00470af8	f	Sprbehav	TBehavRadioButton.MouseUp
+00470b48	f	Sprbehav	TBehavRadioButton.SetState
+00470c08	f	Sprbehav	TBehavCursor.Create
+00470c4c	f	Sprbehav	TBehavCursor.MouseMove
+00470c9c	f	Sprbehav	TBehavCursor.MouseLeave
+00470da0	f	Sprbehav	TBehavButton.Create
+00470e4c	f	Sprbehav	TBehavButton.Create
+00470f3c	f	Sprbehav	TCaption.Create
+00471010	f	Sprbehav	TBehavText.Create
 004710c4	f	Sprbehav	TBehavText.Destroy
-004711e0	f	Sprbehav	TBehavText.Virtual0C
+004710fc	f	Sprbehav	TBehavText.SetCaption
+004711e0	f	Sprbehav	TBehavText.AfterBlit
+00471354	f	Sprbehav	TBehavMemo.Create
 004713e4	f	Sprbehav	TBehavMemo.Destroy
-00471438	f	Sprbehav	TBehavMemo.Virtual34
-004714d8	f	Sprbehav	TBehavMemo.Virtual08
-004715e8	f	Sprbehav	TBehavMemo.Virtual0C
+00471438	f	Sprbehav	TBehavMemo.SetActive
+004714d8	f	Sprbehav	TBehavMemo.Move
+00471554	f	Sprbehav	TBehavMemo.MemoChange
+00471578	f	Sprbehav	TBehavMemo.AfterBlit.ToggleBold
+004715e8	f	Sprbehav	TBehavMemo.AfterBlit
 00471a0c	s	Sprbehav	1
 00471a18	s	Sprbehav	1
+00471a1c	f	Sprbehav	Sprbehav.AddTextBehaviour
 00471ad8	s	Sprbehav	13
+00471ae8	f	Sprbehav	Sprbehav.ControlToBehaviour.FindFrame
+00471bbc	f	Sprbehav	Sprbehav.ControlToBehaviour.AddCaption
 00471d68	s	Sprbehav	7
+00471d70	f	Sprbehav	Sprbehav.ControlToBehaviour
 004720d0	s	Sprbehav	3
 004720dc	s	Sprbehav	3
 004720e8	s	Sprbehav	3
@@ -3925,13 +4137,19 @@
 00472134	f	Sprbehav	Sprbehav.Finalization
 00472164	f	Sprbehav	Sprbehav.Initialization
 004721b8	v	Usett	VMT_TTask
+004721c4	d	Usett	Usett.TypeInfo_TLevel
+004721e0	d	Usett	Usett.TypeInfo_TLevelArray
 0047223c	v	Usett	VMT_TSettings
 004722d4	v	Usett	VMT_TStatus
+004722dc	f	Usett	TSettings.Create
 004723a4	s	Usett	18
 004723b8	f	Usett	TSettings.Destroy
+004723e4	f	Usett	TSettings.SaveHighScore
 00472448	s	Usett	9
 0047245c	s	Usett	7
+00472464	f	Usett	TSettings.Load.ReadList
 00472510	s	Usett	1
+00472514	f	Usett	TSettings.Load
 00472a40	s	Usett	5
 00472a50	s	Usett	10
 00472a64	s	Usett	7
@@ -3972,6 +4190,11 @@
 00472d70	s	Usett	9
 00472d84	s	Usett	11
 00472d98	s	Usett	9
+00472da4	f	Usett	TStatus.Create
+00472dec	f	Usett	TStatus.SetGeld
+00472e08	f	Usett	TTask.Create
+00472e38	f	Usett	TTask.Add
+00472e48	f	Usett	TTask.Clear
 00472e54	f	Usett	Usett.Finalization
 00472e84	f	Usett	Usett.Initialization
 00472e94	s	Unit78	9
@@ -3987,12 +4210,21 @@
 00472fc8	v	Uview	VMT_TViewSprite
 00473110	v	Uview	VMT_TViewSpriteList
 0047317c	v	Uview	VMT_TView
+0047322c	f	Uview	TView.Create
 00473450	s	Uview	16
 0047346c	s	Uview	6
 0047347c	s	Uview	5
 0047348c	s	Uview	8
 00473498	f	Uview	TView.Destroy
+004734e0	f	Uview	TView.ProcessChanges
+00473530	f	Uview	Uview.ClipToView
+004735ec	f	Uview	TView.PlaceSprite
+00473638	f	Uview	TView.Redraw
+0047376c	f	Uview	TView.GetCenter
+004737b8	f	Uview	TView.ScrollTo
+004738e4	f	Uview	Uview.StoepFrame
 00473980	s	Uview	6
+00473988	f	Uview	TView.PaintCell
 00473f74	s	Uview	10
 00473f88	s	Uview	12
 00473fa0	s	Uview	5
@@ -4009,13 +4241,15 @@
 00474070	s	Uview	11
 00474084	s	Uview	11
 00474098	s	Uview	15
-004740a8	f	Uview	TView.Virtual68
+004740a8	f	Uview	TView.DrawDC
+004740c8	f	Uview	TView.Draw.DrawSprite
 0047441c	s	Uview	1
-00474420	f	Uview	TView.Virtual64
-004749bc	f	Uview	TView.Virtual60
-004749c4	f	Uview	TView.Virtual5C
-004749cc	f	Uview	TView.Virtual40
-004749d4	f	Uview	TView.Virtual44
+00474420	f	Uview	TView.Draw
+004749bc	f	Uview	TView.GetHeight
+004749c4	f	Uview	TView.GetWidth
+004749cc	f	Uview	TView.GetX
+004749d4	f	Uview	TView.GetY
+004749dc	f	Uview	TView.UpdateSprite
 00474d70	s	Uview	12
 00474d88	s	Uview	7
 00474d98	s	Uview	32
@@ -4027,19 +4261,34 @@
 00474e34	s	Uview	2
 00474e40	s	Uview	32
 00474e6c	s	Uview	11
-00474e78	f	Uview	TView.Virtual4C
-00474e80	f	Uview	TView.Virtual54
+00474e78	f	Uview	TView.GetLeft
+00474e80	f	Uview	TView.GetTop
+00474e88	f	Uview	TViewSpriteList.Add
+00474e98	f	Uview	TViewSpriteList.GetItem
 00474eb8	f	Uview	Uview.Finalization
 00474ee8	f	Uview	Uview.Initialization
 00474f3c	v	uAutos	VMT_TAutoSprite
 00475070	v	uAutos	VMT_TSegment
 004750c8	v	uAutos	VMT_TSegmentList
+004750e8	f	uAutos	uAutos.CreateAutos
+00475178	f	uAutos	uAutos.Verkeer
+0047519c	f	uAutos	uAutos.SegmentPos
 0047530c	s	uAutos	4
+00475314	f	uAutos	TAutoSprite.Draw.PlotAuto
+00475440	f	uAutos	TAutoSprite.Draw.DrawAutos
 00475900	s	uAutos	1
 0047590c	s	uAutos	6
-00475934	f	uAutos	TAutoSprite.Virtual64
+00475914	f	uAutos	TAutoSprite.Draw.Beide
+00475934	f	uAutos	TAutoSprite.Draw
 00476078	s	uAutos	1
 00476090	s	uAutos	6
+00476098	f	uAutos	TSegment.Create
+004760f4	f	uAutos	TSegmentList.Add
+00476104	f	uAutos	TSegmentList.GetItem
+00476124	f	uAutos	uAutos.MaakWeg
+00476274	f	uAutos	uAutos.MaakSnelweg
+004763c4	f	uAutos	uAutos.MaakKlaver
+004764a4	f	uAutos	uAutos.MaakKlaver2
 00476604	f	uAutos	uAutos.Finalization
 00476634	f	uAutos	uAutos.Initialization
 004775e4	s	uTransition	4
@@ -4086,6 +4335,7 @@
 00477828	f	uTransition	uTransition.Initialization
 00477838	f	ddraw	ddraw.Finalization
 00477868	f	ddraw	ddraw.Initialization
+00477870	f	uQuickDirectX	uQuickDirectX.StartDirectX
 00477aa0	s	uQuickDirectX	25
 00477ac4	s	uQuickDirectX	35
 00477af0	s	uQuickDirectX	24
@@ -4097,8 +4347,10 @@
 00477b90	s	uQuickDirectX	13
 00477ba8	s	uQuickDirectX	40
 00477bdc	s	uQuickDirectX	23
+00477bf4	f	uQuickDirectX	uQuickDirectX.StopDirectX
 00477c1c	f	uQuickDirectX	uQuickDirectX.Finalization
 00477c58	f	uQuickDirectX	uQuickDirectX.Initialization
+00477c60	d	Uctrl	Uctrl.TypeInfo_TControlDef
 00477c8c	s	Uctrl	3
 00477c98	s	Uctrl	3
 00477ca4	s	Uctrl	4
@@ -4111,7 +4363,10 @@
 00477d04	s	Uctrl	3
 00477d10	s	Uctrl	4
 00477d64	v	Uctrl	VMT_TCtrlForm
+00477e74	f	Uctrl	TCtrlForm.ControlToSprite
 00477fd4	s	Uctrl	12
+00477fe4	f	Uctrl	TCtrlForm.AttachControls
+0047817c	f	Uctrl	TCtrlForm.DetachControls
 00478328	s	Uctrl	13
 00478338	f	Uctrl	Uctrl.Finalization
 00478408	f	Uctrl	Uctrl.Initialization
@@ -4124,8 +4379,12 @@
 00478730	s	uTrein	93
 00478798	s	uTrein	135
 0047886c	v	uTrein	VMT_TTrein
+00478874	f	uTrein	TTrein.Create
 00478b18	s	uTrein	1
 00478b28	s	uTrein	1
+00478b44	f	uTrein	TTrein.Tick
+00478b68	f	uTrein	TTrein.Start
+00478cf0	f	uTrein	TTrein.Step
 0047908c	s	uTrein	1
 004790b0	s	uTrein	1
 004790bc	s	uTrein	6
@@ -4133,10 +4392,13 @@
 004790d8	s	uTrein	1
 004790e4	s	uTrein	7
 004790f4	s	uTrein	12
+00479104	f	uTrein	TTrein.Volgende.GaNaar
+00479168	f	uTrein	TTrein.Volgende
+0047947c	f	uTrein	TTrein.Stop
 00479484	f	uTrein	uTrein.Finalization
 00479508	f	uTrein	uTrein.Initialization
 0047955c	v	Fmain	VMT_TfrmMain
-00479f50	f	Fmain	TfrmMain.Dynamic0014
+00479f50	f	Fmain	TfrmMain.WMEraseBkgnd
 00479f54	f	Fmain	TfrmMain.FormCreate
 0047a6dc	s	Fmain	10
 0047a6f0	s	Fmain	7
@@ -4160,7 +4422,9 @@
 0047a904	f	Fmain	TfrmMain.sbStageStarted
 0047aaa4	s	Fmain	5
 0047aac0	s	Fmain	9
+0047aacc	f	Fmain	TfrmMain.ReadSprites.LoadFrames
 0047ac44	s	Fmain	1
+0047ac48	f	Fmain	TfrmMain.ReadSprites
 0047b308	s	Fmain	6
 0047b318	s	Fmain	5
 0047b328	s	Fmain	5
@@ -4180,14 +4444,17 @@
 0047b3f0	s	Fmain	49
 0047b42c	s	Fmain	10
 0047b440	s	Fmain	45
+0047b470	f	Fmain	TfrmMain.CreateKnoppen
 0047b720	s	Fmain	4
 0047b730	s	Fmain	3
 0047b73c	s	Fmain	3
 0047b748	s	Fmain	3
 0047b754	s	Fmain	2
 0047b760	s	Fmain	22
+0047b778	f	Fmain	TfrmMain.ShowLoading
 0047b848	s	Fmain	1
 0047b84c	f	Fmain	TfrmMain.FormDestroy
+0047b8a8	f	Fmain	TfrmMain.SetDrag
 0047ba34	s	Fmain	3
 0047ba40	s	Fmain	2
 0047ba4c	s	Fmain	31
@@ -4199,11 +4466,16 @@
 0047beb0	s	Fmain	13
 0047bec8	s	Fmain	2
 0047bed4	s	Fmain	6
+0047bedc	f	Fmain	TfrmMain.ShowDialog
 0047c100	s	Fmain	2
 0047c10c	s	Fmain	13
+0047c11c	f	Fmain	TfrmMain.HideDialog
+0047c184	f	Fmain	TfrmMain.Rapport
+0047c240	f	Fmain	TfrmMain.Dialog.ScoreText
 0047c32c	s	Fmain	1
 0047c338	s	Fmain	32
 0047c364	s	Fmain	2
+0047c368	f	Fmain	TfrmMain.Dialog
 0047c63c	s	Fmain	9
 0047c650	s	Fmain	6
 0047c660	s	Fmain	7
@@ -4226,9 +4498,13 @@
 0047c96c	s	Fmain	7
 0047c97c	s	Fmain	5
 0047c98c	s	Fmain	25
+0047c9a8	f	Fmain	TfrmMain.CritIndex
+0047ca90	f	Fmain	TfrmMain.UpdateStatus.UpdateCrit
 0047cb90	s	Fmain	3
 0047cb9c	s	Fmain	1
+0047cba0	f	Fmain	TfrmMain.UpdateStatus
 0047cdb8	s	Fmain	7
+0047cdc0	f	Fmain	TfrmMain.StartLevel
 0047d0e4	s	Fmain	5
 0047d0f4	s	Fmain	4
 0047d104	s	Fmain	7
@@ -4237,6 +4513,7 @@
 0047d134	s	Fmain	6
 0047d144	s	Fmain	13
 0047d15c	s	Fmain	6
+0047d164	f	Fmain	TfrmMain.StatusChange
 0047d1f8	s	Fmain	7
 0047d208	s	Fmain	2
 0047d20c	f	Fmain	TfrmMain.butReadyClick
@@ -4245,26 +4522,34 @@
 0047d4b4	s	Fmain	5
 0047d4c4	s	Fmain	2
 0047d4d0	s	Fmain	1
+0047d4d4	f	Fmain	TfrmMain.ShowHintSprite.DrawHint
 0047d774	s	Fmain	5
 0047d784	s	Fmain	2
 0047d790	s	Fmain	1
+0047d794	f	Fmain	TfrmMain.ShowHintSprite
+0047d87c	f	Fmain	TfrmMain.HideHintSprite
+0047d8c0	f	Fmain	TfrmMain.ShowBouwHint
 0047da0c	s	Fmain	5
 0047da1c	s	Fmain	10
 0047da30	s	Fmain	12
 0047da48	s	Fmain	20
 0047da68	s	Fmain	13
 0047da80	s	Fmain	5
+0047da88	f	Fmain	TfrmMain.ShowKnopHint
 0047db94	s	Fmain	4
 0047dba4	s	Fmain	2
 0047dbb0	s	Fmain	5
+0047dbb8	f	Fmain	TfrmMain.ShowCellHint
 0047dc4c	f	Fmain	TfrmMain.sbStageKeyDown
 0047dc88	f	Fmain	TfrmMain.sbStageKeyPress
 0047dd1c	f	Fmain	TfrmMain.FormClose
+0047dd34	f	Fmain	TfrmMain.SetResolution
 0047deac	f	Fmain	TfrmMain.butStopClick
 0047dec8	s	Fmain	25
 0047dee4	f	Fmain	TfrmMain.timerMeeuwTimer
 0047df68	s	Fmain	5
 0047df70	f	Fmain	TfrmMain.spriteMeeuwFinishSequence
+0047dfac	f	Fmain	TfrmMain.ShowPage
 0047e208	s	Fmain	4
 0047e218	s	Fmain	5
 0047e228	s	Fmain	8
@@ -4272,6 +4557,7 @@
 0047e250	s	Fmain	8
 0047e25c	f	Fmain	TfrmMain.tabClick
 0047e2e8	f	Fmain	TfrmMain.timerKlachtenTimer
+0047e368	f	Fmain	TfrmMain.GetView
 0047e370	f	Fmain	TfrmMain.Label1Click
 0047e378	f	Fmain	TfrmMain.butJaClick
 0047e38c	f	Fmain	TfrmMain.butNeeClick
@@ -4294,8 +4580,10 @@
 0047e9b8	s	Fmain	1
 0047e9c4	s	Fmain	5
 0047e9cc	f	Fmain	TfrmMain.FormCloseQuery
+0047e9e4	f	Fmain	TfrmMain.Quit
 0047ea08	f	Fmain	TfrmMain.timerMainTimer
 0047ebb4	s	Fmain	2
+0047ebb8	f	Fmain	TfrmMain.CritMouseMove
 0047ef24	s	Fmain	45
 0047ef5c	s	Fmain	31
 0047ef88	s	Fmain	6
@@ -4346,12 +4634,15 @@
 0047fa98	f	Fmain	TfrmMain.butScrollleftClick
 0047fafc	f	Fmain	TfrmMain.butScrolldownClick
 0047fb60	f	Fmain	TfrmMain.butScrollrightClick
+0047fbc4	f	Fmain	TfrmMain.ComponentExists
 0047fc18	f	Fmain	TfrmMain.Button1Click
 0047fd24	f	Fmain	Fmain.Finalization
 0047fd60	f	Fmain	Fmain.Initialization
 0047fdb4	v	fReport	VMT_TfrmReport
 0047ff5c	f	fReport	TfrmReport.FormCreate
 0047ffc4	f	fReport	TfrmReport.FormDestroy
+0047ffe0	f	fReport	TfrmReport.Execute
+00480074	f	fReport	TfrmReport.ShowTab
 00480144	f	fReport	TfrmReport.butOKClick
 00480150	f	fReport	TfrmReport.tcTabsChange
 0048016c	f	fReport	TfrmReport.tcTabsDrawTab
@@ -4361,28 +4652,45 @@
 00480310	v	Uworld	VMT_TCellList
 00480378	v	Uworld	VMT_TWijk
 004803dc	v	Uworld	VMT_TWorld
+004803e4	f	Uworld	TCell.Create
 0048043c	f	Uworld	TCell.Destroy
+00480464	f	Uworld	TCell.Init
 0048049c	s	Uworld	12
+004804ac	f	Uworld	TCell.SetParam
 0048051c	s	Uworld	15
+0048052c	f	Uworld	TCell.IsKlaverSnel
 004805b8	s	Uworld	6
+004805c0	f	Uworld	TCell.Buur
+004805d0	f	Uworld	TCell.WegContents
 0048066c	s	Uworld	6
 0048067c	s	Uworld	4
+00480684	f	Uworld	TCell.IsBestemming
 004806fc	s	Uworld	8
 00480710	s	Uworld	10
 00480724	s	Uworld	8
 00480738	s	Uworld	7
 00480748	s	Uworld	5
 00480758	s	Uworld	10
+00480764	f	Uworld	TCell.Update.IsGelijk
+0048078c	f	Uworld	TCell.Update.SluitAan
+004808f0	f	Uworld	TCell.Update.IsVerbonden
 00480bd4	s	Uworld	5
 00480be4	s	Uworld	12
 00480bfc	s	Uworld	4
 00480c0c	s	Uworld	6
 00480c1c	s	Uworld	1
+00480c20	f	Uworld	TCell.Update
 00480ef0	s	Uworld	6
 00480f00	s	Uworld	5
 00480f10	s	Uworld	1
+00480f14	f	Uworld	TCell.Reistijd
 00481010	s	Uworld	6
+00481024	f	Uworld	TCell.DrukteFactor
 00481104	s	Uworld	6
+00481110	f	Uworld	TCell.Pos
+0048111c	f	Uworld	TCell.SetContents
+00481168	f	Uworld	Uworld.RandomItem
+00481190	f	Uworld	TCell.Bouw
 00481a0c	s	Uworld	5
 00481a1c	s	Uworld	1
 00481a28	s	Uworld	8
@@ -4395,8 +4703,10 @@
 00481aa0	s	Uworld	2
 00481aac	s	Uworld	6
 00481abc	s	Uworld	1
+00481ac0	f	Uworld	TCell.HeeftWeg
 00481bf4	s	Uworld	4
 00481c04	s	Uworld	6
+00481c0c	f	Uworld	TCell.KanBouwen.CheckCell
 00481d48	s	Uworld	12
 00481d60	s	Uworld	33
 00481d8c	s	Uworld	5
@@ -4405,6 +4715,8 @@
 00481dbc	s	Uworld	11
 00481dd0	s	Uworld	16
 00481dec	s	Uworld	96
+00481e50	f	Uworld	TCell.KanBouwen.IsAt
+00481eec	f	Uworld	TCell.KanBouwen
 004829d8	s	Uworld	20
 004829f8	s	Uworld	35
 00482a24	s	Uworld	8
@@ -4427,7 +4739,16 @@
 00482ba8	s	Uworld	114
 00482c24	s	Uworld	130
 00482cb0	s	Uworld	27
+00482ccc	f	Uworld	TCellList.Add
+00482cdc	f	Uworld	TCellList.GetCell
+00482cfc	f	Uworld	TCellList.IndexOf
+00482d2c	f	Uworld	TWijk.Create
 00482dbc	f	Uworld	TWijk.Destroy
+00482dec	f	Uworld	TWijk.GetWaarde
+00482e54	f	Uworld	TWijk.SetWaarde
+00482ec4	f	Uworld	TWijk.ClearWaarden
+00482ef4	f	Uworld	Uworld.NewWijk
+00482f6c	f	Uworld	TWorld.Create
 004834d4	s	Uworld	4
 004834e4	s	Uworld	10
 004834f8	s	Uworld	14
@@ -4440,21 +4761,39 @@
 00483594	s	Uworld	10
 004835a8	s	Uworld	10
 004835b4	f	Uworld	TWorld.Destroy
+00483614	f	Uworld	TWorld.ZoekRoute
 004838b4	s	Uworld	6
+004838bc	f	Uworld	TWorld.OpenWijk
 00483a5c	s	Uworld	12
 00483a74	s	Uworld	5
+00483a7c	f	Uworld	TWorld.GetCell
+00483aa0	f	Uworld	TWorld.GetAantal
+00483b10	f	Uworld	TWorld.SetAantal
+00483b8c	f	Uworld	TWorld.Clear
+00483be4	f	Uworld	TWorld.Changed
+00483c20	f	Uworld	TWorld.PopChanged
+00483c64	f	Uworld	TWorld.Score
+00483d30	f	Uworld	TWorld.Herbereken
 0048402c	s	Uworld	39
 0048405c	s	Uworld	8
 00484070	s	Uworld	10
 00484084	s	Uworld	8
 00484098	s	Uworld	7
 004840a8	s	Uworld	5
+004840b4	f	Uworld	TWorld.BerekenReistijd
+004845bc	f	Uworld	TWorld.Bereikbaar
 0048460c	s	Uworld	53
+00484644	f	Uworld	TWorld.Level
+0048466c	f	Uworld	TWorld.Waardering
+004847dc	f	Uworld	TWorld.Werkgelegenheid
 004848a4	s	Uworld	25
 004848c8	s	Uworld	22
+004848e0	f	Uworld	Uworld.PercentStr
 0048496c	s	Uworld	1
+00484970	f	Uworld	TWorld.Rapport.AddLine
 00484a2c	s	Uworld	2
 00484a38	s	Uworld	3
+00484a3c	f	Uworld	TWorld.Rapport
 004850cc	s	Uworld	10
 004850e0	s	Uworld	3
 004850fc	s	Uworld	11
@@ -4471,19 +4810,23 @@
 00485208	s	Uworld	14
 00485220	s	Uworld	10
 00485234	s	Uworld	6
+0048523c	f	Uworld	TWorld.Advies
 004854a8	s	Uworld	67
 004854f4	s	Uworld	31
 00485520	s	Uworld	33
 00485550	s	Uworld	50
 00485590	s	Uworld	13
 004855a8	s	Uworld	1
+004855ac	f	Uworld	TWorld.SaveToStrings
 00485708	s	Uworld	5
 00485718	s	Uworld	12
 00485730	s	Uworld	1
+00485734	f	Uworld	TWorld.LoadFromStrings
 004859e8	s	Uworld	1
 004859f4	s	Uworld	6
 004859fc	f	Uworld	Uworld.Finalization
 00485a2c	f	Uworld	Uworld.Initialization
+00485a38	d	Uconst	Uconst.TypeInfo_TContentsInfo
 00485a80	s	Uconst	9
 00485a94	s	Uconst	5
 00485aa4	s	Uconst	10
@@ -4501,6 +4844,9 @@
 00485b7c	s	Uconst	5
 00485b8c	s	Uconst	10
 00485ba0	s	Uconst	4
+00485bac	d	Uconst	Uconst.TypeInfo_TContentsInfoArray
+00485bbc	f	Uconst	Uconst.AddContents
+00485cd8	f	Uconst	Uconst.LoadContents
 0048611c	s	Uconst	12
 00486134	s	Uconst	1
 00486140	s	Uconst	1
@@ -4508,26 +4854,46 @@
 00486160	s	Uconst	10
 00486174	s	Uconst	14
 0048618c	s	Uconst	12
+0048619c	f	Uconst	Uconst.IsSnelweg
 0048623c	s	Uconst	4
 0048624c	s	Uconst	7
 0048625c	s	Uconst	7
 0048626c	s	Uconst	1
+00486270	f	Uconst	Uconst.IsGewoneWeg
 0048634c	s	Uconst	7
 0048635c	s	Uconst	7
 0048636c	s	Uconst	5
 0048637c	s	Uconst	3
 00486388	s	Uconst	1
+0048638c	f	Uconst	Uconst.IsWeg
+00486404	f	Uconst	Uconst.IsSpoor
 004864ac	s	Uconst	5
+004864b4	f	Uconst	Uconst.IsRechtSpoor
+00486518	f	Uconst	Uconst.IsBochtSpoor
+00486584	f	Uconst	Uconst.IsStation
 0048662c	s	Uconst	12
 00486644	s	Uconst	7
+0048664c	f	Uconst	Uconst.IsTreinBestemming
 004866bc	s	Uconst	10
+004866c8	f	Uconst	Uconst.IsBebouwing
 00486764	s	Uconst	8
 00486778	s	Uconst	10
 0048678c	s	Uconst	8
 004867a0	s	Uconst	7
 004867b0	s	Uconst	5
+004867b8	f	Uconst	Uconst.GridToWorld
+004867f4	f	Uconst	Uconst.WorldToScreen
+00486848	f	Uconst	Uconst.GridToScreen
+00486880	f	Uconst	Uconst.ScreenToWorld
+004868c4	f	Uconst	Uconst.WorldToGrid
+00486950	f	Uconst	Uconst.ScreenToGrid
+00486988	f	Uconst	Uconst.ContentsInfoByContents
 00486a48	s	Uconst	24
 00486a6c	s	Uconst	10
+00486a78	f	Uconst	Uconst.ContentsDescription
+00486aec	f	Uconst	Uconst.IsOutOfView
+00486b20	f	Uconst	Uconst.InMap
+00486b44	f	Uconst	Uconst.Fout
 00486bd4	s	Uconst	1
 00486be4	f	Uconst	Uconst.Finalization
 00486c64	f	Uconst	Uconst.Initialization
@@ -4538,6 +4904,8 @@
 00486ea4	f	fBack	TfrmBlack.FormCreate
 00486f2c	f	fBack	fBack.Finalization
 00486f5c	f	fBack	fBack.Initialization
+00486f64	f	Ros	Ros.Initialization
+00487264	f	Ros	Ros.main
 004872b8	s	Ros	19
 00488000	d		Default8087CW
 00488008	d		DebugHook
@@ -4832,6 +5200,18 @@
 00488ca0	d		uString.Digits
 00488cc4	d		uString.UpperChars
 00488ce4	d		uString.WhiteSpace
+00488d04	d		uTool.DayNames
+00488d20	d		Unit49.WavFiles
+00488d40	d		SprBmp.HandleCheck
+00488d44	d		SprBmp.BmpSurfaceCount
+00488d48	d		SprBmp.PaletteBmpHeader
+00488d80	d		Sprframe.ElrondMode
+00488d84	d		Sprframe.FrameCount
+00488d88	d		uResizeScreen.ScreenChanged
+00488d8c	d		uTextBalloon.CornerOrderLeft
+00488dac	d		uTextBalloon.CornerOrderRight
+00488dcc	d		uTextBalloon.CornerOrderBottom
+00488dec	d		uTextBalloon.CornerOrderTop
 00488e0c	d		RTFConversionFormat
 00488e18	d		TextConversionFormat
 00488e20	d		PTR_RTFConversionFormat
@@ -4841,6 +5221,43 @@
 00488e3c	d		AlignStyles
 00488e5c	d		TabStyles
 00488e68	d		RRStyles
+00488e70	d		uSprite.SpriteMotto
+00488e74	d		uSprite.SpriteMotto2
+00488e78	d		uSpritebox.DrawDepth
+00488e7c	d		uTiming.NoMMTimers
+00488e80	d		uTiming.MaxLoopTime
+00488e84	d		uTiming.IdleLoopTime
+00488e88	d		uTiming.InTimerLoop
+00488e8c	d		uTiming.MaxMessageLoops
+00488e90	d		uTiming.TimerCount
+00488e94	d		uTiming.TimeScale
+00488e9c	d		Unit78.WavFiles
+00488ebc	d		Uview.StoepBits
+00488edc	d		uAutos.BitCount
+00488f1c	d		uQuickDirectX.DirectXActive
+00488f20	d		Uctrl.ControlDefs
+00488f78	d		uTrein.RechtNaarBocht
+00488ff8	d		uTrein.BochtNaarRecht
+00489078	d		uTrein.BochtNaarBocht
+00489178	d		uTrein.BochtA
+00489188	d		uTrein.BochtB
+00489198	d		Fmain.StartedLevel
+0048919c	d		fReport.TabR
+004891a8	d		fReport.TabG
+004891b4	d		fReport.TabB
+004891c0	d		Uworld.Dirs
+004891e0	d		Uworld.KlaverDirs
+00489200	d		Uworld.OppositeMask
+00489210	d		Uworld.BebouwingMask
+00489220	d		Uworld.Neighbours
+00489280	d		Uworld.Diagonals
+004892a0	d		Uconst.Criteria
+004892bc	d		Uconst.ViewRect
+004892cc	d		Uconst.Waarderingen
+004892e0	d		Uconst.Hoeveelheden
+004892f4	d		Uconst.Zoom
+004892fc	d		Uconst.ScrollX
+00489300	d		Uconst.ScrollY
 00489304	d		SShortMonthNameApr
 00489308	d		SDispatchError
 0048930c	d		STooManyOpenFiles
@@ -4854,6 +5271,7 @@
 0048932c	d		SmkcShift
 00489334	d		SRetryButton
 00489338	d		PTR_AbstractErrorProc
+0048933c	d		PTR_Uconst.PerfAutos
 00489340	d		SExternalException
 00489344	d		SMsgDlgHelp
 00489348	d		SLongDayNameFri
@@ -4862,6 +5280,7 @@
 00489354	d		SInvalidDateTime
 00489358	d		PTR_Null
 0048935c	d		SOKButton
+00489360	d		PTR_uSurface.SurfaceClass
 00489364	d		PTR_FlatSB_GetScrollInfo
 00489368	d		SmkcDel
 0048936c	d		SLongDayNameSun
@@ -4885,8 +5304,11 @@
 004893b4	d		SVEnhMetafiles
 004893b8	d		SDiskFull
 004893bc	d		SWindowClass
+004893c0	d		PTR_Uconst.ViewRect
+004893c4	d		PTR_Uconst.Zoom
 004893c8	d		PTR_FindGlobalComponent
 004893cc	d		SInvalidFloat
+004893d0	d		PTR_Uconst.Contents
 004893d4	d		SGroupIndexTooLow
 004893dc	d		SLongDayNameMon
 004893e0	d		SShortDayNameThu
@@ -4898,6 +5320,7 @@
 004893f8	d		SInOutError
 004893fc	d		PTR_DateSeparator
 00489400	d		SExceptTitle
+00489404	d		PTR_Uconst.PerfOther
 00489408	d		SOutOfMemory
 0048940c	d		SShortMonthNameSep
 00489410	d		SInvalidInput
@@ -4938,6 +5361,7 @@
 004894a8	d		SMsgDlgCancel
 004894ac	d		SLongMonthNameDec
 004894b0	d		SStackOverflow
+004894b4	d		PTR_Uconst.PerfStart
 004894b8	d		SControlC
 004894bc	d		SImageWriteFail
 004894c0	d		SShortDayNameSat
@@ -4948,6 +5372,7 @@
 004894d4	d		SMenuIndexError
 004894d8	d		SDuplicateItem
 004894dc	d		SVarArrayCreate
+004894e0	d		PTR_Uconst.PerfView
 004894e4	d		SAllButton
 004894e8	d		SLongMonthNameJan
 004894ec	d		SSortedListError
@@ -4958,6 +5383,7 @@
 00489500	d		PTR_NewStyleControls
 00489504	d		SmkcRight
 00489508	d		SAssignError
+0048950c	d		PTR_Fmain.frmMain
 00489510	d		SMsgDlgWarning
 00489514	d		SCloseButton
 00489518	d		PTR_MonitorFromWindow
@@ -4969,6 +5395,7 @@
 00489530	d		SInvalidName
 00489534	d		STooManyDeleted
 00489538	d		SLongMonthNameApr
+00489540	d		PTR_Uconst.Criteria
 00489548	d		SYesButton
 0048954c	d		SLongMonthNameAug
 00489550	d		SMsgDlgRetry
@@ -5000,6 +5427,7 @@
 004895bc	d		SShortDayNameSun
 004895c0	d		SHelpButton
 004895c4	d		PTR_FlatSB_SetScrollInfo
+004895c8	d		PTR_Uconst.ContentsCount
 004895cc	d		PTR_AssertErrorProc
 004895d0	d		SSafecallException
 004895d4	d		PTR_Application
@@ -5015,6 +5443,7 @@
 00489600	d		SAccessDenied
 00489604	d		SCannotDragForm
 00489608	d		SAssertionFailed
+0048960c	d		PTR_uTrein.Trein
 00489610	d		SParentRequired
 00489614	d		SControlParentSetToSelf
 00489618	d		SReadOnlyProperty
@@ -5040,6 +5469,7 @@
 00489668	d		SmkcPgUp
 0048966c	d		SFOpenError
 00489670	d		SShortMonthNameJul
+00489674	d		PTR_Uconst.PerfSprites
 00489678	d		SNoMDIForm
 0048967c	d		SAssertError
 00489680	d		SShortMonthNameNov
@@ -5048,6 +5478,7 @@
 00489690	d		SCannotFocus
 00489694	d		SMenuNotFound
 00489698	d		SLongDayNameSat
+0048969c	d		PTR_Uconst.ScrollY
 004896a0	d		SMsgDlgAll
 004896a4	d		SClassNotFound
 004896a8	d		SmkcPgDn
@@ -5069,9 +5500,12 @@
 004896e8	d		SCancelButton
 004896ec	d		PTR_Mouse
 004896f0	d		SmkcEnter
+004896f4	d		PTR_Uconst.ScrollX
+004896f8	d		PTR_Uworld.Dirs
 004896fc	d		SShortMonthNameJan
 00489700	d		PTR_DecimalSeparator
 00489704	d		SNoButton
+00489708	d		PTR_uSpritebox.SpriteBoxes
 0048970c	d		SMsgDlgYes
 00489710	d		PTR_FlatSB_SetScrollPos
 00489714	d		SException
@@ -5087,6 +5521,7 @@
 0048973c	d		PTR_SysLocale
 00489740	d		SReadAccess
 00489744	d		SShortMonthNameJun
+00489748	d		PTR_uTool.AppPath
 0048a000	d		ExceptProc
 0048a004	d		ErrorProc
 0048a008	d		ExceptClsProc
@@ -5275,5 +5710,57 @@
 0048a81c	d		ButtonWidths
 0048a868	d		BitBtnGlyphs
 0048a898	d		uString.StrConvError
+0048a8a0	d		uTool.AppPath
+0048a8a4	d		uTool.AppName
+0048a8b0	d		fShow.formDebugShow
+0048a8bc	d		SprBmp.BmpScreen
+0048a8c4	d		SprBmp.TransparentBltProc
+0048a8c8	d		SprBmp.HasTransparentBlt
+0048a8cc	d		uSurface.SurfaceClass
+0048a8d8	d		Sprframe.OnFrameProgress
+0048a8e8	d		uResizeScreen.OriginalMode
+0048a8ec	d		uResizeScreen.NewMode
+0048a8f0	d		uResizeScreen.ModeList
 0048a91c	d		ShellModule
 0048a920	d		FRichEditModule
+0048a934	d		uSpritebox.TempSurface
+0048a938	d		uSpritebox.SpriteBoxes
+0048a940	d		uSpritebox.OldExitProc
+0048a948	d		uTiming.FastTimers
+0048a94c	d		uTiming.RetraceTime
+0048a950	d		uTiming.IsWinNT
+0048a958	d		uTiming.MMSetEventProc
+0048a95c	d		uTiming.MMGetDevCapsProc
+0048a960	d		uTiming.MMKillEventProc
+0048a964	d		uTiming.MMTimerUsers
+0048a968	d		uTiming.WinMMLoaded
+0048a96c	d		uTiming.WinMMHandle
+0048a970	d		uTiming.StartTime
+0048a990	d		uAutos.Heen
+0048a9d0	d		uAutos.Terug
+0048aa10	d		uAutos.SnelHeen
+0048aa50	d		uAutos.SnelTerug
+0048aa90	d		uAutos.KlaverHeen
+0048acd0	d		uAutos.KlaverTerug
+0048af10	d		uAutos.AutoFrame
+0048af58	d		uAutos.I
+0048af5c	d		uAutos.Punten
+0048b12c	d		uAutos.Y2
+0048b13c	d		uQuickDirectX.DirectDraw
+0048b140	d		uQuickDirectX.DDErrorText
+0048b144	d		uQuickDirectX.DDResult
+0048b14c	d		Uctrl.ComboBox
+0048b150	d		uTrein.RechtA
+0048b158	d		uTrein.RechtB
+0048b160	d		uTrein.Trein
+0048b168	d		Fmain.frmMain
+0048b16c	d		Fmain.InitCount
+0048b170	d		fReport.InitCount
+0048b178	d		Uconst.Contents
+0048b17c	d		Uconst.ContentsCount
+0048b180	d		Uconst.PerfStart
+0048b184	d		Uconst.PerfView
+0048b188	d		Uconst.PerfAutos
+0048b18c	d		Uconst.PerfSprites
+0048b190	d		Uconst.PerfOther
+0048b198	d		fBack.InitCount

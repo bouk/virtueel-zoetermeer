@@ -43,33 +43,33 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - Overrides of TObject virtuals: Destroy=`0x461eac`
 - Virtual method table (slot offset, address, status):
   - `+0x08` `0x462a94` override TBmpSurface.Assign (slot introduced by TPersistent: TPersistent.Assign)
-  - `+0x20` `0x462530` override TBmpSurface.Virtual20 (slot introduced by TGraphic: @AbstractError)
-  - `+0x2c` `0x462524` override TBmpSurface.Virtual2C (slot introduced by TGraphic: @AbstractError)
-  - `+0x50` `0x462b20` override TBmpSurface.Virtual50 (slot introduced by TGraphic: @AbstractError)
-  - `+0x54` `0x462bd4` override TBmpSurface.Virtual54 (slot introduced by TGraphic: @AbstractError)
-  - `+0x60` `0x461dc8` override TBmpSurface.Virtual60 (slot introduced by TSurface: TSurface.Virtual60)
-  - `+0x64` `0x461ef8` override TBmpSurface.Virtual64 (slot introduced by TSurface: @AbstractError)
-  - `+0x68` `0x461f20` override TBmpSurface.Virtual68 (slot introduced by TSurface: @AbstractError)
-  - `+0x6c` `0x461f74` override TBmpSurface.Virtual6C (slot introduced by TSurface: @AbstractError)
-  - `+0x70` `0x461f80` override TBmpSurface.Virtual70 (slot introduced by TSurface: @AbstractError)
-  - `+0x74` `0x461fc0` override TBmpSurface.Virtual74 (slot introduced by TSurface: @AbstractError)
-  - `+0x78` `0x462004` override TBmpSurface.Virtual78 (slot introduced by TSurface: @AbstractError)
-  - `+0x7c` `0x462058` override TBmpSurface.Virtual7C (slot introduced by TSurface: @AbstractError)
-  - `+0x80` `0x46250c` override TBmpSurface.Virtual80 (slot introduced by TSurface: @AbstractError)
-  - `+0x84` `0x462518` override TBmpSurface.Virtual84 (slot introduced by TSurface: TSurface.Virtual84)
-  - `+0x88` `0x461ef0` override TBmpSurface.Virtual88 (slot introduced by TSurface: TSurface.Virtual88)
-  - `+0x8c` `0x46253c` override TBmpSurface.Virtual8C (slot introduced by TSurface: @AbstractError)
-  - `+0x90` `0x462f24` override TBmpSurface.Virtual90 (slot introduced by TSurface: @AbstractError)
-  - `+0x94` `0x462588` override TBmpSurface.Virtual94 (slot introduced by TSurface: @AbstractError)
-  - `+0x98` `0x462544` override TBmpSurface.Virtual98 (slot introduced by TSurface: @AbstractError)
-  - `+0x9c` `0x462548` override TBmpSurface.Virtual9C (slot introduced by TSurface: @AbstractError)
-  - `+0xa0` `0x4626c0` override TBmpSurface.VirtualA0 (slot introduced by TSurface: @AbstractError)
-  - `+0xa4` `0x462980` override TBmpSurface.VirtualA4 (slot introduced by TSurface: @AbstractError)
-  - `+0xa8` `0x462bf0` override TBmpSurface.VirtualA8 (slot introduced by TSurface: TSurface.VirtualA8)
-  - `+0xac` `0x462e3c` override TBmpSurface.VirtualAC (slot introduced by TSurface: @AbstractError)
-  - `+0xb0` `0x462f70` override TBmpSurface.VirtualB0 (slot introduced by TSurface: @AbstractError)
-  - `+0xb4` `0x462fe4` override TBmpSurface.VirtualB4 (slot introduced by TSurface: @AbstractError)
-  - `+0xb8` `0x463058` override TBmpSurface.VirtualB8 (slot introduced by TSurface: @AbstractError)
+  - `+0x20` `0x462530` override TBmpSurface.GetHeight (slot introduced by TGraphic: @AbstractError)
+  - `+0x2c` `0x462524` override TBmpSurface.GetWidth (slot introduced by TGraphic: @AbstractError)
+  - `+0x50` `0x462b20` override TBmpSurface.LoadFromStream (slot introduced by TGraphic: @AbstractError)
+  - `+0x54` `0x462bd4` override TBmpSurface.SaveToStream (slot introduced by TGraphic: @AbstractError)
+  - `+0x60` `0x461dc8` override TBmpSurface.CreateSize (slot introduced by TSurface: TSurface.CreateSize)
+  - `+0x64` `0x461ef8` override TBmpSurface.GetPixel (slot introduced by TSurface: @AbstractError)
+  - `+0x68` `0x461f20` override TBmpSurface.SetPixel (slot introduced by TSurface: @AbstractError)
+  - `+0x6c` `0x461f74` override TBmpSurface.GetCanvas (slot introduced by TSurface: @AbstractError)
+  - `+0x70` `0x461f80` override TBmpSurface.GetPaletteColor (slot introduced by TSurface: @AbstractError)
+  - `+0x74` `0x461fc0` override TBmpSurface.SetPaletteColor (slot introduced by TSurface: @AbstractError)
+  - `+0x78` `0x462004` override TBmpSurface.GetTransparentColor (slot introduced by TSurface: @AbstractError)
+  - `+0x7c` `0x462058` override TBmpSurface.SetTransparentColor (slot introduced by TSurface: @AbstractError)
+  - `+0x80` `0x46250c` override TBmpSurface.GetPaletteHandle (slot introduced by TSurface: @AbstractError)
+  - `+0x84` `0x462518` override TBmpSurface.GetHandle (slot introduced by TSurface: TSurface.GetHandle)
+  - `+0x88` `0x461ef0` override TBmpSurface.GetScreen (slot introduced by TSurface: TSurface.GetScreen)
+  - `+0x8c` `0x46253c` override TBmpSurface.GetPaletteCount (slot introduced by TSurface: @AbstractError)
+  - `+0x90` `0x462f24` override TBmpSurface.DebugShow (slot introduced by TSurface: @AbstractError)
+  - `+0x94` `0x462588` override TBmpSurface.SavePalette (slot introduced by TSurface: @AbstractError)
+  - `+0x98` `0x462544` override TBmpSurface.ConvertTo (slot introduced by TSurface: @AbstractError)
+  - `+0x9c` `0x462548` override TBmpSurface.CopyPalette (slot introduced by TSurface: @AbstractError)
+  - `+0xa0` `0x4626c0` override TBmpSurface.CopyFrom (slot introduced by TSurface: @AbstractError)
+  - `+0xa4` `0x462980` override TBmpSurface.DrawTo (slot introduced by TSurface: @AbstractError)
+  - `+0xa8` `0x462bf0` override TBmpSurface.SetSize (slot introduced by TSurface: TSurface.SetSize)
+  - `+0xac` `0x462e3c` override TBmpSurface.TextOut (slot introduced by TSurface: @AbstractError)
+  - `+0xb0` `0x462f70` override TBmpSurface.TextWidth (slot introduced by TSurface: @AbstractError)
+  - `+0xb4` `0x462fe4` override TBmpSurface.TextHeight (slot introduced by TSurface: @AbstractError)
+  - `+0xb8` `0x463058` override TBmpSurface.FillRect (slot introduced by TSurface: @AbstractError)
   - (20 inherited slots omitted)
 
 ## TSurface = class(TGraphic)  — unit uSurface
@@ -77,11 +77,11 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - VMT: `0x463280`, instance size: `0x30` (parent: `0x1c`)
 - Virtual method table (slot offset, address, status):
   - `+0x0c` `0x463370` override TSurface.Create (slot introduced by TGraphic: TGraphic.Create)
-  - `+0x14` `0x4633f0` override TSurface.Virtual14 (slot introduced by TGraphic: @AbstractError)
-  - `+0x1c` `0x46358c` override TSurface.Virtual1C (slot introduced by TGraphic: @AbstractError)
-  - `+0x34` `0x463560` override TSurface.Virtual34 (slot introduced by TGraphic: @AbstractError)
-  - `+0x40` `0x463534` override TSurface.Virtual40 (slot introduced by TGraphic: @AbstractError)
-  - `+0x60` `0x4633b0` NEW TSurface.Virtual60
+  - `+0x14` `0x4633f0` override TSurface.Draw (slot introduced by TGraphic: @AbstractError)
+  - `+0x1c` `0x46358c` override TSurface.GetEmpty (slot introduced by TGraphic: @AbstractError)
+  - `+0x34` `0x463560` override TSurface.SetHeight (slot introduced by TGraphic: @AbstractError)
+  - `+0x40` `0x463534` override TSurface.SetWidth (slot introduced by TGraphic: @AbstractError)
+  - `+0x60` `0x4633b0` NEW TSurface.CreateSize
   - `+0x64` `0x4029ec` NEW @AbstractError
   - `+0x68` `0x4029ec` NEW @AbstractError
   - `+0x6c` `0x4029ec` NEW @AbstractError
@@ -90,8 +90,8 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
   - `+0x78` `0x4029ec` NEW @AbstractError
   - `+0x7c` `0x4029ec` NEW @AbstractError
   - `+0x80` `0x4029ec` NEW @AbstractError
-  - `+0x84` `0x4633ec` NEW TSurface.Virtual84
-  - `+0x88` `0x4635b0` NEW TSurface.Virtual88
+  - `+0x84` `0x4633ec` NEW TSurface.GetHandle
+  - `+0x88` `0x4635b0` NEW TSurface.GetScreen
   - `+0x8c` `0x4029ec` NEW @AbstractError
   - `+0x90` `0x4029ec` NEW @AbstractError
   - `+0x94` `0x4029ec` NEW @AbstractError
@@ -99,12 +99,12 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
   - `+0x9c` `0x4029ec` NEW @AbstractError
   - `+0xa0` `0x4029ec` NEW @AbstractError
   - `+0xa4` `0x4029ec` NEW @AbstractError
-  - `+0xa8` `0x46343c` NEW TSurface.VirtualA8
+  - `+0xa8` `0x46343c` NEW TSurface.SetSize
   - `+0xac` `0x4029ec` NEW @AbstractError
   - `+0xb0` `0x4029ec` NEW @AbstractError
   - `+0xb4` `0x4029ec` NEW @AbstractError
   - `+0xb8` `0x4029ec` NEW @AbstractError
-  - `+0xbc` `0x463674` NEW TSurface.VirtualBC
+  - `+0xbc` `0x463674` NEW TSurface.Clear
   - (19 inherited slots omitted)
 
 ## TPixie = class(TComponent)  — unit uPixie
@@ -116,28 +116,28 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
   - OnMouseUp: TMouseEvent read field +0x50 write field +0x50
   - OnMouseLeave: TNotifyEvent read field +0x60 write field +0x60
 - Virtual method table (slot offset, address, status):
-  - `+0x30` `0x4639e4` NEW TPixie.Virtual30
-  - `+0x34` `0x4639e8` NEW TPixie.Virtual34
-  - `+0x38` `0x4639f0` NEW TPixie.Virtual38
-  - `+0x3c` `0x463a10` NEW TPixie.Virtual3C
-  - `+0x40` `0x4639f8` NEW TPixie.Virtual40
-  - `+0x44` `0x463a00` NEW TPixie.Virtual44
-  - `+0x48` `0x463a08` NEW TPixie.Virtual48
-  - `+0x4c` `0x463a18` NEW TPixie.Virtual4C
-  - `+0x50` `0x463a20` NEW TPixie.Virtual50
-  - `+0x54` `0x463a28` NEW TPixie.Virtual54
-  - `+0x58` `0x463a30` NEW TPixie.Virtual58
+  - `+0x30` `0x4639e4` NEW TPixie.SetVisible
+  - `+0x34` `0x4639e8` NEW TPixie.SetX
+  - `+0x38` `0x4639f0` NEW TPixie.SetY
+  - `+0x3c` `0x463a10` NEW TPixie.SetZ
+  - `+0x40` `0x4639f8` NEW TPixie.GetX
+  - `+0x44` `0x463a00` NEW TPixie.GetY
+  - `+0x48` `0x463a08` NEW TPixie.GetZ
+  - `+0x4c` `0x463a18` NEW TPixie.GetLeft
+  - `+0x50` `0x463a20` NEW TPixie.SetLeft
+  - `+0x54` `0x463a28` NEW TPixie.GetTop
+  - `+0x58` `0x463a30` NEW TPixie.SetTop
   - `+0x5c` `0x4029ec` NEW @AbstractError
   - `+0x60` `0x4029ec` NEW @AbstractError
   - `+0x64` `0x4029ec` NEW @AbstractError
   - `+0x68` `0x4029ec` NEW @AbstractError
-  - `+0x6c` `0x463a68` NEW TPixie.Virtual6C
-  - `+0x70` `0x463aa4` NEW TPixie.Virtual70
-  - `+0x74` `0x463ae4` NEW TPixie.Virtual74
-  - `+0x78` `0x463ba8` NEW TPixie.Virtual78
-  - `+0x7c` `0x463bb4` NEW TPixie.Virtual7C
-  - `+0x80` `0x463b68` NEW TPixie.Virtual80
-  - `+0x84` `0x463b94` NEW TPixie.Virtual84
+  - `+0x6c` `0x463a68` NEW TPixie.Intersects
+  - `+0x70` `0x463aa4` NEW TPixie.GetState
+  - `+0x74` `0x463ae4` NEW TPixie.GetChange
+  - `+0x78` `0x463ba8` NEW TPixie.MouseDown
+  - `+0x7c` `0x463bb4` NEW TPixie.MouseUp
+  - `+0x80` `0x463b68` NEW TPixie.MouseMove
+  - `+0x84` `0x463b94` NEW TPixie.MouseLeave
   - (12 inherited slots omitted)
 
 ## EFrame = class(Exception)  — unit Sprframe
@@ -150,8 +150,8 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - Overrides of TObject virtuals: Destroy=`0x4640bc`
 - Virtual method table (slot offset, address, status):
   - `+0x08` `0x4640f8` override TFrame.Assign (slot introduced by TPersistent: TPersistent.Assign)
-  - `+0x0c` `0x464274` NEW TFrame.Loaded
-  - `+0x10` `0x4641dc` NEW TFrame.Notification
+  - `+0x0c` `0x464274` NEW TFrame.Draw
+  - `+0x10` `0x4641dc` NEW TFrame.DrawDC
   - (2 inherited slots omitted)
 
 ## TPersistentList = class(TPersistent)  — unit Sprframe
@@ -159,7 +159,7 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - VMT: `0x463d9c`, instance size: `0x8` (parent: `0x4`)
 - Overrides of TObject virtuals: Destroy=`0x46450c`
 - Virtual method table (slot offset, address, status):
-  - `+0x0c` `0x464540` NEW TPersistentList.Virtual0C
+  - `+0x0c` `0x464540` NEW TPersistentList.Clear
   - (3 inherited slots omitted)
 
 ## TFrameList = class(TPersistentList)  — unit Sprframe
@@ -169,7 +169,7 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - Virtual method table (slot offset, address, status):
   - `+0x04` `0x464c28` override TFrameList.DefineProperties (slot introduced by TPersistent: TPersistent.DefineProperties)
   - `+0x08` `0x464940` override TFrameList.Assign (slot introduced by TPersistent: TPersistent.Assign)
-  - `+0x0c` `0x464854` override TFrameList.Virtual0C (slot introduced by TPersistentList: TPersistentList.Virtual0C)
+  - `+0x0c` `0x464854` override TFrameList.Clear (slot introduced by TPersistentList: TPersistentList.Clear)
   - (1 inherited slots omitted)
 
 ## TScrnMode = class(TObject)  — unit uResizeScreen
@@ -200,15 +200,15 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - Overrides of TObject virtuals: Destroy=`0x4656f0`
 - Virtual method table (slot offset, address, status):
   - `+0x2c` `0x465654` override TTextBalloon.Create (slot introduced by TComponent: TComponent.Create)
-  - `+0x34` `0x466f1c` override TTextBalloon.Virtual34 (slot introduced by TPixie: TPixie.Virtual34)
-  - `+0x38` `0x466f28` override TTextBalloon.Virtual38 (slot introduced by TPixie: TPixie.Virtual38)
-  - `+0x3c` `0x466f34` override TTextBalloon.Virtual3C (slot introduced by TPixie: TPixie.Virtual3C)
-  - `+0x40` `0x466f60` override TTextBalloon.Virtual40 (slot introduced by TPixie: TPixie.Virtual40)
-  - `+0x44` `0x466f68` override TTextBalloon.Virtual44 (slot introduced by TPixie: TPixie.Virtual44)
-  - `+0x5c` `0x465750` override TTextBalloon.Virtual5C (slot introduced by TPixie: @AbstractError)
-  - `+0x60` `0x465758` override TTextBalloon.Virtual60 (slot introduced by TPixie: @AbstractError)
-  - `+0x64` `0x46663c` override TTextBalloon.Virtual64 (slot introduced by TPixie: @AbstractError)
-  - `+0x68` `0x466de8` override TTextBalloon.Virtual68 (slot introduced by TPixie: @AbstractError)
+  - `+0x34` `0x466f1c` override TTextBalloon.SetX (slot introduced by TPixie: TPixie.SetX)
+  - `+0x38` `0x466f28` override TTextBalloon.SetY (slot introduced by TPixie: TPixie.SetY)
+  - `+0x3c` `0x466f34` override TTextBalloon.SetZ (slot introduced by TPixie: TPixie.SetZ)
+  - `+0x40` `0x466f60` override TTextBalloon.GetX (slot introduced by TPixie: TPixie.GetX)
+  - `+0x44` `0x466f68` override TTextBalloon.GetY (slot introduced by TPixie: TPixie.GetY)
+  - `+0x5c` `0x465750` override TTextBalloon.GetWidth (slot introduced by TPixie: @AbstractError)
+  - `+0x60` `0x465758` override TTextBalloon.GetHeight (slot introduced by TPixie: @AbstractError)
+  - `+0x64` `0x46663c` override TTextBalloon.Draw (slot introduced by TPixie: @AbstractError)
+  - `+0x68` `0x466de8` override TTextBalloon.DrawDC (slot introduced by TPixie: @AbstractError)
   - (24 inherited slots omitted)
 
 ## TComment = class(TCustomEdit)  — unit cEditCtr
@@ -252,35 +252,35 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - Overrides of TObject virtuals: Destroy=`0x46a150`
 - Virtual method table (slot offset, address, status):
   - `+0x2c` `0x469d70` override TSprite.Create (slot introduced by TComponent: TComponent.Create)
-  - `+0x30` `0x46b688` override TSprite.Virtual30 (slot introduced by TPixie: TPixie.Virtual30)
-  - `+0x34` `0x46b738` override TSprite.Virtual34 (slot introduced by TPixie: TPixie.Virtual34)
-  - `+0x38` `0x46b7ac` override TSprite.Virtual38 (slot introduced by TPixie: TPixie.Virtual38)
-  - `+0x3c` `0x46b878` override TSprite.Virtual3C (slot introduced by TPixie: TPixie.Virtual3C)
-  - `+0x40` `0x46baf4` override TSprite.Virtual40 (slot introduced by TPixie: TPixie.Virtual40)
-  - `+0x44` `0x46bb50` override TSprite.Virtual44 (slot introduced by TPixie: TPixie.Virtual44)
-  - `+0x50` `0x46b820` override TSprite.Virtual50 (slot introduced by TPixie: TPixie.Virtual50)
-  - `+0x58` `0x46b84c` override TSprite.Virtual58 (slot introduced by TPixie: TPixie.Virtual58)
-  - `+0x5c` `0x46bbac` override TSprite.Virtual5C (slot introduced by TPixie: @AbstractError)
-  - `+0x60` `0x46bbe0` override TSprite.Virtual60 (slot introduced by TPixie: @AbstractError)
-  - `+0x64` `0x46ae50` override TSprite.Virtual64 (slot introduced by TPixie: @AbstractError)
-  - `+0x68` `0x46ad00` override TSprite.Virtual68 (slot introduced by TPixie: @AbstractError)
-  - `+0x74` `0x46a9d4` override TSprite.Virtual74 (slot introduced by TPixie: TPixie.Virtual74)
-  - `+0x78` `0x46abf0` override TSprite.Virtual78 (slot introduced by TPixie: TPixie.Virtual78)
-  - `+0x7c` `0x46ac78` override TSprite.Virtual7C (slot introduced by TPixie: TPixie.Virtual7C)
-  - `+0x80` `0x46ab14` override TSprite.Virtual80 (slot introduced by TPixie: TPixie.Virtual80)
-  - `+0x84` `0x46ab94` override TSprite.Virtual84 (slot introduced by TPixie: TPixie.Virtual84)
-  - `+0x88` `0x46bc14` NEW TSprite.Virtual88
-  - `+0x8c` `0x46bc50` NEW TSprite.Virtual8C
-  - `+0x90` `0x46b2d0` NEW TSprite.Virtual90
-  - `+0x94` `0x46a5ec` NEW TSprite.Virtual94
-  - `+0x98` `0x46a60c` NEW TSprite.Virtual98
-  - `+0x9c` `0x46a69c` NEW TSprite.Virtual9C
-  - `+0xa0` `0x46a720` NEW TSprite.VirtualA0
-  - `+0xa4` `0x46aae8` NEW TSprite.VirtualA4
-  - `+0xa8` `0x46a7ec` NEW TSprite.VirtualA8
-  - `+0xac` `0x46a924` NEW TSprite.VirtualAC
-  - `+0xb0` `0x46b2ec` NEW TSprite.VirtualB0
-  - `+0xb4` `0x469ecc` NEW TSprite.VirtualB4
+  - `+0x30` `0x46b688` override TSprite.SetVisible (slot introduced by TPixie: TPixie.SetVisible)
+  - `+0x34` `0x46b738` override TSprite.SetX (slot introduced by TPixie: TPixie.SetX)
+  - `+0x38` `0x46b7ac` override TSprite.SetY (slot introduced by TPixie: TPixie.SetY)
+  - `+0x3c` `0x46b878` override TSprite.SetZ (slot introduced by TPixie: TPixie.SetZ)
+  - `+0x40` `0x46baf4` override TSprite.GetX (slot introduced by TPixie: TPixie.GetX)
+  - `+0x44` `0x46bb50` override TSprite.GetY (slot introduced by TPixie: TPixie.GetY)
+  - `+0x50` `0x46b820` override TSprite.SetLeft (slot introduced by TPixie: TPixie.SetLeft)
+  - `+0x58` `0x46b84c` override TSprite.SetTop (slot introduced by TPixie: TPixie.SetTop)
+  - `+0x5c` `0x46bbac` override TSprite.GetWidth (slot introduced by TPixie: @AbstractError)
+  - `+0x60` `0x46bbe0` override TSprite.GetHeight (slot introduced by TPixie: @AbstractError)
+  - `+0x64` `0x46ae50` override TSprite.Draw (slot introduced by TPixie: @AbstractError)
+  - `+0x68` `0x46ad00` override TSprite.DrawDC (slot introduced by TPixie: @AbstractError)
+  - `+0x74` `0x46a9d4` override TSprite.GetChange (slot introduced by TPixie: TPixie.GetChange)
+  - `+0x78` `0x46abf0` override TSprite.MouseDown (slot introduced by TPixie: TPixie.MouseDown)
+  - `+0x7c` `0x46ac78` override TSprite.MouseUp (slot introduced by TPixie: TPixie.MouseUp)
+  - `+0x80` `0x46ab14` override TSprite.MouseMove (slot introduced by TPixie: TPixie.MouseMove)
+  - `+0x84` `0x46ab94` override TSprite.MouseLeave (slot introduced by TPixie: TPixie.MouseLeave)
+  - `+0x88` `0x46bc14` NEW TSprite.GetHotSpotX
+  - `+0x8c` `0x46bc50` NEW TSprite.GetHotSpotY
+  - `+0x90` `0x46b2d0` NEW TSprite.GetScale
+  - `+0x94` `0x46a5ec` NEW TSprite.DoVisible
+  - `+0x98` `0x46a60c` NEW TSprite.DoMove
+  - `+0x9c` `0x46a69c` NEW TSprite.DoFinishSequence
+  - `+0xa0` `0x46a720` NEW TSprite.DoHit
+  - `+0xa4` `0x46aae8` NEW TSprite.DoFrameSkipped
+  - `+0xa8` `0x46a7ec` NEW TSprite.DoAfterBlit
+  - `+0xac` `0x46a924` NEW TSprite.DoBeforeBlit
+  - `+0xb0` `0x46b2ec` NEW TSprite.ChangeState
+  - `+0xb4` `0x469ecc` NEW TSprite.CreateCopy
   - (16 inherited slots omitted)
 
 ## TSpriteList = class(TList)  — unit uSprite
@@ -294,20 +294,20 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - VMT: `0x469ca4`, instance size: `0x1c` (parent: `0x4`)
 - Overrides of TObject virtuals: Destroy=`0x46c1e4`
 - Virtual method table (slot offset, address, status):
-  - `+0x00` `0x46c218` NEW TBehaviour.Virtual00
-  - `+0x04` `0x46c21c` NEW TBehaviour.Virtual04
-  - `+0x08` `0x46c220` NEW TBehaviour.Virtual08
-  - `+0x0c` `0x46c228` NEW TBehaviour.Virtual0C
-  - `+0x10` `0x46c248` NEW TBehaviour.Virtual10
-  - `+0x14` `0x46c284` NEW TBehaviour.Virtual14
-  - `+0x18` `0x46c274` NEW TBehaviour.Virtual18
-  - `+0x1c` `0x46c27c` NEW TBehaviour.Virtual1C
-  - `+0x20` `0x46c268` NEW TBehaviour.Virtual20
-  - `+0x24` `0x46c270` NEW TBehaviour.Virtual24
-  - `+0x28` `0x46c288` NEW TBehaviour.Virtual28
-  - `+0x2c` `0x46c28c` NEW TBehaviour.Virtual2C
-  - `+0x30` `0x46c2b0` NEW TBehaviour.Virtual30
-  - `+0x34` `0x46c2ac` NEW TBehaviour.Virtual34
+  - `+0x00` `0x46c218` NEW TBehaviour.FinishSequence
+  - `+0x04` `0x46c21c` NEW TBehaviour.Hit
+  - `+0x08` `0x46c220` NEW TBehaviour.Move
+  - `+0x0c` `0x46c228` NEW TBehaviour.AfterBlit
+  - `+0x10` `0x46c248` NEW TBehaviour.BeforeBlit
+  - `+0x14` `0x46c284` NEW TBehaviour.VisibleChange
+  - `+0x18` `0x46c274` NEW TBehaviour.MouseDown
+  - `+0x1c` `0x46c27c` NEW TBehaviour.MouseUp
+  - `+0x20` `0x46c268` NEW TBehaviour.MouseMove
+  - `+0x24` `0x46c270` NEW TBehaviour.MouseLeave
+  - `+0x28` `0x46c288` NEW TBehaviour.SetSprite
+  - `+0x2c` `0x46c28c` NEW TBehaviour.Detach
+  - `+0x30` `0x46c2b0` NEW TBehaviour.Finish
+  - `+0x34` `0x46c2ac` NEW TBehaviour.SetActive
   - (0 inherited slots omitted)
 
 ## TBehaviourList = class(TList)  — unit uSprite
@@ -325,12 +325,12 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - Overrides of TObject virtuals: Destroy=`0x46c600`
 - Virtual method table (slot offset, address, status):
   - `+0x2c` `0x46c5bc` override TGoblin.Create (slot introduced by TComponent: TComponent.Create)
-  - `+0x3c` `0x46c968` override TGoblin.Virtual3C (slot introduced by TPixie: TPixie.Virtual3C)
-  - `+0x5c` `0x46c6b8` override TGoblin.Virtual5C (slot introduced by TPixie: @AbstractError)
-  - `+0x60` `0x46c6c4` override TGoblin.Virtual60 (slot introduced by TPixie: @AbstractError)
-  - `+0x64` `0x46c6d0` override TGoblin.Virtual64 (slot introduced by TPixie: @AbstractError)
-  - `+0x68` `0x46c71c` override TGoblin.Virtual68 (slot introduced by TPixie: @AbstractError)
-  - `+0x74` `0x46c638` override TGoblin.Virtual74 (slot introduced by TPixie: TPixie.Virtual74)
+  - `+0x3c` `0x46c968` override TGoblin.SetZ (slot introduced by TPixie: TPixie.SetZ)
+  - `+0x5c` `0x46c6b8` override TGoblin.GetWidth (slot introduced by TPixie: @AbstractError)
+  - `+0x60` `0x46c6c4` override TGoblin.GetHeight (slot introduced by TPixie: @AbstractError)
+  - `+0x64` `0x46c6d0` override TGoblin.Draw (slot introduced by TPixie: @AbstractError)
+  - `+0x68` `0x46c71c` override TGoblin.DrawDC (slot introduced by TPixie: @AbstractError)
+  - `+0x74` `0x46c638` override TGoblin.GetChange (slot introduced by TPixie: TPixie.GetChange)
   - (27 inherited slots omitted)
 
 ## TThreeD = class(TPersistent)  — unit uSpritebox
@@ -386,13 +386,13 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - Virtual method table (slot offset, address, status):
   - `+0x2c` `0x46d1a8` override TSpriteBox.Create (slot introduced by TComponent: TComponent.Create)
   - `+0xb4` `0x46d714` override TSpriteBox.Paint (slot introduced by TCustomControl: TCustomControl.Paint)
-  - `+0xb8` `0x46dea8` NEW TSpriteBox.VirtualB8
-  - `+0xbc` `0x46e1e4` NEW TSpriteBox.VirtualBC
-  - `+0xc0` `0x46d914` NEW TSpriteBox.VirtualC0
-  - `+0xc4` `0x46db0c` NEW TSpriteBox.VirtualC4
-  - `+0xc8` `0x46de00` NEW TSpriteBox.VirtualC8
-  - `+0xcc` `0x46df60` NEW TSpriteBox.VirtualCC
-  - `+0xd0` `0x46e0f0` NEW TSpriteBox.VirtualD0
+  - `+0xb8` `0x46dea8` NEW TSpriteBox.InvalidateState
+  - `+0xbc` `0x46e1e4` NEW TSpriteBox.PaintBackground
+  - `+0xc0` `0x46d914` NEW TSpriteBox.FullFlip
+  - `+0xc4` `0x46db0c` NEW TSpriteBox.DirtyFlip
+  - `+0xc8` `0x46de00` NEW TSpriteBox.GDIFlip
+  - `+0xcc` `0x46df60` NEW TSpriteBox.Flip
+  - `+0xd0` `0x46e0f0` NEW TSpriteBox.InvalidateArea
   - (44 inherited slots omitted)
 - Dynamic/message methods: 0x14→`0x46d44c`, 0x402→`0x46d460`, 0xffda→`0x46d5b8`, 0xffd9→`0x46d620`, 0xffd8→`0x46d6a8`
 
@@ -432,7 +432,7 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - Overrides of TObject virtuals: Destroy=`0x46f928`
 - Virtual method table (slot offset, address, status):
   - `+0x2c` `0x46f874` override TCustomFastTimer.Create (slot introduced by TComponent: TComponent.Create)
-  - `+0x30` `0x46fbd4` NEW TCustomFastTimer.Virtual30
+  - `+0x30` `0x46fbd4` NEW TCustomFastTimer.SkipTimer
   - (11 inherited slots omitted)
 - Dynamic/message methods: 0xfff0→`0x46fbc8`
 
@@ -440,10 +440,10 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 
 - VMT: `0x46f654`, instance size: `0x70` (parent: `0x70`)
 - Published properties:
-  - About: String read TFastTimer.GetAbout write field +0x24
-  - Enabled: Boolean read field +0x28 write TFastTimer.SetEnabled default 0
-  - Interval: Integer read field +0x2c write TFastTimer.SetInterval
-  - OnTimer: TNotifyEvent read field +0x40 write TFastTimer.SetOnTimer
+  - About: String read TCustomFastTimer.GetAbout write field +0x24
+  - Enabled: Boolean read field +0x28 write TCustomFastTimer.SetEnabled default 0
+  - Interval: Integer read field +0x2c write TCustomFastTimer.SetInterval
+  - OnTimer: TNotifyEvent read field +0x40 write TCustomFastTimer.SetOnTimer
   - OnSkipTimer: TNotifyEvent read field +0x48 write field +0x48
   - Priority: Integer read field +0x68 write field +0x68 default 5
 - Virtual method table (slot offset, address, status):
@@ -459,21 +459,21 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 
 - VMT: `0x470014`, instance size: `0x28` (parent: `0x1c`)
 - Virtual method table (slot offset, address, status):
-  - `+0x20` `0x470c4c` override TBehavCursor.Virtual20 (slot introduced by TBehaviour: TBehaviour.Virtual20)
-  - `+0x24` `0x470c9c` override TBehavCursor.Virtual24 (slot introduced by TBehaviour: TBehaviour.Virtual24)
+  - `+0x20` `0x470c4c` override TBehavCursor.MouseMove (slot introduced by TBehaviour: TBehaviour.MouseMove)
+  - `+0x24` `0x470c9c` override TBehavCursor.MouseLeave (slot introduced by TBehaviour: TBehaviour.MouseLeave)
   - (12 inherited slots omitted)
 
 ## TBehavControl = class(TBehaviour)  — unit Sprbehav
 
 - VMT: `0x4700a8`, instance size: `0x50` (parent: `0x1c`)
 - Virtual method table (slot offset, address, status):
-  - `+0x00` `0x4707e0` override TBehavControl.Virtual00 (slot introduced by TBehaviour: TBehaviour.Virtual00)
-  - `+0x18` `0x4705fc` override TBehavControl.Virtual18 (slot introduced by TBehaviour: TBehaviour.Virtual18)
-  - `+0x1c` `0x470620` override TBehavControl.Virtual1C (slot introduced by TBehaviour: TBehaviour.Virtual1C)
-  - `+0x20` `0x47058c` override TBehavControl.Virtual20 (slot introduced by TBehaviour: TBehaviour.Virtual20)
-  - `+0x24` `0x4705f4` override TBehavControl.Virtual24 (slot introduced by TBehaviour: TBehaviour.Virtual24)
-  - `+0x34` `0x4706b4` override TBehavControl.Virtual34 (slot introduced by TBehaviour: TBehaviour.Virtual34)
-  - `+0x38` `0x470850` NEW TBehavControl.Virtual38
+  - `+0x00` `0x4707e0` override TBehavControl.FinishSequence (slot introduced by TBehaviour: TBehaviour.FinishSequence)
+  - `+0x18` `0x4705fc` override TBehavControl.MouseDown (slot introduced by TBehaviour: TBehaviour.MouseDown)
+  - `+0x1c` `0x470620` override TBehavControl.MouseUp (slot introduced by TBehaviour: TBehaviour.MouseUp)
+  - `+0x20` `0x47058c` override TBehavControl.MouseMove (slot introduced by TBehaviour: TBehaviour.MouseMove)
+  - `+0x24` `0x4705f4` override TBehavControl.MouseLeave (slot introduced by TBehaviour: TBehaviour.MouseLeave)
+  - `+0x34` `0x4706b4` override TBehavControl.SetActive (slot introduced by TBehaviour: TBehaviour.SetActive)
+  - `+0x38` `0x470850` NEW TBehavControl.SetState
   - (8 inherited slots omitted)
 
 ## TBehavCheckBox = class(TBehavControl)  — unit Sprbehav
@@ -486,8 +486,8 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 
 - VMT: `0x470208`, instance size: `0x5c` (parent: `0x58`)
 - Virtual method table (slot offset, address, status):
-  - `+0x1c` `0x470af8` override TBehavRadioButton.Virtual1C (slot introduced by TBehaviour: TBehaviour.Virtual1C)
-  - `+0x38` `0x470b48` override TBehavRadioButton.Virtual38 (slot introduced by TBehavControl: TBehavControl.Virtual38)
+  - `+0x1c` `0x470af8` override TBehavRadioButton.MouseUp (slot introduced by TBehaviour: TBehaviour.MouseUp)
+  - `+0x38` `0x470b48` override TBehavRadioButton.SetState (slot introduced by TBehavControl: TBehavControl.SetState)
   - (13 inherited slots omitted)
 
 ## TBehavButton = class(TBehavControl)  — unit Sprbehav
@@ -501,9 +501,9 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - VMT: `0x47034c`, instance size: `0x68` (parent: `0x50`)
 - Overrides of TObject virtuals: Destroy=`0x4713e4`
 - Virtual method table (slot offset, address, status):
-  - `+0x08` `0x4714d8` override TBehavMemo.Virtual08 (slot introduced by TBehaviour: TBehaviour.Virtual08)
-  - `+0x0c` `0x4715e8` override TBehavMemo.Virtual0C (slot introduced by TBehaviour: TBehaviour.Virtual0C)
-  - `+0x34` `0x471438` override TBehavMemo.Virtual34 (slot introduced by TBehaviour: TBehaviour.Virtual34)
+  - `+0x08` `0x4714d8` override TBehavMemo.Move (slot introduced by TBehaviour: TBehaviour.Move)
+  - `+0x0c` `0x4715e8` override TBehavMemo.AfterBlit (slot introduced by TBehaviour: TBehaviour.AfterBlit)
+  - `+0x34` `0x471438` override TBehavMemo.SetActive (slot introduced by TBehaviour: TBehaviour.SetActive)
   - (12 inherited slots omitted)
 
 ## TCaption = class(TObject)  — unit Sprbehav
@@ -515,7 +515,7 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - VMT: `0x470448`, instance size: `0x28` (parent: `0x1c`)
 - Overrides of TObject virtuals: Destroy=`0x4710c4`
 - Virtual method table (slot offset, address, status):
-  - `+0x0c` `0x4711e0` override TBehavText.Virtual0C (slot introduced by TBehaviour: TBehaviour.Virtual0C)
+  - `+0x0c` `0x4711e0` override TBehavText.AfterBlit (slot introduced by TBehaviour: TBehaviour.AfterBlit)
   - (13 inherited slots omitted)
 
 ## TTask = class(TObject)  — unit Usett
@@ -548,21 +548,21 @@ Offsets are hex. Field offsets include the VMT pointer at +0.
 - VMT: `0x47317c`, instance size: `0x90` (parent: `0x68`)
 - Overrides of TObject virtuals: Destroy=`0x473498`
 - Virtual method table (slot offset, address, status):
-  - `+0x40` `0x4749cc` override TView.Virtual40 (slot introduced by TPixie: TPixie.Virtual40)
-  - `+0x44` `0x4749d4` override TView.Virtual44 (slot introduced by TPixie: TPixie.Virtual44)
-  - `+0x4c` `0x474e78` override TView.Virtual4C (slot introduced by TPixie: TPixie.Virtual4C)
-  - `+0x54` `0x474e80` override TView.Virtual54 (slot introduced by TPixie: TPixie.Virtual54)
-  - `+0x5c` `0x4749c4` override TView.Virtual5C (slot introduced by TPixie: @AbstractError)
-  - `+0x60` `0x4749bc` override TView.Virtual60 (slot introduced by TPixie: @AbstractError)
-  - `+0x64` `0x474420` override TView.Virtual64 (slot introduced by TPixie: @AbstractError)
-  - `+0x68` `0x4740a8` override TView.Virtual68 (slot introduced by TPixie: @AbstractError)
+  - `+0x40` `0x4749cc` override TView.GetX (slot introduced by TPixie: TPixie.GetX)
+  - `+0x44` `0x4749d4` override TView.GetY (slot introduced by TPixie: TPixie.GetY)
+  - `+0x4c` `0x474e78` override TView.GetLeft (slot introduced by TPixie: TPixie.GetLeft)
+  - `+0x54` `0x474e80` override TView.GetTop (slot introduced by TPixie: TPixie.GetTop)
+  - `+0x5c` `0x4749c4` override TView.GetWidth (slot introduced by TPixie: @AbstractError)
+  - `+0x60` `0x4749bc` override TView.GetHeight (slot introduced by TPixie: @AbstractError)
+  - `+0x64` `0x474420` override TView.Draw (slot introduced by TPixie: @AbstractError)
+  - `+0x68` `0x4740a8` override TView.DrawDC (slot introduced by TPixie: @AbstractError)
   - (26 inherited slots omitted)
 
 ## TAutoSprite = class(TSprite)  — unit uAutos
 
 - VMT: `0x474f3c`, instance size: `0x158` (parent: `0x13c`)
 - Virtual method table (slot offset, address, status):
-  - `+0x64` `0x475934` override TAutoSprite.Virtual64 (slot introduced by TPixie: @AbstractError)
+  - `+0x64` `0x475934` override TAutoSprite.Draw (slot introduced by TPixie: @AbstractError)
   - (45 inherited slots omitted)
 
 ## TSegment = class(TObject)  — unit uAutos
