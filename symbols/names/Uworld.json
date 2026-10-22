@@ -1,0 +1,92 @@
+{
+  "functions": {
+    "004803e4": "TCell.Create",
+    "0048043c": "TCell.Destroy",
+    "00480464": "TCell.Init",
+    "004804ac": "TCell.SetParam",
+    "0048052c": "TCell.IsKlaverSnel",
+    "004805c0": "TCell.Buur",
+    "004805d0": "TCell.WegContents",
+    "00480684": "TCell.IsBestemming",
+    "00480764": "TCell.Update.IsGelijk",
+    "0048078c": "TCell.Update.SluitAan",
+    "004808f0": "TCell.Update.IsVerbonden",
+    "00480c20": "TCell.Update",
+    "00480f14": "TCell.Reistijd",
+    "00481024": "TCell.DrukteFactor",
+    "00481110": "TCell.Pos",
+    "0048111c": "TCell.SetContents",
+    "00481168": "Uworld.RandomItem",
+    "00481190": "TCell.Bouw",
+    "00481ac0": "TCell.HeeftWeg",
+    "00481c0c": "TCell.KanBouwen.CheckCell",
+    "00481e50": "TCell.KanBouwen.IsAt",
+    "00481eec": "TCell.KanBouwen",
+    "00482ccc": "TCellList.Add",
+    "00482cdc": "TCellList.GetCell",
+    "00482cfc": "TCellList.IndexOf",
+    "00482d2c": "TWijk.Create",
+    "00482dbc": "TWijk.Destroy",
+    "00482dec": "TWijk.GetWaarde",
+    "00482e54": "TWijk.SetWaarde",
+    "00482ec4": "TWijk.ClearWaarden",
+    "00482ef4": "Uworld.NewWijk",
+    "00482f6c": "TWorld.Create",
+    "004835b4": "TWorld.Destroy",
+    "00483614": "TWorld.ZoekRoute",
+    "004838bc": "TWorld.OpenWijk",
+    "00483a7c": "TWorld.GetCell",
+    "00483aa0": "TWorld.GetAantal",
+    "00483b10": "TWorld.SetAantal",
+    "00483b8c": "TWorld.Clear",
+    "00483be4": "TWorld.Changed",
+    "00483c20": "TWorld.PopChanged",
+    "00483c64": "TWorld.Score",
+    "00483d30": "TWorld.Herbereken",
+    "004840b4": "TWorld.BerekenReistijd",
+    "004845bc": "TWorld.Bereikbaar",
+    "00484644": "TWorld.Level",
+    "0048466c": "TWorld.Waardering",
+    "004847dc": "TWorld.Werkgelegenheid",
+    "004848e0": "Uworld.PercentStr",
+    "00484970": "TWorld.Rapport.AddLine",
+    "00484a3c": "TWorld.Rapport",
+    "0048523c": "TWorld.Advies",
+    "004855ac": "TWorld.SaveToStrings",
+    "00485734": "TWorld.LoadFromStrings"
+  },
+  "globals": {
+    "004891c0": "Uworld.Dirs",
+    "004891e0": "Uworld.KlaverDirs",
+    "00489200": "Uworld.OppositeMask",
+    "00489210": "Uworld.BebouwingMask",
+    "00489220": "Uworld.Neighbours",
+    "00489280": "Uworld.Diagonals"
+  },
+  "fields": {
+    "TCell": {
+      "0x4": ["Contents", "string"], "0x8": ["Param", "string"], "0xc": ["Wijk", "Integer"],
+      "0x10": ["X", "Integer"], "0x14": ["Y", "Integer"], "0x18": ["World", "TWorld"],
+      "0x1c": ["Wegen", "Integer"], "0x20": ["Bebouwing", "Integer"], "0x24": ["Gelijk", "Integer"],
+      "0x28": ["Links", "array[0..3] of TCell"], "0x38": ["Drukte", "Double"], "0x40": ["Vorige", "TCell"],
+      "0x48": ["Afstand", "Double"], "0x50": ["Hoofd", "TCell"], "0x54": ["Bereikbaar", "Boolean"]
+    },
+    "TWijk": {
+      "0x4": ["Naam", "string"], "0x8": ["X", "Integer"], "0xc": ["Y", "Integer"],
+      "0x10": ["Inwoners", "Integer"], "0x14": ["Waarden", "TStringList"]
+    },
+    "TWorld": {
+      "0x4": ["Woningen", "Integer"], "0x8": ["Settings", "TSettings"], "0xc": ["Status", "TStatus"],
+      "0x10": ["Cells", "array[0..44, 0..44] of TCell"], "0x1fb4": ["Changes", "TPosList"],
+      "0x1fb8": ["Aantallen", "TStringList"], "0x1fbc": ["Bebouwing", "TCellList"],
+      "0x1fc0": ["Bestemmingen", "TCellList"], "0x1fc8": ["Reistijd", "Double"],
+      "0x1fd0": ["Banen", "Integer"], "0x1fd4": ["OpenWijken", "Integer"],
+      "0x1fd8": ["Wijken", "array[0..9] of TWijk"]
+    }
+  },
+  "assumes": {
+    "uTool": ["AppPath", "IMax/IMin", "FreeList", "RandomString", "TPos.Create(AX, AY)", "TPosList.Create/Add/GetItem/IndexOf(X, Y)"],
+    "Fmain": ["frmMain: TfrmMain (0048B168)", "TfrmMain.View: TView (property, getter 0047E368 returns field +0x428)", "TfrmMain.timerRecalc: TFastTimer (published +0x3C4)"],
+    "Uview": ["TView.ScrollTo(X, Y: Integer; AZoom: Double) (004737B8)"]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "functions": {
+    "004722dc": "TSettings.Create",
+    "004723b8": "TSettings.Destroy",
+    "004723e4": "TSettings.SaveHighScore",
+    "00472464": "TSettings.Load.ReadList",
+    "00472514": "TSettings.Load",
+    "00472da4": "TStatus.Create",
+    "00472dec": "TStatus.SetGeld",
+    "00472e08": "TTask.Create",
+    "00472e38": "TTask.Add",
+    "00472e48": "TTask.Clear"
+  },
+  "globals": {
+    "004721c4": "Usett.TypeInfo_TLevel",
+    "004721e0": "Usett.TypeInfo_TLevelArray"
+  },
+  "fields": {
+    "TTask": { "0x4": ["FHouses", "Integer"], "0x8": ["FOffices", "Integer"] },
+    "TLevel": {
+      "0x0": ["Uitleg", "string"], "0x4": ["Laag", "TStringList"], "0x8": ["Midden", "TStringList"],
+      "0xc": ["Hoog", "TStringList"], "0x10": ["Kantoor", "TStringList"], "0x14": ["Duration", "Integer"],
+      "0x18": ["Task", "TTask"], "0x1c": ["StartGeld", "Integer"], "0x20": ["OpenWijk", "Integer"],
+      "0x28": ["HappyTreshold", "Double"], "0x30": ["PercKantoren", "Double"], "0x38": ["Huisprijs", "Integer"]
+    },
+    "TSettings": {
+      "0x4": ["GameIniFile", "string"], "0x8": ["LevelsIniFile", "string"], "0xc": ["HighScore", "Integer"],
+      "0x10": ["Startgeld", "Integer"], "0x14": ["NiveauTekst", "string"], "0x18": ["NiveauKop", "string"],
+      "0x1c": ["IntroTekst", "string"], "0x20": ["IntroKop", "string"], "0x24": ["AcceptabeleReistijd", "Integer"],
+      "0x28": ["Levels", "array[0..11] of TLevel"], "0x328": ["Groen", "array[0..11] of Integer"],
+      "0x358": ["MaxGroen", "Integer"], "0x35c": ["MaxOverlast", "Integer"], "0x360": ["ShowAutos", "Boolean"],
+      "0x361": ["KantorenNaastSnelweg", "Boolean"], "0x362": ["FabriekenNaastSnelweg", "Boolean"],
+      "0x363": ["HuizenNaastSnelweg", "Boolean"], "0x364": ["TerminalsNaastSnelweg", "Boolean"],
+      "0x368": ["ScreenChangeLevel", "Integer"], "0x36c": ["AutosVisible", "Boolean"],
+      "0x36d": ["KlaverbladAutosVisible", "Boolean"]
+    },
+    "TStatus": {
+      "0x4": ["FScore", "Integer"], "0x8": ["FGeld", "Integer"], "0xc": ["FReserved0C", "Integer"],
+      "0x10": ["FOnChange", "TNotifyEvent"], "0x18": ["FTask", "TTask"], "0x1c": ["FLevel", "Integer"]
+    }
+  },
+  "assumes": {
+    "uTool": ["AppPath: string (0048A8A0)"]
+  }
+}
