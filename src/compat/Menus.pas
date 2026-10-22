@@ -249,11 +249,11 @@ end;
 
 procedure TMenuItem.Delete(Index: Integer);
 var
-  Item: TMenuItem;
+  Element: TMenuItem;
 begin
-  Item := Items[Index];
+  Element := Items[Index];
   FItems.Delete(Index);
-  Item.FParent := nil;
+  Element.FParent := nil;
 end;
 
 procedure TMenuItem.Remove(Item: TMenuItem);
@@ -366,30 +366,30 @@ end;
 
 function TMenu.IsShortCut(var Message: TWMKey): Boolean;
 
-  function Scan(Item: TMenuItem; SC: TShortCut): Boolean;
+  function Scan(Element: TMenuItem; SC: TShortCut): Boolean;
   var
     I: Integer;
   begin
     Result := False;
-    for I := 0 to Item.Count - 1 do
+    for I := 0 to Element.Count - 1 do
     begin
-      if (Item[I].ShortCut = SC) and (SC <> 0) and Item[I].Enabled then
+      if (Element[I].ShortCut = SC) and (SC <> 0) and Element[I].Enabled then
       begin
-        Item[I].Click;
+        Element[I].Click;
         Exit(True);
       end;
-      if Scan(Item[I], SC) then Exit(True);
+      if Scan(Element[I], SC) then Exit(True);
     end;
   end;
 
 var
-  Shift: TShiftState;
+  Schakel: TShiftState;
 begin
-  Shift := [];
-  if GetKeyState(VK_SHIFT) < 0 then Include(Shift, ssShift);
-  if GetKeyState(VK_CONTROL) < 0 then Include(Shift, ssCtrl);
-  if Message.KeyData and $20000000 <> 0 then Include(Shift, ssAlt);
-  Result := Scan(FItems, ShortCut(Message.CharCode, Shift));
+  Schakel := [];
+  if GetKeyState(VK_SHIFT) < 0 then Include(Schakel, ssShift);
+  if GetKeyState(VK_CONTROL) < 0 then Include(Schakel, ssCtrl);
+  if Message.KeyData and $20000000 <> 0 then Include(Schakel, ssAlt);
+  Result := Scan(FItems, ShortCut(Message.CharCode, Schakel));
 end;
 
 procedure TMainMenu.Merge(Menu: TMainMenu);
@@ -450,9 +450,9 @@ begin
   if ShortCut and scAlt <> 0 then Include(Shift, ssAlt);
 end;
 
-function KeyName(Key: Word): string;
+function KeyName(Toets: Word): string;
 begin
-  case Key of
+  case Toets of
     VK_BACK: Result := 'BkSp';
     VK_TAB: Result := 'Tab';
     VK_RETURN: Result := 'Enter';
@@ -468,8 +468,8 @@ begin
     VK_DOWN: Result := 'Down';
     VK_INSERT: Result := 'Ins';
     VK_DELETE: Result := 'Del';
-    Ord('0')..Ord('9'), Ord('A')..Ord('Z'): Result := Chr(Key);
-    VK_F1..VK_F12: Result := 'F' + IntToStr(Key - VK_F1 + 1);
+    Ord('0')..Ord('9'), Ord('A')..Ord('Z'): Result := Chr(Toets);
+    VK_F1..VK_F12: Result := 'F' + IntToStr(Toets - VK_F1 + 1);
   else
     Result := '';
   end;
@@ -477,34 +477,34 @@ end;
 
 function ShortCutToText(ShortCut: TShortCut): string;
 var
-  Name: string;
+  Naam: string;
 begin
-  Name := KeyName(ShortCut and $FF);
-  if Name = '' then Exit('');
+  Naam := KeyName(ShortCut and $FF);
+  if Naam = '' then Exit('');
   Result := '';
   if ShortCut and scShift <> 0 then Result := Result + 'Shift+';
   if ShortCut and scCtrl <> 0 then Result := Result + 'Ctrl+';
   if ShortCut and scAlt <> 0 then Result := Result + 'Alt+';
-  Result := Result + Name;
+  Result := Result + Naam;
 end;
 
 function TextToShortCut(Text: string): TShortCut;
 var
-  Shift: TShortCut;
+  Schakel: TShortCut;
   K: Word;
 begin
-  Shift := 0;
+  Schakel := 0;
   while True do
   begin
-    if AnsiSameText(Copy(Text, 1, 6), 'Shift+') then begin Inc(Shift, scShift); Delete(Text, 1, 6); end
-    else if AnsiSameText(Copy(Text, 1, 5), 'Ctrl+') then begin Inc(Shift, scCtrl); Delete(Text, 1, 5); end
-    else if AnsiSameText(Copy(Text, 1, 4), 'Alt+') then begin Inc(Shift, scAlt); Delete(Text, 1, 4); end
+    if AnsiSameText(Copy(Text, 1, 6), 'Shift+') then begin Inc(Schakel, scShift); Delete(Text, 1, 6); end
+    else if AnsiSameText(Copy(Text, 1, 5), 'Ctrl+') then begin Inc(Schakel, scCtrl); Delete(Text, 1, 5); end
+    else if AnsiSameText(Copy(Text, 1, 4), 'Alt+') then begin Inc(Schakel, scAlt); Delete(Text, 1, 4); end
     else Break;
   end;
   Result := 0;
   if Text = '' then Exit;
   for K := 8 to 255 do
-    if AnsiSameText(Text, KeyName(K)) then Exit(Shift or K);
+    if AnsiSameText(Text, KeyName(K)) then Exit(Schakel or K);
 end;
 
 function NewMenu(Owner: TComponent; const AName: string; const Items: array of TMenuItem): TMainMenu;

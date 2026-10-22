@@ -18,7 +18,7 @@ var
   RandSeed: Longint;
 
 procedure Randomize;
-function Random(Range: Integer): Integer;
+function Random(Bereik: Integer): Integer;
 
 implementation
 
@@ -27,18 +27,18 @@ uses
 
 procedure Randomize;
 var
-  H, M, S, MS: Word;
-  Fixed: string;
+  Uur, Minuut, Seconde, Milliseconde: Word;
+  Vast: string;
 begin
-  Fixed := GetEnvironmentVariable('ZM_RANDSEED');
-  if Fixed <> '' then
+  Vast := GetEnvironmentVariable('ZM_RANDSEED');
+  if Vast <> '' then
   begin
-    RandSeed := StrToInt(Fixed);
+    RandSeed := StrToInt(Vast);
     Exit;
   end;
   { Delphi 5: GetSystemTime, seed = milliseconden sinds middernacht (UTC) }
-  DecodeTime(Time, H, M, S, MS);
-  RandSeed := ((H * 60 + M) * 60 + S) * 1000 + MS;
+  DecodeTime(Time, Uur, Minuut, Seconde, Milliseconde);
+  RandSeed := ((Uur * 60 + Minuut) * 60 + Seconde) * 1000 + Milliseconde;
 end;
 
 function NextSeed: Longword;
@@ -49,10 +49,10 @@ begin
   Result := Longword(RandSeed);
 end;
 
-function Random(Range: Integer): Integer;
+function Random(Bereik: Integer): Integer;
 begin
   { MUL: ongetekend 32x32 -> 64, hoge helft }
-  Result := Integer((QWord(NextSeed) * QWord(Longword(Range))) shr 32);
+  Result := Integer((QWord(NextSeed) * QWord(Longword(Bereik))) shr 32);
 end;
 
 end.

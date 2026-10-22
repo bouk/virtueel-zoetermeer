@@ -292,21 +292,21 @@ uses Math;
 
 procedure Frame3D(Canvas: TCanvas; var Rect: TRect; TopColor, BottomColor: TColor; Width: Integer);
 
-  procedure DoRect;
+  procedure DoRechthoek;
   var
-    TopRight, BottomLeft: TPoint;
+    Rechtsboven, Linksonder: TPoint;
   begin
     with Canvas, Rect do
     begin
-      TopRight.X := Right;
-      TopRight.Y := Top;
-      BottomLeft.X := Left;
-      BottomLeft.Y := Bottom;
+      Rechtsboven.X := Right;
+      Rechtsboven.Y := Top;
+      Linksonder.X := Left;
+      Linksonder.Y := Bottom;
       Pen.Color := TopColor;
-      PolyLine([BottomLeft, TopLeft, TopRight]);
+      PolyLine([Linksonder, TopLeft, Rechtsboven]);
       Pen.Color := BottomColor;
-      Dec(BottomLeft.X);
-      PolyLine([TopRight, BottomRight, BottomLeft]);
+      Dec(Linksonder.X);
+      PolyLine([Rechtsboven, BottomRight, Linksonder]);
     end;
   end;
 
@@ -317,7 +317,7 @@ begin
   while Width > 0 do
   begin
     Dec(Width);
-    DoRect;
+    DoRechthoek;
     InflateRect(Rect, -1, -1);
   end;
   Inc(Rect.Bottom);
@@ -599,21 +599,21 @@ end;
 
 procedure TBevel.Paint;
 var
-  Color1, Color2: TColor;
-  Temp: TColor;
+  Kleur1, Kleur2: TColor;
+  Tijdelijk: TColor;
 
-  procedure BevelRect(const R: TRect);
+  procedure Afschuiningrect(const R: TRect);
   begin
     with Canvas do
     begin
-      Pen.Color := Color1;
+      Pen.Color := Kleur1;
       PolyLine([Point(R.Left, R.Bottom), Point(R.Left, R.Top), Point(R.Right, R.Top)]);
-      Pen.Color := Color2;
+      Pen.Color := Kleur2;
       PolyLine([Point(R.Right, R.Top), Point(R.Right, R.Bottom), Point(R.Left, R.Bottom)]);
     end;
   end;
 
-  procedure BevelLine(C: TColor; X1, Y1, X2, Y2: Integer);
+  procedure Afschuininglijn(C: TColor; X1, Y1, X2, Y2: Integer);
   begin
     with Canvas do
     begin
@@ -629,44 +629,44 @@ begin
     Pen.Width := 1;
     if FStyle = bsLowered then
     begin
-      Color1 := clBtnShadow;
-      Color2 := clBtnHighlight;
+      Kleur1 := clBtnShadow;
+      Kleur2 := clBtnHighlight;
     end
     else
     begin
-      Color1 := clBtnHighlight;
-      Color2 := clBtnShadow;
+      Kleur1 := clBtnHighlight;
+      Kleur2 := clBtnShadow;
     end;
     case FShape of
-      bsBox: BevelRect(Rect(0, 0, Width - 1, Height - 1));
+      bsBox: Afschuiningrect(Rect(0, 0, Width - 1, Height - 1));
       bsFrame:
         begin
-          Temp := Color1;
-          Color1 := Color2;
-          BevelRect(Rect(1, 1, Width - 1, Height - 1));
-          Color2 := Temp;
-          Color1 := Temp;
-          BevelRect(Rect(0, 0, Width - 2, Height - 2));
+          Tijdelijk := Kleur1;
+          Kleur1 := Kleur2;
+          Afschuiningrect(Rect(1, 1, Width - 1, Height - 1));
+          Kleur2 := Tijdelijk;
+          Kleur1 := Tijdelijk;
+          Afschuiningrect(Rect(0, 0, Width - 2, Height - 2));
         end;
       bsTopLine:
         begin
-          BevelLine(Color1, 0, 0, Width, 0);
-          BevelLine(Color2, 0, 1, Width, 1);
+          Afschuininglijn(Kleur1, 0, 0, Width, 0);
+          Afschuininglijn(Kleur2, 0, 1, Width, 1);
         end;
       bsBottomLine:
         begin
-          BevelLine(Color1, 0, Height - 2, Width, Height - 2);
-          BevelLine(Color2, 0, Height - 1, Width, Height - 1);
+          Afschuininglijn(Kleur1, 0, Height - 2, Width, Height - 2);
+          Afschuininglijn(Kleur2, 0, Height - 1, Width, Height - 1);
         end;
       bsLeftLine:
         begin
-          BevelLine(Color1, 0, 0, 0, Height);
-          BevelLine(Color2, 1, 0, 1, Height);
+          Afschuininglijn(Kleur1, 0, 0, 0, Height);
+          Afschuininglijn(Kleur2, 1, 0, 1, Height);
         end;
       bsRightLine:
         begin
-          BevelLine(Color1, Width - 2, 0, Width - 2, Height);
-          BevelLine(Color2, Width - 1, 0, Width - 1, Height);
+          Afschuininglijn(Kleur1, Width - 2, 0, Width - 2, Height);
+          Afschuininglijn(Kleur2, Width - 1, 0, Width - 1, Height);
         end;
     end;
   end;
@@ -780,60 +780,60 @@ end;
 
 procedure TCustomPanel.AdjustClientRect(var Rect: TRect);
 var
-  BevelSize: Integer;
+  Afschuiningsgrootte: Integer;
 begin
   inherited AdjustClientRect(Rect);
-  BevelSize := BorderWidth;
-  if BevelOuter <> bvNone then Inc(BevelSize, BevelWidth);
-  if BevelInner <> bvNone then Inc(BevelSize, BevelWidth);
-  InflateRect(Rect, -BevelSize, -BevelSize);
+  Afschuiningsgrootte := BorderWidth;
+  if BevelOuter <> bvNone then Inc(Afschuiningsgrootte, BevelWidth);
+  if BevelInner <> bvNone then Inc(Afschuiningsgrootte, BevelWidth);
+  InflateRect(Rect, -Afschuiningsgrootte, -Afschuiningsgrootte);
 end;
 
 procedure TCustomPanel.Paint;
 const
   Alignments: array[TAlignment] of Longint = (DT_LEFT, DT_RIGHT, DT_CENTER);
 var
-  Rect: TRect;
-  TopColor, BottomColor: TColor;
-  FontHeight: Integer;
-  Flags: Longint;
+  Rechthoek: TRect;
+  Bovenkleur, Onderkleur: TColor;
+  Letterhoogte: Integer;
+  Vlaggen: Longint;
 
-  procedure AdjustColors(Bevel: TPanelBevel);
+  procedure Kleurenaanpassen(Afschuining: TPanelBevel);
   begin
-    TopColor := clBtnHighlight;
-    if Bevel = bvLowered then TopColor := clBtnShadow;
-    BottomColor := clBtnShadow;
-    if Bevel = bvLowered then BottomColor := clBtnHighlight;
+    Bovenkleur := clBtnHighlight;
+    if Afschuining = bvLowered then Bovenkleur := clBtnShadow;
+    Onderkleur := clBtnShadow;
+    if Afschuining = bvLowered then Onderkleur := clBtnHighlight;
   end;
 
 begin
-  Rect := GetClientRect;
+  Rechthoek := GetClientRect;
   if BevelOuter <> bvNone then
   begin
-    AdjustColors(BevelOuter);
-    Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
+    Kleurenaanpassen(BevelOuter);
+    Frame3D(Canvas, Rechthoek, Bovenkleur, Onderkleur, BevelWidth);
   end;
-  Frame3D(Canvas, Rect, Color, Color, BorderWidth);
+  Frame3D(Canvas, Rechthoek, Color, Color, BorderWidth);
   if BevelInner <> bvNone then
   begin
-    AdjustColors(BevelInner);
-    Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
+    Kleurenaanpassen(BevelInner);
+    Frame3D(Canvas, Rechthoek, Bovenkleur, Onderkleur, BevelWidth);
   end;
   with Canvas do
   begin
     Brush.Color := Color;
     Brush.Style := bsSolid;
-    FillRect(Rect);
+    FillRect(Rechthoek);
     Brush.Style := bsClear;
     Font := Self.Font;
-    FontHeight := TextHeight('W');
-    with Rect do
+    Letterhoogte := TextHeight('W');
+    with Rechthoek do
     begin
-      Top := ((Bottom + Top) - FontHeight) div 2;
-      Bottom := Top + FontHeight;
+      Top := ((Bottom + Top) - Letterhoogte) div 2;
+      Bottom := Top + Letterhoogte;
     end;
-    Flags := DT_EXPANDTABS or DT_VCENTER or Alignments[FAlignment];
-    DrawText(Handle, PChar(Caption), -1, Rect, Flags);
+    Vlaggen := DT_EXPANDTABS or DT_VCENTER or Alignments[FAlignment];
+    DrawText(Handle, PChar(Caption), -1, Rechthoek, Vlaggen);
   end;
 end;
 

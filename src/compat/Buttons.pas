@@ -174,16 +174,16 @@ begin
 end;
 
 { Tekent het glyph van een standaard knopsoort, 16x16, op X, Y. }
-procedure DrawKindGlyph(Canvas: TCanvas; Kind: TBitBtnKind; X, Y: Integer; Enabled: Boolean);
+procedure DrawKindGlyph(Tekenvlak: TCanvas; Soort: TBitBtnKind; X, Y: Integer; Ingeschakeld: Boolean);
 var
   I: Integer;
   C: TColor;
 begin
-  with Canvas do
-    case Kind of
+  with Tekenvlak do
+    case Soort of
       bkOK, bkYes, bkAll:
         begin
-          if Enabled then C := clGreen else C := clBtnShadow;
+          if Ingeschakeld then C := clGreen else C := clBtnShadow;
           Pen.Color := C;
           for I := 0 to 1 do
           begin
@@ -197,7 +197,7 @@ begin
         end;
       bkCancel, bkNo, bkAbort:
         begin
-          if Enabled then C := clRed else C := clBtnShadow;
+          if Ingeschakeld then C := clRed else C := clBtnShadow;
           Pen.Color := C;
           for I := 0 to 1 do
           begin
@@ -209,10 +209,10 @@ begin
         end;
       bkHelp, bkIgnore, bkRetry, bkClose:
         begin
-          if Enabled then C := clNavy else C := clBtnShadow;
+          if Ingeschakeld then C := clNavy else C := clBtnShadow;
           Font.Color := C;
           Brush.Style := bsClear;
-          case Kind of
+          case Soort of
             bkHelp: TextOut(X + 4, Y, '?');
             bkIgnore: TextOut(X + 4, Y, '!');
             bkRetry: TextOut(X + 3, Y, '@');
@@ -222,26 +222,26 @@ begin
     end;
 end;
 
-procedure DrawGlyphAndText(Canvas: TCanvas; R: TRect; Glyph: TBitmap; NumGlyphs: Integer;
-  Kind: TBitBtnKind; const Caption: string; Layout: TButtonLayout; Margin, Spacing: Integer;
-  Enabled, Down: Boolean);
+procedure DrawGlyphAndText(Tekenvlak: TCanvas; R: TRect; Glyph: TBitmap; Aantalglyphs: Integer;
+  Soort: TBitBtnKind; const Titel: string; Indeling: TButtonLayout; Marge, Afstand: Integer;
+  Ingeschakeld, Omlaag: Boolean);
 var
-  GW, GH, TW, TH, X, Y, TotalW, TotalH, Idx, SX: Integer;
+  GW, GH, TW, TH, X, Y, Totaalbreedte, Totaalhoogte, Idx, SX: Integer;
   TR: TRect;
-  Src: TBitmap;
-  Part: TBitmap;
-  HasGlyph, Stock: Boolean;
+  Bron: TBitmap;
+  Deel: TBitmap;
+  Heeftglyph, Voorraad: Boolean;
 begin
-  Stock := (Kind <> bkCustom) and ((Glyph = nil) or Glyph.Empty);
-  HasGlyph := Stock or ((Glyph <> nil) and not Glyph.Empty);
-  if Stock then
+  Voorraad := (Soort <> bkCustom) and ((Glyph = nil) or Glyph.Empty);
+  Heeftglyph := Voorraad or ((Glyph <> nil) and not Glyph.Empty);
+  if Voorraad then
   begin
     GW := 16;
     GH := 16;
   end
-  else if HasGlyph then
+  else if Heeftglyph then
   begin
-    GW := Glyph.Width div Max(1, NumGlyphs);
+    GW := Glyph.Width div Max(1, Aantalglyphs);
     GH := Glyph.Height;
   end
   else
@@ -250,70 +250,70 @@ begin
     GH := 0;
   end;
   TR := Rect(0, 0, R.Right - R.Left, 0);
-  DrawText(Canvas.Handle, PChar(Caption), Length(Caption), TR, DT_CALCRECT or DT_SINGLELINE);
+  DrawText(Tekenvlak.Handle, PChar(Titel), Length(Titel), TR, DT_CALCRECT or DT_SINGLELINE);
   TW := TR.Right;
   TH := TR.Bottom;
-  if Caption = '' then TW := 0;
-  if Spacing < 0 then Spacing := 4;
-  if (GW = 0) or (TW = 0) then Spacing := 0;
-  if Layout in [blGlyphLeft, blGlyphRight] then
+  if Titel = '' then TW := 0;
+  if Afstand < 0 then Afstand := 4;
+  if (GW = 0) or (TW = 0) then Afstand := 0;
+  if Indeling in [blGlyphLeft, blGlyphRight] then
   begin
-    TotalW := GW + Spacing + TW;
-    if Margin < 0 then X := R.Left + (R.Right - R.Left - TotalW) div 2 else X := R.Left + Margin;
+    Totaalbreedte := GW + Afstand + TW;
+    if Marge < 0 then X := R.Left + (R.Right - R.Left - Totaalbreedte) div 2 else X := R.Left + Marge;
     Y := R.Top + (R.Bottom - R.Top - GH) div 2;
-    if Layout = blGlyphRight then
+    if Indeling = blGlyphRight then
     begin
       TR := Rect(X, R.Top, X + TW, R.Bottom);
-      X := X + TW + Spacing;
+      X := X + TW + Afstand;
     end
     else
-      TR := Rect(X + GW + Spacing, R.Top, X + GW + Spacing + TW, R.Bottom);
+      TR := Rect(X + GW + Afstand, R.Top, X + GW + Afstand + TW, R.Bottom);
   end
   else
   begin
-    TotalH := GH + Spacing + TH;
+    Totaalhoogte := GH + Afstand + TH;
     X := R.Left + (R.Right - R.Left - GW) div 2;
-    if Margin < 0 then Y := R.Top + (R.Bottom - R.Top - TotalH) div 2 else Y := R.Top + Margin;
-    if Layout = blGlyphBottom then
+    if Marge < 0 then Y := R.Top + (R.Bottom - R.Top - Totaalhoogte) div 2 else Y := R.Top + Marge;
+    if Indeling = blGlyphBottom then
     begin
       TR := Rect(R.Left, Y, R.Right, Y + TH);
-      Y := Y + TH + Spacing;
+      Y := Y + TH + Afstand;
     end
     else
-      TR := Rect(R.Left, Y + GH + Spacing, R.Right, Y + GH + Spacing + TH);
+      TR := Rect(R.Left, Y + GH + Afstand, R.Right, Y + GH + Afstand + TH);
   end;
-  if Down then
+  if Omlaag then
   begin
     Inc(X);
     Inc(Y);
     OffsetRect(TR, 1, 1);
   end;
-  if Stock then
-    DrawKindGlyph(Canvas, Kind, X, Y, Enabled)
-  else if HasGlyph then
+  if Voorraad then
+    DrawKindGlyph(Tekenvlak, Soort, X, Y, Ingeschakeld)
+  else if Heeftglyph then
   begin
     Idx := 0;
-    if not Enabled and (NumGlyphs >= 2) then Idx := 1;
-    if Down and (NumGlyphs >= 3) then Idx := 2;
+    if not Ingeschakeld and (Aantalglyphs >= 2) then Idx := 1;
+    if Omlaag and (Aantalglyphs >= 3) then Idx := 2;
     SX := Idx * GW;
-    Part := TBitmap.Create;
+    Deel := TBitmap.Create;
     try
-      Part.Width := GW;
-      Part.Height := GH;
-      Part.Canvas.CopyRect(Rect(0, 0, GW, GH), Glyph.Canvas, Rect(SX, 0, SX + GW, GH));
-      Part.Transparent := True;
-      Part.TransparentColor := Glyph.Canvas.Pixels[SX, GH - 1];
-      Src := Part;
-      Canvas.Draw(X, Y, Src);
+      Deel.Width := GW;
+      Deel.Height := GH;
+      Deel.Canvas.CopyRect(Rect(0, 0, GW, GH), Glyph.Canvas, Rect(SX, 0, SX + GW, GH));
+      Deel.Transparent := True;
+      Deel.TransparentColor := Glyph.Canvas.Pixels[SX, GH - 1];
+      Bron := Deel;
+      Tekenvlak.Draw(X, Y, Bron);
     finally
-      Part.Free;
+      Deel.Free;
     end;
   end;
-  Canvas.Brush.Style := bsClear;
-  if Enabled then
-    DrawText(Canvas.Handle, PChar(Caption), Length(Caption), TR, DT_CENTER or DT_VCENTER or DT_SINGLELINE)
+  Tekenvlak.Brush.Style := bsClear;
+  if Ingeschakeld then
+    DrawText(Tekenvlak.Handle, PChar(Titel), Length(Titel), TR, DT_CENTER or DT_VCENTER or DT_SINGLELINE)
   else
-    ZMDrawDisabledText(Canvas, TR, Caption, DT_CENTER or DT_VCENTER or DT_SINGLELINE);
+    ZMDrawDisabledText(Tekenvlak, TR, Titel, DT_CENTER or DT_VCENTER or DT_SINGLELINE);
 end;
 
 { ---------------------------------------------------------------- TBitBtn }
@@ -340,12 +340,12 @@ end;
 
 procedure TBitBtn.Click;
 var
-  Form: TCustomForm;
+  Formulier: TCustomForm;
 begin
   if FKind = bkClose then
   begin
-    Form := GetParentForm(Self);
-    if Form <> nil then Form.Close
+    Formulier := GetParentForm(Self);
+    if Formulier <> nil then Formulier.Close
     else inherited Click;
   end
   else
@@ -438,17 +438,17 @@ procedure TBitBtn.Paint;
 var
   R: TRect;
   C: TCanvas;
-  Down: Boolean;
+  Omlaag: Boolean;
 begin
   C := PaintCanvas;
   begin
     R := ClientRect;
-    Down := FPressed and FMouseInside;
-    ZMDrawButtonFace(C, R, Down, Default or Focused, Focused);
+    Omlaag := FPressed and FMouseInside;
+    ZMDrawButtonFace(C, R, Omlaag, Default or Focused, Focused);
     C.Font := Font;
     InflateRect(R, -2, -2);
     DrawGlyphAndText(C, R, FGlyph, FNumGlyphs, FKind, Caption, FLayout, FMargin, FSpacing,
-      Enabled, Down);
+      Enabled, Omlaag);
     if Focused then
     begin
       R := ClientRect;
@@ -492,16 +492,16 @@ end;
 procedure TSpeedButton.Paint;
 var
   R: TRect;
-  Down: Boolean;
+  Omlaag: Boolean;
 begin
   if not Enabled then FState := bsDisabled
   else if FState = bsDisabled then
     if FDown and (GroupIndex <> 0) then FState := bsExclusive else FState := bsUp;
-  Down := FState in [bsDown, bsExclusive];
+  Omlaag := FState in [bsDown, bsExclusive];
   R := ClientRect;
   Canvas.Font := Font;
-  if not FFlat or FMouseInControl or Down then
-    ZMDrawButtonFace(Canvas, R, Down, False, False)
+  if not FFlat or FMouseInControl or Omlaag then
+    ZMDrawButtonFace(Canvas, R, Omlaag, False, False)
   else if not FTransparent then
   begin
     Canvas.Brush.Color := Color;
@@ -509,20 +509,20 @@ begin
   end;
   InflateRect(R, -2, -2);
   DrawGlyphAndText(Canvas, R, FGlyph, FNumGlyphs, bkCustom, Caption, FLayout, FMargin, FSpacing,
-    Enabled, Down);
+    Enabled, Omlaag);
 end;
 
 procedure TSpeedButton.UpdateExclusive;
 var
-  Msg: TMessage;
+  Bericht: TMessage;
 begin
   if (FGroupIndex <> 0) and (Parent <> nil) then
   begin
-    FillChar(Msg, SizeOf(Msg), 0);
-    Msg.Msg := CM_BUTTONPRESSED;
-    Msg.WParam := FGroupIndex;
-    Msg.LParam := LPARAM(Self);
-    Parent.Broadcast(Msg);
+    FillChar(Bericht, SizeOf(Bericht), 0);
+    Bericht.Msg := CM_BUTTONPRESSED;
+    Bericht.WParam := FGroupIndex;
+    Bericht.LParam := LPARAM(Self);
+    Parent.Broadcast(Bericht);
   end;
 end;
 
@@ -542,17 +542,17 @@ end;
 
 procedure TSpeedButton.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
-  NewState: TButtonState;
+  Nieuwestaat: TButtonState;
 begin
   inherited MouseMove(Shift, X, Y);
   if FDragging then
   begin
-    if not FDown then NewState := bsUp else NewState := bsExclusive;
+    if not FDown then Nieuwestaat := bsUp else Nieuwestaat := bsExclusive;
     if (X >= 0) and (X < ClientWidth) and (Y >= 0) and (Y <= ClientHeight) then
-      if FDown then NewState := bsExclusive else NewState := bsDown;
-    if NewState <> FState then
+      if FDown then Nieuwestaat := bsExclusive else Nieuwestaat := bsDown;
+    if Nieuwestaat <> FState then
     begin
-      FState := NewState;
+      FState := Nieuwestaat;
       Invalidate;
     end;
   end;
@@ -560,20 +560,20 @@ end;
 
 procedure TSpeedButton.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
-  DoClick: Boolean;
+  DoKlik: Boolean;
 begin
   inherited MouseUp(Button, Shift, X, Y);
   if FDragging then
   begin
     FDragging := False;
-    DoClick := (X >= 0) and (X < ClientWidth) and (Y >= 0) and (Y <= ClientHeight);
+    DoKlik := (X >= 0) and (X < ClientWidth) and (Y >= 0) and (Y <= ClientHeight);
     if FGroupIndex = 0 then
     begin
       FState := bsUp;
       FMouseInControl := False;
-      if DoClick and not (FState in [bsExclusive, bsDown]) then Invalidate;
+      if DoKlik and not (FState in [bsExclusive, bsDown]) then Invalidate;
     end
-    else if DoClick then
+    else if DoKlik then
     begin
       SetDown(not FDown);
       if FDown then Repaint;
@@ -583,7 +583,7 @@ begin
       if FDown then FState := bsExclusive;
       Repaint;
     end;
-    if DoClick then Click;
+    if DoKlik then Click;
   end;
 end;
 

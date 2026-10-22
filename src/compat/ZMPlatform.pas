@@ -39,20 +39,20 @@ type
   public
     function Name: string; virtual;
     { open het uitvoervenster; W x H is de grootte van het geëmuleerde scherm }
-    function Open(const Title: string; W, H: Integer): Boolean; virtual;
+    function Open(const Titel: string; Breedte, Hoogte: Integer): Boolean; virtual;
     procedure Close; virtual;
-    procedure Resize(W, H: Integer); virtual;
+    procedure Resize(Breedte, Hoogte: Integer); virtual;
     { toon een beeld: Pixels zijn W x H 32-bits $00RRGGBB-waarden, Stride bytes per regel }
-    procedure Present(Pixels: Pointer; W, H, Stride: Integer); virtual;
-    function PollEvent(out E: TZMEvent): Boolean; virtual;
+    procedure Present(Pixels: Pointer; Breedte, Hoogte, Regellengte: Integer); virtual;
+    function PollEvent(out Gebeurtenis: TZMEvent): Boolean; virtual;
     { blokkeer tot een gebeurtenis binnenkomt of TimeoutMs verstreken is (-1 = oneindig) }
-    procedure WaitEvent(TimeoutMs: Integer); virtual;
+    procedure WaitEvent(TijdslimietMs: Integer); virtual;
     function Ticks: LongWord; virtual;             { milliseconden }
     function PerfCounter: Int64; virtual;
     function PerfFrequency: Int64; virtual;
-    procedure Delay(Ms: Integer); virtual;
-    procedure SetTitle(const S: string); virtual;
-    procedure SetCursor(Shape: TZMCursorShape); virtual;
+    procedure Delay(Milliseconden: Integer); virtual;
+    procedure SetTitle(const Tekst: string); virtual;
+    procedure SetCursor(Vorm: TZMCursorShape); virtual;
     procedure Beep; virtual;
   end;
 
@@ -62,14 +62,14 @@ var
     Gebruikt door het differentiële-testharnas. }
   ZMIdleHook: procedure = nil;
 
-procedure ZMRegisterBackend(B: TZMBackend; Priority: Integer);
+procedure ZMRegisterBackend(Achterkant: TZMBackend; Prioriteit: Integer);
 function ZMBackend: TZMBackend;
 { vervang de huidige backend door de null-backend (bijv. wanneer geen beeldscherm beschikbaar is) }
 procedure ZMFallbackToNull;
 
 { Hulpfuncties die door backends en tests gedeeld worden }
-function ZMUtf8ToCp1252(const S: AnsiString): AnsiString;
-function ZMSavePNG(const FileName: string; Pixels: Pointer; W, H, Stride: Integer): Boolean;
+function ZMUtf8ToCp1252(const Tekst: AnsiString): AnsiString;
+function ZMSavePNG(const Bestandsnaam: string; Pixels: Pointer; Breedte, Hoogte, Regellengte: Integer): Boolean;
 
 implementation
 
@@ -80,21 +80,21 @@ var
   GBackend: TZMBackend = nil;
   GPriority: Integer = -1;
 
-procedure ZMRegisterBackend(B: TZMBackend; Priority: Integer);
+procedure ZMRegisterBackend(Achterkant: TZMBackend; Prioriteit: Integer);
 begin
   if GetEnvironmentVariable('ZM_HEADLESS') = '1' then
   begin
-    B.Free;
+    Achterkant.Free;
     Exit;
   end;
-  if Priority > GPriority then
+  if Prioriteit > GPriority then
   begin
     if GBackend <> nil then GBackend.Free;
-    GBackend := B;
-    GPriority := Priority;
+    GBackend := Achterkant;
+    GPriority := Prioriteit;
   end
   else
-    B.Free;
+    Achterkant.Free;
 end;
 
 function ZMBackend: TZMBackend;
@@ -121,7 +121,7 @@ begin
   Result := 'null';
 end;
 
-function TZMBackend.Open(const Title: string; W, H: Integer): Boolean;
+function TZMBackend.Open(const Titel: string; Breedte, Hoogte: Integer): Boolean;
 begin
   Result := True;
 end;
@@ -130,24 +130,24 @@ procedure TZMBackend.Close;
 begin
 end;
 
-procedure TZMBackend.Resize(W, H: Integer);
+procedure TZMBackend.Resize(Breedte, Hoogte: Integer);
 begin
 end;
 
-procedure TZMBackend.Present(Pixels: Pointer; W, H, Stride: Integer);
+procedure TZMBackend.Present(Pixels: Pointer; Breedte, Hoogte, Regellengte: Integer);
 begin
 end;
 
-function TZMBackend.PollEvent(out E: TZMEvent): Boolean;
+function TZMBackend.PollEvent(out Gebeurtenis: TZMEvent): Boolean;
 begin
-  FillChar(E, SizeOf(E), 0);
+  FillChar(Gebeurtenis, SizeOf(Gebeurtenis), 0);
   Result := False;
 end;
 
-procedure TZMBackend.WaitEvent(TimeoutMs: Integer);
+procedure TZMBackend.WaitEvent(TijdslimietMs: Integer);
 begin
-  if TimeoutMs < 0 then TimeoutMs := 10;
-  if TimeoutMs > 0 then Delay(TimeoutMs);
+  if TijdslimietMs < 0 then TijdslimietMs := 10;
+  if TijdslimietMs > 0 then Delay(TijdslimietMs);
 end;
 
 function TZMBackend.PerfFrequency: Int64;
@@ -158,10 +158,10 @@ end;
 function TZMBackend.PerfCounter: Int64;
 {$IFDEF UNIX}
 var
-  TV: TTimeVal;
+  Tijdwaarde: TTimeVal;
 begin
-  fpgettimeofday(@TV, nil);
-  Result := Int64(TV.tv_sec) * 1000000 + TV.tv_usec;
+  fpgettimeofday(@Tijdwaarde, nil);
+  Result := Int64(Tijdwaarde.tv_sec) * 1000000 + Tijdwaarde.tv_usec;
 end;
 {$ELSE}
 begin
@@ -178,16 +178,16 @@ begin
   Result := LongWord((PerfCounter - StartCounter) * 1000 div PerfFrequency);
 end;
 
-procedure TZMBackend.Delay(Ms: Integer);
+procedure TZMBackend.Delay(Milliseconden: Integer);
 begin
-  if Ms > 0 then SysUtils.Sleep(Ms);
+  if Milliseconden > 0 then SysUtils.Sleep(Milliseconden);
 end;
 
-procedure TZMBackend.SetTitle(const S: string);
+procedure TZMBackend.SetTitle(const Tekst: string);
 begin
 end;
 
-procedure TZMBackend.SetCursor(Shape: TZMCursorShape);
+procedure TZMBackend.SetCursor(Vorm: TZMCursorShape);
 begin
 end;
 
@@ -197,39 +197,39 @@ end;
 
 { ---------------------------------------------------------------- hulpfuncties }
 
-function ZMUtf8ToCp1252(const S: AnsiString): AnsiString;
+function ZMUtf8ToCp1252(const Tekst: AnsiString): AnsiString;
 const
-  Hi: array[$80..$9F] of Word = (
+  Hoogtabel: array[$80..$9F] of Word = (
     $20AC, $0081, $201A, $0192, $201E, $2026, $2020, $2021, $02C6, $2030, $0160, $2039, $0152, $008D, $017D, $008F,
     $0090, $2018, $2019, $201C, $201D, $2022, $2013, $2014, $02DC, $2122, $0161, $203A, $0153, $009D, $017E, $0178);
 var
-  I, N, CP, K: Integer;
-  C: Byte;
-  Ch: AnsiChar;
+  Positie, Resterend, Codepunt, Teller: Integer;
+  Bytewaarde: Byte;
+  Teken: AnsiChar;
 begin
   Result := '';
-  I := 1;
-  while I <= Length(S) do
+  Positie := 1;
+  while Positie <= Length(Tekst) do
   begin
-    C := Byte(S[I]);
-    if C < $80 then begin CP := C; N := 0; end
-    else if C and $E0 = $C0 then begin CP := C and $1F; N := 1; end
-    else if C and $F0 = $E0 then begin CP := C and $0F; N := 2; end
-    else if C and $F8 = $F0 then begin CP := C and $07; N := 3; end
-    else begin CP := Ord('?'); N := 0; end;
-    Inc(I);
-    while (N > 0) and (I <= Length(S)) do
+    Bytewaarde := Byte(Tekst[Positie]);
+    if Bytewaarde < $80 then begin Codepunt := Bytewaarde; Resterend := 0; end
+    else if Bytewaarde and $E0 = $C0 then begin Codepunt := Bytewaarde and $1F; Resterend := 1; end
+    else if Bytewaarde and $F0 = $E0 then begin Codepunt := Bytewaarde and $0F; Resterend := 2; end
+    else if Bytewaarde and $F8 = $F0 then begin Codepunt := Bytewaarde and $07; Resterend := 3; end
+    else begin Codepunt := Ord('?'); Resterend := 0; end;
+    Inc(Positie);
+    while (Resterend > 0) and (Positie <= Length(Tekst)) do
     begin
-      CP := (CP shl 6) or (Byte(S[I]) and $3F);
-      Inc(I);
-      Dec(N);
+      Codepunt := (Codepunt shl 6) or (Byte(Tekst[Positie]) and $3F);
+      Inc(Positie);
+      Dec(Resterend);
     end;
-    Ch := '?';
-    if (CP < $80) or ((CP >= $A0) and (CP <= $FF)) then Ch := AnsiChar(CP)
+    Teken := '?';
+    if (Codepunt < $80) or ((Codepunt >= $A0) and (Codepunt <= $FF)) then Teken := AnsiChar(Codepunt)
     else
-      for K := $80 to $9F do
-        if Hi[K] = CP then begin Ch := AnsiChar(K); Break; end;
-    Result := Result + Ch;
+      for Teller := $80 to $9F do
+        if Hoogtabel[Teller] = Codepunt then begin Teken := AnsiChar(Teller); Break; end;
+    Result := Result + Teken;
   end;
 end;
 
@@ -239,111 +239,111 @@ var
   CrcTable: array[0..255] of LongWord;
   CrcReady: Boolean = False;
 
-function Crc32(Crc: LongWord; P: PByte; N: Integer): LongWord;
+function Crc32(Startwaarde: LongWord; Gegevens: PByte; Aantal: Integer): LongWord;
 var
-  I, K: Integer;
-  C: LongWord;
+  Index, Bit: Integer;
+  Waarde: LongWord;
 begin
   if not CrcReady then
   begin
-    for I := 0 to 255 do
+    for Index := 0 to 255 do
     begin
-      C := I;
-      for K := 0 to 7 do
-        if C and 1 <> 0 then C := $EDB88320 xor (C shr 1) else C := C shr 1;
-      CrcTable[I] := C;
+      Waarde := Index;
+      for Bit := 0 to 7 do
+        if Waarde and 1 <> 0 then Waarde := $EDB88320 xor (Waarde shr 1) else Waarde := Waarde shr 1;
+      CrcTable[Index] := Waarde;
     end;
     CrcReady := True;
   end;
-  C := Crc xor $FFFFFFFF;
-  for I := 0 to N - 1 do
-    C := CrcTable[(C xor P[I]) and $FF] xor (C shr 8);
-  Result := C xor $FFFFFFFF;
+  Waarde := Startwaarde xor $FFFFFFFF;
+  for Index := 0 to Aantal - 1 do
+    Waarde := CrcTable[(Waarde xor Gegevens[Index]) and $FF] xor (Waarde shr 8);
+  Result := Waarde xor $FFFFFFFF;
 end;
 
-function ZMSavePNG(const FileName: string; Pixels: Pointer; W, H, Stride: Integer): Boolean;
+function ZMSavePNG(const Bestandsnaam: string; Pixels: Pointer; Breedte, Hoogte, Regellengte: Integer): Boolean;
 var
-  Raw, Z: array of Byte;
-  F: File;
-  X, Y, RawLen, Pos, Blk, ZP: Integer;
-  Src: PLongWord;
-  A, B: LongWord;
-  procedure Chunk(const Typ: AnsiString; Data: PByte; Len: Integer);
+  Ruw, Zlibstroom: array of Byte;
+  Bestand: File;
+  Kolom, Rij, RuwLengte, Positie, Blok, ZPositie: Integer;
+  Bron: PLongWord;
+  Som1, Som2: LongWord;
+  procedure Stuk(const Soort: AnsiString; Gegevens: PByte; Lengte: Integer);
   var
-    Hdr: array[0..7] of Byte;
-    Buf: array of Byte;
-    Crc: LongWord;
-    T: array[0..3] of Byte;
+    Kop: array[0..7] of Byte;
+    Buffer: array of Byte;
+    Controlesom: LongWord;
+    Controlebytes: array[0..3] of Byte;
   begin
-    Hdr[0] := Len shr 24; Hdr[1] := Len shr 16; Hdr[2] := Len shr 8; Hdr[3] := Len;
-    Move(Typ[1], Hdr[4], 4);
-    BlockWrite(F, Hdr, 8);
-    if Len > 0 then BlockWrite(F, Data^, Len);
-    SetLength(Buf, Len + 4);
-    Move(Typ[1], Buf[0], 4);
-    if Len > 0 then Move(Data^, Buf[4], Len);
-    Crc := Crc32(0, @Buf[0], Len + 4);
-    T[0] := Crc shr 24; T[1] := Crc shr 16; T[2] := Crc shr 8; T[3] := Crc;
-    BlockWrite(F, T, 4);
+    Kop[0] := Lengte shr 24; Kop[1] := Lengte shr 16; Kop[2] := Lengte shr 8; Kop[3] := Lengte;
+    Move(Soort[1], Kop[4], 4);
+    BlockWrite(Bestand, Kop, 8);
+    if Lengte > 0 then BlockWrite(Bestand, Gegevens^, Lengte);
+    SetLength(Buffer, Lengte + 4);
+    Move(Soort[1], Buffer[0], 4);
+    if Lengte > 0 then Move(Gegevens^, Buffer[4], Lengte);
+    Controlesom := Crc32(0, @Buffer[0], Lengte + 4);
+    Controlebytes[0] := Controlesom shr 24; Controlebytes[1] := Controlesom shr 16; Controlebytes[2] := Controlesom shr 8; Controlebytes[3] := Controlesom;
+    BlockWrite(Bestand, Controlebytes, 4);
   end;
 const
-  Sig: array[0..7] of Byte = (137, 80, 78, 71, 13, 10, 26, 10);
+  Signatuur: array[0..7] of Byte = (137, 80, 78, 71, 13, 10, 26, 10);
 var
-  IHDR: array[0..12] of Byte;
+  Kopgegevens: array[0..12] of Byte;
 begin
   Result := False;
-  RawLen := H * (1 + W * 3);
-  SetLength(Raw, RawLen);
-  Pos := 0;
-  for Y := 0 to H - 1 do
+  RuwLengte := Hoogte * (1 + Breedte * 3);
+  SetLength(Ruw, RuwLengte);
+  Positie := 0;
+  for Rij := 0 to Hoogte - 1 do
   begin
-    Raw[Pos] := 0; Inc(Pos);
-    Src := PLongWord(PByte(Pixels) + PtrInt(Y) * Stride);
-    for X := 0 to W - 1 do
+    Ruw[Positie] := 0; Inc(Positie);
+    Bron := PLongWord(PByte(Pixels) + PtrInt(Rij) * Regellengte);
+    for Kolom := 0 to Breedte - 1 do
     begin
-      Raw[Pos] := (Src^ shr 16) and $FF;
-      Raw[Pos + 1] := (Src^ shr 8) and $FF;
-      Raw[Pos + 2] := Src^ and $FF;
-      Inc(Pos, 3);
-      Inc(Src);
+      Ruw[Positie] := (Bron^ shr 16) and $FF;
+      Ruw[Positie + 1] := (Bron^ shr 8) and $FF;
+      Ruw[Positie + 2] := Bron^ and $FF;
+      Inc(Positie, 3);
+      Inc(Bron);
     end;
   end;
   { zlib-stroom met opgeslagen blokken }
-  SetLength(Z, 2 + RawLen + (RawLen div 65535 + 1) * 5 + 4);
-  Z[0] := $78; Z[1] := $01;
-  ZP := 2;
-  Pos := 0;
+  SetLength(Zlibstroom, 2 + RuwLengte + (RuwLengte div 65535 + 1) * 5 + 4);
+  Zlibstroom[0] := $78; Zlibstroom[1] := $01;
+  ZPositie := 2;
+  Positie := 0;
   repeat
-    Blk := RawLen - Pos;
-    if Blk > 65535 then Blk := 65535;
-    if Pos + Blk >= RawLen then Z[ZP] := 1 else Z[ZP] := 0;
-    Z[ZP + 1] := Blk and $FF; Z[ZP + 2] := Blk shr 8;
-    Z[ZP + 3] := not Blk and $FF; Z[ZP + 4] := (not Blk shr 8) and $FF;
-    Inc(ZP, 5);
-    if Blk > 0 then Move(Raw[Pos], Z[ZP], Blk);
-    Inc(ZP, Blk);
-    Inc(Pos, Blk);
-  until Pos >= RawLen;
-  A := 1; B := 0;
-  for Pos := 0 to RawLen - 1 do
+    Blok := RuwLengte - Positie;
+    if Blok > 65535 then Blok := 65535;
+    if Positie + Blok >= RuwLengte then Zlibstroom[ZPositie] := 1 else Zlibstroom[ZPositie] := 0;
+    Zlibstroom[ZPositie + 1] := Blok and $FF; Zlibstroom[ZPositie + 2] := Blok shr 8;
+    Zlibstroom[ZPositie + 3] := not Blok and $FF; Zlibstroom[ZPositie + 4] := (not Blok shr 8) and $FF;
+    Inc(ZPositie, 5);
+    if Blok > 0 then Move(Ruw[Positie], Zlibstroom[ZPositie], Blok);
+    Inc(ZPositie, Blok);
+    Inc(Positie, Blok);
+  until Positie >= RuwLengte;
+  Som1 := 1; Som2 := 0;
+  for Positie := 0 to RuwLengte - 1 do
   begin
-    A := (A + Raw[Pos]) mod 65521;
-    B := (B + A) mod 65521;
+    Som1 := (Som1 + Ruw[Positie]) mod 65521;
+    Som2 := (Som2 + Som1) mod 65521;
   end;
-  A := (B shl 16) or A;
-  Z[ZP] := A shr 24; Z[ZP + 1] := A shr 16; Z[ZP + 2] := A shr 8; Z[ZP + 3] := A;
-  Inc(ZP, 4);
-  AssignFile(F, FileName);
-  {$I-} Rewrite(F, 1); {$I+}
+  Som1 := (Som2 shl 16) or Som1;
+  Zlibstroom[ZPositie] := Som1 shr 24; Zlibstroom[ZPositie + 1] := Som1 shr 16; Zlibstroom[ZPositie + 2] := Som1 shr 8; Zlibstroom[ZPositie + 3] := Som1;
+  Inc(ZPositie, 4);
+  AssignFile(Bestand, Bestandsnaam);
+  {$I-} Rewrite(Bestand, 1); {$I+}
   if IOResult <> 0 then Exit;
-  BlockWrite(F, Sig, 8);
-  IHDR[0] := W shr 24; IHDR[1] := W shr 16; IHDR[2] := W shr 8; IHDR[3] := W;
-  IHDR[4] := H shr 24; IHDR[5] := H shr 16; IHDR[6] := H shr 8; IHDR[7] := H;
-  IHDR[8] := 8; IHDR[9] := 2; IHDR[10] := 0; IHDR[11] := 0; IHDR[12] := 0;
-  Chunk('IHDR', @IHDR[0], 13);
-  Chunk('IDAT', @Z[0], ZP);
-  Chunk('IEND', nil, 0);
-  CloseFile(F);
+  BlockWrite(Bestand, Signatuur, 8);
+  Kopgegevens[0] := Breedte shr 24; Kopgegevens[1] := Breedte shr 16; Kopgegevens[2] := Breedte shr 8; Kopgegevens[3] := Breedte;
+  Kopgegevens[4] := Hoogte shr 24; Kopgegevens[5] := Hoogte shr 16; Kopgegevens[6] := Hoogte shr 8; Kopgegevens[7] := Hoogte;
+  Kopgegevens[8] := 8; Kopgegevens[9] := 2; Kopgegevens[10] := 0; Kopgegevens[11] := 0; Kopgegevens[12] := 0;
+  Stuk('IHDR', @Kopgegevens[0], 13);
+  Stuk('IDAT', @Zlibstroom[0], ZPositie);
+  Stuk('IEND', nil, 0);
+  CloseFile(Bestand);
   Result := True;
 end;
 

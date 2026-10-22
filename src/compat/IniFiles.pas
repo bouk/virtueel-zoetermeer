@@ -112,12 +112,12 @@ end;
 
 function TCustomIniFile.ReadInteger(const Section, Ident: string; Default: Longint): Longint;
 var
-  IntStr: string;
+  IntTekst: string;
 begin
-  IntStr := ReadString(Section, Ident, '');
-  if (Length(IntStr) > 2) and (IntStr[1] = '0') and (IntStr[2] in ['X', 'x']) then
-    IntStr := '$' + Copy(IntStr, 3, Maxint);
-  Result := StrToIntDef(IntStr, Default);
+  IntTekst := ReadString(Section, Ident, '');
+  if (Length(IntTekst) > 2) and (IntTekst[1] = '0') and (IntTekst[2] in ['X', 'x']) then
+    IntTekst := '$' + Copy(IntTekst, 3, Maxint);
+  Result := StrToIntDef(IntTekst, Default);
 end;
 
 procedure TCustomIniFile.WriteInteger(const Section, Ident: string; Value: Longint);
@@ -280,15 +280,15 @@ end;
 procedure TIniFile.ReadSection(const Section: string; Strings: TStrings);
 var
   Buffer, P: PAnsiChar;
-  CharCount: Integer;
-  BufSize: Integer;
+  Tekenaantal: Integer;
+  Buffergrootte: Integer;
 
-  procedure ReadStringData;
+  procedure LeesTekstgegevens;
   begin
     Strings.BeginUpdate;
     try
       Strings.Clear;
-      if CharCount <> 0 then
+      if Tekenaantal <> 0 then
       begin
         P := Buffer;
         while P^ <> #0 do
@@ -303,43 +303,43 @@ var
   end;
 
 begin
-  BufSize := 1024;
+  Buffergrootte := 1024;
   while True do
   begin
-    GetMem(Buffer, BufSize);
+    GetMem(Buffer, Buffergrootte);
     try
-      CharCount := GetPrivateProfileString(PAnsiChar(Section), nil, nil, Buffer, BufSize,
+      Tekenaantal := GetPrivateProfileString(PAnsiChar(Section), nil, nil, Buffer, Buffergrootte,
         PAnsiChar(FFileName));
-      if CharCount < BufSize - 2 then
+      if Tekenaantal < Buffergrootte - 2 then
       begin
-        ReadStringData;
+        LeesTekstgegevens;
         Break;
       end;
     finally
-      FreeMem(Buffer, BufSize);
+      FreeMem(Buffer, Buffergrootte);
     end;
-    BufSize := BufSize * 4;
+    Buffergrootte := Buffergrootte * 4;
   end;
 end;
 
 procedure TIniFile.ReadSectionValues(const Section: string; Strings: TStrings);
 var
-  KeyList: TStringList;
+  Toetslijst: TStringList;
   I: Integer;
 begin
-  KeyList := TStringList.Create;
+  Toetslijst := TStringList.Create;
   try
-    ReadSection(Section, KeyList);
+    ReadSection(Section, Toetslijst);
     Strings.BeginUpdate;
     try
       Strings.Clear;
-      for I := 0 to KeyList.Count - 1 do
-        Strings.Add(KeyList[I] + '=' + ReadString(Section, KeyList[I], ''));
+      for I := 0 to Toetslijst.Count - 1 do
+        Strings.Add(Toetslijst[I] + '=' + ReadString(Section, Toetslijst[I], ''));
     finally
       Strings.EndUpdate;
     end;
   finally
-    KeyList.Free;
+    Toetslijst.Free;
   end;
 end;
 
@@ -398,14 +398,14 @@ end;
 procedure TMemIniFile.DeleteKey(const Section, Ident: string);
 var
   I, J: Integer;
-  Strings: TStrings;
+  Teksten: TStrings;
 begin
   I := FSections.IndexOf(Section);
   if I >= 0 then
   begin
-    Strings := TStrings(FSections.Objects[I]);
-    J := Strings.IndexOfName(Ident);
-    if J >= 0 then Strings.Delete(J);
+    Teksten := TStrings(FSections.Objects[I]);
+    J := Teksten.IndexOfName(Ident);
+    if J >= 0 then Teksten.Delete(J);
   end;
 end;
 
@@ -424,15 +424,15 @@ end;
 procedure TMemIniFile.GetStrings(List: TStrings);
 var
   I, J: Integer;
-  Strings: TStrings;
+  Teksten: TStrings;
 begin
   List.BeginUpdate;
   try
     for I := 0 to FSections.Count - 1 do
     begin
       List.Add('[' + FSections[I] + ']');
-      Strings := TStrings(FSections.Objects[I]);
-      for J := 0 to Strings.Count - 1 do List.Add(Strings[J]);
+      Teksten := TStrings(FSections.Objects[I]);
+      for J := 0 to Teksten.Count - 1 do List.Add(Teksten[J]);
       List.Add('');
     end;
   finally
@@ -442,18 +442,18 @@ end;
 
 procedure TMemIniFile.LoadValues;
 var
-  List: TStringList;
-  Path: string;
+  Lijst: TStringList;
+  Pad: string;
 begin
-  Path := ZMResolvePath(FileName);
-  if (FileName <> '') and FileExists(Path) then
+  Pad := ZMResolvePath(FileName);
+  if (FileName <> '') and FileExists(Pad) then
   begin
-    List := TStringList.Create;
+    Lijst := TStringList.Create;
     try
-      List.LoadFromFile(Path);
-      SetStrings(List);
+      Lijst.LoadFromFile(Pad);
+      SetStrings(Lijst);
     finally
-      List.Free;
+      Lijst.Free;
     end;
   end
   else
@@ -463,7 +463,7 @@ end;
 procedure TMemIniFile.ReadSection(const Section: string; Strings: TStrings);
 var
   I, J: Integer;
-  SectionStrings: TStrings;
+  Sectieteksten: TStrings;
 begin
   Strings.BeginUpdate;
   try
@@ -471,9 +471,9 @@ begin
     I := FSections.IndexOf(Section);
     if I >= 0 then
     begin
-      SectionStrings := TStrings(FSections.Objects[I]);
-      for J := 0 to SectionStrings.Count - 1 do
-        Strings.Add(SectionStrings.Names[J]);
+      Sectieteksten := TStrings(FSections.Objects[I]);
+      for J := 0 to Sectieteksten.Count - 1 do
+        Strings.Add(Sectieteksten.Names[J]);
     end;
   finally
     Strings.EndUpdate;
@@ -502,16 +502,16 @@ end;
 function TMemIniFile.ReadString(const Section, Ident, Default: string): string;
 var
   I: Integer;
-  Strings: TStrings;
+  Teksten: TStrings;
 begin
   I := FSections.IndexOf(Section);
   if I >= 0 then
   begin
-    Strings := TStrings(FSections.Objects[I]);
-    I := Strings.IndexOfName(Ident);
+    Teksten := TStrings(FSections.Objects[I]);
+    I := Teksten.IndexOfName(Ident);
     if I >= 0 then
     begin
-      Result := Copy(Strings[I], Length(Ident) + 2, Maxint);
+      Result := Copy(Teksten[I], Length(Ident) + 2, Maxint);
       Exit;
     end;
   end;
@@ -528,31 +528,31 @@ procedure TMemIniFile.SetStrings(List: TStrings);
 var
   I: Integer;
   S: string;
-  Strings: TStrings;
+  Teksten: TStrings;
 begin
   Clear;
-  Strings := nil;
+  Teksten := nil;
   for I := 0 to List.Count - 1 do
   begin
     S := Trim(List[I]);
     if (S <> '') and (S[1] <> ';') then
       if (S[1] = '[') and (S[Length(S)] = ']') then
-        Strings := AddSection(Trim(Copy(S, 2, Length(S) - 2)))
-      else if Strings <> nil then
-        Strings.Add(S);
+        Teksten := AddSection(Trim(Copy(S, 2, Length(S) - 2)))
+      else if Teksten <> nil then
+        Teksten.Add(S);
   end;
 end;
 
 procedure TMemIniFile.UpdateFile;
 var
-  List: TStringList;
+  Lijst: TStringList;
 begin
-  List := TStringList.Create;
+  Lijst := TStringList.Create;
   try
-    GetStrings(List);
-    List.SaveToFile(ZMWritePath(ZMResolvePath(FileName)));
+    GetStrings(Lijst);
+    Lijst.SaveToFile(ZMWritePath(ZMResolvePath(FileName)));
   finally
-    List.Free;
+    Lijst.Free;
   end;
 end;
 
@@ -560,16 +560,16 @@ procedure TMemIniFile.WriteString(const Section, Ident, Value: string);
 var
   I: Integer;
   S: string;
-  Strings: TStrings;
+  Teksten: TStrings;
 begin
   I := FSections.IndexOf(Section);
   if I >= 0 then
-    Strings := TStrings(FSections.Objects[I])
+    Teksten := TStrings(FSections.Objects[I])
   else
-    Strings := AddSection(Section);
+    Teksten := AddSection(Section);
   S := Ident + '=' + Value;
-  I := Strings.IndexOfName(Ident);
-  if I >= 0 then Strings[I] := S else Strings.Add(S);
+  I := Teksten.IndexOfName(Ident);
+  if I >= 0 then Teksten[I] := S else Teksten.Add(S);
 end;
 
 end.

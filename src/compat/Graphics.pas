@@ -1284,21 +1284,21 @@ end;
 
 procedure TCanvas.RequiredState(ReqState: TCanvasState);
 var
-  NeededState: TCanvasState;
+  Vereistestaat: TCanvasState;
 begin
-  NeededState := ReqState - State;
-  if NeededState <> [] then
+  Vereistestaat := ReqState - State;
+  if Vereistestaat <> [] then
   begin
-    if csHandleValid in NeededState then
+    if csHandleValid in Vereistestaat then
     begin
       CreateHandle;
       if FHandle = 0 then
         raise EInvalidOperation.Create('Canvas does not allow drawing');
     end;
-    if csFontValid in NeededState then CreateFont;
-    if csPenValid in NeededState then CreatePen;
-    if csBrushValid in NeededState then CreateBrush;
-    State := State + NeededState;
+    if csFontValid in Vereistestaat then CreateFont;
+    if csPenValid in Vereistestaat then CreatePen;
+    if csBrushValid in Vereistestaat then CreateBrush;
+    State := State + Vereistestaat;
   end;
 end;
 
@@ -1651,13 +1651,13 @@ end;
 
 procedure TCanvas.TextRect(Rect: TRect; X, Y: Integer; const Text: string);
 var
-  Options: Longint;
+  Opties: Longint;
 begin
   Changing;
   RequiredState([csHandleValid, csFontValid, csBrushValid]);
-  Options := ETO_CLIPPED or FTextFlags;
-  if Brush.Style <> bsClear then Options := Options or ETO_OPAQUE;
-  Windows.ExtTextOut(FHandle, X, Y, Options, @Rect, PAnsiChar(Text), Length(Text), nil);
+  Opties := ETO_CLIPPED or FTextFlags;
+  if Brush.Style <> bsClear then Opties := Opties or ETO_OPAQUE;
+  Windows.ExtTextOut(FHandle, X, Y, Opties, @Rect, PAnsiChar(Text), Length(Text), nil);
   Changed;
 end;
 
@@ -1676,7 +1676,7 @@ end;
 
 procedure TGraphic.DefineProperties(Filer: TFiler);
 
-  function DoWrite: Boolean;
+  function DoSchrijf: Boolean;
   begin
     if Filer.Ancestor <> nil then
       Result := not (Filer.Ancestor is TGraphic) or not Equals(TGraphic(Filer.Ancestor))
@@ -1685,7 +1685,7 @@ procedure TGraphic.DefineProperties(Filer: TFiler);
   end;
 
 begin
-  Filer.DefineBinaryProperty('Data', ReadData, WriteData, DoWrite);
+  Filer.DefineBinaryProperty('Data', ReadData, WriteData, DoSchrijf);
 end;
 
 function TGraphic.Equals(Graphic: TGraphic): Boolean;
@@ -1759,25 +1759,25 @@ end;
 
 procedure TGraphic.LoadFromFile(const Filename: string);
 var
-  Stream: TStream;
+  Stroom: TStream;
 begin
-  Stream := TFileStream.Create(ZMResolvePath(Filename), fmOpenRead or fmShareDenyWrite);
+  Stroom := TFileStream.Create(ZMResolvePath(Filename), fmOpenRead or fmShareDenyWrite);
   try
-    LoadFromStream(Stream);
+    LoadFromStream(Stroom);
   finally
-    Stream.Free;
+    Stroom.Free;
   end;
 end;
 
 procedure TGraphic.SaveToFile(const Filename: string);
 var
-  Stream: TStream;
+  Stroom: TStream;
 begin
-  Stream := TFileStream.Create(ZMWritePath(ZMResolvePath(Filename)), fmCreate);
+  Stroom := TFileStream.Create(ZMWritePath(ZMResolvePath(Filename)), fmCreate);
   try
-    SaveToStream(Stream);
+    SaveToStream(Stroom);
   finally
-    Stream.Free;
+    Stroom.Free;
   end;
 end;
 
@@ -1814,15 +1814,15 @@ begin
   Result := AFormat in [CF_BITMAP, CF_DIB];
 end;
 
-function FindGraphicClassName(const Name: string): TGraphicClass;
+function FindGraphicClassName(const Naam: string): TGraphicClass;
 var
   I: Integer;
   C: TPersistentClass;
 begin
   for I := 0 to High(FileFormats) do
-    if (FileFormats[I].Cls <> nil) and SameText(FileFormats[I].Cls.ClassName, Name) then
+    if (FileFormats[I].Cls <> nil) and SameText(FileFormats[I].Cls.ClassName, Naam) then
       Exit(FileFormats[I].Cls);
-  C := GetClass(Name);
+  C := GetClass(Naam);
   if (C <> nil) and C.InheritsFrom(TGraphic) then
     Result := TGraphicClass(C)
   else
@@ -1896,22 +1896,22 @@ end;
 
 procedure TPicture.SetGraphic(Value: TGraphic);
 var
-  NewGraphic: TGraphic;
+  Nieuwegrafiek: TGraphic;
 begin
-  NewGraphic := nil;
+  Nieuwegrafiek := nil;
   if Value <> nil then
   begin
-    NewGraphic := TGraphicClass(Value.ClassType).Create;
-    NewGraphic.Assign(Value);
-    NewGraphic.OnChange := Changed;
-    NewGraphic.OnProgress := Progress;
+    Nieuwegrafiek := TGraphicClass(Value.ClassType).Create;
+    Nieuwegrafiek.Assign(Value);
+    Nieuwegrafiek.OnChange := Changed;
+    Nieuwegrafiek.OnProgress := Progress;
   end;
   try
     FGraphic.Free;
-    FGraphic := NewGraphic;
+    FGraphic := Nieuwegrafiek;
     Changed(Self);
   except
-    NewGraphic.Free;
+    Nieuwegrafiek.Free;
     raise;
   end;
 end;
@@ -1928,28 +1928,28 @@ end;
 
 procedure TPicture.LoadFromFile(const Filename: string);
 var
-  Ext: string;
+  Extensie: string;
   I: Integer;
-  GraphicClass: TGraphicClass;
-  NewGraphic: TGraphic;
+  Grafischklasse: TGraphicClass;
+  Nieuwegrafiek: TGraphic;
 begin
-  Ext := LowerCase(ExtractFileExt(Filename));
-  Delete(Ext, 1, 1);
-  GraphicClass := nil;
+  Extensie := LowerCase(ExtractFileExt(Filename));
+  Delete(Extensie, 1, 1);
+  Grafischklasse := nil;
   for I := 0 to High(FileFormats) do
-    if FileFormats[I].Ext = Ext then GraphicClass := FileFormats[I].Cls;
-  if GraphicClass = nil then
-    raise EInvalidGraphic.CreateFmt('Unknown picture file extension (.%s)', [Ext]);
-  NewGraphic := GraphicClass.Create;
+    if FileFormats[I].Ext = Extensie then Grafischklasse := FileFormats[I].Cls;
+  if Grafischklasse = nil then
+    raise EInvalidGraphic.CreateFmt('Unknown picture file extension (.%s)', [Extensie]);
+  Nieuwegrafiek := Grafischklasse.Create;
   try
-    NewGraphic.OnProgress := Progress;
-    NewGraphic.LoadFromFile(Filename);
+    Nieuwegrafiek.OnProgress := Progress;
+    Nieuwegrafiek.LoadFromFile(Filename);
   except
-    NewGraphic.Free;
+    Nieuwegrafiek.Free;
     raise;
   end;
   FGraphic.Free;
-  FGraphic := NewGraphic;
+  FGraphic := Nieuwegrafiek;
   FGraphic.OnChange := Changed;
   Changed(Self);
 end;
@@ -1984,49 +1984,49 @@ end;
 
 procedure TPicture.ReadData(Stream: TStream);
 var
-  CName: string[63];
-  NewGraphic: TGraphic;
-  GraphicClass: TGraphicClass;
+  Klassenaam: string[63];
+  Nieuwegrafiek: TGraphic;
+  Grafischklasse: TGraphicClass;
 begin
-  Stream.Read(CName[0], 1);
-  Stream.Read(CName[1], Integer(CName[0]));
-  GraphicClass := FindGraphicClassName(CName);
-  NewGraphic := nil;
-  if GraphicClass <> nil then
+  Stream.Read(Klassenaam[0], 1);
+  Stream.Read(Klassenaam[1], Integer(Klassenaam[0]));
+  Grafischklasse := FindGraphicClassName(Klassenaam);
+  Nieuwegrafiek := nil;
+  if Grafischklasse <> nil then
   begin
-    NewGraphic := GraphicClass.Create;
+    Nieuwegrafiek := Grafischklasse.Create;
     try
-      NewGraphic.ReadData(Stream);
+      Nieuwegrafiek.ReadData(Stream);
     except
-      NewGraphic.Free;
+      Nieuwegrafiek.Free;
       raise;
     end;
   end;
   FGraphic.Free;
-  FGraphic := NewGraphic;
-  if NewGraphic <> nil then
+  FGraphic := Nieuwegrafiek;
+  if Nieuwegrafiek <> nil then
   begin
-    NewGraphic.OnChange := Changed;
-    NewGraphic.OnProgress := Progress;
+    Nieuwegrafiek.OnChange := Changed;
+    Nieuwegrafiek.OnProgress := Progress;
   end;
   Changed(Self);
 end;
 
 procedure TPicture.WriteData(Stream: TStream);
 var
-  CName: string[63];
+  Klassenaam: string[63];
 begin
   if Graphic <> nil then
-    CName := Graphic.ClassName
+    Klassenaam := Graphic.ClassName
   else
-    CName := '';
-  Stream.Write(CName, Length(CName) + 1);
+    Klassenaam := '';
+  Stream.Write(Klassenaam, Length(Klassenaam) + 1);
   if Graphic <> nil then Graphic.WriteData(Stream);
 end;
 
 procedure TPicture.DefineProperties(Filer: TFiler);
 
-  function DoWrite: Boolean;
+  function DoSchrijf: Boolean;
   begin
     if Filer.Ancestor <> nil then
     begin
@@ -2041,7 +2041,7 @@ procedure TPicture.DefineProperties(Filer: TFiler);
   end;
 
 begin
-  Filer.DefineBinaryProperty('Data', ReadData, WriteData, DoWrite);
+  Filer.DefineBinaryProperty('Data', ReadData, WriteData, DoSchrijf);
 end;
 
 { ---------------------------------------------------------------- TMetafile (tijdelijke aanduiding) }
@@ -2214,71 +2214,71 @@ end;
 
 procedure TBitmap.NewImage(AWidth, AHeight: Integer; ABPP: Integer; CopyOld: Boolean);
 var
-  RowBuf, LUT: array of LongWord;
-  Old, New: TZMBitmap;
+  Rijbuffer, LUT: array of LongWord;
+  Oud, Nieuw: TZMBitmap;
   X, Y, W, H, I: Integer;
-  OldH: HBITMAP;
+  Oudehoogte: HBITMAP;
 begin
-  Old := TZMBitmap(Img);
-  New := TZMBitmap.Create(AWidth, AHeight, ABPP);
-  if (Old <> nil) and (Old.BPP <= 8) and (ABPP <= 8) and (Old.NumColors > 0) then
+  Oud := TZMBitmap(Img);
+  Nieuw := TZMBitmap.Create(AWidth, AHeight, ABPP);
+  if (Oud <> nil) and (Oud.BPP <= 8) and (ABPP <= 8) and (Oud.NumColors > 0) then
   begin
-    for I := 0 to Min(Old.NumColors, New.NumColors) - 1 do New.Colors[I] := Old.Colors[I];
-    New.ColorsChanged;
+    for I := 0 to Min(Oud.NumColors, Nieuw.NumColors) - 1 do Nieuw.Colors[I] := Oud.Colors[I];
+    Nieuw.ColorsChanged;
   end
   else if (ABPP = 8) and (FPalette <> 0) then
   begin
     for I := 0 to Min(GdiPalette(FPalette).Count, 256) - 1 do
-      with GdiPalette(FPalette).Entries[I] do New.Colors[I] := (peRed shl 16) or (peGreen shl 8) or peBlue;
-    New.ColorsChanged;
+      with GdiPalette(FPalette).Entries[I] do Nieuw.Colors[I] := (peRed shl 16) or (peGreen shl 8) or peBlue;
+    Nieuw.ColorsChanged;
   end;
   if ABPP > 1 then
     { nieuwe DIB's beginnen wit, zoals de TBitmap van Delphi (Canvas-kwast); dat wordt hier niet gedaan:
       Windows-DIB-secties beginnen op nul (zwart). }
   ;
-  if CopyOld and (Old <> nil) then
+  if CopyOld and (Oud <> nil) then
   begin
-    W := Min(Old.Width, AWidth);
-    H := Min(Old.Height, AHeight);
+    W := Min(Oud.Width, AWidth);
+    H := Min(Oud.Height, AHeight);
     if (W > 0) and (H > 0) then
     begin
-      if Old.BPP = ABPP then
+      if Oud.BPP = ABPP then
       begin
         { zelfde formaat: kopieer de rijen (behoudt de indices van palet-bitmaps) }
         for Y := 0 to H - 1 do
           if (ABPP mod 8 = 0) then
-            Move(Old.RowPtr(Y)^, New.RowPtr(Y)^, W * (ABPP div 8))
+            Move(Oud.RowPtr(Y)^, Nieuw.RowPtr(Y)^, W * (ABPP div 8))
           else
-            for X := 0 to W - 1 do New.SetNative(X, Y, Old.GetNative(X, Y));
+            for X := 0 to W - 1 do Nieuw.SetNative(X, Y, Oud.GetNative(X, Y));
       end
       else
       begin
-        SetLength(RowBuf, W);
+        SetLength(Rijbuffer, W);
         for Y := 0 to H - 1 do
         begin
-          ZMReadRow(Old, Y, 0, W, @RowBuf[0]);
-          if Old.BPP <= 8 then
+          ZMReadRow(Oud, Y, 0, W, @Rijbuffer[0]);
+          if Oud.BPP <= 8 then
           begin
             if Length(LUT) = 0 then
             begin
               SetLength(LUT, 256);
-              for X := 0 to 255 do LUT[X] := New.RGBToNative(Old.NativeToRGB(X));
+              for X := 0 to 255 do LUT[X] := Nieuw.RGBToNative(Oud.NativeToRGB(X));
             end;
-            for X := 0 to W - 1 do RowBuf[X] := LUT[RowBuf[X] and $FF];
+            for X := 0 to W - 1 do Rijbuffer[X] := LUT[Rijbuffer[X] and $FF];
           end
           else
-            for X := 0 to W - 1 do RowBuf[X] := New.RGBToNative(Old.NativeToRGB(RowBuf[X]));
-          ZMWriteRow(New, Y, 0, W, @RowBuf[0]);
+            for X := 0 to W - 1 do Rijbuffer[X] := Nieuw.RGBToNative(Oud.NativeToRGB(Rijbuffer[X]));
+          ZMWriteRow(Nieuw, Y, 0, W, @Rijbuffer[0]);
         end;
       end;
     end;
   end;
-  New.IsDIB := (FHandleType = bmDIB) or (FPixelFormat <> pfDevice) or (ABPP <> 32);
+  Nieuw.IsDIB := (FHandleType = bmDIB) or (FPixelFormat <> pfDevice) or (ABPP <> 32);
   ReselectInCanvas;
-  OldH := FHandle;
-  FHandle := New.Handle;
+  Oudehoogte := FHandle;
+  FHandle := Nieuw.Handle;
   FImgHandle := 0;
-  if OldH <> 0 then DeleteObject(OldH);
+  if Oudehoogte <> 0 then DeleteObject(Oudehoogte);
   if FMaskHandle <> 0 then
   begin
     DeleteObject(FMaskHandle);
@@ -2483,7 +2483,7 @@ var
   D: TZMDC;
   X, Y, W, H, SX, SY: Integer;
   T: LongWord;
-  OldMode: Integer;
+  Oudemodus: Integer;
 begin
   B := TZMBitmap(Img);
   if (B = nil) or (B.Width = 0) or (B.Height = 0) then Exit;
@@ -2509,10 +2509,10 @@ begin
   end
   else
   begin
-    OldMode := SetStretchBltMode(DC, COLORONCOLOR);
+    Oudemodus := SetStretchBltMode(DC, COLORONCOLOR);
     GdiBltBitmap(D, Rect.Left, Rect.Top, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, B,
       $FFFFFF, 0, 0, B.Width, B.Height, ACanvas.CopyMode, True);
-    SetStretchBltMode(DC, OldMode);
+    SetStretchBltMode(DC, Oudemodus);
   end;
 end;
 
@@ -2713,11 +2713,11 @@ begin
 end;
 
 { BMP lezen }
-procedure DecodeRLE(Src: PByte; SrcLen: Integer; B: TZMBitmap; Is4: Boolean);
+procedure DecodeRLE(Bron: PByte; Bronlengte: Integer; B: TZMBitmap; Is4: Boolean);
 var
   X, Y, I, N, C: Integer;
   P, E: PByte;
-  procedure Put(V: Integer);
+  procedure Plaats(V: Integer);
   begin
     if (X >= 0) and (X < B.Width) and (Y >= 0) and (Y < B.Height) then
       B.SetNative(X, B.Height - 1 - Y, V);
@@ -2726,8 +2726,8 @@ var
 begin
   X := 0;
   Y := 0;
-  P := Src;
-  E := Src + SrcLen;
+  P := Bron;
+  E := Bron + Bronlengte;
   while P + 1 < E do
   begin
     N := P[0];
@@ -2738,10 +2738,10 @@ begin
       for I := 0 to N - 1 do
         if Is4 then
         begin
-          if I and 1 = 0 then Put(C shr 4) else Put(C and $F);
+          if I and 1 = 0 then Plaats(C shr 4) else Plaats(C and $F);
         end
         else
-          Put(C);
+          Plaats(C);
     end
     else
       case C of
@@ -2759,10 +2759,10 @@ begin
           for I := 0 to C - 1 do
             if Is4 then
             begin
-              if I and 1 = 0 then Put(P[I shr 1] shr 4) else Put(P[I shr 1] and $F);
+              if I and 1 = 0 then Plaats(P[I shr 1] shr 4) else Plaats(P[I shr 1] and $F);
             end
             else
-              Put(P[I]);
+              Plaats(P[I]);
           if Is4 then N := (C + 1) div 2 else N := C;
           Inc(P, (N + 1) and not 1);
         end;
@@ -2774,32 +2774,32 @@ procedure TBitmap.LoadFromStream(Stream: TStream);
 var
   FH: TBitmapFileHeader;
   Start: Int64;
-  HdrSize: DWORD;
+  Kopgrootte: DWORD;
   BI: TBitmapInfoHeader;
   BC: TBitmapCoreHeader;
-  W, H, BPP, NColors, I, Y, SrcStride, SY: Integer;
-  TopDown: Boolean;
+  W, H, BPP, Kleurenaantal, I, Y, Bronstap, SY: Integer;
+  Bovenaf: Boolean;
   Pal: array[0..255] of TRGBQuad;
   Tri: array[0..255] of TRGBTriple;
   B: TZMBitmap;
-  Data: array of Byte;
-  DataLen: Int64;
-  Masks: array[0..2] of DWORD;
+  Gegevens: array of Byte;
+  Gegevenslengte: Int64;
+  Maskers: array[0..2] of DWORD;
   X: Integer;
   V: LongWord;
-  Row: PByte;
-  Core: Boolean;
+  Rij: PByte;
+  Kern: Boolean;
 begin
   Start := Stream.Position;
   Stream.ReadBuffer(FH, SizeOf(FH));
   if FH.bfType <> $4D42 then
     raise EInvalidGraphic.Create('Bitmap image is not valid');
-  Stream.ReadBuffer(HdrSize, 4);
-  Core := HdrSize = SizeOf(TBitmapCoreHeader);
+  Stream.ReadBuffer(Kopgrootte, 4);
+  Kern := Kopgrootte = SizeOf(TBitmapCoreHeader);
   FillChar(BI, SizeOf(BI), 0);
-  if Core then
+  if Kern then
   begin
-    BC.bcSize := HdrSize;
+    BC.bcSize := Kopgrootte;
     Stream.ReadBuffer(BC.bcWidth, SizeOf(BC) - 4);
     BI.biWidth := BC.bcWidth;
     BI.biHeight := BC.bcHeight;
@@ -2807,26 +2807,26 @@ begin
   end
   else
   begin
-    BI.biSize := HdrSize;
+    BI.biSize := Kopgrootte;
     Stream.ReadBuffer(BI.biWidth, SizeOf(BI) - 4);
-    if HdrSize > SizeOf(BI) then Stream.Seek(HdrSize - SizeOf(BI), soCurrent);
+    if Kopgrootte > SizeOf(BI) then Stream.Seek(Kopgrootte - SizeOf(BI), soCurrent);
   end;
   W := BI.biWidth;
   H := Abs(BI.biHeight);
-  TopDown := BI.biHeight < 0;
+  Bovenaf := BI.biHeight < 0;
   BPP := BI.biBitCount;
-  Masks[0] := 0; Masks[1] := 0; Masks[2] := 0;
-  if (BI.biCompression = BI_BITFIELDS) and (HdrSize = SizeOf(BI)) then
-    Stream.ReadBuffer(Masks, 12);
-  NColors := 0;
+  Maskers[0] := 0; Maskers[1] := 0; Maskers[2] := 0;
+  if (BI.biCompression = BI_BITFIELDS) and (Kopgrootte = SizeOf(BI)) then
+    Stream.ReadBuffer(Maskers, 12);
+  Kleurenaantal := 0;
   if BPP <= 8 then
   begin
-    NColors := BI.biClrUsed;
-    if (NColors = 0) or (NColors > 1 shl BPP) then NColors := 1 shl BPP;
-    if Core then
+    Kleurenaantal := BI.biClrUsed;
+    if (Kleurenaantal = 0) or (Kleurenaantal > 1 shl BPP) then Kleurenaantal := 1 shl BPP;
+    if Kern then
     begin
-      Stream.ReadBuffer(Tri, NColors * 3);
-      for I := 0 to NColors - 1 do
+      Stream.ReadBuffer(Tri, Kleurenaantal * 3);
+      for I := 0 to Kleurenaantal - 1 do
       begin
         Pal[I].rgbBlue := Tri[I].rgbtBlue;
         Pal[I].rgbGreen := Tri[I].rgbtGreen;
@@ -2834,7 +2834,7 @@ begin
       end;
     end
     else
-      Stream.ReadBuffer(Pal, NColors * 4);
+      Stream.ReadBuffer(Pal, Kleurenaantal * 4);
   end;
   if FH.bfOffBits <> 0 then Stream.Position := Start + FH.bfOffBits;
   if BPP = 4 then
@@ -2848,40 +2848,40 @@ begin
     begin
       B.NumColors := 1 shl BPP;
       for I := 0 to B.NumColors - 1 do
-        if I < NColors then
+        if I < Kleurenaantal then
           B.Colors[I] := (Pal[I].rgbRed shl 16) or (Pal[I].rgbGreen shl 8) or Pal[I].rgbBlue
         else
           B.Colors[I] := 0;
       B.ColorsChanged;
     end;
-    SrcStride := ((W * BPP + 31) div 32) * 4;
+    Bronstap := ((W * BPP + 31) div 32) * 4;
     if (BI.biCompression = BI_RLE8) or (BI.biCompression = BI_RLE4) then
     begin
-      DataLen := BI.biSizeImage;
-      if DataLen = 0 then DataLen := Stream.Size - Stream.Position;
-      SetLength(Data, DataLen);
-      if DataLen > 0 then Stream.ReadBuffer(Data[0], DataLen);
-      DecodeRLE(@Data[0], DataLen, B, BI.biCompression = BI_RLE4);
+      Gegevenslengte := BI.biSizeImage;
+      if Gegevenslengte = 0 then Gegevenslengte := Stream.Size - Stream.Position;
+      SetLength(Gegevens, Gegevenslengte);
+      if Gegevenslengte > 0 then Stream.ReadBuffer(Gegevens[0], Gegevenslengte);
+      DecodeRLE(@Gegevens[0], Gegevenslengte, B, BI.biCompression = BI_RLE4);
     end
     else
     begin
-      SetLength(Data, SrcStride);
+      SetLength(Gegevens, Bronstap);
       for Y := 0 to H - 1 do
       begin
-        if SrcStride > 0 then Stream.ReadBuffer(Data[0], SrcStride);
-        if TopDown then SY := Y else SY := H - 1 - Y;
-        Row := B.RowPtr(SY);
-        if (BPP = 16) and (BI.biCompression = BI_BITFIELDS) and (Masks[1] = $7E0) then
+        if Bronstap > 0 then Stream.ReadBuffer(Gegevens[0], Bronstap);
+        if Bovenaf then SY := Y else SY := H - 1 - Y;
+        Rij := B.RowPtr(SY);
+        if (BPP = 16) and (BI.biCompression = BI_BITFIELDS) and (Maskers[1] = $7E0) then
         begin
           { 5-6-5 -> 5-5-5 }
           for X := 0 to W - 1 do
           begin
-            V := PWord(@Data[X * 2])^;
-            PWord(Row + X * 2)^ := ((V shr 11) shl 10) or (((V shr 6) and $1F) shl 5) or (V and $1F);
+            V := PWord(@Gegevens[X * 2])^;
+            PWord(Rij + X * 2)^ := ((V shr 11) shl 10) or (((V shr 6) and $1F) shl 5) or (V and $1F);
           end;
         end
         else
-          Move(Data[0], Row^, Min(SrcStride, B.Stride));
+          Move(Gegevens[0], Rij^, Min(Bronstap, B.Stride));
       end;
     end;
   except
@@ -2903,7 +2903,7 @@ var
   B: TZMBitmap;
   FH: TBitmapFileHeader;
   BI: TBitmapInfoHeader;
-  NC, Y, I, Stride: Integer;
+  NC, Y, I, Stap: Integer;
   Q: TRGBQuad;
   Pad: array[0..3] of Byte;
 begin
@@ -2930,8 +2930,8 @@ begin
     BI.biBitCount := 24;
   BI.biPlanes := 1;
   BI.biCompression := BI_RGB;
-  Stride := ((BI.biWidth * BI.biBitCount + 31) div 32) * 4;
-  BI.biSizeImage := Stride * BI.biHeight;
+  Stap := ((BI.biWidth * BI.biBitCount + 31) div 32) * 4;
+  BI.biSizeImage := Stap * BI.biHeight;
   if BI.biBitCount <= 8 then NC := 1 shl BI.biBitCount else NC := 0;
   BI.biClrUsed := 0;
   FH.bfType := $4D42;
@@ -2953,22 +2953,22 @@ begin
   if B <> nil then
     for Y := B.Height - 1 downto 0 do
     begin
-      Stream.WriteBuffer(B.RowPtr(Y)^, Min(Stride, B.Stride));
-      if Stride > B.Stride then Stream.WriteBuffer(Pad, Stride - B.Stride);
+      Stream.WriteBuffer(B.RowPtr(Y)^, Min(Stap, B.Stride));
+      if Stap > B.Stride then Stream.WriteBuffer(Pad, Stap - B.Stride);
     end;
 end;
 
 procedure TBitmap.ReadData(Stream: TStream);
 var
-  Size: Longint;
+  Grootte: Longint;
   M: TMemoryStream;
 begin
-  Stream.Read(Size, SizeOf(Size));
+  Stream.Read(Grootte, SizeOf(Grootte));
   M := TMemoryStream.Create;
   try
-    M.CopyFrom(Stream, Size);
+    M.CopyFrom(Stream, Grootte);
     M.Position := 0;
-    if Size > 0 then LoadFromStream(M);
+    if Grootte > 0 then LoadFromStream(M);
   finally
     M.Free;
   end;
@@ -2977,14 +2977,14 @@ end;
 procedure TBitmap.WriteData(Stream: TStream);
 var
   M: TMemoryStream;
-  Size: Longint;
+  Grootte: Longint;
 begin
   M := TMemoryStream.Create;
   try
     SaveToStream(M);
-    Size := M.Size;
-    Stream.Write(Size, SizeOf(Size));
-    Stream.Write(M.Memory^, Size);
+    Grootte := M.Size;
+    Stream.Write(Grootte, SizeOf(Grootte));
+    Stream.Write(M.Memory^, Grootte);
   finally
     M.Free;
   end;
@@ -3226,15 +3226,15 @@ end;
 function TransparentStretchBlt(DstDC: HDC; DstX, DstY, DstW, DstH: Integer;
   SrcDC: HDC; SrcX, SrcY, SrcW, SrcH: Integer; MaskDC: HDC; MaskX, MaskY: Integer): Boolean;
 var
-  OldBk, OldText: COLORREF;
+  Oudachtergrond, Oudetekst: COLORREF;
 begin
-  OldBk := SetBkColor(DstDC, $FFFFFF);
-  OldText := SetTextColor(DstDC, 0);
+  Oudachtergrond := SetBkColor(DstDC, $FFFFFF);
+  Oudetekst := SetTextColor(DstDC, 0);
   StretchBlt(DstDC, DstX, DstY, DstW, DstH, SrcDC, SrcX, SrcY, SrcW, SrcH, SRCINVERT);
   StretchBlt(DstDC, DstX, DstY, DstW, DstH, MaskDC, MaskX, MaskY, SrcW, SrcH, SRCAND);
   StretchBlt(DstDC, DstX, DstY, DstW, DstH, SrcDC, SrcX, SrcY, SrcW, SrcH, SRCINVERT);
-  SetTextColor(DstDC, OldText);
-  SetBkColor(DstDC, OldBk);
+  SetTextColor(DstDC, Oudetekst);
+  SetBkColor(DstDC, Oudachtergrond);
   Result := True;
 end;
 

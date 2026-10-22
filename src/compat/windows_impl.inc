@@ -785,7 +785,7 @@ function DrawEdge(hdc: HDC; var qrc: TRect; edge: UINT; grfFlags: UINT): BOOL;
 var
   D: TZMDC;
   R: TRect;
-  procedure Line(Outer: Boolean; TL, BR: COLORREF);
+  procedure Regel(Buiten: Boolean; TL, BR: COLORREF);
   begin
     if grfFlags and BF_FLAT <> 0 then
     begin
@@ -805,10 +805,10 @@ begin
   D := GdiDC(hdc);
   if D = nil then Exit(False);
   R := qrc;
-  if edge and BDR_RAISEDOUTER <> 0 then Line(True, SysColors[COLOR_3DLIGHT], SysColors[COLOR_3DDKSHADOW])
-  else if edge and BDR_SUNKENOUTER <> 0 then Line(True, SysColors[COLOR_BTNSHADOW], SysColors[COLOR_BTNHIGHLIGHT]);
-  if edge and BDR_RAISEDINNER <> 0 then Line(False, SysColors[COLOR_BTNHIGHLIGHT], SysColors[COLOR_BTNSHADOW])
-  else if edge and BDR_SUNKENINNER <> 0 then Line(False, SysColors[COLOR_3DDKSHADOW], SysColors[COLOR_3DLIGHT]);
+  if edge and BDR_RAISEDOUTER <> 0 then Regel(True, SysColors[COLOR_3DLIGHT], SysColors[COLOR_3DDKSHADOW])
+  else if edge and BDR_SUNKENOUTER <> 0 then Regel(True, SysColors[COLOR_BTNSHADOW], SysColors[COLOR_BTNHIGHLIGHT]);
+  if edge and BDR_RAISEDINNER <> 0 then Regel(False, SysColors[COLOR_BTNHIGHLIGHT], SysColors[COLOR_BTNSHADOW])
+  else if edge and BDR_SUNKENINNER <> 0 then Regel(False, SysColors[COLOR_3DDKSHADOW], SysColors[COLOR_3DLIGHT]);
   if grfFlags and BF_MIDDLE <> 0 then GdiFillSolid(D, R, SysColors[COLOR_BTNFACE]);
   if grfFlags and BF_ADJUST <> 0 then qrc := R;
   Result := True;
@@ -1011,16 +1011,16 @@ end;
 function CreateBitmap(Width, Height: Integer; Planes, BitCount: Longint; Bits: Pointer): HBITMAP;
 var
   B: TZMBitmap;
-  Y, SrcStride: Integer;
+  Y, Bronstap: Integer;
 begin
   ZMInit;
   if not (BitCount in [1, 4, 8, 16, 24, 32]) then BitCount := 1;
   B := TZMBitmap.Create(Width, Height, BitCount);
   if Bits <> nil then
   begin
-    SrcStride := ((Width * BitCount + 15) div 16) * 2;   { DDB-rijen zijn WORD-uitgelijnd }
+    Bronstap := ((Width * BitCount + 15) div 16) * 2;   { DDB-rijen zijn WORD-uitgelijnd }
     for Y := 0 to Height - 1 do
-      Move((PByte(Bits) + Y * SrcStride)^, B.RowPtr(Y)^, Min(SrcStride, B.Stride));
+      Move((PByte(Bits) + Y * Bronstap)^, B.RowPtr(Y)^, Min(Bronstap, B.Stride));
   end;
   Result := B.Handle;
 end;
@@ -1050,42 +1050,42 @@ begin
 end;
 
 { kopieer DIB-bits (van onder naar boven, tenzij biHeight < 0) naar een bitmap }
-procedure CopyDIBIn(B: TZMBitmap; StartScan, NumScans: Integer; Bits: Pointer; const BI: TBitmapInfo; Usage: UINT; Pal: TZMPalette);
+procedure CopyDIBIn(B: TZMBitmap; Startscan, Aantalscans: Integer; Bits: Pointer; const BI: TBitmapInfo; Gebruik: UINT; Pal: TZMPalette);
 var
-  Src: TZMBitmap;
-  Y, SY, SrcStride, H, X: Integer;
-  TopDown: Boolean;
-  Row: PByte;
+  Bron: TZMBitmap;
+  Y, SY, Bronstap, H, X: Integer;
+  Bovenaf: Boolean;
+  Rij: PByte;
 begin
   if Bits = nil then Exit;
   H := Abs(BI.bmiHeader.biHeight);
-  TopDown := BI.bmiHeader.biHeight < 0;
-  SrcStride := ((BI.bmiHeader.biWidth * BI.bmiHeader.biBitCount + 31) div 32) * 4;
+  Bovenaf := BI.bmiHeader.biHeight < 0;
+  Bronstap := ((BI.bmiHeader.biWidth * BI.bmiHeader.biBitCount + 31) div 32) * 4;
   if (B.BPP = BI.bmiHeader.biBitCount) and (BI.bmiHeader.biCompression = BI_RGB) then
   begin
-    for Y := StartScan to Min(Integer(StartScan + NumScans), H) - 1 do
+    for Y := Startscan to Min(Integer(Startscan + Aantalscans), H) - 1 do
     begin
-      if TopDown then SY := Y else SY := H - 1 - Y;
+      if Bovenaf then SY := Y else SY := H - 1 - Y;
       if (SY < 0) or (SY >= B.Height) then Continue;
-      Row := PByte(Bits) + (Y - StartScan) * SrcStride;
-      Move(Row^, B.RowPtr(SY)^, Min(SrcStride, B.Stride));
+      Rij := PByte(Bits) + (Y - Startscan) * Bronstap;
+      Move(Rij^, B.RowPtr(SY)^, Min(Bronstap, B.Stride));
     end;
     Exit;
   end;
   { formaatconversie via een tijdelijke DIB }
-  Src := NewBitmapFromInfo(BI, Usage, Pal);
+  Bron := NewBitmapFromInfo(BI, Gebruik, Pal);
   try
-    for Y := StartScan to Min(Integer(StartScan + NumScans), H) - 1 do
+    for Y := Startscan to Min(Integer(Startscan + Aantalscans), H) - 1 do
     begin
-      if TopDown then SY := Y else SY := H - 1 - Y;
-      Row := PByte(Bits) + (Y - StartScan) * SrcStride;
-      if SY < Src.Height then Move(Row^, Src.RowPtr(SY)^, Min(SrcStride, Src.Stride));
+      if Bovenaf then SY := Y else SY := H - 1 - Y;
+      Rij := PByte(Bits) + (Y - Startscan) * Bronstap;
+      if SY < Bron.Height then Move(Rij^, Bron.RowPtr(SY)^, Min(Bronstap, Bron.Stride));
     end;
-    for Y := 0 to Min(B.Height, Src.Height) - 1 do
-      for X := 0 to Min(B.Width, Src.Width) - 1 do
-        B.SetNative(X, Y, B.RGBToNative(Src.NativeToRGB(Src.GetNative(X, Y))));
+    for Y := 0 to Min(B.Height, Bron.Height) - 1 do
+      for X := 0 to Min(B.Width, Bron.Width) - 1 do
+        B.SetNative(X, Y, B.RGBToNative(Bron.NativeToRGB(Bron.GetNative(X, Y))));
   finally
-    Src.Free;
+    Bron.Free;
   end;
 end;
 
@@ -1105,10 +1105,10 @@ function GetDIBits(DC: HDC; Bitmap: HBITMAP; StartScan, NumScans: UINT;
   Bits: Pointer; var BitInfo: TBitmapInfo; Usage: UINT): Integer;
 var
   B: TZMBitmap;
-  I, Y, SY, X, BC, DstStride, H: Integer;
+  I, Y, SY, X, BC, Doelstap, H: Integer;
   Q: PRGBQuad;
   Tmp: TZMBitmap;
-  TopDown: Boolean;
+  Bovenaf: Boolean;
 begin
   Result := 0;
   B := GdiBitmap(Bitmap);
@@ -1140,8 +1140,8 @@ begin
   if Bits = nil then Exit(B.Height);
   H := Abs(BitInfo.bmiHeader.biHeight);
   if H = 0 then H := B.Height;
-  TopDown := BitInfo.bmiHeader.biHeight < 0;
-  DstStride := ((B.Width * BC + 31) div 32) * 4;
+  Bovenaf := BitInfo.bmiHeader.biHeight < 0;
+  Doelstap := ((B.Width * BC + 31) div 32) * 4;
   Tmp := NewBitmapFromInfo(BitInfo, DIB_RGB_COLORS, nil);
   try
     for Y := 0 to Min(Tmp.Height, B.Height) - 1 do
@@ -1152,9 +1152,9 @@ begin
           Tmp.SetNative(X, Y, Tmp.RGBToNative(B.NativeToRGB(B.GetNative(X, Y))));
     for Y := StartScan to Min(Integer(StartScan + NumScans), H) - 1 do
     begin
-      if TopDown then SY := Y else SY := H - 1 - Y;
+      if Bovenaf then SY := Y else SY := H - 1 - Y;
       if SY >= Tmp.Height then Continue;
-      Move(Tmp.RowPtr(SY)^, (PByte(Bits) + (Y - StartScan) * DstStride)^, Min(DstStride, Tmp.Stride));
+      Move(Tmp.RowPtr(SY)^, (PByte(Bits) + (Y - StartScan) * Doelstap)^, Min(Doelstap, Tmp.Stride));
       Inc(Result);
     end;
   finally
@@ -1178,22 +1178,22 @@ function StretchDIBits(DC: HDC; DestX, DestY, DestWidth, DestHeight, SrcX, SrcY,
   Usage: UINT; Rop: DWORD): Integer;
 var
   D: TZMDC;
-  Src: TZMBitmap;
+  Bron: TZMBitmap;
   H: Integer;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(0);
-  Src := NewBitmapFromInfo(BitsInfo, Usage, D.St.Palette);
+  Bron := NewBitmapFromInfo(BitsInfo, Usage, D.St.Palette);
   try
     H := Abs(BitsInfo.bmiHeader.biHeight);
-    CopyDIBIn(Src, 0, H, Bits, BitsInfo, Usage, D.St.Palette);
+    CopyDIBIn(Bron, 0, H, Bits, BitsInfo, Usage, D.St.Palette);
     { DIB-brongecoördinaten zijn van onder naar boven bij DIB's die van onder naar boven lopen }
     if BitsInfo.bmiHeader.biHeight > 0 then
       SrcY := H - SrcY - SrcHeight;
-    GdiBltBitmap(D, DestX, DestY, DestWidth, DestHeight, Src, $FFFFFF, SrcX, SrcY,
+    GdiBltBitmap(D, DestX, DestY, DestWidth, DestHeight, Bron, $FFFFFF, SrcX, SrcY,
       SrcWidth, SrcHeight, Rop, True);
   finally
-    Src.Free;
+    Bron.Free;
   end;
   Result := DestHeight;
 end;
@@ -1359,19 +1359,19 @@ end;
 function GetNearestPaletteIndex(Palette: HPALETTE; Color: COLORREF): UINT;
 var
   P: TZMPalette;
-  I, D, Best: Integer;
+  I, D, Beste: Integer;
 begin
   P := GdiPalette(Palette);
   Result := CLR_INVALID;
   if (P = nil) or (P.Count = 0) then Exit;
-  Best := MaxInt;
+  Beste := MaxInt;
   for I := 0 to P.Count - 1 do
     with P.Entries[I] do
     begin
       D := Sqr(peRed - GetRValue(Color)) + Sqr(peGreen - GetGValue(Color)) + Sqr(peBlue - GetBValue(Color));
-      if D < Best then
+      if D < Beste then
       begin
-        Best := D;
+        Beste := D;
         Result := I;
       end;
     end;
@@ -1539,15 +1539,15 @@ function ExtTextOut(DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect;
   Str: PAnsiChar; Count: Longint; Dx: PInteger): BOOL;
 var
   D: TZMDC;
-  Clip, Opq: PRect;
+  Knipgebied, Opq: PRect;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  Clip := nil;
+  Knipgebied := nil;
   Opq := nil;
-  if (Rect <> nil) and (Options and ETO_CLIPPED <> 0) then Clip := Rect;
+  if (Rect <> nil) and (Options and ETO_CLIPPED <> 0) then Knipgebied := Rect;
   if (Rect <> nil) and (Options and ETO_OPAQUE <> 0) then Opq := Rect;
-  GdiTextOut(D, X, Y, Str, Count, Opq = nil, Clip, Opq);
+  GdiTextOut(D, X, Y, Str, Count, Opq = nil, Knipgebied, Opq);
   Result := True;
 end;
 
@@ -1813,24 +1813,24 @@ function ExtSelectClipRgn(DC: HDC; Region: HRGN; Mode: Integer): Integer;
 var
   D: TZMDC;
   G: TZMRegion;
-  Cur: TZMRects;
+  Huidig: TZMRects;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(ERROR);
   G := GdiRegion(Region);
   if Mode = RGN_COPY then Exit(SelectClipRgn(DC, Region));
   if G = nil then Exit(ERROR);
-  if D.St.HasClip then Cur := D.St.ClipRgn else Cur := DeviceAll(D);
+  if D.St.HasClip then Huidig := D.St.ClipRgn else Huidig := DeviceAll(D);
   case Mode of
-    RGN_AND: Cur := RectsIntersect(Cur, G.Rects);
-    RGN_OR: Cur := RectsUnion(Cur, G.Rects);
-    RGN_DIFF: Cur := RectsSubtract(Cur, G.Rects);
-    RGN_XOR: Cur := RectsUnion(RectsSubtract(Cur, G.Rects), RectsSubtract(G.Rects, Cur));
+    RGN_AND: Huidig := RectsIntersect(Huidig, G.Rects);
+    RGN_OR: Huidig := RectsUnion(Huidig, G.Rects);
+    RGN_DIFF: Huidig := RectsSubtract(Huidig, G.Rects);
+    RGN_XOR: Huidig := RectsUnion(RectsSubtract(Huidig, G.Rects), RectsSubtract(G.Rects, Huidig));
   end;
   D.St.HasClip := True;
-  D.St.ClipRgn := Cur;
+  D.St.ClipRgn := Huidig;
   D.InvalidateClip;
-  if Length(Cur) = 0 then Result := NULLREGION else Result := SIMPLEREGION;
+  if Length(Huidig) = 0 then Result := NULLREGION else Result := SIMPLEREGION;
 end;
 
 { logische -> apparaat(client)-coördinaten voor knipvierkanten }
@@ -1874,31 +1874,31 @@ end;
 function IntersectClipRect(DC: HDC; X1, Y1, X2, Y2: Integer): Integer;
 var
   D: TZMDC;
-  Cur: TZMRects;
+  Huidig: TZMRects;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(ERROR);
-  if D.St.HasClip then Cur := D.St.ClipRgn else Cur := DeviceAll(D);
-  Cur := RectsIntersectRect(Cur, LToDev(D, Types.Rect(X1, Y1, X2, Y2)));
+  if D.St.HasClip then Huidig := D.St.ClipRgn else Huidig := DeviceAll(D);
+  Huidig := RectsIntersectRect(Huidig, LToDev(D, Types.Rect(X1, Y1, X2, Y2)));
   D.St.HasClip := True;
-  D.St.ClipRgn := Cur;
+  D.St.ClipRgn := Huidig;
   D.InvalidateClip;
-  if Length(Cur) = 0 then Result := NULLREGION else Result := SIMPLEREGION;
+  if Length(Huidig) = 0 then Result := NULLREGION else Result := SIMPLEREGION;
 end;
 
 function ExcludeClipRect(DC: HDC; LeftRect, TopRect, RightRect, BottomRect: Integer): Integer;
 var
   D: TZMDC;
-  Cur: TZMRects;
+  Huidig: TZMRects;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(ERROR);
-  if D.St.HasClip then Cur := D.St.ClipRgn else Cur := DeviceAll(D);
-  Cur := RectsSubtractRect(Cur, LToDev(D, Types.Rect(LeftRect, TopRect, RightRect, BottomRect)));
+  if D.St.HasClip then Huidig := D.St.ClipRgn else Huidig := DeviceAll(D);
+  Huidig := RectsSubtractRect(Huidig, LToDev(D, Types.Rect(LeftRect, TopRect, RightRect, BottomRect)));
   D.St.HasClip := True;
-  D.St.ClipRgn := Cur;
+  D.St.ClipRgn := Huidig;
   D.InvalidateClip;
-  if Length(Cur) = 0 then Result := NULLREGION else Result := COMPLEXREGION;
+  if Length(Huidig) = 0 then Result := NULLREGION else Result := COMPLEXREGION;
 end;
 
 function OffsetClipRgn(DC: HDC; XOffset, YOffset: Integer): Integer;
@@ -2048,12 +2048,12 @@ type
 var
   RegClasses: array of TRegClass;
 
-function FindClass(const Name: string): Integer;
+function FindClass(const Naam: string): Integer;
 var
   I: Integer;
 begin
   for I := 0 to High(RegClasses) do
-    if SameText(RegClasses[I].Name, Name) then Exit(I);
+    if SameText(RegClasses[I].Name, Naam) then Exit(I);
   Result := -1;
 end;
 
@@ -2069,18 +2069,18 @@ var
   I: Integer;
   Proc: Pointer;
   W: TZMWindow;
-  Name, Txt: string;
+  Naam, Tkst: string;
 begin
-  Name := ClassNameStr(lpClassName);
-  I := FindClass(Name);
+  Naam := ClassNameStr(lpClassName);
+  I := FindClass(Naam);
   Proc := nil;
   if I >= 0 then Proc := RegClasses[I].WC.lpfnWndProc;
-  if lpWindowName <> nil then Txt := StrPas(lpWindowName) else Txt := '';
+  if lpWindowName <> nil then Tkst := StrPas(lpWindowName) else Tkst := '';
   if X = Integer($80000000) then X := 0;
   if Y = Integer($80000000) then Y := 0;
   if nWidth = Integer($80000000) then nWidth := 400;
   if nHeight = Integer($80000000) then nHeight := 300;
-  Result := ZMCreateWindow(dwExStyle, Name, Txt, dwStyle, X, Y, nWidth, nHeight, hWndParent,
+  Result := ZMCreateWindow(dwExStyle, Naam, Tkst, dwStyle, X, Y, nWidth, nHeight, hWndParent,
     PtrInt(hMenu), nil, Proc);
   W := ZMWindowObj(Result);
   if (W <> nil) and (I >= 0) then
@@ -2107,16 +2107,16 @@ end;
 function RegisterClass(const lpWndClass: TWndClass): ATOM;
 var
   I: Integer;
-  Name: string;
+  Naam: string;
 begin
-  Name := ClassNameStr(lpWndClass.lpszClassName);
-  I := FindClass(Name);
+  Naam := ClassNameStr(lpWndClass.lpszClassName);
+  I := FindClass(Naam);
   if I < 0 then
   begin
     I := Length(RegClasses);
     SetLength(RegClasses, I + 1);
   end;
-  RegClasses[I].Name := Name;
+  RegClasses[I].Name := Naam;
   RegClasses[I].WC := lpWndClass;
   Result := $C000 + I;
 end;
@@ -2587,16 +2587,16 @@ type
   end;
   PFindData = ^TFindData;
 
-function FindProc(Wnd: HWND; Data: Pointer): Boolean;
+function FindProc(Venster: HWND; Gegevens: Pointer): Boolean;
 var
   W: TZMWindow;
 begin
-  W := ZMWindowObj(Wnd);
+  W := ZMWindowObj(Venster);
   Result := True;
-  with PFindData(Data)^ do
+  with PFindData(Gegevens)^ do
     if (not UseCls or SameText(W.ClsName, Cls)) and (not UseTxt or (W.Text = Txt)) then
     begin
-      Found := Wnd;
+      Found := Venster;
       Result := False;
     end;
 end;

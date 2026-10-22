@@ -133,108 +133,108 @@ end;
 
 function PcLibDirs: TStringList;
 var
-  Paths: TStringList;
-  I, J: Integer;
-  PC: TStringList;
-  F: string;
+  Paden: TStringList;
+  Teller, Regelnr: Integer;
+  PcBestand: TStringList;
+  Bestandsnaam: string;
 begin
   Result := TStringList.Create;
-  Paths := TStringList.Create;
+  Paden := TStringList.Create;
   try
-    Paths.Delimiter := ':';
-    Paths.StrictDelimiter := True;
-    Paths.DelimitedText := GetEnvironmentVariable('PKG_CONFIG_PATH');
-    for I := 0 to Paths.Count - 1 do
+    Paden.Delimiter := ':';
+    Paden.StrictDelimiter := True;
+    Paden.DelimitedText := GetEnvironmentVariable('PKG_CONFIG_PATH');
+    for Teller := 0 to Paden.Count - 1 do
     begin
-      F := IncludeTrailingPathDelimiter(Paths[I]) + 'sdl3.pc';
-      if not FileExists(F) then Continue;
-      PC := TStringList.Create;
+      Bestandsnaam := IncludeTrailingPathDelimiter(Paden[Teller]) + 'sdl3.pc';
+      if not FileExists(Bestandsnaam) then Continue;
+      PcBestand := TStringList.Create;
       try
-        PC.LoadFromFile(F);
-        for J := 0 to PC.Count - 1 do
-          if Copy(PC[J], 1, 7) = 'libdir=' then
-            Result.Add(Copy(PC[J], 8, MaxInt));
+        PcBestand.LoadFromFile(Bestandsnaam);
+        for Regelnr := 0 to PcBestand.Count - 1 do
+          if Copy(PcBestand[Regelnr], 1, 7) = 'libdir=' then
+            Result.Add(Copy(PcBestand[Regelnr], 8, MaxInt));
       finally
-        PC.Free;
+        PcBestand.Free;
       end;
     end;
   finally
-    Paths.Free;
+    Paden.Free;
   end;
 end;
 
-function TryLoad(const Name: string): Boolean;
+function TryLoad(const Naam: string): Boolean;
 begin
-  if Name = '' then Exit(False);
-  Lib := LoadLibrary(Name);
+  if Naam = '' then Exit(False);
+  Lib := LoadLibrary(Naam);
   Result := Lib <> NilHandle;
 end;
 
 function SDL3_Load: Boolean;
 const
-  Names: array[0..4] of string = ('libSDL3.so.0', 'libSDL3.so', 'libSDL3.0.dylib',
+  Namen: array[0..4] of string = ('libSDL3.so.0', 'libSDL3.so', 'libSDL3.0.dylib',
     'libSDL3.dylib', 'SDL3.dll');
 var
-  I, J: Integer;
-  Dirs: TStringList;
-  Missing: string;
-  procedure Get(var P; const N: string);
+  Teller, Mapnr: Integer;
+  Mappen: TStringList;
+  Ontbreekt: string;
+  procedure Haal(var Adres; const Naam: string);
   begin
-    Pointer(P) := GetProcAddress(Lib, N);
-    if Pointer(P) = nil then Missing := Missing + ' ' + N;
+    Pointer(Adres) := GetProcAddress(Lib, Naam);
+    if Pointer(Adres) = nil then Ontbreekt := Ontbreekt + ' ' + Naam;
   end;
 begin
   if Lib <> NilHandle then Exit(True);
   Result := TryLoad(GetEnvironmentVariable('ZM_SDL3_LIB'));
-  for I := 0 to High(Names) do
-    if not Result then Result := TryLoad(Names[I]);
+  for Teller := 0 to High(Namen) do
+    if not Result then Result := TryLoad(Namen[Teller]);
   if not Result then
   begin
-    Dirs := PcLibDirs;
+    Mappen := PcLibDirs;
     try
-      for J := 0 to Dirs.Count - 1 do
-        for I := 0 to High(Names) do
+      for Mapnr := 0 to Mappen.Count - 1 do
+        for Teller := 0 to High(Namen) do
           if not Result then
-            Result := TryLoad(IncludeTrailingPathDelimiter(Dirs[J]) + Names[I]);
+            Result := TryLoad(IncludeTrailingPathDelimiter(Mappen[Mapnr]) + Namen[Teller]);
     finally
-      Dirs.Free;
+      Mappen.Free;
     end;
   end;
   if not Result then Exit;
-  Missing := '';
-  Get(SDL_Init, 'SDL_Init');
-  Get(SDL_Quit, 'SDL_Quit');
-  Get(SDL_GetError, 'SDL_GetError');
-  Get(SDL_SetHint, 'SDL_SetHint');
-  Get(SDL_CreateWindow, 'SDL_CreateWindow');
-  Get(SDL_DestroyWindow, 'SDL_DestroyWindow');
-  Get(SDL_SetWindowTitle, 'SDL_SetWindowTitle');
-  Get(SDL_SetWindowSize, 'SDL_SetWindowSize');
-  Get(SDL_ShowWindow, 'SDL_ShowWindow');
-  Get(SDL_CreateRenderer, 'SDL_CreateRenderer');
-  Get(SDL_DestroyRenderer, 'SDL_DestroyRenderer');
-  Get(SDL_SetRenderLogicalPresentation, 'SDL_SetRenderLogicalPresentation');
-  Get(SDL_SetRenderDrawColor, 'SDL_SetRenderDrawColor');
-  Get(SDL_RenderClear, 'SDL_RenderClear');
-  Get(SDL_RenderTexture, 'SDL_RenderTexture');
-  Get(SDL_RenderPresent, 'SDL_RenderPresent');
-  Get(SDL_CreateTexture, 'SDL_CreateTexture');
-  Get(SDL_DestroyTexture, 'SDL_DestroyTexture');
-  Get(SDL_SetTextureScaleMode, 'SDL_SetTextureScaleMode');
-  Get(SDL_UpdateTexture, 'SDL_UpdateTexture');
-  Get(SDL_ConvertEventToRenderCoordinates, 'SDL_ConvertEventToRenderCoordinates');
-  Get(SDL_PollEvent, 'SDL_PollEvent');
-  Get(SDL_WaitEventTimeout, 'SDL_WaitEventTimeout');
-  Get(SDL_GetTicks, 'SDL_GetTicks');
-  Get(SDL_GetPerformanceCounter, 'SDL_GetPerformanceCounter');
-  Get(SDL_GetPerformanceFrequency, 'SDL_GetPerformanceFrequency');
-  Get(SDL_Delay, 'SDL_Delay');
-  Get(SDL_StartTextInput, 'SDL_StartTextInput');
-  Get(SDL_CreateSystemCursor, 'SDL_CreateSystemCursor');
-  Get(SDL_SetCursor, 'SDL_SetCursor');
-  Get(SDL_ShowCursor, 'SDL_ShowCursor');
-  Get(SDL_HideCursor, 'SDL_HideCursor');
-  if Missing <> '' then
+  Ontbreekt := '';
+  Haal(SDL_Init, 'SDL_Init');
+  Haal(SDL_Quit, 'SDL_Quit');
+  Haal(SDL_GetError, 'SDL_GetError');
+  Haal(SDL_SetHint, 'SDL_SetHint');
+  Haal(SDL_CreateWindow, 'SDL_CreateWindow');
+  Haal(SDL_DestroyWindow, 'SDL_DestroyWindow');
+  Haal(SDL_SetWindowTitle, 'SDL_SetWindowTitle');
+  Haal(SDL_SetWindowSize, 'SDL_SetWindowSize');
+  Haal(SDL_ShowWindow, 'SDL_ShowWindow');
+  Haal(SDL_CreateRenderer, 'SDL_CreateRenderer');
+  Haal(SDL_DestroyRenderer, 'SDL_DestroyRenderer');
+  Haal(SDL_SetRenderLogicalPresentation, 'SDL_SetRenderLogicalPresentation');
+  Haal(SDL_SetRenderDrawColor, 'SDL_SetRenderDrawColor');
+  Haal(SDL_RenderClear, 'SDL_RenderClear');
+  Haal(SDL_RenderTexture, 'SDL_RenderTexture');
+  Haal(SDL_RenderPresent, 'SDL_RenderPresent');
+  Haal(SDL_CreateTexture, 'SDL_CreateTexture');
+  Haal(SDL_DestroyTexture, 'SDL_DestroyTexture');
+  Haal(SDL_SetTextureScaleMode, 'SDL_SetTextureScaleMode');
+  Haal(SDL_UpdateTexture, 'SDL_UpdateTexture');
+  Haal(SDL_ConvertEventToRenderCoordinates, 'SDL_ConvertEventToRenderCoordinates');
+  Haal(SDL_PollEvent, 'SDL_PollEvent');
+  Haal(SDL_WaitEventTimeout, 'SDL_WaitEventTimeout');
+  Haal(SDL_GetTicks, 'SDL_GetTicks');
+  Haal(SDL_GetPerformanceCounter, 'SDL_GetPerformanceCounter');
+  Haal(SDL_GetPerformanceFrequency, 'SDL_GetPerformanceFrequency');
+  Haal(SDL_Delay, 'SDL_Delay');
+  Haal(SDL_StartTextInput, 'SDL_StartTextInput');
+  Haal(SDL_CreateSystemCursor, 'SDL_CreateSystemCursor');
+  Haal(SDL_SetCursor, 'SDL_SetCursor');
+  Haal(SDL_ShowCursor, 'SDL_ShowCursor');
+  Haal(SDL_HideCursor, 'SDL_HideCursor');
+  if Ontbreekt <> '' then
   begin
     UnloadLibrary(Lib);
     Lib := NilHandle;

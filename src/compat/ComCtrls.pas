@@ -416,12 +416,12 @@ end;
 
 procedure TCustomTabControl.LayoutTabs;
 var
-  I, X, Row, W, H, MaxW, DC: Integer;
-  RowStart: array of Integer;
-  Widths: array of Integer;
+  I, X, Rij, W, H, Maxbreedte, DC: Integer;
+  Rijstart: array of Integer;
+  Breedtes: array of Integer;
   C: TCanvas;
-  Shift, ActRow, J, K, Extra, N: Integer;
-  RowOf: array of Integer;
+  Schakel, Actierij, J, K, Extra, N: Integer;
+  Rijvan: array of Integer;
 begin
   FRectsValid := True;
   SetLength(FRects, FTabs.Count);
@@ -435,10 +435,10 @@ begin
   try
     C.Handle := DC;
     C.Font := Font;
-    SetLength(Widths, FTabs.Count);
+    SetLength(Breedtes, FTabs.Count);
     for I := 0 to FTabs.Count - 1 do
-      if FTabWidth > 0 then Widths[I] := FTabWidth
-      else Widths[I] := C.TextWidth(FTabs[I]) + 12;
+      if FTabWidth > 0 then Breedtes[I] := FTabWidth
+      else Breedtes[I] := C.TextWidth(FTabs[I]) + 12;
     H := FTabHeight;
     if H <= 0 then H := C.TextHeight('Ag') + 5;
     C.Handle := 0;
@@ -446,23 +446,23 @@ begin
     ReleaseDC(0, DC);
     C.Free;
   end;
-  MaxW := Width - 4;
-  SetLength(RowOf, FTabs.Count);
-  Row := 0;
+  Maxbreedte := Width - 4;
+  SetLength(Rijvan, FTabs.Count);
+  Rij := 0;
   X := 0;
   for I := 0 to FTabs.Count - 1 do
   begin
-    W := Widths[I];
-    if FMultiLine and (X > 0) and (X + W > MaxW) then
+    W := Breedtes[I];
+    if FMultiLine and (X > 0) and (X + W > Maxbreedte) then
     begin
-      Inc(Row);
+      Inc(Rij);
       X := 0;
     end;
-    RowOf[I] := Row;
+    Rijvan[I] := Rij;
     FRects[I] := Rect(2 + X, 0, 2 + X + W, H);
     Inc(X, W);
   end;
-  FRows := Row + 1;
+  FRows := Rij + 1;
   { rijen over de volle breedte uitrekken (niet ongelijk) bij meerdere regels }
   if FMultiLine and (FRows > 1) and not FRaggedRight then
     for K := 0 to FRows - 1 do
@@ -470,35 +470,35 @@ begin
       N := 0;
       X := 0;
       for I := 0 to FTabs.Count - 1 do
-        if RowOf[I] = K then
+        if Rijvan[I] = K then
         begin
           Inc(N);
           X := FRects[I].Right - 2;
         end;
       if N = 0 then Continue;
-      Extra := MaxW - X;
+      Extra := Maxbreedte - X;
       J := 0;
-      Shift := 0;
+      Schakel := 0;
       for I := 0 to FTabs.Count - 1 do
-        if RowOf[I] = K then
+        if Rijvan[I] = K then
         begin
-          FRects[I].Left := FRects[I].Left + Shift;
-          Inc(Shift, Extra div N + Ord(J < Extra mod N));
-          FRects[I].Right := FRects[I].Right + Shift;
+          FRects[I].Left := FRects[I].Left + Schakel;
+          Inc(Schakel, Extra div N + Ord(J < Extra mod N));
+          FRects[I].Right := FRects[I].Right + Schakel;
           Inc(J);
         end;
     end;
   { de rij van het geselecteerde tabblad wordt naast het clientgebied geplaatst (onderste rij) }
-  ActRow := FRows - 1;
-  if (FTabIndex >= 0) and (FTabIndex < FTabs.Count) then ActRow := RowOf[FTabIndex];
+  Actierij := FRows - 1;
+  if (FTabIndex >= 0) and (FTabIndex < FTabs.Count) then Actierij := Rijvan[FTabIndex];
   for I := 0 to FTabs.Count - 1 do
   begin
-    K := RowOf[I];
-    if K = ActRow then K := FRows - 1
-    else if K > ActRow then Dec(K);
+    K := Rijvan[I];
+    if K = Actierij then K := FRows - 1
+    else if K > Actierij then Dec(K);
     OffsetRect(FRects[I], 0, 2 + K * H);
   end;
-  SetLength(RowStart, 0);
+  SetLength(Rijstart, 0);
 end;
 
 function TCustomTabControl.TabRect(Index: Integer): TRect;
@@ -510,21 +510,21 @@ end;
 
 function TCustomTabControl.GetDisplayRect: TRect;
 var
-  Top: Integer;
+  Boven: Integer;
 begin
   if not FRectsValid then LayoutTabs;
   if FTabs.Count > 0 then
-    Top := FRects[0].Bottom + (FRows - 1) * 0
+    Boven := FRects[0].Bottom + (FRows - 1) * 0
   else
-    Top := 0;
+    Boven := 0;
   if FTabs.Count > 0 then
   begin
-    Top := 0;
+    Boven := 0;
     if Length(FRects) > 0 then
-      Top := FRects[0].Bottom;
-    Top := 2 + FRows * (FRects[0].Bottom - FRects[0].Top);
+      Boven := FRects[0].Bottom;
+    Boven := 2 + FRows * (FRects[0].Bottom - FRects[0].Top);
   end;
-  Result := Rect(4, Top + 4, Width - 4, Height - 4);
+  Result := Rect(4, Boven + 4, Width - 4, Height - 4);
   if FTabs.Count = 0 then Result.Top := 6;
 end;
 
@@ -586,8 +586,8 @@ procedure TCustomTabControl.PaintWindow(DC: HDC);
 var
   I: Integer;
   R, DR: TRect;
-  Active: Boolean;
-  Order: array of Integer;
+  Actief: Boolean;
+  Volgorde: array of Integer;
 begin
   if not FRectsValid then LayoutTabs;
   FCanvas.Handle := DC;
@@ -602,13 +602,13 @@ begin
     ZMFrame3D(FCanvas, DR, clBtnHighlight, cl3DDkShadow);
     InflateRect(DR, -1, -1);
     ZMFrame3D(FCanvas, DR, cl3DLight, clBtnShadow);
-    SetLength(Order, FTabs.Count);
-    for I := 0 to FTabs.Count - 1 do Order[I] := I;
+    SetLength(Volgorde, FTabs.Count);
+    for I := 0 to FTabs.Count - 1 do Volgorde[I] := I;
     for I := 0 to FTabs.Count - 1 do
     begin
       R := FRects[I];
-      Active := I = FTabIndex;
-      if Active then
+      Actief := I = FTabIndex;
+      if Actief then
       begin
         InflateRect(R, 2, 2);
         Inc(R.Bottom, 0);
@@ -627,7 +627,7 @@ begin
       FCanvas.Pen.Color := clBtnShadow;
       FCanvas.MoveTo(R.Right - 2, R.Top + 2);
       FCanvas.LineTo(R.Right - 2, R.Bottom);
-      if Active then
+      if Actief then
       begin
         { samenvoegen met het kaderlijn van het clientgebied }
         FCanvas.Pen.Color := clBtnFace;
@@ -641,14 +641,14 @@ begin
       begin
         FCanvas.Brush.Color := clBtnFace;
         FCanvas.Font := Font;
-        DrawTab(I, R, Active);
+        DrawTab(I, R, Actief);
       end
       else
       begin
         FCanvas.Brush.Style := bsClear;
         DrawText(FCanvas.Handle, PChar(FTabs[I]), Length(FTabs[I]), R,
           DT_CENTER or DT_VCENTER or DT_SINGLELINE);
-        if Active and Focused then
+        if Actief and Focused then
         begin
           FCanvas.Brush.Style := bsSolid;
           FCanvas.DrawFocusRect(R);

@@ -19,7 +19,7 @@ const
 var
   AsyncifyStack: array[0..StackGrootte - 1] of Byte;
 
-procedure zm_set_async_buffer(Buf: Pointer; Size: Integer); external 'zm' name 'set_async_buffer';
+procedure zm_set_async_buffer(Geheugen: Pointer; Grootte: Integer); external 'zm' name 'set_async_buffer';
 
 initialization
   zm_set_async_buffer(@AsyncifyStack[0], SizeOf(AsyncifyStack));

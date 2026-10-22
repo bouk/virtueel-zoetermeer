@@ -11,9 +11,9 @@ interface
 const
   ZM_HANDLE_BASE = $10000;
 
-function ZMAllocHandle(Obj: TObject): System.THandle;
-procedure ZMFreeHandle(H: System.THandle);
-function ZMHandleObj(H: System.THandle): TObject;
+function ZMAllocHandle(Voorwerp: TObject): System.THandle;
+procedure ZMFreeHandle(Greep: System.THandle);
+function ZMHandleObj(Greep: System.THandle): TObject;
 
 implementation
 
@@ -22,43 +22,43 @@ var
   FreeList: array of Integer;
   FreeCount: Integer;
 
-function ZMAllocHandle(Obj: TObject): System.THandle;
+function ZMAllocHandle(Voorwerp: TObject): System.THandle;
 var
-  I: Integer;
+  Index: Integer;
 begin
   if FreeCount > 0 then
   begin
     Dec(FreeCount);
-    I := FreeList[FreeCount];
+    Index := FreeList[FreeCount];
   end
   else
   begin
-    I := Length(Table);
-    SetLength(Table, I + 1);
+    Index := Length(Table);
+    SetLength(Table, Index + 1);
   end;
-  Table[I] := Obj;
-  Result := ZM_HANDLE_BASE + I;
+  Table[Index] := Voorwerp;
+  Result := ZM_HANDLE_BASE + Index;
 end;
 
-procedure ZMFreeHandle(H: System.THandle);
+procedure ZMFreeHandle(Greep: System.THandle);
 var
-  I: Integer;
+  Index: Integer;
 begin
-  I := Integer(H) - ZM_HANDLE_BASE;
-  if (I < 0) or (I >= Length(Table)) or (Table[I] = nil) then Exit;
-  Table[I] := nil;
+  Index := Integer(Greep) - ZM_HANDLE_BASE;
+  if (Index < 0) or (Index >= Length(Table)) or (Table[Index] = nil) then Exit;
+  Table[Index] := nil;
   if FreeCount >= Length(FreeList) then SetLength(FreeList, FreeCount * 2 + 16);
-  FreeList[FreeCount] := I;
+  FreeList[FreeCount] := Index;
   Inc(FreeCount);
 end;
 
-function ZMHandleObj(H: System.THandle): TObject;
+function ZMHandleObj(Greep: System.THandle): TObject;
 var
-  I: Integer;
+  Index: Integer;
 begin
-  I := Integer(H) - ZM_HANDLE_BASE;
-  if (I < 0) or (I >= Length(Table)) then Exit(nil);
-  Result := Table[I];
+  Index := Integer(Greep) - ZM_HANDLE_BASE;
+  if (Index < 0) or (Index >= Length(Table)) then Exit(nil);
+  Result := Table[Index];
 end;
 
 end.

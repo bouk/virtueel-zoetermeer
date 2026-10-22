@@ -765,29 +765,29 @@ var
   TaskFirstWindow: HWnd = 0;
   TaskWindowList: PTaskWindow = nil;
 
-function DoDisableWindow(Window: HWnd; Data: Pointer): Boolean;
+function DoDisableWindow(Vensterobject: HWnd; Gegevens: Pointer): Boolean;
 var
   P: PTaskWindow;
 begin
-  if (Window <> TaskActiveWindow) and IsWindowVisible(Window) and IsWindowEnabled(Window) then
+  if (Vensterobject <> TaskActiveWindow) and IsWindowVisible(Vensterobject) and IsWindowEnabled(Vensterobject) then
   begin
     New(P);
     P^.Next := TaskWindowList;
-    P^.Window := Window;
+    P^.Window := Vensterobject;
     TaskWindowList := P;
-    EnableWindow(Window, False);
+    EnableWindow(Vensterobject, False);
   end;
   Result := True;
 end;
 
 function DisableTaskWindows(ActiveWindow: HWnd): Pointer;
 var
-  SaveActiveWindow: HWND;
-  SaveWindowList: Pointer;
+  Bewaaractievenster: HWND;
+  Bewaarvensterlijst: Pointer;
 begin
   Result := nil;
-  SaveActiveWindow := TaskActiveWindow;
-  SaveWindowList := TaskWindowList;
+  Bewaaractievenster := TaskActiveWindow;
+  Bewaarvensterlijst := TaskWindowList;
   TaskActiveWindow := ActiveWindow;
   TaskWindowList := nil;
   try
@@ -797,8 +797,8 @@ begin
     EnableTaskWindows(TaskWindowList);
     raise;
   end;
-  TaskWindowList := SaveWindowList;
-  TaskActiveWindow := SaveActiveWindow;
+  TaskWindowList := Bewaarvensterlijst;
+  TaskActiveWindow := Bewaaractievenster;
 end;
 
 procedure EnableTaskWindows(WindowList: Pointer);
@@ -818,11 +818,11 @@ end;
 
 type
   TReaderHelper = class
-    procedure PropertyNotFound(Reader: TReader; Instance: TPersistent; var PropName: string;
-      IsPath: Boolean; var Handled, Skip: Boolean);
-    procedure FindMethod(Reader: TReader; const MethodName: string; var Address: Pointer;
-      var Error: Boolean);
-    procedure ReaderError(Reader: TReader; const Message: string; var Handled: Boolean);
+    procedure PropertyNotFound(Lezer: TReader; Exemplaar: TPersistent; var Eigenschapsnaam: string;
+      IsPad: Boolean; var Afgehandeld, Overslaan: Boolean);
+    procedure FindMethod(Lezer: TReader; const Methodenaam: string; var Adres: Pointer;
+      var Fout: Boolean);
+    procedure ReaderError(Lezer: TReader; const Bericht: string; var Afgehandeld: Boolean);
   end;
 
 var
@@ -833,50 +833,50 @@ begin
   Result := GetEnvironmentVariable('ZM_DEBUG') <> '';
 end;
 
-procedure TReaderHelper.PropertyNotFound(Reader: TReader; Instance: TPersistent; var PropName: string;
-  IsPath: Boolean; var Handled, Skip: Boolean);
+procedure TReaderHelper.PropertyNotFound(Lezer: TReader; Exemplaar: TPersistent; var Eigenschapsnaam: string;
+  IsPad: Boolean; var Afgehandeld, Overslaan: Boolean);
 begin
   if DebugOn then
-    WriteLn(StdErr, 'DFM: onbekende eigenschap ', Instance.ClassName, '.', PropName, ' (overgeslagen)');
-  Skip := True;
-  Handled := True;
+    WriteLn(StdErr, 'DFM: onbekende eigenschap ', Exemplaar.ClassName, '.', Eigenschapsnaam, ' (overgeslagen)');
+  Overslaan := True;
+  Afgehandeld := True;
 end;
 
-procedure TReaderHelper.FindMethod(Reader: TReader; const MethodName: string; var Address: Pointer;
-  var Error: Boolean);
+procedure TReaderHelper.FindMethod(Lezer: TReader; const Methodenaam: string; var Adres: Pointer;
+  var Fout: Boolean);
 begin
-  if Error then
+  if Fout then
   begin
-    WriteLn(StdErr, 'DFM: gebeurtenishandler ', MethodName, ' niet gevonden (gepubliceerde methode ontbreekt)');
-    Error := False;
+    WriteLn(StdErr, 'DFM: gebeurtenishandler ', Methodenaam, ' niet gevonden (gepubliceerde methode ontbreekt)');
+    Fout := False;
   end;
 end;
 
-procedure TReaderHelper.ReaderError(Reader: TReader; const Message: string; var Handled: Boolean);
+procedure TReaderHelper.ReaderError(Lezer: TReader; const Bericht: string; var Afgehandeld: Boolean);
 begin
-  WriteLn(StdErr, 'DFM: ', Message);
-  Handled := True;
+  WriteLn(StdErr, 'DFM: ', Bericht);
+  Afgehandeld := True;
 end;
 
-function LoadFormResource(Instance: TComponent; AClass: TClass): Boolean;
+function LoadFormResource(Exemplaar: TComponent; Aklasse: TClass): Boolean;
 var
-  Data: Pointer;
-  Size: Integer;
+  Gegevens: Pointer;
+  Grootte: Integer;
   MS: TMemoryStream;
   R: TReader;
 begin
   Result := False;
-  if not ZMLoadExeResource(UpperCase(AClass.ClassName), 10, Data, Size) then Exit;
+  if not ZMLoadExeResource(UpperCase(Aklasse.ClassName), 10, Gegevens, Grootte) then Exit;
   MS := TMemoryStream.Create;
   try
-    MS.WriteBuffer(Data^, Size);
+    MS.WriteBuffer(Gegevens^, Grootte);
     MS.Position := 0;
     R := TReader.Create(MS, 4096);
     try
       R.OnPropertyNotFound := ReaderHelper.PropertyNotFound;
       R.OnFindMethod := ReaderHelper.FindMethod;
       R.OnError := ReaderHelper.ReaderError;
-      R.ReadRootComponent(Instance);
+      R.ReadRootComponent(Exemplaar);
     finally
       R.Free;
     end;
@@ -1133,29 +1133,29 @@ end;
 
 procedure TCustomForm.Loaded;
 var
-  Control: TWinControl;
+  Besturing: TWinControl;
 begin
   inherited Loaded;
   if ActiveControl <> nil then
   begin
-    Control := ActiveControl;
+    Besturing := ActiveControl;
     FActiveControl := nil;
-    if Control.CanFocus then SetActiveControl(Control);
+    if Besturing.CanFocus then SetActiveControl(Besturing);
   end;
 end;
 
 procedure TCustomForm.ReadState(Reader: TReader);
 var
-  NewTextHeight: Integer;
-  Scaled: Boolean;
+  Nieuwetekstgrootte: Integer;
+  Geschaald: Boolean;
 begin
   DisableAlign;
   try
     FTextHeight := 0;
     inherited ReadState(Reader);
-    NewTextHeight := GetTextHeight;
-    Scaled := FScaled;
-    if (FTextHeight <> 0) and (FTextHeight <> NewTextHeight) and Scaled then ;
+    Nieuwetekstgrootte := GetTextHeight;
+    Geschaald := FScaled;
+    if (FTextHeight <> 0) and (FTextHeight <> Nieuwetekstgrootte) and Geschaald then ;
   finally
     EnableAlign;
   end;
@@ -1333,17 +1333,17 @@ end;
 
 function TCustomForm.NCInsets: TRect;
 var
-  Params: TCreateParams;
+  Parameters: TCreateParams;
   B: Integer;
 begin
-  CreateParams(Params);
+  CreateParams(Parameters);
   B := 0;
-  if Params.Style and WS_THICKFRAME <> 0 then B := 4
-  else if (Params.Style and WS_DLGFRAME <> 0) or (Params.ExStyle and WS_EX_DLGMODALFRAME <> 0) then B := 3
-  else if Params.Style and WS_BORDER <> 0 then B := 1;
-  if Params.ExStyle and WS_EX_CLIENTEDGE <> 0 then Inc(B, 2);
+  if Parameters.Style and WS_THICKFRAME <> 0 then B := 4
+  else if (Parameters.Style and WS_DLGFRAME <> 0) or (Parameters.ExStyle and WS_EX_DLGMODALFRAME <> 0) then B := 3
+  else if Parameters.Style and WS_BORDER <> 0 then B := 1;
+  if Parameters.ExStyle and WS_EX_CLIENTEDGE <> 0 then Inc(B, 2);
   Result := Rect(B, B, B, B);
-  if Params.Style and WS_CAPTION = WS_CAPTION then Inc(Result.Top, 19);
+  if Parameters.Style and WS_CAPTION = WS_CAPTION then Inc(Result.Top, 19);
 end;
 
 function TCustomForm.GetClientRect: TRect;
@@ -1361,8 +1361,8 @@ end;
 
 procedure TCustomForm.CreateParams(var Params: TCreateParams);
 var
-  Icons: TBorderIcons;
-  CreateStyle: TFormBorderStyle;
+  Pictogrammen: TBorderIcons;
+  Maakstijl: TFormBorderStyle;
 begin
   inherited CreateParams(Params);
   with Params do
@@ -1375,10 +1375,10 @@ begin
     end;
     WindowClass.style := CS_DBLCLKS;
     if FFormStyle = fsStayOnTop then ExStyle := ExStyle or WS_EX_TOPMOST;
-    CreateStyle := FBorderStyle;
+    Maakstijl := FBorderStyle;
     Style := Style or WS_CLIPCHILDREN;
     if Parent = nil then
-      case CreateStyle of
+      case Maakstijl of
         bsNone:
           Style := Style or WS_POPUP;
         bsSingle, bsToolWindow:
@@ -1391,25 +1391,25 @@ begin
             ExStyle := ExStyle or WS_EX_DLGMODALFRAME or WS_EX_WINDOWEDGE;
           end;
       end;
-    if CreateStyle in [bsToolWindow, bsSizeToolWin] then ExStyle := ExStyle or WS_EX_TOOLWINDOW;
-    Icons := FBorderIcons;
-    case CreateStyle of
-      bsNone: Icons := [];
-      bsDialog: Icons := Icons * [biSystemMenu, biHelp];
-      bsToolWindow, bsSizeToolWin: Icons := Icons * [biSystemMenu];
+    if Maakstijl in [bsToolWindow, bsSizeToolWin] then ExStyle := ExStyle or WS_EX_TOOLWINDOW;
+    Pictogrammen := FBorderIcons;
+    case Maakstijl of
+      bsNone: Pictogrammen := [];
+      bsDialog: Pictogrammen := Pictogrammen * [biSystemMenu, biHelp];
+      bsToolWindow, bsSizeToolWin: Pictogrammen := Pictogrammen * [biSystemMenu];
     end;
-    if CreateStyle in [bsSingle, bsSizeable, bsNone] then
+    if Maakstijl in [bsSingle, bsSizeable, bsNone] then
     begin
-      if (FormStyle <> fsMDIChild) or (biSystemMenu in Icons) then
+      if (FormStyle <> fsMDIChild) or (biSystemMenu in Pictogrammen) then
       begin
-        if biMinimize in Icons then Style := Style or WS_MINIMIZEBOX;
-        if biMaximize in Icons then Style := Style or WS_MAXIMIZEBOX;
+        if biMinimize in Pictogrammen then Style := Style or WS_MINIMIZEBOX;
+        if biMaximize in Pictogrammen then Style := Style or WS_MAXIMIZEBOX;
       end;
       if FWindowState = wsMaximized then Style := Style or WS_MAXIMIZE;
     end
     else
       FWindowState := wsNormal;
-    if biSystemMenu in Icons then Style := Style or WS_SYSMENU;
+    if biSystemMenu in Pictogrammen then Style := Style or WS_SYSMENU;
   end;
 end;
 
@@ -1629,13 +1629,13 @@ end;
 
 procedure TCustomForm.SetWindowFocus;
 var
-  FocusHandle: HWnd;
+  Focusvenster: HWnd;
 begin
   if (FActiveControl <> nil) and FActiveControl.HandleAllocated and FActiveControl.CanFocus then
-    FocusHandle := FActiveControl.Handle
+    Focusvenster := FActiveControl.Handle
   else
-    FocusHandle := Handle;
-  if FocusHandle <> 0 then Windows.SetFocus(FocusHandle);
+    Focusvenster := Handle;
+  if Focusvenster <> 0 then Windows.SetFocus(Focusvenster);
 end;
 
 procedure TCustomForm.SetActiveControl(Control: TWinControl);
@@ -1664,17 +1664,17 @@ end;
 
 procedure TCustomForm.FocusControl(Control: TWinControl);
 var
-  WasActive: Boolean;
+  Wasactief: Boolean;
 begin
-  WasActive := FActive;
+  Wasactief := FActive;
   ActiveControl := Control;
-  if not WasActive then SetFocus;
+  if not Wasactief then SetFocus;
 end;
 
 function TCustomForm.SetFocusedControl(Control: TWinControl): Boolean;
 var
-  FocusHandle: HWnd;
-  TempControl: TWinControl;
+  Focusvenster: HWnd;
+  Tijdelijkbesturing: TWinControl;
 begin
   Result := False;
   Inc(FocusCount);
@@ -1695,17 +1695,17 @@ begin
   begin
     while (FFocusedControl <> nil) and not FFocusedControl.ContainsControl(Control) do
     begin
-      FocusHandle := FFocusedControl.Handle;
-      TempControl := FFocusedControl;
+      Focusvenster := FFocusedControl.Handle;
+      Tijdelijkbesturing := FFocusedControl;
       FFocusedControl := FFocusedControl.Parent;
-      TempControl.Perform(CM_EXIT, 0, 0);
-      if (FocusHandle <> 0) and (GetFocus <> FocusHandle) then Exit;
+      Tijdelijkbesturing.Perform(CM_EXIT, 0, 0);
+      if (Focusvenster <> 0) and (GetFocus <> Focusvenster) then Exit;
     end;
     while FFocusedControl <> Control do
     begin
-      TempControl := Control;
-      while TempControl.Parent <> FFocusedControl do TempControl := TempControl.Parent;
-      FFocusedControl := TempControl;
+      Tijdelijkbesturing := Control;
+      while Tijdelijkbesturing.Parent <> FFocusedControl do Tijdelijkbesturing := Tijdelijkbesturing.Parent;
+      FFocusedControl := Tijdelijkbesturing;
       FFocusedControl.Perform(CM_ENTER, 0, 0);
     end;
   end;
@@ -1829,23 +1829,23 @@ end;
 
 procedure TCustomForm.Close;
 var
-  CloseAction: TCloseAction;
+  Sluitactie: TCloseAction;
 begin
   if fsModal in FFormState then
     ModalResult := mrCancel
   else if CloseQuery then
   begin
     if FormStyle = fsMDIChild then
-      CloseAction := caMinimize
+      Sluitactie := caMinimize
     else
-      CloseAction := caHide;
-    DoClose(CloseAction);
-    if CloseAction <> caNone then
+      Sluitactie := caHide;
+    DoClose(Sluitactie);
+    if Sluitactie <> caNone then
       if Application.MainForm = Self then
         Application.Terminate
-      else if CloseAction = caHide then
+      else if Sluitactie = caHide then
         Hide
-      else if CloseAction = caMinimize then
+      else if Sluitactie = caMinimize then
         Hide
       else
         Release;
@@ -1854,22 +1854,22 @@ end;
 
 function TCustomForm.ShowModal: Integer;
 var
-  WindowList: Pointer;
-  SaveFocusCount: Integer;
-  SaveCursor: TCursor;
-  ActiveWindow: HWnd;
-  CloseAction: TCloseAction;
+  Vensterlijst: Pointer;
+  Bewaarfocusaantal: Integer;
+  Bewaarcursor: TCursor;
+  Actievenster: HWnd;
+  Sluitactie: TCloseAction;
 begin
   if Visible or not Enabled or (fsModal in FFormState) or (FormStyle = fsMDIChild) then
     raise EInvalidOperation.Create('Cannot make a visible window modal');
   if GetCapture <> 0 then SendMessage(GetCapture, WM_CANCELMODE, 0, 0);
   ReleaseCapture;
   Include(FFormState, fsModal);
-  ActiveWindow := GetActiveWindow;
-  SaveFocusCount := FocusCount;
-  SaveCursor := Screen.Cursor;
+  Actievenster := GetActiveWindow;
+  Bewaarfocusaantal := FocusCount;
+  Bewaarcursor := Screen.Cursor;
   Screen.Cursor := crDefault;
-  WindowList := DisableTaskWindows(0);
+  Vensterlijst := DisableTaskWindows(0);
   try
     Show;
     try
@@ -1882,13 +1882,13 @@ begin
         else if ModalResult <> 0 then
         begin
           { CloseModal }
-          CloseAction := caNone;
+          Sluitactie := caNone;
           if CloseQuery then
           begin
-            CloseAction := caHide;
-            DoClose(CloseAction);
+            Sluitactie := caHide;
+            DoClose(Sluitactie);
           end;
-          case CloseAction of
+          case Sluitactie of
             caNone: ModalResult := 0;
             caFree: Release;
           end;
@@ -1896,15 +1896,15 @@ begin
       until ModalResult <> 0;
       Result := ModalResult;
       SendMessage(Handle, CM_DEACTIVATE, 0, 0);
-      if GetActiveWindow <> Handle then ActiveWindow := 0;
+      if GetActiveWindow <> Handle then Actievenster := 0;
     finally
       Hide;
     end;
   finally
-    EnableTaskWindows(WindowList);
-    if ActiveWindow <> 0 then SetActiveWindow(ActiveWindow);
-    FocusCount := SaveFocusCount;
-    Screen.Cursor := SaveCursor;
+    EnableTaskWindows(Vensterlijst);
+    if Actievenster <> 0 then SetActiveWindow(Actievenster);
+    FocusCount := Bewaarfocusaantal;
+    Screen.Cursor := Bewaarcursor;
     Exclude(FFormState, fsModal);
   end;
 end;
@@ -2145,7 +2145,7 @@ end;
 procedure TScreen.SetCursor(Value: TCursor);
 var
   P: TPoint;
-  Handle: HWND;
+  Handvat: HWND;
 begin
   if Value <> FCursor then
   begin
@@ -2153,9 +2153,9 @@ begin
     if Value = crDefault then
     begin
       GetCursorPos(P);
-      Handle := WindowFromPoint(P);
-      if Handle <> 0 then
-        SendMessage(Handle, WM_SETCURSOR, Handle, MakeLong(HTCLIENT, WM_MOUSEMOVE))
+      Handvat := WindowFromPoint(P);
+      if Handvat <> 0 then
+        SendMessage(Handvat, WM_SETCURSOR, Handvat, MakeLong(HTCLIENT, WM_MOUSEMOVE))
       else
         Windows.SetCursor(Cursors[crDefault]);
     end
@@ -2285,51 +2285,51 @@ end;
 
 procedure TApplication.CreateForm(InstanceClass: TComponentClass; var Reference);
 var
-  Instance: TComponent;
+  Exemplaar: TComponent;
 begin
-  Instance := TComponent(InstanceClass.NewInstance);
-  TComponent(Reference) := Instance;
+  Exemplaar := TComponent(InstanceClass.NewInstance);
+  TComponent(Reference) := Exemplaar;
   try
-    Instance.Create(Self);
+    Exemplaar.Create(Self);
   except
     TComponent(Reference) := nil;
     raise;
   end;
-  if (FMainForm = nil) and (Instance is TForm) then
+  if (FMainForm = nil) and (Exemplaar is TForm) then
   begin
-    TForm(Instance).HandleNeeded;
-    FMainForm := TForm(Instance);
+    TForm(Exemplaar).HandleNeeded;
+    FMainForm := TForm(Exemplaar);
     ZMMainWindow := FMainForm.Handle;
   end;
 end;
 
 function TApplication.IsKeyMsg(var Msg: TMsg): Boolean;
 var
-  Wnd: HWND;
-  Form: TCustomForm;
-  Control: TWinControl;
-  Key: TWMKey;
+  Venster: HWND;
+  Formulier: TCustomForm;
+  Besturing: TWinControl;
+  Toets: TWMKey;
 begin
   Result := False;
   if (Msg.message = WM_KEYDOWN) or (Msg.message = WM_SYSKEYDOWN) then
   begin
     { menu- / formuliersneltoetsen }
-    Wnd := Msg.hwnd;
-    Control := FindControl(Wnd);
-    if Control = nil then Exit;
-    Form := GetParentForm(Control);
-    if Form = nil then Exit;
-    FillChar(Key, SizeOf(Key), 0);
-    Key.Msg := Msg.message;
-    Key.CharCode := Msg.wParam;
-    Key.KeyData := Msg.lParam;
-    if Form.IsShortCut(Key) then Result := True;
+    Venster := Msg.hwnd;
+    Besturing := FindControl(Venster);
+    if Besturing = nil then Exit;
+    Formulier := GetParentForm(Besturing);
+    if Formulier = nil then Exit;
+    FillChar(Toets, SizeOf(Toets), 0);
+    Toets.Msg := Msg.message;
+    Toets.CharCode := Msg.wParam;
+    Toets.KeyData := Msg.lParam;
+    if Formulier.IsShortCut(Toets) then Result := True;
   end;
 end;
 
 function TApplication.ProcessMessage(var Msg: TMsg): Boolean;
 var
-  Handled: Boolean;
+  Afgehandeld: Boolean;
 begin
   Result := False;
   if PeekMessage(Msg, 0, 0, 0, PM_REMOVE) then
@@ -2337,9 +2337,9 @@ begin
     Result := True;
     if Msg.message <> WM_QUIT then
     begin
-      Handled := False;
-      if Assigned(FOnMessage) then FOnMessage(Msg, Handled);
-      if not Handled and not IsKeyMsg(Msg) then
+      Afgehandeld := False;
+      if Assigned(FOnMessage) then FOnMessage(Msg, Afgehandeld);
+      if not Afgehandeld and not IsKeyMsg(Msg) then
       begin
         TranslateMessage(Msg);
         DispatchMessage(Msg);
@@ -2352,52 +2352,52 @@ end;
 
 procedure TApplication.ProcessMessages;
 var
-  Msg: TMsg;
+  Bericht: TMsg;
 begin
-  while ProcessMessage(Msg) do {lus};
+  while ProcessMessage(Bericht) do {lus};
 end;
 
 procedure TApplication.DoMouseIdle;
 var
-  CaptureControl: TControl;
+  Vangbesturing: TControl;
   P: TPoint;
-  Target: TControl;
+  Doel: TControl;
 begin
   GetCursorPos(P);
-  Target := FindDragTarget(P, True);
-  CaptureControl := GetCaptureControl;
-  if FMouseControl <> Target then
+  Doel := FindDragTarget(P, True);
+  Vangbesturing := GetCaptureControl;
+  if FMouseControl <> Doel then
   begin
-    if ((FMouseControl <> nil) and (CaptureControl = nil)) or
-      ((CaptureControl <> nil) and (FMouseControl = CaptureControl)) then
+    if ((FMouseControl <> nil) and (Vangbesturing = nil)) or
+      ((Vangbesturing <> nil) and (FMouseControl = Vangbesturing)) then
       FMouseControl.Perform(CM_MOUSELEAVE, 0, 0);
-    FMouseControl := Target;
-    if ((FMouseControl <> nil) and (CaptureControl = nil)) or
-      ((CaptureControl <> nil) and (FMouseControl = CaptureControl)) then
+    FMouseControl := Doel;
+    if ((FMouseControl <> nil) and (Vangbesturing = nil)) or
+      ((Vangbesturing <> nil) and (FMouseControl = Vangbesturing)) then
       FMouseControl.Perform(CM_MOUSEENTER, 0, 0);
   end;
 end;
 
 procedure TApplication.Idle(const Msg: TMsg);
 var
-  Done: Boolean;
+  Klaar: Boolean;
 begin
   DoMouseIdle;
   FreeDeviceContexts;
-  Done := True;
+  Klaar := True;
   try
-    if Assigned(FOnIdle) then FOnIdle(Self, Done);
+    if Assigned(FOnIdle) then FOnIdle(Self, Klaar);
   except
     HandleException(Self);
   end;
-  if Done then WaitMessage;
+  if Klaar then WaitMessage;
 end;
 
 procedure TApplication.HandleMessage;
 var
-  Msg: TMsg;
+  Bericht: TMsg;
 begin
-  if not ProcessMessage(Msg) then Idle(Msg);
+  if not ProcessMessage(Bericht) then Idle(Bericht);
 end;
 
 procedure TApplication.Run;
@@ -2442,14 +2442,14 @@ end;
 
 procedure TApplication.ShowException(E: Exception);
 var
-  Msg: string;
+  Bericht: string;
 begin
-  Msg := E.Message;
-  if (Msg <> '') and (AnsiLastChar(Msg) > '.') then Msg := Msg + '.';
-  WriteLn(StdErr, 'Exception ', E.ClassName, ': ', Msg);
+  Bericht := E.Message;
+  if (Bericht <> '') and (AnsiLastChar(Bericht) > '.') then Bericht := Bericht + '.';
+  WriteLn(StdErr, 'Exception ', E.ClassName, ': ', Bericht);
   if GetEnvironmentVariable('ZM_DEBUG') <> '' then
     DumpExceptionBacktrace(StdErr);
-  MessageBox(PChar(Msg), PChar(GetTitle), MB_OK + MB_ICONSTOP);
+  MessageBox(PChar(Bericht), PChar(GetTitle), MB_OK + MB_ICONSTOP);
 end;
 
 function TApplication.MessageBox(const Text, Caption: PChar; Flags: Longint): Integer;
@@ -2541,81 +2541,81 @@ end;
 
 { ---------------------------------------------------------------- berichtvenster }
 
-function ZMMessageBox(Wnd: HWND; const Text, Caption: string; Flags: UINT): Integer;
+function ZMMessageBox(Venster: HWND; const Tekst, Titel: string; Vlaggen: UINT): Integer;
 const
   BtnCaptions: array[1..7] of string = ('OK', 'Annuleren', 'Afbreken', 'Opnieuw', 'Negeren', 'Ja', 'Nee');
 var
-  Form: TForm;
+  Formulier: TForm;
   Lbl: TLabel;
-  Btns: array of Integer;
-  I, BW, BH, TotalW, X, TextW, TextH: Integer;
+  Knoppen: array of Integer;
+  I, BW, BH, Totaalbreedte, X, Tekstbreedte, Teksthoogte: Integer;
   B: TButton;
   R: TRect;
-  DefIdx: Integer;
+  Standaardidx: Integer;
 begin
-  case Flags and $F of
-    MB_OKCANCEL: Btns := [IDOK, IDCANCEL];
-    MB_ABORTRETRYIGNORE: Btns := [IDABORT, IDRETRY, IDIGNORE];
-    MB_YESNOCANCEL: Btns := [IDYES, IDNO, IDCANCEL];
-    MB_YESNO: Btns := [IDYES, IDNO];
-    MB_RETRYCANCEL: Btns := [IDRETRY, IDCANCEL];
+  case Vlaggen and $F of
+    MB_OKCANCEL: Knoppen := [IDOK, IDCANCEL];
+    MB_ABORTRETRYIGNORE: Knoppen := [IDABORT, IDRETRY, IDIGNORE];
+    MB_YESNOCANCEL: Knoppen := [IDYES, IDNO, IDCANCEL];
+    MB_YESNO: Knoppen := [IDYES, IDNO];
+    MB_RETRYCANCEL: Knoppen := [IDRETRY, IDCANCEL];
   else
-    Btns := [IDOK];
+    Knoppen := [IDOK];
   end;
   if GetEnvironmentVariable('ZM_DEBUG') <> '' then
-    WriteLn(StdErr, 'Berichtvenster [', Caption, ']: ', Text);
-  DefIdx := (Flags shr 8) and $F;
-  if DefIdx > High(Btns) then DefIdx := 0;
-  Form := TForm.CreateNew(Application);
+    WriteLn(StdErr, 'Berichtvenster [', Titel, ']: ', Tekst);
+  Standaardidx := (Vlaggen shr 8) and $F;
+  if Standaardidx > High(Knoppen) then Standaardidx := 0;
+  Formulier := TForm.CreateNew(Application);
   try
-    Form.BorderStyle := bsDialog;
-    Form.Caption := Caption;
-    Form.Position := poScreenCenter;
-    Form.Font.Name := 'MS Sans Serif';
-    Form.Font.Height := -11;
-    Lbl := TLabel.Create(Form);
-    Lbl.Parent := Form;
-    Lbl.Caption := Text;
+    Formulier.BorderStyle := bsDialog;
+    Formulier.Caption := Titel;
+    Formulier.Position := poScreenCenter;
+    Formulier.Font.Name := 'MS Sans Serif';
+    Formulier.Font.Height := -11;
+    Lbl := TLabel.Create(Formulier);
+    Lbl.Parent := Formulier;
+    Lbl.Caption := Tekst;
     Lbl.AutoSize := False;
     R := Rect(0, 0, 400, 0);
-    Form.Canvas.Font := Form.Font;
-    DrawText(Form.Canvas.Handle, PChar(Text), Length(Text), R, DT_CALCRECT or DT_WORDBREAK or DT_NOPREFIX);
-    TextW := Max(R.Right, 120);
-    TextH := R.Bottom;
-    Lbl.SetBounds(16, 16, TextW, TextH);
+    Formulier.Canvas.Font := Formulier.Font;
+    DrawText(Formulier.Canvas.Handle, PChar(Tekst), Length(Tekst), R, DT_CALCRECT or DT_WORDBREAK or DT_NOPREFIX);
+    Tekstbreedte := Max(R.Right, 120);
+    Teksthoogte := R.Bottom;
+    Lbl.SetBounds(16, 16, Tekstbreedte, Teksthoogte);
     Lbl.WordWrap := True;
     BW := 75;
     BH := 23;
-    TotalW := Length(Btns) * BW + (Length(Btns) - 1) * 8;
-    Form.ClientWidth := Max(TextW + 32, TotalW + 32);
-    Form.ClientHeight := TextH + 16 + 16 + BH + 12;
-    X := (Form.ClientWidth - TotalW) div 2;
-    for I := 0 to High(Btns) do
+    Totaalbreedte := Length(Knoppen) * BW + (Length(Knoppen) - 1) * 8;
+    Formulier.ClientWidth := Max(Tekstbreedte + 32, Totaalbreedte + 32);
+    Formulier.ClientHeight := Teksthoogte + 16 + 16 + BH + 12;
+    X := (Formulier.ClientWidth - Totaalbreedte) div 2;
+    for I := 0 to High(Knoppen) do
     begin
-      B := TButton.Create(Form);
-      B.Parent := Form;
-      B.Caption := BtnCaptions[Btns[I]];
-      if Btns[I] = IDOK then B.Caption := 'OK';
-      B.ModalResult := Btns[I];
-      B.SetBounds(X, TextH + 32, BW, BH);
-      B.Default := I = DefIdx;
-      B.Cancel := (Btns[I] = IDCANCEL) or ((Length(Btns) = 1));
-      if I = DefIdx then Form.ActiveControl := B;
+      B := TButton.Create(Formulier);
+      B.Parent := Formulier;
+      B.Caption := BtnCaptions[Knoppen[I]];
+      if Knoppen[I] = IDOK then B.Caption := 'OK';
+      B.ModalResult := Knoppen[I];
+      B.SetBounds(X, Teksthoogte + 32, BW, BH);
+      B.Default := I = Standaardidx;
+      B.Cancel := (Knoppen[I] = IDCANCEL) or ((Length(Knoppen) = 1));
+      if I = Standaardidx then Formulier.ActiveControl := B;
       Inc(X, BW + 8);
     end;
-    Result := Form.ShowModal;
+    Result := Formulier.ShowModal;
     if Result = mrCancel then
-      if (Length(Btns) = 1) then Result := Btns[0];
+      if (Length(Knoppen) = 1) then Result := Knoppen[0];
   finally
-    Form.Free;
+    Formulier.Free;
   end;
 end;
 
 { ---------------------------------------------------------------- hooks voor Controls }
 
-function HookGetParentForm(Control: TControl): TWinControl;
+function HookGetParentForm(Besturing: TControl): TWinControl;
 begin
-  Result := GetParentForm(Control);
+  Result := GetParentForm(Besturing);
 end;
 
 function HookCursor(Cursor: TCursor): HCURSOR;
@@ -2623,35 +2623,35 @@ begin
   Result := Screen.Cursors[Cursor];
 end;
 
-function HookKeyPreview(Form: TWinControl): Boolean;
+function HookKeyPreview(Formulier: TWinControl): Boolean;
 begin
-  Result := (Form is TCustomForm) and TCustomForm(Form).KeyPreview;
+  Result := (Formulier is TCustomForm) and TCustomForm(Formulier).KeyPreview;
 end;
 
-function HookSetFocusedControl(Form, Control: TWinControl): Boolean;
+function HookSetFocusedControl(Formulier, Besturing: TWinControl): Boolean;
 begin
-  if Form is TCustomForm then
-    Result := TCustomForm(Form).SetFocusedControl(Control)
+  if Formulier is TCustomForm then
+    Result := TCustomForm(Formulier).SetFocusedControl(Besturing)
   else
     Result := True;
 end;
 
-procedure HookFocusControl(Form, Control: TWinControl);
+procedure HookFocusControl(Formulier, Besturing: TWinControl);
 begin
-  if Form is TCustomForm then
-    TCustomForm(Form).FocusControl(Control)
+  if Formulier is TCustomForm then
+    TCustomForm(Formulier).FocusControl(Besturing)
   else
-    Windows.SetFocus(Control.Handle);
+    Windows.SetFocus(Besturing.Handle);
 end;
 
-procedure HookDefocus(Form, Control: TWinControl; Removing: Boolean);
+procedure HookDefocus(Formulier, Besturing: TWinControl; Verwijderen: Boolean);
 begin
-  if Form is TCustomForm then TCustomForm(Form).DefocusControl(Control, Removing);
+  if Formulier is TCustomForm then TCustomForm(Formulier).DefocusControl(Besturing, Verwijderen);
 end;
 
-procedure HookSetModalResult(Form: TWinControl; MR: Integer);
+procedure HookSetModalResult(Formulier: TWinControl; MR: Integer);
 begin
-  if Form is TCustomForm then TCustomForm(Form).ModalResult := MR;
+  if Formulier is TCustomForm then TCustomForm(Formulier).ModalResult := MR;
 end;
 
 procedure HookHandleException(Sender: TObject);

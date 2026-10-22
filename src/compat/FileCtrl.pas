@@ -199,22 +199,22 @@ procedure TDirectoryListBox.Fill;
 var
   SR: TSearchRec;
   L: TStringList;
-  Parts: TStringList;
+  Delen: TStringList;
   I: Integer;
   P: string;
 begin
   Items.BeginUpdate;
   L := TStringList.Create;
-  Parts := TStringList.Create;
+  Delen := TStringList.Create;
   try
     Items.Clear;
     { eerst de padonderdelen, daarna de submappen }
-    Parts.Delimiter := PathDelim;
-    Parts.StrictDelimiter := True;
-    Parts.DelimitedText := FDirectory;
+    Delen.Delimiter := PathDelim;
+    Delen.StrictDelimiter := True;
+    Delen.DelimitedText := FDirectory;
     Items.Add(PathDelim);
-    for I := 0 to Parts.Count - 1 do
-      if Parts[I] <> '' then Items.Add(Parts[I]);
+    for I := 0 to Delen.Count - 1 do
+      if Delen[I] <> '' then Items.Add(Delen[I]);
     ItemIndex := Items.Count - 1;
     L.Sorted := True;
     if FindFirst(IncludeTrailingPathDelimiter(FDirectory) + '*', faDirectory, SR) = 0 then
@@ -227,7 +227,7 @@ begin
     for I := 0 to L.Count - 1 do Items.Add('  ' + L[I]);
   finally
     L.Free;
-    Parts.Free;
+    Delen.Free;
     Items.EndUpdate;
   end;
   if FDirLabel <> nil then

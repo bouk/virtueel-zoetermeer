@@ -154,10 +154,10 @@ function CreateMessageDialog(const Msg: string; DlgType: TMsgDlgType; Buttons: T
 var
   Lbl: TLabel;
   B: TButton;
-  Btn: TMsgDlgBtn;
-  N, X, BW, BH, TotalW, TextW, TextH: Integer;
+  Knop: TMsgDlgBtn;
+  N, X, BW, BH, Totaalbreedte, Tekstbreedte, Teksthoogte: Integer;
   R: TRect;
-  DefSet: Boolean;
+  Standaardset: Boolean;
 begin
   Result := TForm.CreateNew(Application);
   Result.BorderStyle := bsDialog;
@@ -169,45 +169,45 @@ begin
   Result.Canvas.Font := Result.Font;
   R := Rect(0, 0, 400, 0);
   DrawText(Result.Canvas.Handle, PChar(Msg), Length(Msg), R, DT_CALCRECT or DT_WORDBREAK or DT_NOPREFIX);
-  TextW := Max(R.Right, 100);
-  TextH := R.Bottom;
+  Tekstbreedte := Max(R.Right, 100);
+  Teksthoogte := R.Bottom;
   Lbl := TLabel.Create(Result);
   Lbl.Parent := Result;
   Lbl.AutoSize := False;
   Lbl.WordWrap := True;
   Lbl.ShowAccelChar := False;
   Lbl.Caption := Msg;
-  Lbl.SetBounds(16, 16, TextW, TextH);
+  Lbl.SetBounds(16, 16, Tekstbreedte, Teksthoogte);
   BW := 75;
   BH := 25;
   N := 0;
-  for Btn := Low(TMsgDlgBtn) to High(TMsgDlgBtn) do
-    if Btn in Buttons then Inc(N);
+  for Knop := Low(TMsgDlgBtn) to High(TMsgDlgBtn) do
+    if Knop in Buttons then Inc(N);
   if N = 0 then
   begin
     Buttons := [mbOK];
     N := 1;
   end;
-  TotalW := N * BW + (N - 1) * 8;
-  Result.ClientWidth := Max(TextW + 32, TotalW + 32);
-  Result.ClientHeight := TextH + 32 + BH + 12;
-  X := (Result.ClientWidth - TotalW) div 2;
-  DefSet := False;
-  for Btn := Low(TMsgDlgBtn) to High(TMsgDlgBtn) do
-    if Btn in Buttons then
+  Totaalbreedte := N * BW + (N - 1) * 8;
+  Result.ClientWidth := Max(Tekstbreedte + 32, Totaalbreedte + 32);
+  Result.ClientHeight := Teksthoogte + 32 + BH + 12;
+  X := (Result.ClientWidth - Totaalbreedte) div 2;
+  Standaardset := False;
+  for Knop := Low(TMsgDlgBtn) to High(TMsgDlgBtn) do
+    if Knop in Buttons then
     begin
       B := TButton.Create(Result);
       B.Parent := Result;
-      B.Caption := BtnCaptions[Btn];
-      B.ModalResult := BtnResults[Btn];
-      B.SetBounds(X, TextH + 32, BW, BH);
-      if not DefSet and (Btn in [mbOK, mbYes]) then
+      B.Caption := BtnCaptions[Knop];
+      B.ModalResult := BtnResults[Knop];
+      B.SetBounds(X, Teksthoogte + 32, BW, BH);
+      if not Standaardset and (Knop in [mbOK, mbYes]) then
       begin
         B.Default := True;
         Result.ActiveControl := B;
-        DefSet := True;
+        Standaardset := True;
       end;
-      if (Btn = mbCancel) or ((Btn = mbNo) and not (mbCancel in Buttons)) then B.Cancel := True;
+      if (Knop = mbCancel) or ((Knop = mbNo) and not (mbCancel in Buttons)) then B.Cancel := True;
       Inc(X, BW + 8);
     end;
 end;
@@ -346,10 +346,10 @@ type
     function CurrentMasks: TStringList;
   end;
 
-function MatchMask(const Name, Mask: string): Boolean;
+function MatchMask(const Naam, Masker: string): Boolean;
 var
   N, M: string;
-  function Match(NI, MI: Integer): Boolean;
+  function Passend(NI, MI: Integer): Boolean;
   begin
     while MI <= Length(M) do
     begin
@@ -359,7 +359,7 @@ var
             if MI = Length(M) then Exit(True);
             while NI <= Length(N) + 1 do
             begin
-              if Match(NI, MI + 1) then Exit(True);
+              if Passend(NI, MI + 1) then Exit(True);
               Inc(NI);
             end;
             Exit(False);
@@ -375,50 +375,50 @@ var
     Result := NI > Length(N);
   end;
 begin
-  N := LowerCase(Name);
-  M := LowerCase(Mask);
+  N := LowerCase(Naam);
+  M := LowerCase(Masker);
   if (M = '*.*') then Exit(True);
-  Result := Match(1, 1);
+  Result := Passend(1, 1);
 end;
 
 function TFileDlgForm.CurrentMasks: TStringList;
 var
-  Parts: TStringList;
+  Delen: TStringList;
   I, Idx: Integer;
   S: string;
 begin
   Result := TStringList.Create;
-  Parts := TStringList.Create;
+  Delen := TStringList.Create;
   try
-    Parts.Delimiter := '|';
-    Parts.StrictDelimiter := True;
-    Parts.DelimitedText := Dlg.Filter;
+    Delen.Delimiter := '|';
+    Delen.StrictDelimiter := True;
+    Delen.DelimitedText := Dlg.Filter;
     Idx := Types.ItemIndex;
     if Idx < 0 then Idx := 0;
-    if 2 * Idx + 1 < Parts.Count then S := Parts[2 * Idx + 1] else S := '*.*';
+    if 2 * Idx + 1 < Delen.Count then S := Delen[2 * Idx + 1] else S := '*.*';
     Result.Delimiter := ';';
     Result.StrictDelimiter := True;
     Result.DelimitedText := S;
     for I := 0 to Result.Count - 1 do Result[I] := Trim(Result[I]);
   finally
-    Parts.Free;
+    Delen.Free;
   end;
 end;
 
 procedure TFileDlgForm.Fill;
 var
   SR: TSearchRec;
-  Dirs, Files: TStringList;
+  Mappen, Bestanden: TStringList;
   M: TStringList;
   I: Integer;
   Ok: Boolean;
 begin
-  Dirs := TStringList.Create;
-  Files := TStringList.Create;
+  Mappen := TStringList.Create;
+  Bestanden := TStringList.Create;
   M := CurrentMasks;
   try
-    Dirs.Sorted := True;
-    Files.Sorted := True;
+    Mappen.Sorted := True;
+    Bestanden.Sorted := True;
     if FindFirst(IncludeTrailingPathDelimiter(Dir) + '*', faAnyFile, SR) = 0 then
     begin
       repeat
@@ -426,32 +426,32 @@ begin
         if SR.Attr and faDirectory <> 0 then
         begin
           if (SR.Name <> '..') and (SR.Name[1] = '.') then Continue;
-          Dirs.Add('[' + SR.Name + ']');
+          Mappen.Add('[' + SR.Name + ']');
         end
         else
         begin
           Ok := False;
           for I := 0 to M.Count - 1 do
             if MatchMask(SR.Name, M[I]) then Ok := True;
-          if Ok then Files.Add(SR.Name);
+          if Ok then Bestanden.Add(SR.Name);
         end;
       until FindNext(SR) <> 0;
       FindClose(SR);
     end;
-    if (Dirs.IndexOf('[..]') < 0) and (ExcludeTrailingPathDelimiter(Dir) <> '') and (Dir <> '/') then
-      Dirs.Add('[..]');
+    if (Mappen.IndexOf('[..]') < 0) and (ExcludeTrailingPathDelimiter(Dir) <> '') and (Dir <> '/') then
+      Mappen.Add('[..]');
     List.Items.BeginUpdate;
     try
       List.Items.Clear;
-      List.Items.AddStrings(Dirs);
-      List.Items.AddStrings(Files);
+      List.Items.AddStrings(Mappen);
+      List.Items.AddStrings(Bestanden);
     finally
       List.Items.EndUpdate;
     end;
     LblDir.Caption := Dir;
   finally
-    Dirs.Free;
-    Files.Free;
+    Mappen.Free;
+    Bestanden.Free;
     M.Free;
   end;
 end;
@@ -575,7 +575,7 @@ end;
 function TOpenDialog.DoExecute: Boolean;
 var
   F: TFileDlgForm;
-  Parts: TStringList;
+  Delen: TStringList;
   I: Integer;
   L: TLabel;
   Start: string;
@@ -631,19 +631,19 @@ begin
     F.Types.Parent := F;
     F.Types.Style := csDropDownList;
     F.Types.SetBounds(96, 246, 228, 21);
-    Parts := TStringList.Create;
+    Delen := TStringList.Create;
     try
-      Parts.Delimiter := '|';
-      Parts.StrictDelimiter := True;
-      Parts.DelimitedText := FFilter;
+      Delen.Delimiter := '|';
+      Delen.StrictDelimiter := True;
+      Delen.DelimitedText := FFilter;
       I := 0;
-      while I < Parts.Count do
+      while I < Delen.Count do
       begin
-        F.Types.Items.Add(Parts[I]);
+        F.Types.Items.Add(Delen[I]);
         Inc(I, 2);
       end;
     finally
-      Parts.Free;
+      Delen.Free;
     end;
     if F.Types.Items.Count = 0 then F.Types.Items.Add('Alle bestanden (*.*)');
     F.Types.ItemIndex := Max(0, Min(FFilterIndex - 1, F.Types.Items.Count - 1));

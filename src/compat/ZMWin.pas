@@ -54,7 +54,7 @@ type
     function TopLevel: TZMWindow;
   end;
 
-  TZMEnumWindowProc = function(Wnd: HWND; Data: Pointer): Boolean;
+  TZMEnumWindowProc = function(Venster: HWND; Gegevens: Pointer): Boolean;
 
 var
   ZMScreen: TZMBitmap;
@@ -69,89 +69,89 @@ var
   { idle-hook (TApplication.Idle), aangeroepen door WaitMessage vóór het blokkeren }
   ZMDesktopColor: LongWord = 0;
   { MessageBox-implementatie (geïnstalleerd door Forms: een dialoog in de framebuffer) }
-  ZMMessageBoxHook: function(Wnd: HWND; const Text, Caption: string; Flags: UINT): Integer = nil;
+  ZMMessageBoxHook: function(Venster: HWND; const Tekst, Titel: string; Vlaggen: UINT): Integer = nil;
 
 procedure ZMInit;
 procedure ZMShutdown;
-procedure ZMSetScreenSize(W, H: Integer);
+procedure ZMSetScreenSize(Breedte, Hoogte: Integer);
 function ZMTicks: LongWord;
 
-function ZMWindowObj(H: HWND): TZMWindow;
-function ZMCreateWindow(ExStyle: DWORD; const ClsName, Text: string; Style: DWORD;
-  X, Y, W, H: Integer; Parent: HWND; ID: PtrInt; AMethod: TWndMethod; AProc: Pointer): HWND;
-function ZMDestroyWindow(H: HWND): Boolean;
-procedure ZMSetWindowPos(H, After: HWND; X, Y, W, H2: Integer; Flags: UINT);
-function ZMShowWindow(H: HWND; Show: Boolean): Boolean;
-procedure ZMSetParent(H, NewParent: HWND);
-function ZMWindowFromPoint(P: TPoint; SkipDisabled: Boolean): HWND;
-procedure ZMClientToScreen(H: HWND; var P: TPoint);
-procedure ZMScreenToClient(H: HWND; var P: TPoint);
-procedure ZMEnumTopLevel(Proc: TZMEnumWindowProc; Data: Pointer);
-procedure ZMEnumChildren(H: HWND; Proc: TZMEnumWindowProc; Data: Pointer);
-function ZMGetWindowInZ(H: HWND; Cmd: UINT): HWND;
-procedure ZMSetStyle(H: HWND; NewStyle: DWORD);
-procedure ZMSetExStyle(H: HWND; NewStyle: DWORD);
+function ZMWindowObj(Venster: HWND): TZMWindow;
+function ZMCreateWindow(UitStijl: DWORD; const KlasseNaam, Tekst: string; Stijl: DWORD;
+  X, Y, Breedte, Hoogte: Integer; Ouder: HWND; Ident: PtrInt; AMethode: TWndMethod; ProcAdres: Pointer): HWND;
+function ZMDestroyWindow(Venster: HWND): Boolean;
+procedure ZMSetWindowPos(Venster, Na: HWND; X, Y, Breedte, Hoogte: Integer; Vlaggen: UINT);
+function ZMShowWindow(Venster: HWND; Tonen: Boolean): Boolean;
+procedure ZMSetParent(Venster, NieuweOuder: HWND);
+function ZMWindowFromPoint(Punt: TPoint; Overslaan: Boolean): HWND;
+procedure ZMClientToScreen(Venster: HWND; var Punt: TPoint);
+procedure ZMScreenToClient(Venster: HWND; var Punt: TPoint);
+procedure ZMEnumTopLevel(Terugroep: TZMEnumWindowProc; Gegevens: Pointer);
+procedure ZMEnumChildren(Venster: HWND; Terugroep: TZMEnumWindowProc; Gegevens: Pointer);
+function ZMGetWindowInZ(Venster: HWND; Opdracht: UINT): HWND;
+procedure ZMSetStyle(Venster: HWND; NieuweStijl: DWORD);
+procedure ZMSetExStyle(Venster: HWND; NieuweUitStijl: DWORD);
 
 { tekenen }
-procedure ZMInvalidate(H: HWND; R: PRect; Erase: Boolean);
-procedure ZMInvalidateTree(W: TZMWindow; const ScreenR: TRect);
-procedure ZMInvalidateScreen(const ScreenR: TRect);
-procedure ZMValidate(H: HWND; R: PRect);
-function ZMGetUpdateRect(H: HWND; var R: TRect): Boolean;
-function ZMGetDC(H: HWND; WholeWindow: Boolean): HDC;
+procedure ZMInvalidate(Venster: HWND; R: PRect; Wissen: Boolean);
+procedure ZMInvalidateTree(VensterObj: TZMWindow; const SchermR: TRect);
+procedure ZMInvalidateScreen(const SchermR: TRect);
+procedure ZMValidate(Venster: HWND; R: PRect);
+function ZMGetUpdateRect(Venster: HWND; var R: TRect): Boolean;
+function ZMGetDC(Venster: HWND; HeelVenster: Boolean): HDC;
 procedure ZMReleaseDC(DC: HDC);
-function ZMBeginPaint(H: HWND; var PS: TPaintStruct): HDC;
-procedure ZMEndPaint(H: HWND; const PS: TPaintStruct);
-procedure ZMUpdateWindow(H: HWND);
-procedure ZMPaintNC(W: TZMWindow);
+function ZMBeginPaint(Venster: HWND; var TekenInfo: TPaintStruct): HDC;
+procedure ZMEndPaint(Venster: HWND; const TekenInfo: TPaintStruct);
+procedure ZMUpdateWindow(Venster: HWND);
+procedure ZMPaintNC(VensterObj: TZMWindow);
 
 { berichten }
-function ZMPostMessage(H: HWND; Msg: UINT; WP: WPARAM; LP: LPARAM): Boolean;
-function ZMSendMessage(H: HWND; Msg: UINT; WP: WPARAM; LP: LPARAM): LRESULT;
-function ZMPeekMessage(var M: TMsg; H: HWND; MinMsg, MaxMsg, Remove: UINT): Boolean;
-function ZMGetMessage(var M: TMsg; H: HWND; MinMsg, MaxMsg: UINT): Boolean;
-procedure ZMTranslateMessage(const M: TMsg);
-function ZMDispatchMessage(const M: TMsg): LRESULT;
+function ZMPostMessage(Venster: HWND; Bericht: UINT; WPar: WPARAM; LPar: LPARAM): Boolean;
+function ZMSendMessage(Venster: HWND; Bericht: UINT; WPar: WPARAM; LPar: LPARAM): LRESULT;
+function ZMPeekMessage(var Melding: TMsg; Venster: HWND; MinBericht, MaxBericht, Verwijderen: UINT): Boolean;
+function ZMGetMessage(var Melding: TMsg; Venster: HWND; MinBericht, MaxBericht: UINT): Boolean;
+procedure ZMTranslateMessage(const Melding: TMsg);
+function ZMDispatchMessage(const Melding: TMsg): LRESULT;
 procedure ZMWaitMessage;
-function ZMDefWindowProc(H: HWND; Msg: UINT; WP: WPARAM; LP: LPARAM): LRESULT;
-function ZMCallWindow(W: TZMWindow; Msg: UINT; WP: WPARAM; LP: LPARAM): LRESULT;
+function ZMDefWindowProc(Venster: HWND; Bericht: UINT; WPar: WPARAM; LPar: LPARAM): LRESULT;
+function ZMCallWindow(VensterObj: TZMWindow; Bericht: UINT; WPar: WPARAM; LPar: LPARAM): LRESULT;
 procedure ZMPollInput;
-procedure ZMPresent(Force: Boolean);
+procedure ZMPresent(Forceer: Boolean);
 function ZMMessagePos: TPoint;
 function ZMMessageTime: LongWord;
 
 { timers }
-function ZMSetTimer(H: HWND; ID, Elapse: UINT; Proc: Pointer): UINT;
-function ZMKillTimer(H: HWND; ID: UINT): Boolean;
-function ZMAddMMTimer(Delay: UINT; Proc: Pointer; User: PtrUInt; Periodic: Boolean): UINT;
-function ZMKillMMTimer(ID: UINT): Boolean;
+function ZMSetTimer(Venster: HWND; Ident, Verstreken: UINT; Terugroep: Pointer): UINT;
+function ZMKillTimer(Venster: HWND; Ident: UINT): Boolean;
+function ZMAddMMTimer(Vertraging: UINT; Terugroep: Pointer; Gebruiker: PtrUInt; Periodiek: Boolean): UINT;
+function ZMKillMMTimer(Ident: UINT): Boolean;
 
 { focus, activering, capture, invoerstatus }
-function ZMSetFocus(H: HWND): HWND;
+function ZMSetFocus(Venster: HWND): HWND;
 function ZMGetFocus: HWND;
-function ZMSetActive(H: HWND): HWND;
+function ZMSetActive(Venster: HWND): HWND;
 function ZMGetActive: HWND;
-function ZMSetCapture(H: HWND): HWND;
+function ZMSetCapture(Venster: HWND): HWND;
 function ZMGetCapture: HWND;
 procedure ZMReleaseCapture;
-function ZMEnableWindow(H: HWND; Enable: Boolean): Boolean;
-function ZMKeyState(VK: Integer): SmallInt;
+function ZMEnableWindow(Venster: HWND; Inschakelen: Boolean): Boolean;
+function ZMKeyState(Toets: Integer): SmallInt;
 function ZMCursorPos: TPoint;
 procedure ZMSetCursorPos(X, Y: Integer);
-procedure ZMSetCursorShape(C: HCURSOR);
-function ZMCursorFromId(Id: PtrUInt): HCURSOR;
+procedure ZMSetCursorShape(Aanwijzer: HCURSOR);
+function ZMCursorFromId(Ident: PtrUInt): HCURSOR;
 
 procedure ZMDumpWindows;
 
 { Synthetische invoer, in de wachtrij gezet zoals backend-gebeurtenissen (werkt ook headless).
   Coördinaten zijn relatief aan het clientgebied van het hoofdformulier (ZMMainWindow; het
   scherm als die er niet is). Button: 0 = alleen verplaatsen, 1 = links, 2 = rechts. }
-procedure ZMInjectMouse(X, Y: Integer; Button: Integer; Down: Boolean);
-procedure ZMInjectKey(VK: Word; Down: Boolean);
-procedure ZMInjectChar(C: Char);
+procedure ZMInjectMouse(X, Y: Integer; Knop: Integer; Omlaag: Boolean);
+procedure ZMInjectKey(Toets: Word; Omlaag: Boolean);
+procedure ZMInjectChar(Karakter: Char);
 
 { testondersteuning: sla het geëmuleerde scherm op als PNG }
-function ZMSaveScreenshot(const FileName: string): Boolean;
+function ZMSaveScreenshot(const Bestandsnaam: string): Boolean;
 
 implementation
 
@@ -214,12 +214,12 @@ begin
   Result := ZMBackend.Ticks;
 end;
 
-function ZMWindowObj(H: HWND): TZMWindow;
+function ZMWindowObj(Venster: HWND): TZMWindow;
 var
-  O: TObject;
+  Obj: TObject;
 begin
-  O := ZMHandleObj(H);
-  if (O <> nil) and (O is TZMWindow) then Result := TZMWindow(O) else Result := nil;
+  Obj := ZMHandleObj(Venster);
+  if (Obj <> nil) and (Obj is TZMWindow) then Result := TZMWindow(Obj) else Result := nil;
 end;
 
 procedure BumpVis;
@@ -229,70 +229,70 @@ end;
 
 function TZMWindow.NCInsets: TRect;
 var
-  B: Integer;
+  Rand: Integer;
 begin
   Result := Rect(0, 0, 0, 0);
-  B := 0;
-  if Style and WS_THICKFRAME <> 0 then B := 4
-  else if (Style and WS_DLGFRAME <> 0) or (ExStyle and WS_EX_DLGMODALFRAME <> 0) then B := 3
-  else if Style and WS_BORDER <> 0 then B := 1;
-  if ExStyle and WS_EX_CLIENTEDGE <> 0 then Inc(B, 2);
-  if ExStyle and WS_EX_STATICEDGE <> 0 then Inc(B, 1);
-  Result := Rect(B, B, B, B);
+  Rand := 0;
+  if Style and WS_THICKFRAME <> 0 then Rand := 4
+  else if (Style and WS_DLGFRAME <> 0) or (ExStyle and WS_EX_DLGMODALFRAME <> 0) then Rand := 3
+  else if Style and WS_BORDER <> 0 then Rand := 1;
+  if ExStyle and WS_EX_CLIENTEDGE <> 0 then Inc(Rand, 2);
+  if ExStyle and WS_EX_STATICEDGE <> 0 then Inc(Rand, 1);
+  Result := Rect(Rand, Rand, Rand, Rand);
   if Style and WS_CAPTION = WS_CAPTION then Inc(Result.Top, CAPTION_H + 1);
 end;
 
 function TZMWindow.WindowRectScreen: TRect;
 var
-  P: TZMWindow;
-  O: TRect;
+  Ouder: TZMWindow;
+  Marge: TRect;
 begin
   Result := R;
-  P := Parent;
-  while P <> nil do
+  Ouder := Parent;
+  while Ouder <> nil do
   begin
-    O := P.NCInsets;
-    OffsetRect(Result, P.R.Left + O.Left, P.R.Top + O.Top);
-    P := P.Parent;
+    Marge := Ouder.NCInsets;
+    OffsetRect(Result, Ouder.R.Left + Marge.Left, Ouder.R.Top + Marge.Top);
+    Ouder := Ouder.Parent;
   end;
 end;
 
 function TZMWindow.ClientRectScreen: TRect;
 var
-  N: TRect;
+  Marge: TRect;
 begin
   Result := WindowRectScreen;
-  N := NCInsets;
-  Inc(Result.Left, N.Left);
-  Inc(Result.Top, N.Top);
-  Dec(Result.Right, N.Right);
-  Dec(Result.Bottom, N.Bottom);
+  Marge := NCInsets;
+  Inc(Result.Left, Marge.Left);
+  Inc(Result.Top, Marge.Top);
+  Dec(Result.Right, Marge.Right);
+  Dec(Result.Bottom, Marge.Bottom);
   if Result.Right < Result.Left then Result.Right := Result.Left;
   if Result.Bottom < Result.Top then Result.Bottom := Result.Top;
 end;
 
 function TZMWindow.IsVisible: Boolean;
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
-  W := Self;
-  while W <> nil do
+  VensterObj := Self;
+  while VensterObj <> nil do
   begin
-    if W.Style and WS_VISIBLE = 0 then Exit(False);
-    W := W.Parent;
+    if VensterObj.Style and WS_VISIBLE = 0 then Exit(False);
+    VensterObj := VensterObj.Parent;
   end;
   Result := True;
 end;
 
 function TZMWindow.IsEnabledTree: Boolean;
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
-  W := Self;
-  while W <> nil do
+  VensterObj := Self;
+  while VensterObj <> nil do
   begin
-    if W.Style and WS_DISABLED <> 0 then Exit(False);
-    W := W.Parent;
+    if VensterObj.Style and WS_DISABLED <> 0 then Exit(False);
+    VensterObj := VensterObj.Parent;
   end;
   Result := True;
 end;
@@ -305,91 +305,91 @@ end;
 
 { ---------------------------------------------------------------- zichtbaarheid }
 
-procedure ComputeVis(W: TZMWindow);
+procedure ComputeVis(VensterObj: TZMWindow);
 var
-  Vis, Win: TZMRects;
-  A, S: TZMWindow;
-  I, Idx: Integer;
-  Sibs: TZMWindowArray;
-  CR: TRect;
+  Zichtbaar, VensterGebied: TZMRects;
+  Voorouder, Zus: TZMWindow;
+  I, Plaats: Integer;
+  Zusters: TZMWindowArray;
+  KlientR: TRect;
 begin
-  W.VisGen := ZMVisGeneration;
-  W.VisClientCache := nil;
-  W.VisWindowCache := nil;
-  if not W.IsVisible then Exit;
-  SetLength(Win, 1);
-  Win[0] := W.WindowRectScreen;
+  VensterObj.VisGen := ZMVisGeneration;
+  VensterObj.VisClientCache := nil;
+  VensterObj.VisWindowCache := nil;
+  if not VensterObj.IsVisible then Exit;
+  SetLength(VensterGebied, 1);
+  VensterGebied[0] := VensterObj.WindowRectScreen;
   { knip bij tot de clientgebieden van de voorouders }
-  A := W.Parent;
-  while A <> nil do
+  Voorouder := VensterObj.Parent;
+  while Voorouder <> nil do
   begin
-    Win := RectsIntersectRect(Win, A.ClientRectScreen);
-    A := A.Parent;
+    VensterGebied := RectsIntersectRect(VensterGebied, Voorouder.ClientRectScreen);
+    Voorouder := Voorouder.Parent;
   end;
-  Win := RectsIntersectRect(Win, Rect(0, 0, ZMScreenW, ZMScreenH));
+  VensterGebied := RectsIntersectRect(VensterGebied, Rect(0, 0, ZMScreenW, ZMScreenH));
   { trek zusters boven W en boven elke voorouder af }
-  A := W;
-  while A <> nil do
+  Voorouder := VensterObj;
+  while Voorouder <> nil do
   begin
-    if A.Parent = nil then Sibs := TopLevels else Sibs := A.Parent.Children;
-    Idx := -1;
-    for I := 0 to High(Sibs) do
-      if Sibs[I] = A then begin Idx := I; Break; end;
-    for I := Idx + 1 to High(Sibs) do
+    if Voorouder.Parent = nil then Zusters := TopLevels else Zusters := Voorouder.Parent.Children;
+    Plaats := -1;
+    for I := 0 to High(Zusters) do
+      if Zusters[I] = Voorouder then begin Plaats := I; Break; end;
+    for I := Plaats + 1 to High(Zusters) do
     begin
-      S := Sibs[I];
-      if S.Style and WS_VISIBLE <> 0 then
-        Win := RectsSubtractRect(Win, S.WindowRectScreen);
+      Zus := Zusters[I];
+      if Zus.Style and WS_VISIBLE <> 0 then
+        VensterGebied := RectsSubtractRect(VensterGebied, Zus.WindowRectScreen);
     end;
-    A := A.Parent;
+    Voorouder := Voorouder.Parent;
   end;
-  W.VisWindowCache := Win;
-  CR := W.ClientRectScreen;
-  Vis := RectsIntersectRect(Win, CR);
-  for I := 0 to High(W.Children) do
-    if W.Children[I].Style and WS_VISIBLE <> 0 then
-      Vis := RectsSubtractRect(Vis, W.Children[I].WindowRectScreen);
-  W.VisClientCache := Vis;
+  VensterObj.VisWindowCache := VensterGebied;
+  KlientR := VensterObj.ClientRectScreen;
+  Zichtbaar := RectsIntersectRect(VensterGebied, KlientR);
+  for I := 0 to High(VensterObj.Children) do
+    if VensterObj.Children[I].Style and WS_VISIBLE <> 0 then
+      Zichtbaar := RectsSubtractRect(Zichtbaar, VensterObj.Children[I].WindowRectScreen);
+  VensterObj.VisClientCache := Zichtbaar;
   { de vensterrechthoek min de kinderen ook (voor vensters-DC's) }
-  for I := 0 to High(W.Children) do
-    if W.Children[I].Style and WS_VISIBLE <> 0 then
-      W.VisWindowCache := RectsSubtractRect(W.VisWindowCache, W.Children[I].WindowRectScreen);
+  for I := 0 to High(VensterObj.Children) do
+    if VensterObj.Children[I].Style and WS_VISIBLE <> 0 then
+      VensterObj.VisWindowCache := RectsSubtractRect(VensterObj.VisWindowCache, VensterObj.Children[I].WindowRectScreen);
 end;
 
-function VisClient(W: TZMWindow): TZMRects;
+function VisClient(VensterObj: TZMWindow): TZMRects;
 begin
-  if W.VisGen <> ZMVisGeneration then ComputeVis(W);
-  Result := W.VisClientCache;
+  if VensterObj.VisGen <> ZMVisGeneration then ComputeVis(VensterObj);
+  Result := VensterObj.VisClientCache;
 end;
 
-function VisWindow(W: TZMWindow): TZMRects;
+function VisWindow(VensterObj: TZMWindow): TZMRects;
 begin
-  if W.VisGen <> ZMVisGeneration then ComputeVis(W);
-  Result := W.VisWindowCache;
+  if VensterObj.VisGen <> ZMVisGeneration then ComputeVis(VensterObj);
+  Result := VensterObj.VisWindowCache;
 end;
 
-procedure DCVisProvider(DCObj: TObject);
+procedure DCVisProvider(DCObjekt: TObject);
 var
   DC: TZMDC;
-  W: TZMWindow;
+  VensterObj: TZMWindow;
   R: TRect;
 begin
-  DC := TZMDC(DCObj);
-  W := ZMWindowObj(DC.Wnd);
-  if W = nil then
+  DC := TZMDC(DCObjekt);
+  VensterObj := ZMWindowObj(DC.Wnd);
+  if VensterObj = nil then
   begin
     DC.VisRgn := nil;
     Exit;
   end;
   if DC.IsWindowDC then
   begin
-    DC.VisRgn := VisWindow(W);
-    R := W.WindowRectScreen;
+    DC.VisRgn := VisWindow(VensterObj);
+    R := VensterObj.WindowRectScreen;
   end
   else
   begin
-    DC.VisRgn := VisClient(W);
-    R := W.ClientRectScreen;
+    DC.VisRgn := VisClient(VensterObj);
+    R := VensterObj.ClientRectScreen;
   end;
   DC.DevOrg := Point(R.Left, R.Top);
   DC.InvalidateClip;
@@ -439,23 +439,23 @@ begin
   BackendOpen := False;
 end;
 
-procedure ZMSetScreenSize(W, H: Integer);
+procedure ZMSetScreenSize(Breedte, Hoogte: Integer);
 var
-  NewScr: TZMBitmap;
+  NieuwScherm: TZMBitmap;
 begin
   ZMInit;
-  if (W = ZMScreenW) and (H = ZMScreenH) then Exit;
-  NewScr := TZMBitmap.Create(W, H, 32);
+  if (Breedte = ZMScreenW) and (Hoogte = ZMScreenH) then Exit;
+  NieuwScherm := TZMBitmap.Create(Breedte, Hoogte, 32);
   ZMScreen.Free;
-  ZMScreen := NewScr;
-  ZMScreenW := W;
-  ZMScreenH := H;
+  ZMScreen := NieuwScherm;
+  ZMScreenW := Breedte;
+  ZMScreenH := Hoogte;
   BumpVis;
-  if BackendOpen then ZMBackend.Resize(W, H);
-  ZMInvalidateScreen(Rect(0, 0, W, H));
+  if BackendOpen then ZMBackend.Resize(Breedte, Hoogte);
+  ZMInvalidateScreen(Rect(0, 0, Breedte, Hoogte));
 end;
 
-function DDSetMode(W, H, Bpp: Integer): Boolean;
+function DDSetMode(Breedte, Hoogte, Bitdiepte: Integer): Boolean;
 begin
   { het beeldscherm wordt op een vaste grootte geëmuleerd; modusveranderingen worden geaccepteerd }
   Result := True;
@@ -470,129 +470,129 @@ end;
 type
   TWinArray = TZMWindowArray;
 
-procedure ArrRemove(var A: TWinArray; W: TZMWindow);
+procedure ArrRemove(var Lijst: TWinArray; VensterObj: TZMWindow);
 var
   I, J: Integer;
 begin
-  for I := 0 to High(A) do
-    if A[I] = W then
+  for I := 0 to High(Lijst) do
+    if Lijst[I] = VensterObj then
     begin
-      for J := I to High(A) - 1 do A[J] := A[J + 1];
-      SetLength(A, Length(A) - 1);
+      for J := I to High(Lijst) - 1 do Lijst[J] := Lijst[J + 1];
+      SetLength(Lijst, Length(Lijst) - 1);
       Exit;
     end;
 end;
 
-procedure ArrInsert(var A: TWinArray; W: TZMWindow; Index: Integer);
+procedure ArrInsert(var Lijst: TWinArray; VensterObj: TZMWindow; Plaats: Integer);
 var
   J: Integer;
 begin
-  if (Index < 0) or (Index > Length(A)) then Index := Length(A);
-  SetLength(A, Length(A) + 1);
-  for J := High(A) downto Index + 1 do A[J] := A[J - 1];
-  A[Index] := W;
+  if (Plaats < 0) or (Plaats > Length(Lijst)) then Plaats := Length(Lijst);
+  SetLength(Lijst, Length(Lijst) + 1);
+  for J := High(Lijst) downto Plaats + 1 do Lijst[J] := Lijst[J - 1];
+  Lijst[Plaats] := VensterObj;
 end;
 
-function SiblingsOf(W: TZMWindow): TWinArray;
+function SiblingsOf(VensterObj: TZMWindow): TWinArray;
 begin
-  if W.Parent = nil then Result := TopLevels else Result := W.Parent.Children;
+  if VensterObj.Parent = nil then Result := TopLevels else Result := VensterObj.Parent.Children;
 end;
 
-procedure SetSiblings(W: TZMWindow; const A: TWinArray);
+procedure SetSiblings(VensterObj: TZMWindow; const Lijst: TWinArray);
 begin
-  if W.Parent = nil then TopLevels := A else W.Parent.Children := A;
+  if VensterObj.Parent = nil then TopLevels := Lijst else VensterObj.Parent.Children := Lijst;
 end;
 
 { invoegindex, rekening houdend met WS_EX_TOPMOST voor topniveauvensters }
-function TopInsertIndex(const A: TWinArray; W: TZMWindow): Integer;
+function TopInsertIndex(const Lijst: TWinArray; VensterObj: TZMWindow): Integer;
 begin
-  Result := Length(A);
-  if (W.Parent = nil) and (W.ExStyle and WS_EX_TOPMOST = 0) then
-    while (Result > 0) and (A[Result - 1].ExStyle and WS_EX_TOPMOST <> 0) do Dec(Result);
+  Result := Length(Lijst);
+  if (VensterObj.Parent = nil) and (VensterObj.ExStyle and WS_EX_TOPMOST = 0) then
+    while (Result > 0) and (Lijst[Result - 1].ExStyle and WS_EX_TOPMOST <> 0) do Dec(Result);
 end;
 
-function ZMCreateWindow(ExStyle: DWORD; const ClsName, Text: string; Style: DWORD;
-  X, Y, W, H: Integer; Parent: HWND; ID: PtrInt; AMethod: TWndMethod; AProc: Pointer): HWND;
+function ZMCreateWindow(UitStijl: DWORD; const KlasseNaam, Tekst: string; Stijl: DWORD;
+  X, Y, Breedte, Hoogte: Integer; Ouder: HWND; Ident: PtrInt; AMethode: TWndMethod; ProcAdres: Pointer): HWND;
 var
-  Win: TZMWindow;
-  P: TZMWindow;
-  A: TWinArray;
-  CS: TCreateStruct;
+  VensterObj: TZMWindow;
+  OuderObj: TZMWindow;
+  Lijst: TWinArray;
+  Maakstruct: TCreateStruct;
 begin
   ZMInit;
-  Win := TZMWindow.Create;
-  Win.Handle := ZMAllocHandle(Win);
-  Win.ClsName := ClsName;
-  Win.ClsStyle := CS_DBLCLKS;
-  Win.Style := Style;
-  Win.ExStyle := ExStyle;
-  Win.Text := Text;
-  Win.Method := AMethod;
-  Win.Proc := AProc;
-  Win.ID := ID;
-  if W < 0 then W := 0;
-  if H < 0 then H := 0;
-  Win.R := Rect(X, Y, X + W, Y + H);
-  P := ZMWindowObj(Parent);
-  if (P <> nil) and (Style and WS_CHILD <> 0) then
+  VensterObj := TZMWindow.Create;
+  VensterObj.Handle := ZMAllocHandle(VensterObj);
+  VensterObj.ClsName := KlasseNaam;
+  VensterObj.ClsStyle := CS_DBLCLKS;
+  VensterObj.Style := Stijl;
+  VensterObj.ExStyle := UitStijl;
+  VensterObj.Text := Tekst;
+  VensterObj.Method := AMethode;
+  VensterObj.Proc := ProcAdres;
+  VensterObj.ID := Ident;
+  if Breedte < 0 then Breedte := 0;
+  if Hoogte < 0 then Hoogte := 0;
+  VensterObj.R := Rect(X, Y, X + Breedte, Y + Hoogte);
+  OuderObj := ZMWindowObj(Ouder);
+  if (OuderObj <> nil) and (Stijl and WS_CHILD <> 0) then
   begin
-    Win.Parent := P;
-    A := P.Children;
-    ArrInsert(A, Win, Length(A));
-    P.Children := A;
+    VensterObj.Parent := OuderObj;
+    Lijst := OuderObj.Children;
+    ArrInsert(Lijst, VensterObj, Length(Lijst));
+    OuderObj.Children := Lijst;
   end
   else
   begin
-    if P <> nil then Win.Owner := Parent;
-    A := TopLevels;
-    ArrInsert(A, Win, TopInsertIndex(A, Win));
-    TopLevels := A;
+    if OuderObj <> nil then VensterObj.Owner := Ouder;
+    Lijst := TopLevels;
+    ArrInsert(Lijst, VensterObj, TopInsertIndex(Lijst, VensterObj));
+    TopLevels := Lijst;
   end;
-  Win.NCDirty := True;
+  VensterObj.NCDirty := True;
   BumpVis;
-  Result := Win.Handle;
-  FillChar(CS, SizeOf(CS), 0);
-  CS.x := X; CS.y := Y; CS.cx := W; CS.cy := H;
-  CS.style := Style;
-  CS.dwExStyle := ExStyle;
-  CS.hwndParent := Parent;
-  ZMCallWindow(Win, WM_NCCREATE, 0, LPARAM(@CS));
-  ZMCallWindow(Win, WM_CREATE, 0, LPARAM(@CS));
-  if Style and WS_VISIBLE <> 0 then
-    ZMInvalidateScreen(Win.WindowRectScreen);
+  Result := VensterObj.Handle;
+  FillChar(Maakstruct, SizeOf(Maakstruct), 0);
+  Maakstruct.x := X; Maakstruct.y := Y; Maakstruct.cx := Breedte; Maakstruct.cy := Hoogte;
+  Maakstruct.style := Stijl;
+  Maakstruct.dwExStyle := UitStijl;
+  Maakstruct.hwndParent := Ouder;
+  ZMCallWindow(VensterObj, WM_NCCREATE, 0, LPARAM(@Maakstruct));
+  ZMCallWindow(VensterObj, WM_CREATE, 0, LPARAM(@Maakstruct));
+  if Stijl and WS_VISIBLE <> 0 then
+    ZMInvalidateScreen(VensterObj.WindowRectScreen);
 end;
 
-function ZMDestroyWindow(H: HWND): Boolean;
+function ZMDestroyWindow(Venster: HWND): Boolean;
 var
-  W: TZMWindow;
-  A: TWinArray;
-  WR: TRect;
-  WasVisible: Boolean;
+  VensterObj: TZMWindow;
+  Lijst: TWinArray;
+  VensterR: TRect;
+  WasZichtbaar: Boolean;
   I: Integer;
 begin
-  W := ZMWindowObj(H);
-  if (W = nil) or W.Destroying then Exit(False);
-  W.Destroying := True;
-  WasVisible := W.IsVisible;
-  WR := W.WindowRectScreen;
-  if WasVisible then
+  VensterObj := ZMWindowObj(Venster);
+  if (VensterObj = nil) or VensterObj.Destroying then Exit(False);
+  VensterObj.Destroying := True;
+  WasZichtbaar := VensterObj.IsVisible;
+  VensterR := VensterObj.WindowRectScreen;
+  if WasZichtbaar then
   begin
-    W.Style := W.Style and not WS_VISIBLE;
+    VensterObj.Style := VensterObj.Style and not WS_VISIBLE;
     BumpVis;
   end;
-  ZMCallWindow(W, WM_DESTROY, 0, 0);
-  while Length(W.Children) > 0 do
-    if not ZMDestroyWindow(W.Children[High(W.Children)].Handle) then
+  ZMCallWindow(VensterObj, WM_DESTROY, 0, 0);
+  while Length(VensterObj.Children) > 0 do
+    if not ZMDestroyWindow(VensterObj.Children[High(VensterObj.Children)].Handle) then
     begin
-      A := W.Children;
-      SetLength(A, Length(A) - 1);
-      W.Children := A;
+      Lijst := VensterObj.Children;
+      SetLength(Lijst, Length(Lijst) - 1);
+      VensterObj.Children := Lijst;
     end;
   { eigen topniveauvensters gaan mee met hun eigenaar }
   I := 0;
   while I <= High(TopLevels) do
   begin
-    if (TopLevels[I].Owner = H) and not TopLevels[I].Destroying then
+    if (TopLevels[I].Owner = Venster) and not TopLevels[I].Destroying then
     begin
       ZMDestroyWindow(TopLevels[I].Handle);
       I := 0;
@@ -600,24 +600,24 @@ begin
     else
       Inc(I);
   end;
-  ZMCallWindow(W, WM_NCDESTROY, 0, 0);
+  ZMCallWindow(VensterObj, WM_NCDESTROY, 0, 0);
   for I := 0 to High(Timers) do
-    if Timers[I].Active and (Timers[I].Wnd = H) then Timers[I].Active := False;
-  if FocusWnd = H then FocusWnd := 0;
-  if CaptureWnd = H then CaptureWnd := 0;
-  if ActiveWnd = H then ActiveWnd := 0;
-  if ZMMainWindow = H then ZMMainWindow := 0;
-  A := SiblingsOf(W);
-  ArrRemove(A, W);
-  SetSiblings(W, A);
+    if Timers[I].Active and (Timers[I].Wnd = Venster) then Timers[I].Active := False;
+  if FocusWnd = Venster then FocusWnd := 0;
+  if CaptureWnd = Venster then CaptureWnd := 0;
+  if ActiveWnd = Venster then ActiveWnd := 0;
+  if ZMMainWindow = Venster then ZMMainWindow := 0;
+  Lijst := SiblingsOf(VensterObj);
+  ArrRemove(Lijst, VensterObj);
+  SetSiblings(VensterObj, Lijst);
   { verwijder wachtende berichten voor dit venster }
   for I := 0 to QCount - 1 do
-    if Queue[(QHead + I) mod Length(Queue)].hwnd = H then
+    if Queue[(QHead + I) mod Length(Queue)].hwnd = Venster then
       Queue[(QHead + I) mod Length(Queue)].message := WM_NULL;
   BumpVis;
-  if WasVisible then ZMInvalidateScreen(WR);
-  ZMFreeHandle(H);
-  W.Free;
+  if WasZichtbaar then ZMInvalidateScreen(VensterR);
+  ZMFreeHandle(Venster);
+  VensterObj.Free;
   if (ActiveWnd = 0) and (Length(TopLevels) > 0) then
   begin
     for I := High(TopLevels) downto 0 do
@@ -630,450 +630,450 @@ begin
   Result := True;
 end;
 
-procedure ZMSetStyle(H: HWND; NewStyle: DWORD);
+procedure ZMSetStyle(Venster: HWND; NieuweStijl: DWORD);
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
-  W := ZMWindowObj(H);
-  if W = nil then Exit;
-  if W.Style = NewStyle then Exit;
-  W.Style := NewStyle;
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit;
+  if VensterObj.Style = NieuweStijl then Exit;
+  VensterObj.Style := NieuweStijl;
   BumpVis;
-  W.NCDirty := True;
-  if W.IsVisible then ZMInvalidateScreen(W.WindowRectScreen);
+  VensterObj.NCDirty := True;
+  if VensterObj.IsVisible then ZMInvalidateScreen(VensterObj.WindowRectScreen);
 end;
 
-procedure ZMSetExStyle(H: HWND; NewStyle: DWORD);
+procedure ZMSetExStyle(Venster: HWND; NieuweUitStijl: DWORD);
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
-  W := ZMWindowObj(H);
-  if W = nil then Exit;
-  W.ExStyle := NewStyle;
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit;
+  VensterObj.ExStyle := NieuweUitStijl;
   BumpVis;
-  W.NCDirty := True;
-  if W.IsVisible then ZMInvalidateScreen(W.WindowRectScreen);
+  VensterObj.NCDirty := True;
+  if VensterObj.IsVisible then ZMInvalidateScreen(VensterObj.WindowRectScreen);
 end;
 
-procedure ZMSetWindowPos(H, After: HWND; X, Y, W, H2: Integer; Flags: UINT);
+procedure ZMSetWindowPos(Venster, Na: HWND; X, Y, Breedte, Hoogte: Integer; Vlaggen: UINT);
 var
-  Win: TZMWindow;
-  OldR, OldScr, NewScr: TRect;
-  A: TWinArray;
-  Moved, Sized, WasVis, Changed: Boolean;
-  WP: TWindowPos;
+  VensterObj: TZMWindow;
+  OudR, OudScherm, NieuwScherm: TRect;
+  Lijst: TWinArray;
+  Verplaatst, Hergrootd, WasZichtbaar, Gewijzigd: Boolean;
+  Positie: TWindowPos;
   I: Integer;
 begin
-  Win := ZMWindowObj(H);
-  if Win = nil then Exit;
-  OldR := Win.R;
-  WasVis := Win.IsVisible;
-  OldScr := Win.WindowRectScreen;
-  Changed := False;
-  if Flags and SWP_NOMOVE = 0 then
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit;
+  OudR := VensterObj.R;
+  WasZichtbaar := VensterObj.IsVisible;
+  OudScherm := VensterObj.WindowRectScreen;
+  Gewijzigd := False;
+  if Vlaggen and SWP_NOMOVE = 0 then
   begin
-    if (X <> OldR.Left) or (Y <> OldR.Top) then
+    if (X <> OudR.Left) or (Y <> OudR.Top) then
     begin
-      OffsetRect(Win.R, X - Win.R.Left, Y - Win.R.Top);
-      Changed := True;
+      OffsetRect(VensterObj.R, X - VensterObj.R.Left, Y - VensterObj.R.Top);
+      Gewijzigd := True;
     end;
   end;
-  if Flags and SWP_NOSIZE = 0 then
+  if Vlaggen and SWP_NOSIZE = 0 then
   begin
-    if W < 0 then W := 0;
-    if H2 < 0 then H2 := 0;
-    if (W <> Win.R.Right - Win.R.Left) or (H2 <> Win.R.Bottom - Win.R.Top) then
+    if Breedte < 0 then Breedte := 0;
+    if Hoogte < 0 then Hoogte := 0;
+    if (Breedte <> VensterObj.R.Right - VensterObj.R.Left) or (Hoogte <> VensterObj.R.Bottom - VensterObj.R.Top) then
     begin
-      Win.R.Right := Win.R.Left + W;
-      Win.R.Bottom := Win.R.Top + H2;
-      Changed := True;
+      VensterObj.R.Right := VensterObj.R.Left + Breedte;
+      VensterObj.R.Bottom := VensterObj.R.Top + Hoogte;
+      Gewijzigd := True;
     end;
   end;
-  if Flags and SWP_NOZORDER = 0 then
+  if Vlaggen and SWP_NOZORDER = 0 then
   begin
-    A := SiblingsOf(Win);
-    ArrRemove(A, Win);
-    if After = HWND_TOPMOST then
+    Lijst := SiblingsOf(VensterObj);
+    ArrRemove(Lijst, VensterObj);
+    if Na = HWND_TOPMOST then
     begin
-      Win.ExStyle := Win.ExStyle or WS_EX_TOPMOST;
-      ArrInsert(A, Win, Length(A));
+      VensterObj.ExStyle := VensterObj.ExStyle or WS_EX_TOPMOST;
+      ArrInsert(Lijst, VensterObj, Length(Lijst));
     end
-    else if After = HWND_NOTOPMOST then
+    else if Na = HWND_NOTOPMOST then
     begin
-      Win.ExStyle := Win.ExStyle and not WS_EX_TOPMOST;
-      ArrInsert(A, Win, TopInsertIndex(A, Win));
+      VensterObj.ExStyle := VensterObj.ExStyle and not WS_EX_TOPMOST;
+      ArrInsert(Lijst, VensterObj, TopInsertIndex(Lijst, VensterObj));
     end
-    else if After = HWND_TOP then
-      ArrInsert(A, Win, TopInsertIndex(A, Win))
-    else if After = HWND_BOTTOM then
-      ArrInsert(A, Win, 0)
+    else if Na = HWND_TOP then
+      ArrInsert(Lijst, VensterObj, TopInsertIndex(Lijst, VensterObj))
+    else if Na = HWND_BOTTOM then
+      ArrInsert(Lijst, VensterObj, 0)
     else
     begin
       { plaats onder After }
       I := 0;
-      while (I <= High(A)) and (A[I].Handle <> After) do Inc(I);
-      if I > High(A) then ArrInsert(A, Win, TopInsertIndex(A, Win))
-      else ArrInsert(A, Win, I);
+      while (I <= High(Lijst)) and (Lijst[I].Handle <> Na) do Inc(I);
+      if I > High(Lijst) then ArrInsert(Lijst, VensterObj, TopInsertIndex(Lijst, VensterObj))
+      else ArrInsert(Lijst, VensterObj, I);
     end;
-    SetSiblings(Win, A);
-    Changed := True;
+    SetSiblings(VensterObj, Lijst);
+    Gewijzigd := True;
   end;
-  if Flags and SWP_SHOWWINDOW <> 0 then
+  if Vlaggen and SWP_SHOWWINDOW <> 0 then
   begin
-    if Win.Style and WS_VISIBLE = 0 then Changed := True;
-    Win.Style := Win.Style or WS_VISIBLE;
+    if VensterObj.Style and WS_VISIBLE = 0 then Gewijzigd := True;
+    VensterObj.Style := VensterObj.Style or WS_VISIBLE;
   end;
-  if Flags and SWP_HIDEWINDOW <> 0 then
+  if Vlaggen and SWP_HIDEWINDOW <> 0 then
   begin
-    if Win.Style and WS_VISIBLE <> 0 then Changed := True;
-    Win.Style := Win.Style and not WS_VISIBLE;
+    if VensterObj.Style and WS_VISIBLE <> 0 then Gewijzigd := True;
+    VensterObj.Style := VensterObj.Style and not WS_VISIBLE;
   end;
-  if Flags and SWP_FRAMECHANGED <> 0 then Changed := True;
-  if not Changed then Exit;
+  if Vlaggen and SWP_FRAMECHANGED <> 0 then Gewijzigd := True;
+  if not Gewijzigd then Exit;
   BumpVis;
-  Win.NCDirty := True;
-  if WasVis then ZMInvalidateScreen(OldScr);
-  NewScr := Win.WindowRectScreen;
-  if Win.IsVisible then ZMInvalidateScreen(NewScr);
-  if PtInRect(OldScr, MousePos) or PtInRect(NewScr, MousePos) then SyntheticMove := True;
-  Moved := (OldR.Left <> Win.R.Left) or (OldR.Top <> Win.R.Top);
-  Sized := (OldR.Right - OldR.Left <> Win.R.Right - Win.R.Left) or
-    (OldR.Bottom - OldR.Top <> Win.R.Bottom - Win.R.Top);
-  WP.hwnd := H;
-  WP.hwndInsertAfter := After;
-  WP.x := Win.R.Left; WP.y := Win.R.Top;
-  WP.cx := Win.R.Right - Win.R.Left; WP.cy := Win.R.Bottom - Win.R.Top;
-  WP.flags := Flags;
-  if Flags and SWP_NOSENDCHANGING = 0 then
-    ZMCallWindow(Win, WM_WINDOWPOSCHANGED, 0, LPARAM(@WP));
-  if Moved then
-    ZMCallWindow(Win, WM_MOVE, 0, MakeLParam(Word(Win.R.Left), Word(Win.R.Top)));
-  if Sized then
-    with Win.ClientRectScreen do
-      ZMCallWindow(Win, WM_SIZE, SIZE_RESTORED, MakeLParam(Word(Right - Left), Word(Bottom - Top)));
-  if (Flags and SWP_SHOWWINDOW <> 0) and not WasVis then
-    ZMCallWindow(Win, WM_SHOWWINDOW, 1, 0)
-  else if (Flags and SWP_HIDEWINDOW <> 0) and WasVis then
-    ZMCallWindow(Win, WM_SHOWWINDOW, 0, 0);
+  VensterObj.NCDirty := True;
+  if WasZichtbaar then ZMInvalidateScreen(OudScherm);
+  NieuwScherm := VensterObj.WindowRectScreen;
+  if VensterObj.IsVisible then ZMInvalidateScreen(NieuwScherm);
+  if PtInRect(OudScherm, MousePos) or PtInRect(NieuwScherm, MousePos) then SyntheticMove := True;
+  Verplaatst := (OudR.Left <> VensterObj.R.Left) or (OudR.Top <> VensterObj.R.Top);
+  Hergrootd := (OudR.Right - OudR.Left <> VensterObj.R.Right - VensterObj.R.Left) or
+    (OudR.Bottom - OudR.Top <> VensterObj.R.Bottom - VensterObj.R.Top);
+  Positie.hwnd := Venster;
+  Positie.hwndInsertAfter := Na;
+  Positie.x := VensterObj.R.Left; Positie.y := VensterObj.R.Top;
+  Positie.cx := VensterObj.R.Right - VensterObj.R.Left; Positie.cy := VensterObj.R.Bottom - VensterObj.R.Top;
+  Positie.flags := Vlaggen;
+  if Vlaggen and SWP_NOSENDCHANGING = 0 then
+    ZMCallWindow(VensterObj, WM_WINDOWPOSCHANGED, 0, LPARAM(@Positie));
+  if Verplaatst then
+    ZMCallWindow(VensterObj, WM_MOVE, 0, MakeLParam(Word(VensterObj.R.Left), Word(VensterObj.R.Top)));
+  if Hergrootd then
+    with VensterObj.ClientRectScreen do
+      ZMCallWindow(VensterObj, WM_SIZE, SIZE_RESTORED, MakeLParam(Word(Right - Left), Word(Bottom - Top)));
+  if (Vlaggen and SWP_SHOWWINDOW <> 0) and not WasZichtbaar then
+    ZMCallWindow(VensterObj, WM_SHOWWINDOW, 1, 0)
+  else if (Vlaggen and SWP_HIDEWINDOW <> 0) and WasZichtbaar then
+    ZMCallWindow(VensterObj, WM_SHOWWINDOW, 0, 0);
 end;
 
-function ZMShowWindow(H: HWND; Show: Boolean): Boolean;
+function ZMShowWindow(Venster: HWND; Tonen: Boolean): Boolean;
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
-  W := ZMWindowObj(H);
-  if W = nil then Exit(False);
-  Result := W.Style and WS_VISIBLE <> 0;
-  if Show = Result then Exit;
-  if Show then
-    ZMSetWindowPos(H, 0, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_SHOWWINDOW)
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit(False);
+  Result := VensterObj.Style and WS_VISIBLE <> 0;
+  if Tonen = Result then Exit;
+  if Tonen then
+    ZMSetWindowPos(Venster, 0, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_SHOWWINDOW)
   else
   begin
-    ZMSetWindowPos(H, 0, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_HIDEWINDOW);
+    ZMSetWindowPos(Venster, 0, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_HIDEWINDOW);
     if (FocusWnd <> 0) then
     begin
       { focus binnen een verborgen venster gaat verloren }
-      if (FocusWnd = H) or (IsChild(H, FocusWnd)) then ZMSetFocus(0);
+      if (FocusWnd = Venster) or (IsChild(Venster, FocusWnd)) then ZMSetFocus(0);
     end;
-    if ActiveWnd = H then
+    if ActiveWnd = Venster then
     begin
       ActiveWnd := 0;
     end;
   end;
 end;
 
-procedure ZMSetParent(H, NewParent: HWND);
+procedure ZMSetParent(Venster, NieuweOuder: HWND);
 var
-  W, P: TZMWindow;
-  A: TWinArray;
-  WasVis: Boolean;
-  OldScr: TRect;
+  VensterObj, OuderObj: TZMWindow;
+  Lijst: TWinArray;
+  WasZichtbaar: Boolean;
+  OudScherm: TRect;
 begin
-  W := ZMWindowObj(H);
-  if W = nil then Exit;
-  P := ZMWindowObj(NewParent);
-  if W.Parent = P then Exit;
-  WasVis := W.IsVisible;
-  OldScr := W.WindowRectScreen;
-  A := SiblingsOf(W);
-  ArrRemove(A, W);
-  SetSiblings(W, A);
-  W.Parent := P;
-  if P <> nil then
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit;
+  OuderObj := ZMWindowObj(NieuweOuder);
+  if VensterObj.Parent = OuderObj then Exit;
+  WasZichtbaar := VensterObj.IsVisible;
+  OudScherm := VensterObj.WindowRectScreen;
+  Lijst := SiblingsOf(VensterObj);
+  ArrRemove(Lijst, VensterObj);
+  SetSiblings(VensterObj, Lijst);
+  VensterObj.Parent := OuderObj;
+  if OuderObj <> nil then
   begin
-    W.Style := W.Style or WS_CHILD;
-    A := P.Children;
+    VensterObj.Style := VensterObj.Style or WS_CHILD;
+    Lijst := OuderObj.Children;
   end
   else
-    A := TopLevels;
-  ArrInsert(A, W, TopInsertIndex(A, W));
-  SetSiblings(W, A);
+    Lijst := TopLevels;
+  ArrInsert(Lijst, VensterObj, TopInsertIndex(Lijst, VensterObj));
+  SetSiblings(VensterObj, Lijst);
   BumpVis;
-  if WasVis then ZMInvalidateScreen(OldScr);
-  if W.IsVisible then ZMInvalidateScreen(W.WindowRectScreen);
+  if WasZichtbaar then ZMInvalidateScreen(OudScherm);
+  if VensterObj.IsVisible then ZMInvalidateScreen(VensterObj.WindowRectScreen);
 end;
 
-function HitTest(const A: TWinArray; P: TPoint; SkipDisabled: Boolean): TZMWindow;
+function HitTest(const Lijst: TWinArray; Punt: TPoint; Overslaan: Boolean): TZMWindow;
 var
   I: Integer;
-  W, C: TZMWindow;
+  VensterObj, Kind: TZMWindow;
   R: TRect;
 begin
   Result := nil;
-  for I := High(A) downto 0 do
+  for I := High(Lijst) downto 0 do
   begin
-    W := A[I];
-    if W.Style and WS_VISIBLE = 0 then Continue;
-    R := W.WindowRectScreen;
-    if not PtInRect(R, P) then Continue;
-    if PtInRect(W.ClientRectScreen, P) then
+    VensterObj := Lijst[I];
+    if VensterObj.Style and WS_VISIBLE = 0 then Continue;
+    R := VensterObj.WindowRectScreen;
+    if not PtInRect(R, Punt) then Continue;
+    if PtInRect(VensterObj.ClientRectScreen, Punt) then
     begin
-      C := HitTest(W.Children, P, SkipDisabled);
-      if C <> nil then Exit(C);
+      Kind := HitTest(VensterObj.Children, Punt, Overslaan);
+      if Kind <> nil then Exit(Kind);
     end;
-    if SkipDisabled and (W.Style and WS_DISABLED <> 0) then Exit(nil);
-    Exit(W);
+    if Overslaan and (VensterObj.Style and WS_DISABLED <> 0) then Exit(nil);
+    Exit(VensterObj);
   end;
 end;
 
-function ZMWindowFromPoint(P: TPoint; SkipDisabled: Boolean): HWND;
+function ZMWindowFromPoint(Punt: TPoint; Overslaan: Boolean): HWND;
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
-  W := HitTest(TopLevels, P, SkipDisabled);
-  if W = nil then Result := 0 else Result := W.Handle;
+  VensterObj := HitTest(TopLevels, Punt, Overslaan);
+  if VensterObj = nil then Result := 0 else Result := VensterObj.Handle;
 end;
 
-procedure ZMClientToScreen(H: HWND; var P: TPoint);
+procedure ZMClientToScreen(Venster: HWND; var Punt: TPoint);
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
   R: TRect;
 begin
-  W := ZMWindowObj(H);
-  if W = nil then Exit;
-  R := W.ClientRectScreen;
-  Inc(P.X, R.Left);
-  Inc(P.Y, R.Top);
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit;
+  R := VensterObj.ClientRectScreen;
+  Inc(Punt.X, R.Left);
+  Inc(Punt.Y, R.Top);
 end;
 
-procedure ZMScreenToClient(H: HWND; var P: TPoint);
+procedure ZMScreenToClient(Venster: HWND; var Punt: TPoint);
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
   R: TRect;
 begin
-  W := ZMWindowObj(H);
-  if W = nil then Exit;
-  R := W.ClientRectScreen;
-  Dec(P.X, R.Left);
-  Dec(P.Y, R.Top);
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit;
+  R := VensterObj.ClientRectScreen;
+  Dec(Punt.X, R.Left);
+  Dec(Punt.Y, R.Top);
 end;
 
-procedure ZMEnumTopLevel(Proc: TZMEnumWindowProc; Data: Pointer);
+procedure ZMEnumTopLevel(Terugroep: TZMEnumWindowProc; Gegevens: Pointer);
 var
-  A: TWinArray;
+  Lijst: TWinArray;
   I: Integer;
 begin
-  A := Copy(TopLevels, 0, Length(TopLevels));
-  for I := High(A) downto 0 do
-    if not Proc(A[I].Handle, Data) then Break;
+  Lijst := Copy(TopLevels, 0, Length(TopLevels));
+  for I := High(Lijst) downto 0 do
+    if not Terugroep(Lijst[I].Handle, Gegevens) then Break;
 end;
 
-procedure ZMEnumChildren(H: HWND; Proc: TZMEnumWindowProc; Data: Pointer);
+procedure ZMEnumChildren(Venster: HWND; Terugroep: TZMEnumWindowProc; Gegevens: Pointer);
 var
-  W: TZMWindow;
-  A: TWinArray;
+  VensterObj: TZMWindow;
+  Lijst: TWinArray;
   I: Integer;
 begin
-  W := ZMWindowObj(H);
-  if W = nil then Exit;
-  A := Copy(W.Children, 0, Length(W.Children));
-  for I := High(A) downto 0 do
-    if not Proc(A[I].Handle, Data) then Break;
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit;
+  Lijst := Copy(VensterObj.Children, 0, Length(VensterObj.Children));
+  for I := High(Lijst) downto 0 do
+    if not Terugroep(Lijst[I].Handle, Gegevens) then Break;
 end;
 
-function ZMGetWindowInZ(H: HWND; Cmd: UINT): HWND;
+function ZMGetWindowInZ(Venster: HWND; Opdracht: UINT): HWND;
 const
   GW_HWNDFIRST = 0; GW_HWNDLAST = 1; GW_HWNDNEXT = 2; GW_HWNDPREV = 3; GW_OWNER = 4; GW_CHILD = 5;
 var
-  W: TZMWindow;
-  A: TWinArray;
+  VensterObj: TZMWindow;
+  Lijst: TWinArray;
   I: Integer;
 begin
   Result := 0;
-  W := ZMWindowObj(H);
-  if W = nil then
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then
   begin
-    if (H = 0) and (Cmd = GW_CHILD) and (Length(TopLevels) > 0) then
+    if (Venster = 0) and (Opdracht = GW_CHILD) and (Length(TopLevels) > 0) then
       Result := TopLevels[High(TopLevels)].Handle;
     Exit;
   end;
-  A := SiblingsOf(W);
-  case Cmd of
-    GW_HWNDFIRST: if Length(A) > 0 then Result := A[High(A)].Handle;
-    GW_HWNDLAST: if Length(A) > 0 then Result := A[0].Handle;
+  Lijst := SiblingsOf(VensterObj);
+  case Opdracht of
+    GW_HWNDFIRST: if Length(Lijst) > 0 then Result := Lijst[High(Lijst)].Handle;
+    GW_HWNDLAST: if Length(Lijst) > 0 then Result := Lijst[0].Handle;
     GW_HWNDNEXT, GW_HWNDPREV:
-      for I := 0 to High(A) do
-        if A[I] = W then
+      for I := 0 to High(Lijst) do
+        if Lijst[I] = VensterObj then
         begin
-          if (Cmd = GW_HWNDNEXT) and (I > 0) then Result := A[I - 1].Handle;
-          if (Cmd = GW_HWNDPREV) and (I < High(A)) then Result := A[I + 1].Handle;
+          if (Opdracht = GW_HWNDNEXT) and (I > 0) then Result := Lijst[I - 1].Handle;
+          if (Opdracht = GW_HWNDPREV) and (I < High(Lijst)) then Result := Lijst[I + 1].Handle;
           Break;
         end;
-    GW_OWNER: Result := W.Owner;
-    GW_CHILD: if Length(W.Children) > 0 then Result := W.Children[High(W.Children)].Handle;
+    GW_OWNER: Result := VensterObj.Owner;
+    GW_CHILD: if Length(VensterObj.Children) > 0 then Result := VensterObj.Children[High(VensterObj.Children)].Handle;
   end;
 end;
 
 { ---------------------------------------------------------------- tekenen }
 
-procedure AddUpdate(W: TZMWindow; const ClientR: TRect; Erase: Boolean);
+procedure AddUpdate(VensterObj: TZMWindow; const KlientR: TRect; Wissen: Boolean);
 var
-  CR: TRect;
-  T: TZMRects;
+  KlientLok: TRect;
+  Rechthoeken: TZMRects;
 begin
-  with W.ClientRectScreen do CR := Rect(0, 0, Right - Left, Bottom - Top);
-  SetLength(T, 1);
-  T[0] := ClientR;
-  T := RectsIntersectRect(T, CR);
-  if Length(T) = 0 then Exit;
-  W.UpdRgn := RectsUnion(W.UpdRgn, T);
+  with VensterObj.ClientRectScreen do KlientLok := Rect(0, 0, Right - Left, Bottom - Top);
+  SetLength(Rechthoeken, 1);
+  Rechthoeken[0] := KlientR;
+  Rechthoeken := RectsIntersectRect(Rechthoeken, KlientLok);
+  if Length(Rechthoeken) = 0 then Exit;
+  VensterObj.UpdRgn := RectsUnion(VensterObj.UpdRgn, Rechthoeken);
   { houd het gebied klein: vouw het samen tot zijn omhullende rechthoek als het versplintert }
-  if Length(W.UpdRgn) > 16 then
+  if Length(VensterObj.UpdRgn) > 16 then
   begin
-    SetLength(T, 1);
-    T[0] := RectsBox(W.UpdRgn);
-    W.UpdRgn := T;
+    SetLength(Rechthoeken, 1);
+    Rechthoeken[0] := RectsBox(VensterObj.UpdRgn);
+    VensterObj.UpdRgn := Rechthoeken;
   end;
-  if Erase then W.EraseBk := True;
+  if Wissen then VensterObj.EraseBk := True;
 end;
 
-procedure ZMInvalidateTree(W: TZMWindow; const ScreenR: TRect);
+procedure ZMInvalidateTree(VensterObj: TZMWindow; const SchermR: TRect);
 var
-  WR, CR, I2: TRect;
+  VensterR, KlientR, Snijding: TRect;
   I: Integer;
 begin
-  if W.Style and WS_VISIBLE = 0 then Exit;
-  WR := W.WindowRectScreen;
-  if not IntersectRect(I2, WR, ScreenR) then Exit;
-  CR := W.ClientRectScreen;
-  if not EqualRect(WR, CR) then
-    if not (PtInRect(CR, I2.TopLeft) and PtInRect(CR, Point(I2.Right - 1, I2.Bottom - 1))) then
-      W.NCDirty := True;
-  if IntersectRect(I2, CR, ScreenR) then
+  if VensterObj.Style and WS_VISIBLE = 0 then Exit;
+  VensterR := VensterObj.WindowRectScreen;
+  if not IntersectRect(Snijding, VensterR, SchermR) then Exit;
+  KlientR := VensterObj.ClientRectScreen;
+  if not EqualRect(VensterR, KlientR) then
+    if not (PtInRect(KlientR, Snijding.TopLeft) and PtInRect(KlientR, Point(Snijding.Right - 1, Snijding.Bottom - 1))) then
+      VensterObj.NCDirty := True;
+  if IntersectRect(Snijding, KlientR, SchermR) then
   begin
-    OffsetRect(I2, -CR.Left, -CR.Top);
-    AddUpdate(W, I2, True);
+    OffsetRect(Snijding, -KlientR.Left, -KlientR.Top);
+    AddUpdate(VensterObj, Snijding, True);
   end;
-  for I := 0 to High(W.Children) do
-    ZMInvalidateTree(W.Children[I], ScreenR);
+  for I := 0 to High(VensterObj.Children) do
+    ZMInvalidateTree(VensterObj.Children[I], SchermR);
 end;
 
-procedure ZMInvalidateScreen(const ScreenR: TRect);
+procedure ZMInvalidateScreen(const SchermR: TRect);
 var
   I: Integer;
 begin
   ZMInit;
   for I := 0 to High(TopLevels) do
-    ZMInvalidateTree(TopLevels[I], ScreenR);
+    ZMInvalidateTree(TopLevels[I], SchermR);
   DesktopDirty := True;
 end;
 
 procedure PaintDesktop;
 var
-  D: TZMRects;
+  Bureaugebied: TZMRects;
   I, X, Y: Integer;
-  P: PLongWord;
+  Pixel: PLongWord;
 begin
   DesktopDirty := False;
-  SetLength(D, 1);
-  D[0] := Rect(0, 0, ZMScreenW, ZMScreenH);
+  SetLength(Bureaugebied, 1);
+  Bureaugebied[0] := Rect(0, 0, ZMScreenW, ZMScreenH);
   for I := 0 to High(TopLevels) do
     if TopLevels[I].Style and WS_VISIBLE <> 0 then
-      D := RectsSubtractRect(D, TopLevels[I].WindowRectScreen);
-  for I := 0 to High(D) do
-    for Y := D[I].Top to D[I].Bottom - 1 do
+      Bureaugebied := RectsSubtractRect(Bureaugebied, TopLevels[I].WindowRectScreen);
+  for I := 0 to High(Bureaugebied) do
+    for Y := Bureaugebied[I].Top to Bureaugebied[I].Bottom - 1 do
     begin
-      P := PLongWord(ZMScreen.RowPtr(Y)) + D[I].Left;
-      for X := D[I].Left to D[I].Right - 1 do
+      Pixel := PLongWord(ZMScreen.RowPtr(Y)) + Bureaugebied[I].Left;
+      for X := Bureaugebied[I].Left to Bureaugebied[I].Right - 1 do
       begin
-        P^ := ZMDesktopColor;
-        Inc(P);
+        Pixel^ := ZMDesktopColor;
+        Inc(Pixel);
       end;
     end;
-  if Length(D) > 0 then ZMScreen.Dirty := True;
+  if Length(Bureaugebied) > 0 then ZMScreen.Dirty := True;
 end;
 
-procedure ZMInvalidate(H: HWND; R: PRect; Erase: Boolean);
+procedure ZMInvalidate(Venster: HWND; R: PRect; Wissen: Boolean);
 var
-  W: TZMWindow;
-  CR: TRect;
+  VensterObj: TZMWindow;
+  KlientR: TRect;
 begin
-  if H = 0 then
+  if Venster = 0 then
   begin
     if R = nil then ZMInvalidateScreen(Rect(0, 0, ZMScreenW, ZMScreenH))
     else ZMInvalidateScreen(R^);
     Exit;
   end;
-  W := ZMWindowObj(H);
-  if W = nil then Exit;
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit;
   if R = nil then
   begin
-    with W.ClientRectScreen do CR := Rect(0, 0, Right - Left, Bottom - Top);
-    AddUpdate(W, CR, Erase);
+    with VensterObj.ClientRectScreen do KlientR := Rect(0, 0, Right - Left, Bottom - Top);
+    AddUpdate(VensterObj, KlientR, Wissen);
   end
   else
-    AddUpdate(W, R^, Erase);
+    AddUpdate(VensterObj, R^, Wissen);
 end;
 
-procedure ZMValidate(H: HWND; R: PRect);
+procedure ZMValidate(Venster: HWND; R: PRect);
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
-  W := ZMWindowObj(H);
-  if W = nil then Exit;
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit;
   if R = nil then
   begin
-    W.UpdRgn := nil;
-    W.EraseBk := False;
+    VensterObj.UpdRgn := nil;
+    VensterObj.EraseBk := False;
   end
   else
-    W.UpdRgn := RectsSubtractRect(W.UpdRgn, R^);
+    VensterObj.UpdRgn := RectsSubtractRect(VensterObj.UpdRgn, R^);
 end;
 
-function ZMGetUpdateRect(H: HWND; var R: TRect): Boolean;
+function ZMGetUpdateRect(Venster: HWND; var R: TRect): Boolean;
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
-  W := ZMWindowObj(H);
-  if (W = nil) or (Length(W.UpdRgn) = 0) then
+  VensterObj := ZMWindowObj(Venster);
+  if (VensterObj = nil) or (Length(VensterObj.UpdRgn) = 0) then
   begin
     R := Rect(0, 0, 0, 0);
     Exit(False);
   end;
-  R := RectsBox(W.UpdRgn);
+  R := RectsBox(VensterObj.UpdRgn);
   Result := True;
 end;
 
-function ZMGetDC(H: HWND; WholeWindow: Boolean): HDC;
+function ZMGetDC(Venster: HWND; HeelVenster: Boolean): HDC;
 var
   DC: TZMDC;
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
   ZMInit;
   DC := TZMDC.Create(ZMScreen);
-  if H = 0 then
+  if Venster = 0 then
   begin
     DC.HasVis := False;
     Exit(DC.Handle);
   end;
-  W := ZMWindowObj(H);
-  if W = nil then
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then
   begin
     DC.Free;
     Exit(0);
   end;
-  DC.Wnd := H;
-  DC.IsWindowDC := WholeWindow;
+  DC.Wnd := Venster;
+  DC.IsWindowDC := HeelVenster;
   DC.HasVis := True;
   DCVisProvider(DC);
   DC.VisGen := ZMVisGeneration;
@@ -1082,145 +1082,145 @@ end;
 
 procedure ZMReleaseDC(DC: HDC);
 var
-  D: TZMDC;
+  Teken: TZMDC;
 begin
-  D := GdiDC(DC);
-  if (D <> nil) and not D.IsMemDC then D.Free;
+  Teken := GdiDC(DC);
+  if (Teken <> nil) and not Teken.IsMemDC then Teken.Free;
 end;
 
-function ZMBeginPaint(H: HWND; var PS: TPaintStruct): HDC;
+function ZMBeginPaint(Venster: HWND; var TekenInfo: TPaintStruct): HDC;
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
   DC: TZMDC;
-  CR: TRect;
+  KlientR: TRect;
 begin
-  FillChar(PS, SizeOf(PS), 0);
-  W := ZMWindowObj(H);
-  if W = nil then Exit(0);
-  Result := ZMGetDC(H, False);
+  FillChar(TekenInfo, SizeOf(TekenInfo), 0);
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit(0);
+  Result := ZMGetDC(Venster, False);
   DC := GdiDC(Result);
-  CR := W.ClientRectScreen;
-  DC.PaintRgn := RectsOffset(W.UpdRgn, CR.Left, CR.Top);
+  KlientR := VensterObj.ClientRectScreen;
+  DC.PaintRgn := RectsOffset(VensterObj.UpdRgn, KlientR.Left, KlientR.Top);
   DC.HasPaintRgn := True;
   DC.IsPaintDC := True;
   DC.InvalidateClip;
-  PS.hdc := Result;
-  PS.rcPaint := RectsBox(W.UpdRgn);
-  PS.fErase := W.EraseBk;
-  W.UpdRgn := nil;
-  if W.EraseBk then
+  TekenInfo.hdc := Result;
+  TekenInfo.rcPaint := RectsBox(VensterObj.UpdRgn);
+  TekenInfo.fErase := VensterObj.EraseBk;
+  VensterObj.UpdRgn := nil;
+  if VensterObj.EraseBk then
   begin
-    W.EraseBk := False;
-    if ZMCallWindow(W, WM_ERASEBKGND, WPARAM(Result), 0) <> 0 then
-      PS.fErase := False;
+    VensterObj.EraseBk := False;
+    if ZMCallWindow(VensterObj, WM_ERASEBKGND, WPARAM(Result), 0) <> 0 then
+      TekenInfo.fErase := False;
   end;
 end;
 
-procedure ZMEndPaint(H: HWND; const PS: TPaintStruct);
+procedure ZMEndPaint(Venster: HWND; const TekenInfo: TPaintStruct);
 begin
-  ZMReleaseDC(PS.hdc);
+  ZMReleaseDC(TekenInfo.hdc);
 end;
 
-procedure PaintWindow(W: TZMWindow);
+procedure PaintWindow(VensterObj: TZMWindow);
 begin
-  if W.NCDirty then ZMPaintNC(W);
-  if Length(W.UpdRgn) > 0 then
-    ZMCallWindow(W, WM_PAINT, 0, 0);
+  if VensterObj.NCDirty then ZMPaintNC(VensterObj);
+  if Length(VensterObj.UpdRgn) > 0 then
+    ZMCallWindow(VensterObj, WM_PAINT, 0, 0);
 end;
 
-procedure ZMUpdateWindow(H: HWND);
+procedure ZMUpdateWindow(Venster: HWND);
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
   I: Integer;
-  Kids: TWinArray;
+  Kinderen: TWinArray;
 begin
-  W := ZMWindowObj(H);
-  if (W = nil) or not W.IsVisible then Exit;
-  PaintWindow(W);
-  Kids := Copy(W.Children, 0, Length(W.Children));
-  for I := 0 to High(Kids) do
-    if ZMWindowObj(Kids[I].Handle) = Kids[I] then
-      ZMUpdateWindow(Kids[I].Handle);
+  VensterObj := ZMWindowObj(Venster);
+  if (VensterObj = nil) or not VensterObj.IsVisible then Exit;
+  PaintWindow(VensterObj);
+  Kinderen := Copy(VensterObj.Children, 0, Length(VensterObj.Children));
+  for I := 0 to High(Kinderen) do
+    if ZMWindowObj(Kinderen[I].Handle) = Kinderen[I] then
+      ZMUpdateWindow(Kinderen[I].Handle);
 end;
 
-procedure ZMPaintNC(W: TZMWindow);
+procedure ZMPaintNC(VensterObj: TZMWindow);
 var
   DC: HDC;
-  D: TZMDC;
-  R, CR, TR: TRect;
-  N: TRect;
-  Act: Boolean;
-  LF: TLogFont;
-  F: TZMFontObj;
-  OldF: TZMFontObj;
-  procedure Edge(const A: TRect; TL, BR: COLORREF);
+  Teken: TZMDC;
+  R, KlientR, TitelR: TRect;
+  Marge: TRect;
+  Actief: Boolean;
+  Lettertype: TLogFont;
+  FontObj: TZMFontObj;
+  OudFont: TZMFontObj;
+  procedure Kader(const Gebied: TRect; LinksBoven, RechtsOnder: COLORREF);
   begin
-    GdiFillSolid(D, Rect(A.Left, A.Top, A.Right - 1, A.Top + 1), TL);
-    GdiFillSolid(D, Rect(A.Left, A.Top, A.Left + 1, A.Bottom - 1), TL);
-    GdiFillSolid(D, Rect(A.Left, A.Bottom - 1, A.Right, A.Bottom), BR);
-    GdiFillSolid(D, Rect(A.Right - 1, A.Top, A.Right, A.Bottom), BR);
+    GdiFillSolid(Teken, Rect(Gebied.Left, Gebied.Top, Gebied.Right - 1, Gebied.Top + 1), LinksBoven);
+    GdiFillSolid(Teken, Rect(Gebied.Left, Gebied.Top, Gebied.Left + 1, Gebied.Bottom - 1), LinksBoven);
+    GdiFillSolid(Teken, Rect(Gebied.Left, Gebied.Bottom - 1, Gebied.Right, Gebied.Bottom), RechtsOnder);
+    GdiFillSolid(Teken, Rect(Gebied.Right - 1, Gebied.Top, Gebied.Right, Gebied.Bottom), RechtsOnder);
   end;
 begin
-  W.NCDirty := False;
-  N := W.NCInsets;
-  if (N.Left = 0) and (N.Top = 0) and (N.Right = 0) and (N.Bottom = 0) then Exit;
-  if not W.IsVisible then Exit;
-  DC := ZMGetDC(W.Handle, True);
-  D := GdiDC(DC);
+  VensterObj.NCDirty := False;
+  Marge := VensterObj.NCInsets;
+  if (Marge.Left = 0) and (Marge.Top = 0) and (Marge.Right = 0) and (Marge.Bottom = 0) then Exit;
+  if not VensterObj.IsVisible then Exit;
+  DC := ZMGetDC(VensterObj.Handle, True);
+  Teken := GdiDC(DC);
   try
     { sluit het clientgebied uit }
-    R := Rect(0, 0, W.R.Right - W.R.Left, W.R.Bottom - W.R.Top);
-    CR := Rect(N.Left, N.Top, R.Right - N.Right, R.Bottom - N.Bottom);
-    D.St.HasClip := True;
-    SetLength(D.St.ClipRgn, 1);
-    D.St.ClipRgn[0] := R;
-    D.St.ClipRgn := RectsSubtractRect(D.St.ClipRgn, CR);
-    D.InvalidateClip;
-    if W.ExStyle and WS_EX_CLIENTEDGE <> 0 then
+    R := Rect(0, 0, VensterObj.R.Right - VensterObj.R.Left, VensterObj.R.Bottom - VensterObj.R.Top);
+    KlientR := Rect(Marge.Left, Marge.Top, R.Right - Marge.Right, R.Bottom - Marge.Bottom);
+    Teken.St.HasClip := True;
+    SetLength(Teken.St.ClipRgn, 1);
+    Teken.St.ClipRgn[0] := R;
+    Teken.St.ClipRgn := RectsSubtractRect(Teken.St.ClipRgn, KlientR);
+    Teken.InvalidateClip;
+    if VensterObj.ExStyle and WS_EX_CLIENTEDGE <> 0 then
     begin
-      Edge(Rect(CR.Left - 2, CR.Top - 2, CR.Right + 2, CR.Bottom + 2), $808080, $FFFFFF);
-      Edge(Rect(CR.Left - 1, CR.Top - 1, CR.Right + 1, CR.Bottom + 1), $404040, $C0C0C0);
+      Kader(Rect(KlientR.Left - 2, KlientR.Top - 2, KlientR.Right + 2, KlientR.Bottom + 2), $808080, $FFFFFF);
+      Kader(Rect(KlientR.Left - 1, KlientR.Top - 1, KlientR.Right + 1, KlientR.Bottom + 1), $404040, $C0C0C0);
     end;
-    if W.ExStyle and WS_EX_STATICEDGE <> 0 then
-      Edge(Rect(CR.Left - 1, CR.Top - 1, CR.Right + 1, CR.Bottom + 1), $808080, $FFFFFF);
-    if (W.Style and (WS_THICKFRAME or WS_DLGFRAME) <> 0) or (W.ExStyle and WS_EX_DLGMODALFRAME <> 0) then
+    if VensterObj.ExStyle and WS_EX_STATICEDGE <> 0 then
+      Kader(Rect(KlientR.Left - 1, KlientR.Top - 1, KlientR.Right + 1, KlientR.Bottom + 1), $808080, $FFFFFF);
+    if (VensterObj.Style and (WS_THICKFRAME or WS_DLGFRAME) <> 0) or (VensterObj.ExStyle and WS_EX_DLGMODALFRAME <> 0) then
     begin
-      GdiFillSolid(D, R, SysColors[COLOR_BTNFACE]);
-      Edge(R, $C0C0C0, $000000);
-      Edge(Rect(1, 1, R.Right - 1, R.Bottom - 1), $FFFFFF, $808080);
+      GdiFillSolid(Teken, R, SysColors[COLOR_BTNFACE]);
+      Kader(R, $C0C0C0, $000000);
+      Kader(Rect(1, 1, R.Right - 1, R.Bottom - 1), $FFFFFF, $808080);
     end
-    else if W.Style and WS_BORDER <> 0 then
-      Edge(R, $000000, $000000);
-    if W.Style and WS_CAPTION = WS_CAPTION then
+    else if VensterObj.Style and WS_BORDER <> 0 then
+      Kader(R, $000000, $000000);
+    if VensterObj.Style and WS_CAPTION = WS_CAPTION then
     begin
-      Act := (ActiveWnd = W.Handle);
-      TR := Rect(N.Left, N.Top - CAPTION_H - 1, R.Right - N.Right, N.Top - 1);
-      if Act then GdiFillSolid(D, TR, SysColors[COLOR_ACTIVECAPTION])
-      else GdiFillSolid(D, TR, SysColors[COLOR_INACTIVECAPTION]);
-      FillChar(LF, SizeOf(LF), 0);
-      LF.lfHeight := -11;
-      LF.lfWeight := FW_BOLD;
-      LF.lfFaceName := 'MS Sans Serif';
-      F := TZMFontObj.Create(LF);
-      OldF := D.St.Font;
-      D.St.Font := F;
-      D.St.BkMode := TRANSPARENT;
-      if Act then D.St.TextColor := $FFFFFF else D.St.TextColor := $C0C0C0;
-      GdiTextOut(D, TR.Left + 4, TR.Top + (CAPTION_H - F.Face^.Height) div 2,
-        PAnsiChar(AnsiString(W.Text)), Length(W.Text), False, @TR, nil);
-      D.St.Font := OldF;
-      F.Free;
-      if W.Style and WS_SYSMENU <> 0 then
+      Actief := (ActiveWnd = VensterObj.Handle);
+      TitelR := Rect(Marge.Left, Marge.Top - CAPTION_H - 1, R.Right - Marge.Right, Marge.Top - 1);
+      if Actief then GdiFillSolid(Teken, TitelR, SysColors[COLOR_ACTIVECAPTION])
+      else GdiFillSolid(Teken, TitelR, SysColors[COLOR_INACTIVECAPTION]);
+      FillChar(Lettertype, SizeOf(Lettertype), 0);
+      Lettertype.lfHeight := -11;
+      Lettertype.lfWeight := FW_BOLD;
+      Lettertype.lfFaceName := 'MS Sans Serif';
+      FontObj := TZMFontObj.Create(Lettertype);
+      OudFont := Teken.St.Font;
+      Teken.St.Font := FontObj;
+      Teken.St.BkMode := TRANSPARENT;
+      if Actief then Teken.St.TextColor := $FFFFFF else Teken.St.TextColor := $C0C0C0;
+      GdiTextOut(Teken, TitelR.Left + 4, TitelR.Top + (CAPTION_H - FontObj.Face^.Height) div 2,
+        PAnsiChar(AnsiString(VensterObj.Text)), Length(VensterObj.Text), False, @TitelR, nil);
+      Teken.St.Font := OudFont;
+      FontObj.Free;
+      if VensterObj.Style and WS_SYSMENU <> 0 then
       begin
         { sluitknop }
-        TR := Rect(TR.Right - 18, TR.Top + 2, TR.Right - 2, TR.Bottom - 2);
-        GdiFillSolid(D, TR, SysColors[COLOR_BTNFACE]);
-        Edge(TR, $FFFFFF, $000000);
-        D.St.Pen := TZMPen(StockObjects[BLACK_PEN]);
-        GdiLine(D, TR.Left + 4, TR.Top + 3, TR.Right - 5, TR.Bottom - 4, True);
-        GdiLine(D, TR.Left + 5, TR.Top + 3, TR.Right - 4, TR.Bottom - 4, True);
-        GdiLine(D, TR.Right - 5, TR.Top + 3, TR.Left + 4, TR.Bottom - 4, True);
-        GdiLine(D, TR.Right - 4, TR.Top + 3, TR.Left + 5, TR.Bottom - 4, True);
+        TitelR := Rect(TitelR.Right - 18, TitelR.Top + 2, TitelR.Right - 2, TitelR.Bottom - 2);
+        GdiFillSolid(Teken, TitelR, SysColors[COLOR_BTNFACE]);
+        Kader(TitelR, $FFFFFF, $000000);
+        Teken.St.Pen := TZMPen(StockObjects[BLACK_PEN]);
+        GdiLine(Teken, TitelR.Left + 4, TitelR.Top + 3, TitelR.Right - 5, TitelR.Bottom - 4, True);
+        GdiLine(Teken, TitelR.Left + 5, TitelR.Top + 3, TitelR.Right - 4, TitelR.Bottom - 4, True);
+        GdiLine(Teken, TitelR.Right - 5, TitelR.Top + 3, TitelR.Left + 4, TitelR.Bottom - 4, True);
+        GdiLine(Teken, TitelR.Right - 4, TitelR.Top + 3, TitelR.Left + 5, TitelR.Bottom - 4, True);
       end;
     end;
   finally
@@ -1230,152 +1230,152 @@ end;
 
 { ---------------------------------------------------------------- berichten }
 
-function ZMCallWindow(W: TZMWindow; Msg: UINT; WP: WPARAM; LP: LPARAM): LRESULT;
+function ZMCallWindow(VensterObj: TZMWindow; Bericht: UINT; WPar: WPARAM; LPar: LPARAM): LRESULT;
 var
-  M: TMessage;
+  Melding: TMessage;
 begin
   Result := 0;
-  if W = nil then Exit;
-  if Assigned(W.Method) then
+  if VensterObj = nil then Exit;
+  if Assigned(VensterObj.Method) then
   begin
-    FillChar(M, SizeOf(M), 0);
-    M.Msg := Msg;
-    M.WParam := WP;
-    M.LParam := LP;
+    FillChar(Melding, SizeOf(Melding), 0);
+    Melding.Msg := Bericht;
+    Melding.WParam := WPar;
+    Melding.LParam := LPar;
     Inc(InSend);
     try
-      W.Method(M);
+      VensterObj.Method(Melding);
     finally
       Dec(InSend);
     end;
-    Result := M.Result;
+    Result := Melding.Result;
   end
-  else if W.Proc <> nil then
-    Result := TWndProcFunc(W.Proc)(W.Handle, Msg, WP, LP)
+  else if VensterObj.Proc <> nil then
+    Result := TWndProcFunc(VensterObj.Proc)(VensterObj.Handle, Bericht, WPar, LPar)
   else
-    Result := ZMDefWindowProc(W.Handle, Msg, WP, LP);
+    Result := ZMDefWindowProc(VensterObj.Handle, Bericht, WPar, LPar);
 end;
 
-function ZMSendMessage(H: HWND; Msg: UINT; WP: WPARAM; LP: LPARAM): LRESULT;
+function ZMSendMessage(Venster: HWND; Bericht: UINT; WPar: WPARAM; LPar: LPARAM): LRESULT;
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
   I: Integer;
 begin
-  if H = HWND_BROADCAST then
+  if Venster = HWND_BROADCAST then
   begin
-    for I := 0 to High(TopLevels) do ZMCallWindow(TopLevels[I], Msg, WP, LP);
+    for I := 0 to High(TopLevels) do ZMCallWindow(TopLevels[I], Bericht, WPar, LPar);
     Exit(0);
   end;
-  W := ZMWindowObj(H);
-  Result := ZMCallWindow(W, Msg, WP, LP);
+  VensterObj := ZMWindowObj(Venster);
+  Result := ZMCallWindow(VensterObj, Bericht, WPar, LPar);
 end;
 
-procedure QueuePush(const M: TMsg);
+procedure QueuePush(const Melding: TMsg);
 var
-  NewQ: array of TMsg;
+  NieuweWacht: array of TMsg;
   I: Integer;
 begin
   if QCount >= Length(Queue) then
   begin
-    SetLength(NewQ, Length(Queue) * 2 + 64);
-    for I := 0 to QCount - 1 do NewQ[I] := Queue[(QHead + I) mod Length(Queue)];
-    Queue := NewQ;
+    SetLength(NieuweWacht, Length(Queue) * 2 + 64);
+    for I := 0 to QCount - 1 do NieuweWacht[I] := Queue[(QHead + I) mod Length(Queue)];
+    Queue := NieuweWacht;
     QHead := 0;
   end;
-  Queue[(QHead + QCount) mod Length(Queue)] := M;
+  Queue[(QHead + QCount) mod Length(Queue)] := Melding;
   Inc(QCount);
 end;
 
-function ZMPostMessage(H: HWND; Msg: UINT; WP: WPARAM; LP: LPARAM): Boolean;
+function ZMPostMessage(Venster: HWND; Bericht: UINT; WPar: WPARAM; LPar: LPARAM): Boolean;
 var
-  M: TMsg;
+  Melding: TMsg;
 begin
   ZMInit;
-  if (H <> 0) and (H <> HWND_BROADCAST) and (ZMWindowObj(H) = nil) then Exit(False);
-  M.hwnd := H;
-  M.message := Msg;
-  M.wParam := WP;
-  M.lParam := LP;
-  M.time := ZMTicks;
-  M.pt := MousePos;
-  QueuePush(M);
+  if (Venster <> 0) and (Venster <> HWND_BROADCAST) and (ZMWindowObj(Venster) = nil) then Exit(False);
+  Melding.hwnd := Venster;
+  Melding.message := Bericht;
+  Melding.wParam := WPar;
+  Melding.lParam := LPar;
+  Melding.time := ZMTicks;
+  Melding.pt := MousePos;
+  QueuePush(Melding);
   Result := True;
 end;
 
-function MsgMatches(const M: TMsg; H: HWND; MinMsg, MaxMsg: UINT): Boolean;
+function MsgMatches(const Melding: TMsg; Venster: HWND; MinBericht, MaxBericht: UINT): Boolean;
 begin
   Result := False;
-  if M.message = WM_NULL then
+  if Melding.message = WM_NULL then
   begin
     { geannuleerd bericht; laat het matchen zodat het wordt weggegooid }
     Exit(True);
   end;
-  if (H <> 0) and (M.hwnd <> H) and not IsChild(H, M.hwnd) then Exit;
-  if (MinMsg <> 0) or (MaxMsg <> 0) then
-    if (M.message < MinMsg) or (M.message > MaxMsg) then Exit;
+  if (Venster <> 0) and (Melding.hwnd <> Venster) and not IsChild(Venster, Melding.hwnd) then Exit;
+  if (MinBericht <> 0) or (MaxBericht <> 0) then
+    if (Melding.message < MinBericht) or (Melding.message > MaxBericht) then Exit;
   Result := True;
 end;
 
 function CallMMTimers: Boolean; forward;
-procedure PostMouse(Msg: UINT; P: TPoint; ExtraWP: WPARAM); forward;
+procedure PostMouse(Bericht: UINT; Punt: TPoint; ExtraWPar: WPARAM); forward;
 
-function FindPaint(H: HWND; var M: TMsg): Boolean;
-  function Scan(const A: TWinArray): TZMWindow;
+function FindPaint(Venster: HWND; var Melding: TMsg): Boolean;
+  function Zoek(const Lijst: TWinArray): TZMWindow;
   var
     I: Integer;
-    W: TZMWindow;
+    VensterObj: TZMWindow;
   begin
     Result := nil;
-    for I := 0 to High(A) do
+    for I := 0 to High(Lijst) do
     begin
-      W := A[I];
-      if W.Style and WS_VISIBLE = 0 then Continue;
-      if (Length(W.UpdRgn) > 0) or W.NCDirty then
-        if (H = 0) or (W.Handle = H) or IsChild(H, W.Handle) then Exit(W);
-      Result := Scan(W.Children);
+      VensterObj := Lijst[I];
+      if VensterObj.Style and WS_VISIBLE = 0 then Continue;
+      if (Length(VensterObj.UpdRgn) > 0) or VensterObj.NCDirty then
+        if (Venster = 0) or (VensterObj.Handle = Venster) or IsChild(Venster, VensterObj.Handle) then Exit(VensterObj);
+      Result := Zoek(VensterObj.Children);
       if Result <> nil then Exit;
     end;
   end;
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
   if DesktopDirty then PaintDesktop;
   repeat
-    W := Scan(TopLevels);
-    if W = nil then Exit(False);
-    if W.NCDirty then ZMPaintNC(W);
-  until Length(W.UpdRgn) > 0;
-  M.hwnd := W.Handle;
-  M.message := WM_PAINT;
-  M.wParam := 0;
-  M.lParam := 0;
-  M.time := ZMTicks;
-  M.pt := MousePos;
+    VensterObj := Zoek(TopLevels);
+    if VensterObj = nil then Exit(False);
+    if VensterObj.NCDirty then ZMPaintNC(VensterObj);
+  until Length(VensterObj.UpdRgn) > 0;
+  Melding.hwnd := VensterObj.Handle;
+  Melding.message := WM_PAINT;
+  Melding.wParam := 0;
+  Melding.lParam := 0;
+  Melding.time := ZMTicks;
+  Melding.pt := MousePos;
   Result := True;
 end;
 
-function FindTimer(H: HWND; var M: TMsg; Remove: Boolean): Boolean;
+function FindTimer(Venster: HWND; var Melding: TMsg; Verwijderen: Boolean): Boolean;
 var
-  I, Best: Integer;
-  Now: LongWord;
+  I, Beste: Integer;
+  Nu: LongWord;
 begin
   Result := False;
-  Now := ZMTicks;
-  Best := -1;
+  Nu := ZMTicks;
+  Beste := -1;
   for I := 0 to High(Timers) do
     with Timers[I] do
-      if Active and not IsMM and (LongInt(Now - Due) >= 0) and ((H = 0) or (Wnd = H)) then
-        if (Best < 0) or (LongInt(Timers[Best].Due - Due) > 0) then Best := I;
-  if Best < 0 then Exit;
-  M.hwnd := Timers[Best].Wnd;
-  M.message := WM_TIMER;
-  M.wParam := Timers[Best].ID;
-  M.lParam := LPARAM(PtrUInt(Timers[Best].Proc));
-  M.time := Now;
-  M.pt := MousePos;
-  if Remove then
+      if Active and not IsMM and (LongInt(Nu - Due) >= 0) and ((Venster = 0) or (Wnd = Venster)) then
+        if (Beste < 0) or (LongInt(Timers[Beste].Due - Due) > 0) then Beste := I;
+  if Beste < 0 then Exit;
+  Melding.hwnd := Timers[Beste].Wnd;
+  Melding.message := WM_TIMER;
+  Melding.wParam := Timers[Beste].ID;
+  Melding.lParam := LPARAM(PtrUInt(Timers[Beste].Proc));
+  Melding.time := Nu;
+  Melding.pt := MousePos;
+  if Verwijderen then
   begin
-    Timers[Best].Due := Now + Timers[Best].Interval;
+    Timers[Beste].Due := Nu + Timers[Beste].Interval;
   end;
   Result := True;
 end;
@@ -1383,18 +1383,18 @@ end;
 var
   LastPoll: LongWord;
 
-procedure DumpTree(const A: TWinArray; Indent: string);
+procedure DumpTree(const Lijst: TWinArray; Inspringing: string);
 var
   I: Integer;
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
-  for I := High(A) downto 0 do
+  for I := High(Lijst) downto 0 do
   begin
-    W := A[I];
-    WriteLn(StdErr, Indent, W.Handle, ' ', W.ClsName, ' "', W.Text, '" vis=', Ord(W.Style and WS_VISIBLE <> 0),
-      ' dis=', Ord(W.Style and WS_DISABLED <> 0), ' R=', W.R.Left, ',', W.R.Top, ',', W.R.Right, ',', W.R.Bottom,
-      ' upd=', Length(W.UpdRgn));
-    DumpTree(W.Children, Indent + '  ');
+    VensterObj := Lijst[I];
+    WriteLn(StdErr, Inspringing, VensterObj.Handle, ' ', VensterObj.ClsName, ' "', VensterObj.Text, '" vis=', Ord(VensterObj.Style and WS_VISIBLE <> 0),
+      ' dis=', Ord(VensterObj.Style and WS_DISABLED <> 0), ' R=', VensterObj.R.Left, ',', VensterObj.R.Top, ',', VensterObj.R.Right, ',', VensterObj.R.Bottom,
+      ' upd=', Length(VensterObj.UpdRgn));
+    DumpTree(VensterObj.Children, Inspringing + '  ');
   end;
 end;
 
@@ -1407,96 +1407,96 @@ end;
 { ZM_SCRIPT="ms:cmd[:args];..." met cmd = click:x,y | rclick:x,y | move:x,y |
   key:vk | char:c | shot:bestand.png | exit. Tijden zijn ms sinds de start, coördinaten
   zijn relatief aan het clientgebied van het hoofdformulier. Voor tests zonder harnas. }
-procedure RunScript(T: LongWord);
+procedure RunScript(Tijd: LongWord);
 var
-  Item, Cmd, Arg: string;
-  P, Q, X, Y: Integer;
-  At: Integer;
+  Onderdeel, Commando, Argument: string;
+  Beginpos, Eindpos, X, Y: Integer;
+  Tijdstip: Integer;
 begin
   while ScriptPos <= Length(Script) do
   begin
-    P := ScriptPos;
-    Q := P;
-    while (Q <= Length(Script)) and (Script[Q] <> ';') do Inc(Q);
-    Item := Trim(Copy(Script, P, Q - P));
-    At := StrToIntDef(Copy(Item, 1, Pos(':', Item) - 1), 0);
-    if Integer(T) < At then Exit;
-    ScriptPos := Q + 1;
-    Delete(Item, 1, Pos(':', Item));
-    if Pos(':', Item) > 0 then
+    Beginpos := ScriptPos;
+    Eindpos := Beginpos;
+    while (Eindpos <= Length(Script)) and (Script[Eindpos] <> ';') do Inc(Eindpos);
+    Onderdeel := Trim(Copy(Script, Beginpos, Eindpos - Beginpos));
+    Tijdstip := StrToIntDef(Copy(Onderdeel, 1, Pos(':', Onderdeel) - 1), 0);
+    if Integer(Tijd) < Tijdstip then Exit;
+    ScriptPos := Eindpos + 1;
+    Delete(Onderdeel, 1, Pos(':', Onderdeel));
+    if Pos(':', Onderdeel) > 0 then
     begin
-      Cmd := Copy(Item, 1, Pos(':', Item) - 1);
-      Arg := Copy(Item, Pos(':', Item) + 1, MaxInt);
+      Commando := Copy(Onderdeel, 1, Pos(':', Onderdeel) - 1);
+      Argument := Copy(Onderdeel, Pos(':', Onderdeel) + 1, MaxInt);
     end
     else
     begin
-      Cmd := Item;
-      Arg := '';
+      Commando := Onderdeel;
+      Argument := '';
     end;
-    X := StrToIntDef(Copy(Arg, 1, Pos(',', Arg) - 1), 0);
-    Y := StrToIntDef(Copy(Arg, Pos(',', Arg) + 1, MaxInt), 0);
-    if Cmd = 'click' then
+    X := StrToIntDef(Copy(Argument, 1, Pos(',', Argument) - 1), 0);
+    Y := StrToIntDef(Copy(Argument, Pos(',', Argument) + 1, MaxInt), 0);
+    if Commando = 'click' then
     begin
       ZMInjectMouse(X, Y, 1, True);
       ZMInjectMouse(X, Y, 1, False);
     end
-    else if Cmd = 'rclick' then
+    else if Commando = 'rclick' then
     begin
       ZMInjectMouse(X, Y, 2, True);
       ZMInjectMouse(X, Y, 2, False);
     end
-    else if Cmd = 'move' then ZMInjectMouse(X, Y, 0, False)
-    else if Cmd = 'key' then
+    else if Commando = 'move' then ZMInjectMouse(X, Y, 0, False)
+    else if Commando = 'key' then
     begin
-      ZMInjectKey(StrToIntDef(Arg, 0), True);
-      ZMInjectKey(StrToIntDef(Arg, 0), False);
+      ZMInjectKey(StrToIntDef(Argument, 0), True);
+      ZMInjectKey(StrToIntDef(Argument, 0), False);
     end
-    else if Cmd = 'char' then
+    else if Commando = 'char' then
     begin
-      if Arg <> '' then ZMInjectChar(Arg[1]);
+      if Argument <> '' then ZMInjectChar(Argument[1]);
     end
-    else if Cmd = 'shot' then
+    else if Commando = 'shot' then
     begin
       ZMPresent(True);
-      if ZMSaveScreenshot(Arg) then WriteLn(StdErr, 'compat: screenshot opgeslagen in ', Arg);
+      if ZMSaveScreenshot(Argument) then WriteLn(StdErr, 'compat: screenshot opgeslagen in ', Argument);
     end
-    else if Cmd = 'exit' then
+    else if Commando = 'exit' then
       Halt(0);
   end;
 end;
 
 procedure TestHooks;
 var
-  T: LongWord;
+  Tijd: LongWord;
 begin
   if Script <> '' then RunScript(ZMTicks - StartTicks);
   if (ShotFile = '') and (ExitAt < 0) then Exit;
-  T := ZMTicks - StartTicks;
-  if (ShotFile <> '') and (Integer(T) >= ShotAt) then
+  Tijd := ZMTicks - StartTicks;
+  if (ShotFile <> '') and (Integer(Tijd) >= ShotAt) then
   begin
     if ZMSaveScreenshot(ShotFile) then
       WriteLn(StdErr, 'compat: screenshot opgeslagen in ', ShotFile);
     if GetEnvironmentVariable('ZM_DEBUG') <> '' then ZMDumpWindows;
     ShotFile := '';
   end;
-  if (ExitAt >= 0) and (Integer(T) >= ExitAt) then
+  if (ExitAt >= 0) and (Integer(Tijd) >= ExitAt) then
   begin
     WriteLn(StdErr, 'compat: ZM_EXIT_AT bereikt, wordt afgesloten');
     Halt(0);
   end;
 end;
 
-function ZMPeekMessage(var M: TMsg; H: HWND; MinMsg, MaxMsg, Remove: UINT): Boolean;
+function ZMPeekMessage(var Melding: TMsg; Venster: HWND; MinBericht, MaxBericht, Verwijderen: UINT): Boolean;
 var
-  I, J, Idx: Integer;
-  Now: LongWord;
+  I, J, Plaats: Integer;
+  Nu: LongWord;
 begin
   ZMInit;
   EnsureBackend;
-  Now := ZMTicks;
-  if (Now - LastPoll >= 4) or (QCount = 0) or (Length(Injected) > 0) or Assigned(ZMIdleHook) or (Script <> '') then
+  Nu := ZMTicks;
+  if (Nu - LastPoll >= 4) or (QCount = 0) or (Length(Injected) > 0) or Assigned(ZMIdleHook) or (Script <> '') then
   begin
-    LastPoll := Now;
+    LastPoll := Nu;
     ZMPollInput;
     TestHooks;
   end;
@@ -1504,11 +1504,11 @@ begin
   { geplaatste / invoerberichten }
   for I := 0 to QCount - 1 do
   begin
-    Idx := (QHead + I) mod Length(Queue);
-    if MsgMatches(Queue[Idx], H, MinMsg, MaxMsg) then
+    Plaats := (QHead + I) mod Length(Queue);
+    if MsgMatches(Queue[Plaats], Venster, MinBericht, MaxBericht) then
     begin
-      M := Queue[Idx];
-      if (Remove and PM_REMOVE <> 0) or (M.message = WM_NULL) then
+      Melding := Queue[Plaats];
+      if (Verwijderen and PM_REMOVE <> 0) or (Melding.message = WM_NULL) then
       begin
         { verwijder item I }
         J := I;
@@ -1518,12 +1518,12 @@ begin
           Inc(J);
         end;
         Dec(QCount);
-        if M.message = WM_NULL then
-          Exit(ZMPeekMessage(M, H, MinMsg, MaxMsg, Remove));
+        if Melding.message = WM_NULL then
+          Exit(ZMPeekMessage(Melding, Venster, MinBericht, MaxBericht, Verwijderen));
       end;
-      LastMsgPos := M.pt;
-      LastMsgTime := M.time;
-      if M.message = WM_QUIT then ZMQuitRequested := True;
+      LastMsgPos := Melding.pt;
+      LastMsgTime := Melding.time;
+      if Melding.message = WM_QUIT then ZMQuitRequested := True;
       Exit(True);
     end;
   end;
@@ -1532,22 +1532,22 @@ begin
   begin
     SyntheticMove := False;
     PostMouse(WM_MOUSEMOVE, MousePos, 0);
-    if QCount > 0 then Exit(ZMPeekMessage(M, H, MinMsg, MaxMsg, Remove));
+    if QCount > 0 then Exit(ZMPeekMessage(Melding, Venster, MinBericht, MaxBericht, Verwijderen));
   end;
   { tekenen }
-  if ((MinMsg = 0) and (MaxMsg = 0)) or ((WM_PAINT >= MinMsg) and (WM_PAINT <= MaxMsg)) then
-    if FindPaint(H, M) then
+  if ((MinBericht = 0) and (MaxBericht = 0)) or ((WM_PAINT >= MinBericht) and (WM_PAINT <= MaxBericht)) then
+    if FindPaint(Venster, Melding) then
     begin
-      LastMsgPos := M.pt;
-      LastMsgTime := M.time;
+      LastMsgPos := Melding.pt;
+      LastMsgTime := Melding.time;
       Exit(True);
     end;
   { timers }
-  if ((MinMsg = 0) and (MaxMsg = 0)) or ((WM_TIMER >= MinMsg) and (WM_TIMER <= MaxMsg)) then
-    if FindTimer(H, M, Remove and PM_REMOVE <> 0) then
+  if ((MinBericht = 0) and (MaxBericht = 0)) or ((WM_TIMER >= MinBericht) and (WM_TIMER <= MaxBericht)) then
+    if FindTimer(Venster, Melding, Verwijderen and PM_REMOVE <> 0) then
     begin
-      LastMsgPos := M.pt;
-      LastMsgTime := M.time;
+      LastMsgPos := Melding.pt;
+      LastMsgTime := Melding.time;
       Exit(True);
     end;
   { niets: toon wat er getekend is }
@@ -1558,223 +1558,223 @@ end;
 function NextTimerDue: Integer;
 var
   I: Integer;
-  Now: LongWord;
-  D: LongInt;
+  Nu: LongWord;
+  Verschil: LongInt;
 begin
   Result := 50;
-  Now := ZMTicks;
+  Nu := ZMTicks;
   for I := 0 to High(Timers) do
     if Timers[I].Active then
     begin
-      D := LongInt(Timers[I].Due - Now);
-      if D < 0 then D := 0;
-      if D < Result then Result := D;
+      Verschil := LongInt(Timers[I].Due - Nu);
+      if Verschil < 0 then Verschil := 0;
+      if Verschil < Result then Result := Verschil;
     end;
 end;
 
 procedure ZMWaitMessage;
 var
-  T: Integer;
-  M: TMsg;
+  Wacht: Integer;
+  Melding: TMsg;
 begin
   EnsureBackend;
-  if ZMPeekMessage(M, 0, 0, 0, PM_NOREMOVE) then Exit;
+  if ZMPeekMessage(Melding, 0, 0, 0, PM_NOREMOVE) then Exit;
   ZMPresent(True);
-  T := NextTimerDue;
-  if T > 0 then ZMBackend.WaitEvent(T);
+  Wacht := NextTimerDue;
+  if Wacht > 0 then ZMBackend.WaitEvent(Wacht);
 end;
 
-function ZMGetMessage(var M: TMsg; H: HWND; MinMsg, MaxMsg: UINT): Boolean;
+function ZMGetMessage(var Melding: TMsg; Venster: HWND; MinBericht, MaxBericht: UINT): Boolean;
 begin
-  while not ZMPeekMessage(M, H, MinMsg, MaxMsg, PM_REMOVE) do
+  while not ZMPeekMessage(Melding, Venster, MinBericht, MaxBericht, PM_REMOVE) do
     ZMWaitMessage;
-  Result := M.message <> WM_QUIT;
+  Result := Melding.message <> WM_QUIT;
 end;
 
-procedure ZMTranslateMessage(const M: TMsg);
+procedure ZMTranslateMessage(const Melding: TMsg);
 var
-  C: Integer;
+  Code: Integer;
 begin
-  if (M.message <> WM_KEYDOWN) and (M.message <> WM_SYSKEYDOWN) then Exit;
-  C := -1;
-  case M.wParam of
-    VK_RETURN: C := 13;
-    VK_ESCAPE: C := 27;
-    VK_BACK: C := 8;
-    VK_TAB: C := 9;
+  if (Melding.message <> WM_KEYDOWN) and (Melding.message <> WM_SYSKEYDOWN) then Exit;
+  Code := -1;
+  case Melding.wParam of
+    VK_RETURN: Code := 13;
+    VK_ESCAPE: Code := 27;
+    VK_BACK: Code := 8;
+    VK_TAB: Code := 9;
   else
     if KeyDown[VK_CONTROL] and not KeyDown[VK_MENU] then
     begin
-      if (M.wParam >= Ord('A')) and (M.wParam <= Ord('Z')) then C := M.wParam - Ord('A') + 1;
+      if (Melding.wParam >= Ord('A')) and (Melding.wParam <= Ord('Z')) then Code := Melding.wParam - Ord('A') + 1;
     end;
   end;
-  if C >= 0 then
-    if M.message = WM_KEYDOWN then
-      ZMPostMessage(M.hwnd, WM_CHAR, C, M.lParam)
+  if Code >= 0 then
+    if Melding.message = WM_KEYDOWN then
+      ZMPostMessage(Melding.hwnd, WM_CHAR, Code, Melding.lParam)
     else
-      ZMPostMessage(M.hwnd, WM_SYSCHAR, C, M.lParam);
+      ZMPostMessage(Melding.hwnd, WM_SYSCHAR, Code, Melding.lParam);
 end;
 
-function ZMDispatchMessage(const M: TMsg): LRESULT;
+function ZMDispatchMessage(const Melding: TMsg): LRESULT;
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
   Result := 0;
-  if (M.message = WM_TIMER) and (M.lParam <> 0) then
+  if (Melding.message = WM_TIMER) and (Melding.lParam <> 0) then
   begin
-    TTimerProc(Pointer(PtrUInt(M.lParam)))(M.hwnd, WM_TIMER, M.wParam, ZMTicks);
+    TTimerProc(Pointer(PtrUInt(Melding.lParam)))(Melding.hwnd, WM_TIMER, Melding.wParam, ZMTicks);
     Exit;
   end;
-  W := ZMWindowObj(M.hwnd);
-  if W = nil then Exit;
-  Result := ZMCallWindow(W, M.message, M.wParam, M.lParam);
-  if (M.message = WM_PAINT) and (ZMWindowObj(M.hwnd) = W) and (Length(W.UpdRgn) > 0) then
+  VensterObj := ZMWindowObj(Melding.hwnd);
+  if VensterObj = nil then Exit;
+  Result := ZMCallWindow(VensterObj, Melding.message, Melding.wParam, Melding.lParam);
+  if (Melding.message = WM_PAINT) and (ZMWindowObj(Melding.hwnd) = VensterObj) and (Length(VensterObj.UpdRgn) > 0) then
   begin
     { het venster heeft niet getekend (geen BeginPaint): valideer het zodat we niet blijven lussen }
-    W.UpdRgn := nil;
-    W.EraseBk := False;
+    VensterObj.UpdRgn := nil;
+    VensterObj.EraseBk := False;
   end;
 end;
 
-function ZMDefWindowProc(H: HWND; Msg: UINT; WP: WPARAM; LP: LPARAM): LRESULT;
+function ZMDefWindowProc(Venster: HWND; Bericht: UINT; WPar: WPARAM; LPar: LPARAM): LRESULT;
 var
-  W: TZMWindow;
-  PS: TPaintStruct;
+  VensterObj: TZMWindow;
+  TekenInfo: TPaintStruct;
   DC: HDC;
   R: TRect;
-  B: TZMBrush;
+  Kwast: TZMBrush;
 begin
   Result := 0;
-  W := ZMWindowObj(H);
-  if W = nil then Exit;
-  case Msg of
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit;
+  case Bericht of
     WM_PAINT:
       begin
-        ZMBeginPaint(H, PS);
-        ZMEndPaint(H, PS);
+        ZMBeginPaint(Venster, TekenInfo);
+        ZMEndPaint(Venster, TekenInfo);
       end;
     WM_ERASEBKGND:
       begin
-        B := GdiBrush(W.ClsBrush);
-        if B <> nil then
+        Kwast := GdiBrush(VensterObj.ClsBrush);
+        if Kwast <> nil then
         begin
-          DC := HDC(WP);
-          with W.ClientRectScreen do R := Rect(0, 0, Right - Left, Bottom - Top);
-          GdiFillRect(GdiDC(DC), R, B);
+          DC := HDC(WPar);
+          with VensterObj.ClientRectScreen do R := Rect(0, 0, Right - Left, Bottom - Top);
+          GdiFillRect(GdiDC(DC), R, Kwast);
           Result := 1;
         end;
       end;
-    WM_CLOSE: ZMDestroyWindow(H);
+    WM_CLOSE: ZMDestroyWindow(Venster);
     WM_SETTEXT:
       begin
-        if LP <> 0 then W.Text := StrPas(PAnsiChar(LP)) else W.Text := '';
-        W.NCDirty := True;
+        if LPar <> 0 then VensterObj.Text := StrPas(PAnsiChar(LPar)) else VensterObj.Text := '';
+        VensterObj.NCDirty := True;
         Result := 1;
       end;
     WM_GETTEXT:
       begin
-        if (LP <> 0) and (WP > 0) then
+        if (LPar <> 0) and (WPar > 0) then
         begin
-          StrPLCopy(PAnsiChar(LP), W.Text, WP - 1);
-          Result := StrLen(PAnsiChar(LP));
+          StrPLCopy(PAnsiChar(LPar), VensterObj.Text, WPar - 1);
+          Result := StrLen(PAnsiChar(LPar));
         end;
       end;
-    WM_GETTEXTLENGTH: Result := Length(W.Text);
+    WM_GETTEXTLENGTH: Result := Length(VensterObj.Text);
     WM_ACTIVATE:
-      if (LoWord(WP) <> WA_INACTIVE) and (W.Parent = nil) then
-        if (FocusWnd = 0) or ((FocusWnd <> H) and not IsChild(H, FocusWnd)) then
-          ZMSetFocus(H);
+      if (LoWord(WPar) <> WA_INACTIVE) and (VensterObj.Parent = nil) then
+        if (FocusWnd = 0) or ((FocusWnd <> Venster) and not IsChild(Venster, FocusWnd)) then
+          ZMSetFocus(Venster);
     WM_NCHITTEST: Result := HTCLIENT;
     WM_SETCURSOR:
       begin
-        if W.ClsCursor <> 0 then ZMSetCursorShape(W.ClsCursor)
+        if VensterObj.ClsCursor <> 0 then ZMSetCursorShape(VensterObj.ClsCursor)
         else ZMSetCursorShape(ZMCursorFromId(32512));
         Result := 1;
       end;
     WM_MOUSEACTIVATE: Result := 1;  { MA_ACTIVATE }
     WM_SYSKEYDOWN:
-      if WP = VK_F4 then ZMPostMessage(W.TopLevel.Handle, WM_CLOSE, 0, 0);
+      if WPar = VK_F4 then ZMPostMessage(VensterObj.TopLevel.Handle, WM_CLOSE, 0, 0);
     WM_SYSCOMMAND:
-      if (WP and $FFF0) = SC_CLOSE then ZMPostMessage(H, WM_CLOSE, 0, 0);
+      if (WPar and $FFF0) = SC_CLOSE then ZMPostMessage(Venster, WM_CLOSE, 0, 0);
   end;
 end;
 
 { ---------------------------------------------------------------- timers }
 
-function ZMSetTimer(H: HWND; ID, Elapse: UINT; Proc: Pointer): UINT;
+function ZMSetTimer(Venster: HWND; Ident, Verstreken: UINT; Terugroep: Pointer): UINT;
 var
   I: Integer;
 begin
   ZMInit;
-  if Elapse < 1 then Elapse := 1;
-  if H = 0 then
+  if Verstreken < 1 then Verstreken := 1;
+  if Venster = 0 then
   begin
     Inc(NextTimerID);
-    ID := NextTimerID;
+    Ident := NextTimerID;
   end;
   for I := 0 to High(Timers) do
-    if Timers[I].Active and not Timers[I].IsMM and (Timers[I].Wnd = H) and (Timers[I].ID = ID) then
+    if Timers[I].Active and not Timers[I].IsMM and (Timers[I].Wnd = Venster) and (Timers[I].ID = Ident) then
     begin
-      Timers[I].Interval := Elapse;
-      Timers[I].Due := ZMTicks + Elapse;
-      Timers[I].Proc := Proc;
-      Exit(ID);
+      Timers[I].Interval := Verstreken;
+      Timers[I].Due := ZMTicks + Verstreken;
+      Timers[I].Proc := Terugroep;
+      Exit(Ident);
     end;
   I := 0;
   while (I <= High(Timers)) and Timers[I].Active do Inc(I);
   if I > High(Timers) then SetLength(Timers, I + 1);
   FillChar(Timers[I], SizeOf(TTimerRec), 0);
-  Timers[I].Wnd := H;
-  Timers[I].ID := ID;
-  Timers[I].Interval := Elapse;
-  Timers[I].Due := ZMTicks + Elapse;
-  Timers[I].Proc := Proc;
+  Timers[I].Wnd := Venster;
+  Timers[I].ID := Ident;
+  Timers[I].Interval := Verstreken;
+  Timers[I].Due := ZMTicks + Verstreken;
+  Timers[I].Proc := Terugroep;
   Timers[I].Active := True;
-  if ID = 0 then Result := 1 else Result := ID;
+  if Ident = 0 then Result := 1 else Result := Ident;
 end;
 
-function ZMKillTimer(H: HWND; ID: UINT): Boolean;
+function ZMKillTimer(Venster: HWND; Ident: UINT): Boolean;
 var
   I: Integer;
 begin
   Result := False;
   for I := 0 to High(Timers) do
-    if Timers[I].Active and not Timers[I].IsMM and (Timers[I].Wnd = H) and (Timers[I].ID = ID) then
+    if Timers[I].Active and not Timers[I].IsMM and (Timers[I].Wnd = Venster) and (Timers[I].ID = Ident) then
     begin
       Timers[I].Active := False;
       Result := True;
     end;
 end;
 
-function ZMAddMMTimer(Delay: UINT; Proc: Pointer; User: PtrUInt; Periodic: Boolean): UINT;
+function ZMAddMMTimer(Vertraging: UINT; Terugroep: Pointer; Gebruiker: PtrUInt; Periodiek: Boolean): UINT;
 var
   I: Integer;
 begin
   ZMInit;
-  if Delay < 1 then Delay := 1;
+  if Vertraging < 1 then Vertraging := 1;
   I := 0;
   while (I <= High(Timers)) and Timers[I].Active do Inc(I);
   if I > High(Timers) then SetLength(Timers, I + 1);
   FillChar(Timers[I], SizeOf(TTimerRec), 0);
   Inc(NextTimerID);
   Timers[I].ID := NextTimerID;
-  Timers[I].Interval := Delay;
-  Timers[I].Due := ZMTicks + Delay;
-  Timers[I].Proc := Proc;
-  Timers[I].User := User;
-  Timers[I].Periodic := Periodic;
+  Timers[I].Interval := Vertraging;
+  Timers[I].Due := ZMTicks + Vertraging;
+  Timers[I].Proc := Terugroep;
+  Timers[I].User := Gebruiker;
+  Timers[I].Periodic := Periodiek;
   Timers[I].IsMM := True;
   Timers[I].Active := True;
   Result := NextTimerID;
 end;
 
-function ZMKillMMTimer(ID: UINT): Boolean;
+function ZMKillMMTimer(Ident: UINT): Boolean;
 var
   I: Integer;
 begin
   Result := False;
   for I := 0 to High(Timers) do
-    if Timers[I].Active and Timers[I].IsMM and (Timers[I].ID = ID) then
+    if Timers[I].Active and Timers[I].IsMM and (Timers[I].ID = Ident) then
     begin
       Timers[I].Active := False;
       Result := True;
@@ -1790,23 +1790,23 @@ var
 function CallMMTimers: Boolean;
 var
   I: Integer;
-  Now: LongWord;
-  P: TMMProc;
+  Nu: LongWord;
+  Terugroep: TMMProc;
 begin
   Result := False;
   if InMMTimer then Exit;
   InMMTimer := True;
   try
-    Now := ZMTicks;
+    Nu := ZMTicks;
     for I := 0 to High(Timers) do
-      if Timers[I].Active and Timers[I].IsMM and (LongInt(Now - Timers[I].Due) >= 0) then
+      if Timers[I].Active and Timers[I].IsMM and (LongInt(Nu - Timers[I].Due) >= 0) then
       begin
         if Timers[I].Periodic then
-          Timers[I].Due := Now + Timers[I].Interval
+          Timers[I].Due := Nu + Timers[I].Interval
         else
           Timers[I].Active := False;
-        P := TMMProc(Timers[I].Proc);
-        if Assigned(P) then P(Timers[I].ID, 0, Timers[I].User, 0, 0);
+        Terugroep := TMMProc(Timers[I].Proc);
+        if Assigned(Terugroep) then Terugroep(Timers[I].ID, 0, Timers[I].User, 0, 0);
         Result := True;
       end;
   finally
@@ -1821,23 +1821,23 @@ begin
   Result := FocusWnd;
 end;
 
-function ZMSetFocus(H: HWND): HWND;
+function ZMSetFocus(Venster: HWND): HWND;
 var
-  Old: HWND;
-  W: TZMWindow;
+  Oud: HWND;
+  VensterObj: TZMWindow;
 begin
   Result := FocusWnd;
-  if H = FocusWnd then Exit;
-  W := ZMWindowObj(H);
-  if (H <> 0) and (W = nil) then Exit;
-  if (W <> nil) and (ActiveWnd <> W.TopLevel.Handle) then
-    ZMSetActive(W.TopLevel.Handle);
-  Old := FocusWnd;
-  FocusWnd := H;
-  if (Old <> 0) and (ZMWindowObj(Old) <> nil) then
-    ZMSendMessage(Old, WM_KILLFOCUS, H, 0);
-  if (FocusWnd = H) and (H <> 0) then
-    ZMSendMessage(H, WM_SETFOCUS, Old, 0);
+  if Venster = FocusWnd then Exit;
+  VensterObj := ZMWindowObj(Venster);
+  if (Venster <> 0) and (VensterObj = nil) then Exit;
+  if (VensterObj <> nil) and (ActiveWnd <> VensterObj.TopLevel.Handle) then
+    ZMSetActive(VensterObj.TopLevel.Handle);
+  Oud := FocusWnd;
+  FocusWnd := Venster;
+  if (Oud <> 0) and (ZMWindowObj(Oud) <> nil) then
+    ZMSendMessage(Oud, WM_KILLFOCUS, Venster, 0);
+  if (FocusWnd = Venster) and (Venster <> 0) then
+    ZMSendMessage(Venster, WM_SETFOCUS, Oud, 0);
 end;
 
 function ZMGetActive: HWND;
@@ -1845,39 +1845,39 @@ begin
   Result := ActiveWnd;
 end;
 
-function ZMSetActive(H: HWND): HWND;
+function ZMSetActive(Venster: HWND): HWND;
 var
-  Old: HWND;
-  W, OW: TZMWindow;
+  Oud: HWND;
+  VensterObj, OudObj: TZMWindow;
 begin
   Result := ActiveWnd;
-  W := ZMWindowObj(H);
-  if W <> nil then W := W.TopLevel;
-  if W <> nil then H := W.Handle;
-  if H = ActiveWnd then Exit;
-  Old := ActiveWnd;
-  ActiveWnd := H;
-  OW := ZMWindowObj(Old);
-  if OW <> nil then
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj <> nil then VensterObj := VensterObj.TopLevel;
+  if VensterObj <> nil then Venster := VensterObj.Handle;
+  if Venster = ActiveWnd then Exit;
+  Oud := ActiveWnd;
+  ActiveWnd := Venster;
+  OudObj := ZMWindowObj(Oud);
+  if OudObj <> nil then
   begin
-    OW.NCDirty := True;
-    ZMSendMessage(Old, WM_NCACTIVATE, 0, 0);
-    ZMSendMessage(Old, WM_ACTIVATE, WA_INACTIVE, LPARAM(H));
+    OudObj.NCDirty := True;
+    ZMSendMessage(Oud, WM_NCACTIVATE, 0, 0);
+    ZMSendMessage(Oud, WM_ACTIVATE, WA_INACTIVE, LPARAM(Venster));
   end;
-  if W <> nil then
+  if VensterObj <> nil then
   begin
     { breng naar de bovenkant van de z-volgorde }
-    ZMSetWindowPos(H, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOSENDCHANGING);
-    W.NCDirty := True;
-    ZMSendMessage(H, WM_NCACTIVATE, 1, 0);
-    ZMSendMessage(H, WM_ACTIVATE, WA_ACTIVE, LPARAM(Old));
+    ZMSetWindowPos(Venster, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOSENDCHANGING);
+    VensterObj.NCDirty := True;
+    ZMSendMessage(Venster, WM_NCACTIVATE, 1, 0);
+    ZMSendMessage(Venster, WM_ACTIVATE, WA_ACTIVE, LPARAM(Oud));
   end;
 end;
 
-function ZMSetCapture(H: HWND): HWND;
+function ZMSetCapture(Venster: HWND): HWND;
 begin
   Result := CaptureWnd;
-  CaptureWnd := H;
+  CaptureWnd := Venster;
 end;
 
 function ZMGetCapture: HWND;
@@ -1887,39 +1887,39 @@ end;
 
 procedure ZMReleaseCapture;
 var
-  Old: HWND;
+  Oud: HWND;
 begin
-  Old := CaptureWnd;
+  Oud := CaptureWnd;
   CaptureWnd := 0;
-  if Old <> 0 then
+  if Oud <> 0 then
   begin
-    ZMSendMessage(Old, WM_CAPTURECHANGED, 0, 0);
+    ZMSendMessage(Oud, WM_CAPTURECHANGED, 0, 0);
     { zoals Windows/Wine: het loslaten van capture levert een muisbeweging op, zodat het
       venster onder de cursor weet waar de aanwijzer staat }
     SyntheticMove := True;
   end;
 end;
 
-function ZMEnableWindow(H: HWND; Enable: Boolean): Boolean;
+function ZMEnableWindow(Venster: HWND; Inschakelen: Boolean): Boolean;
 var
-  W: TZMWindow;
+  VensterObj: TZMWindow;
 begin
-  W := ZMWindowObj(H);
-  if W = nil then Exit(False);
-  Result := W.Style and WS_DISABLED <> 0;  { vorige toestand: True = was uitgeschakeld }
-  if Enable = not Result then Exit;
-  if Enable then W.Style := W.Style and not WS_DISABLED
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit(False);
+  Result := VensterObj.Style and WS_DISABLED <> 0;  { vorige toestand: True = was uitgeschakeld }
+  if Inschakelen = not Result then Exit;
+  if Inschakelen then VensterObj.Style := VensterObj.Style and not WS_DISABLED
   else
   begin
-    W.Style := W.Style or WS_DISABLED;
-    if (FocusWnd = H) or IsChild(H, FocusWnd) then ZMSetFocus(0);
+    VensterObj.Style := VensterObj.Style or WS_DISABLED;
+    if (FocusWnd = Venster) or IsChild(Venster, FocusWnd) then ZMSetFocus(0);
   end;
-  ZMSendMessage(H, WM_ENABLE, Ord(Enable), 0);
+  ZMSendMessage(Venster, WM_ENABLE, Ord(Inschakelen), 0);
 end;
 
-function ZMKeyState(VK: Integer): SmallInt;
+function ZMKeyState(Toets: Integer): SmallInt;
 begin
-  if (VK >= 0) and (VK <= 255) and KeyDown[VK] then Result := SmallInt($8000) else Result := 0;
+  if (Toets >= 0) and (Toets <= 255) and KeyDown[Toets] then Result := SmallInt($8000) else Result := 0;
 end;
 
 function ZMCursorPos: TPoint;
@@ -1943,34 +1943,34 @@ begin
 end;
 
 { cursors zijn kleine gehele getallen: de IDC_xxx-resource-id's }
-function ZMCursorFromId(Id: PtrUInt): HCURSOR;
+function ZMCursorFromId(Ident: PtrUInt): HCURSOR;
 begin
-  Result := HCURSOR(Id);
+  Result := HCURSOR(Ident);
 end;
 
-procedure ZMSetCursorShape(C: HCURSOR);
+procedure ZMSetCursorShape(Aanwijzer: HCURSOR);
 var
-  S: TZMCursorShape;
+  Vorm: TZMCursorShape;
 begin
-  if C = CurCursor then Exit;
-  CurCursor := C;
-  case C of
-    0: S := zcNone;
-    32513: S := zcIBeam;
-    32514: S := zcWait;
-    32515: S := zcCross;
-    32640, 32646: S := zcSizeAll;
-    32642: S := zcSizeNWSE;
-    32643: S := zcSizeNESW;
-    32644: S := zcSizeWE;
-    32645: S := zcSizeNS;
-    32648: S := zcNo;
-    32649: S := zcHand;
-    32650: S := zcAppStart;
+  if Aanwijzer = CurCursor then Exit;
+  CurCursor := Aanwijzer;
+  case Aanwijzer of
+    0: Vorm := zcNone;
+    32513: Vorm := zcIBeam;
+    32514: Vorm := zcWait;
+    32515: Vorm := zcCross;
+    32640, 32646: Vorm := zcSizeAll;
+    32642: Vorm := zcSizeNWSE;
+    32643: Vorm := zcSizeNESW;
+    32644: Vorm := zcSizeWE;
+    32645: Vorm := zcSizeNS;
+    32648: Vorm := zcNo;
+    32649: Vorm := zcHand;
+    32650: Vorm := zcAppStart;
   else
-    S := zcArrow;
+    Vorm := zcArrow;
   end;
-  ZMBackend.SetCursor(S);
+  ZMBackend.SetCursor(Vorm);
 end;
 
 { ---------------------------------------------------------------- input }
@@ -1985,24 +1985,24 @@ begin
   if KeyDown[VK_CONTROL] then Result := Result or MK_CONTROL;
 end;
 
-procedure PostMouse(Msg: UINT; P: TPoint; ExtraWP: WPARAM);
+procedure PostMouse(Bericht: UINT; Punt: TPoint; ExtraWPar: WPARAM);
 var
-  H: HWND;
-  W: TZMWindow;
-  C: TPoint;
-  IsDown: Boolean;
-  Top: TZMWindow;
+  Venster: HWND;
+  VensterObj: TZMWindow;
+  KlientPunt: TPoint;
+  Ingedrukt: Boolean;
+  Bovenste: TZMWindow;
 begin
-  IsDown := (Msg = WM_LBUTTONDOWN) or (Msg = WM_RBUTTONDOWN) or (Msg = WM_MBUTTONDOWN);
+  Ingedrukt := (Bericht = WM_LBUTTONDOWN) or (Bericht = WM_RBUTTONDOWN) or (Bericht = WM_MBUTTONDOWN);
   if CaptureWnd <> 0 then
-    H := CaptureWnd
+    Venster := CaptureWnd
   else
-    H := ZMWindowFromPoint(P, False);
-  W := ZMWindowObj(H);
-  if W = nil then Exit;
-  if (CaptureWnd = 0) and not W.IsEnabledTree then
+    Venster := ZMWindowFromPoint(Punt, False);
+  VensterObj := ZMWindowObj(Venster);
+  if VensterObj = nil then Exit;
+  if (CaptureWnd = 0) and not VensterObj.IsEnabledTree then
   begin
-    if IsDown then
+    if Ingedrukt then
     begin
       ZMBackend.Beep;
       { breng een ingeschakeld (modaal) venster naar voren }
@@ -2010,33 +2010,33 @@ begin
     end;
     Exit;
   end;
-  if IsDown then
+  if Ingedrukt then
   begin
-    Top := W.TopLevel;
-    if Top.Handle <> ActiveWnd then
-      if ZMSendMessage(H, WM_MOUSEACTIVATE, Top.Handle, MakeLParam(HTCLIENT, Msg)) <> 3 then
-        ZMSetActive(Top.Handle);
-    W := ZMWindowObj(H);
-    if W = nil then Exit;
+    Bovenste := VensterObj.TopLevel;
+    if Bovenste.Handle <> ActiveWnd then
+      if ZMSendMessage(Venster, WM_MOUSEACTIVATE, Bovenste.Handle, MakeLParam(HTCLIENT, Bericht)) <> 3 then
+        ZMSetActive(Bovenste.Handle);
+    VensterObj := ZMWindowObj(Venster);
+    if VensterObj = nil then Exit;
   end;
-  if (CaptureWnd = 0) and not PtInRect(W.ClientRectScreen, P) then Exit;  { niet-clientgebied }
-  ZMSendMessage(H, WM_SETCURSOR, H, MakeLParam(HTCLIENT, Msg));
-  C := P;
-  ZMScreenToClient(H, C);
-  ZMPostMessage(H, Msg, MouseKeys or ExtraWP, MakeLParam(Word(SmallInt(C.X)), Word(SmallInt(C.Y))));
+  if (CaptureWnd = 0) and not PtInRect(VensterObj.ClientRectScreen, Punt) then Exit;  { niet-clientgebied }
+  ZMSendMessage(Venster, WM_SETCURSOR, Venster, MakeLParam(HTCLIENT, Bericht));
+  KlientPunt := Punt;
+  ZMScreenToClient(Venster, KlientPunt);
+  ZMPostMessage(Venster, Bericht, MouseKeys or ExtraWPar, MakeLParam(Word(SmallInt(KlientPunt.X)), Word(SmallInt(KlientPunt.Y))));
 end;
 
-procedure HandleEvent(const E: TZMEvent);
+procedure HandleEvent(const Gebeurtenis: TZMEvent);
 var
-  Msg: UINT;
-  H: HWND;
-  Now: LongWord;
-  W: TZMWindow;
-  VK: Integer;
+  Bericht: UINT;
+  Venster: HWND;
+  Nu: LongWord;
+  VensterObj: TZMWindow;
+  Toets: Integer;
   I: Integer;
-  LP: LPARAM;
+  LPar: LPARAM;
 begin
-  case E.Kind of
+  case Gebeurtenis.Kind of
     zeQuit:
       if Assigned(ZMOnCloseRequest) then ZMOnCloseRequest
       else if ZMMainWindow <> 0 then ZMPostMessage(ZMMainWindow, WM_CLOSE, 0, 0)
@@ -2046,7 +2046,7 @@ begin
     zeMouseMove:
       begin
         MouseSeen := True;
-        MousePos := Point(E.X, E.Y);
+        MousePos := Point(Gebeurtenis.X, Gebeurtenis.Y);
         { samenvoegen: vervang een wachtende WM_MOUSEMOVE }
         for I := QCount - 1 downto 0 do
           if Queue[(QHead + I) mod Length(Queue)].message = WM_MOUSEMOVE then
@@ -2061,93 +2061,93 @@ begin
     zeMouseDown, zeMouseUp:
       begin
         MouseSeen := True;
-        MousePos := Point(E.X, E.Y);
-        case E.Button of
-          1: VK := VK_LBUTTON;
-          2: VK := VK_RBUTTON;
+        MousePos := Point(Gebeurtenis.X, Gebeurtenis.Y);
+        case Gebeurtenis.Button of
+          1: Toets := VK_LBUTTON;
+          2: Toets := VK_RBUTTON;
         else
-          VK := VK_MBUTTON;
+          Toets := VK_MBUTTON;
         end;
-        KeyDown[VK] := E.Kind = zeMouseDown;
-        if E.Kind = zeMouseDown then
+        KeyDown[Toets] := Gebeurtenis.Kind = zeMouseDown;
+        if Gebeurtenis.Kind = zeMouseDown then
         begin
-          case E.Button of
-            1: Msg := WM_LBUTTONDOWN;
-            2: Msg := WM_RBUTTONDOWN;
+          case Gebeurtenis.Button of
+            1: Bericht := WM_LBUTTONDOWN;
+            2: Bericht := WM_RBUTTONDOWN;
           else
-            Msg := WM_MBUTTONDOWN;
+            Bericht := WM_MBUTTONDOWN;
           end;
-          Now := ZMTicks;
-          if CaptureWnd <> 0 then H := CaptureWnd else H := ZMWindowFromPoint(MousePos, False);
-          if (E.Button = LastClickBtn) and (Now - LastClickTime < GetDoubleClickTime) and
+          Nu := ZMTicks;
+          if CaptureWnd <> 0 then Venster := CaptureWnd else Venster := ZMWindowFromPoint(MousePos, False);
+          if (Gebeurtenis.Button = LastClickBtn) and (Nu - LastClickTime < GetDoubleClickTime) and
             (Abs(MousePos.X - LastClickPos.X) <= 4) and (Abs(MousePos.Y - LastClickPos.Y) <= 4) and
-            (H = LastClickWnd) then
+            (Venster = LastClickWnd) then
           begin
-            W := ZMWindowObj(H);
-            if (W <> nil) and (W.ClsStyle and CS_DBLCLKS <> 0) then
-              Msg := Msg + 2;  { xBUTTONDBLCLK }
+            VensterObj := ZMWindowObj(Venster);
+            if (VensterObj <> nil) and (VensterObj.ClsStyle and CS_DBLCLKS <> 0) then
+              Bericht := Bericht + 2;  { xBUTTONDBLCLK }
             LastClickTime := 0;
           end
           else
           begin
-            LastClickTime := Now;
+            LastClickTime := Nu;
             LastClickPos := MousePos;
-            LastClickBtn := E.Button;
-            LastClickWnd := H;
+            LastClickBtn := Gebeurtenis.Button;
+            LastClickWnd := Venster;
           end;
         end
         else
-          case E.Button of
-            1: Msg := WM_LBUTTONUP;
-            2: Msg := WM_RBUTTONUP;
+          case Gebeurtenis.Button of
+            1: Bericht := WM_LBUTTONUP;
+            2: Bericht := WM_RBUTTONUP;
           else
-            Msg := WM_MBUTTONUP;
+            Bericht := WM_MBUTTONUP;
           end;
-        PostMouse(Msg, MousePos, 0);
+        PostMouse(Bericht, MousePos, 0);
       end;
     zeMouseWheel:
       begin
-        if FocusWnd <> 0 then H := FocusWnd else H := ZMWindowFromPoint(MousePos, True);
-        if H <> 0 then
-          ZMPostMessage(H, WM_MOUSEWHEEL, (MouseKeys and $FFFF) or (WPARAM(Word(SmallInt(E.Wheel))) shl 16),
+        if FocusWnd <> 0 then Venster := FocusWnd else Venster := ZMWindowFromPoint(MousePos, True);
+        if Venster <> 0 then
+          ZMPostMessage(Venster, WM_MOUSEWHEEL, (MouseKeys and $FFFF) or (WPARAM(Word(SmallInt(Gebeurtenis.Wheel))) shl 16),
             MakeLParam(Word(SmallInt(MousePos.X)), Word(SmallInt(MousePos.Y))));
       end;
     zeKeyDown, zeKeyUp:
       begin
-        VK := E.Key;
-        if (VK <= 0) or (VK > 255) then Exit;
-        KeyDown[VK] := E.Kind = zeKeyDown;
-        if VK in [VK_LSHIFT, VK_RSHIFT] then KeyDown[VK_SHIFT] := KeyDown[VK_LSHIFT] or KeyDown[VK_RSHIFT];
-        if VK in [VK_LCONTROL, VK_RCONTROL] then KeyDown[VK_CONTROL] := KeyDown[VK_LCONTROL] or KeyDown[VK_RCONTROL];
-        if VK in [VK_LMENU, VK_RMENU] then KeyDown[VK_MENU] := KeyDown[VK_LMENU] or KeyDown[VK_RMENU];
-        case VK of
-          VK_LSHIFT, VK_RSHIFT: VK := VK_SHIFT;
-          VK_LCONTROL, VK_RCONTROL: VK := VK_CONTROL;
-          VK_LMENU, VK_RMENU: VK := VK_MENU;
+        Toets := Gebeurtenis.Key;
+        if (Toets <= 0) or (Toets > 255) then Exit;
+        KeyDown[Toets] := Gebeurtenis.Kind = zeKeyDown;
+        if Toets in [VK_LSHIFT, VK_RSHIFT] then KeyDown[VK_SHIFT] := KeyDown[VK_LSHIFT] or KeyDown[VK_RSHIFT];
+        if Toets in [VK_LCONTROL, VK_RCONTROL] then KeyDown[VK_CONTROL] := KeyDown[VK_LCONTROL] or KeyDown[VK_RCONTROL];
+        if Toets in [VK_LMENU, VK_RMENU] then KeyDown[VK_MENU] := KeyDown[VK_LMENU] or KeyDown[VK_RMENU];
+        case Toets of
+          VK_LSHIFT, VK_RSHIFT: Toets := VK_SHIFT;
+          VK_LCONTROL, VK_RCONTROL: Toets := VK_CONTROL;
+          VK_LMENU, VK_RMENU: Toets := VK_MENU;
         end;
-        H := FocusWnd;
-        if H = 0 then H := ActiveWnd;
-        if H = 0 then Exit;
-        LP := 1 or (LPARAM(E.ScanCode and $FF) shl 16);
-        if E.Repeated then LP := LP or (1 shl 30);
-        if KeyDown[VK_MENU] or (VK = VK_MENU) or (VK = VK_F10) then
+        Venster := FocusWnd;
+        if Venster = 0 then Venster := ActiveWnd;
+        if Venster = 0 then Exit;
+        LPar := 1 or (LPARAM(Gebeurtenis.ScanCode and $FF) shl 16);
+        if Gebeurtenis.Repeated then LPar := LPar or (1 shl 30);
+        if KeyDown[VK_MENU] or (Toets = VK_MENU) or (Toets = VK_F10) then
         begin
-          if E.Kind = zeKeyDown then Msg := WM_SYSKEYDOWN else Msg := WM_SYSKEYUP;
-          LP := LP or (1 shl 29);
+          if Gebeurtenis.Kind = zeKeyDown then Bericht := WM_SYSKEYDOWN else Bericht := WM_SYSKEYUP;
+          LPar := LPar or (1 shl 29);
         end
-        else if E.Kind = zeKeyDown then Msg := WM_KEYDOWN
-        else Msg := WM_KEYUP;
-        if E.Kind = zeKeyUp then LP := LP or LPARAM(LongWord($C0000000));
-        ZMPostMessage(H, Msg, VK, LP);
+        else if Gebeurtenis.Kind = zeKeyDown then Bericht := WM_KEYDOWN
+        else Bericht := WM_KEYUP;
+        if Gebeurtenis.Kind = zeKeyUp then LPar := LPar or LPARAM(LongWord($C0000000));
+        ZMPostMessage(Venster, Bericht, Toets, LPar);
       end;
     zeText:
       begin
         if KeyDown[VK_CONTROL] or KeyDown[VK_MENU] then Exit;
-        H := FocusWnd;
-        if H = 0 then H := ActiveWnd;
-        if H = 0 then Exit;
-        for I := 1 to Length(E.Text) do
-          ZMPostMessage(H, WM_CHAR, Byte(E.Text[I]), 1);
+        Venster := FocusWnd;
+        if Venster = 0 then Venster := ActiveWnd;
+        if Venster = 0 then Exit;
+        for I := 1 to Length(Gebeurtenis.Text) do
+          ZMPostMessage(Venster, WM_CHAR, Byte(Gebeurtenis.Text[I]), 1);
       end;
     zeActivate: ;
     zeDeactivate:
@@ -2155,60 +2155,60 @@ begin
   end;
 end;
 
-procedure Inject(const E: TZMEvent);
+procedure Inject(const Gebeurtenis: TZMEvent);
 begin
   SetLength(Injected, Length(Injected) + 1);
-  Injected[High(Injected)] := E;
+  Injected[High(Injected)] := Gebeurtenis;
 end;
 
-procedure ZMInjectMouse(X, Y: Integer; Button: Integer; Down: Boolean);
+procedure ZMInjectMouse(X, Y: Integer; Knop: Integer; Omlaag: Boolean);
 var
-  E: TZMEvent;
-  P: TPoint;
+  Gebeurtenis: TZMEvent;
+  Punt: TPoint;
 begin
-  FillChar(E, SizeOf(E), 0);
-  P := Point(X, Y);
-  if ZMMainWindow <> 0 then ZMClientToScreen(ZMMainWindow, P);
-  E.X := P.X;
-  E.Y := P.Y;
-  if Button = 0 then
-    E.Kind := zeMouseMove
+  FillChar(Gebeurtenis, SizeOf(Gebeurtenis), 0);
+  Punt := Point(X, Y);
+  if ZMMainWindow <> 0 then ZMClientToScreen(ZMMainWindow, Punt);
+  Gebeurtenis.X := Punt.X;
+  Gebeurtenis.Y := Punt.Y;
+  if Knop = 0 then
+    Gebeurtenis.Kind := zeMouseMove
   else
   begin
     { eerst verplaatsen, zoals een echte muis }
-    E.Kind := zeMouseMove;
-    Inject(E);
-    if Down then E.Kind := zeMouseDown else E.Kind := zeMouseUp;
-    E.Button := Button;
+    Gebeurtenis.Kind := zeMouseMove;
+    Inject(Gebeurtenis);
+    if Omlaag then Gebeurtenis.Kind := zeMouseDown else Gebeurtenis.Kind := zeMouseUp;
+    Gebeurtenis.Button := Knop;
   end;
-  Inject(E);
+  Inject(Gebeurtenis);
 end;
 
-procedure ZMInjectKey(VK: Word; Down: Boolean);
+procedure ZMInjectKey(Toets: Word; Omlaag: Boolean);
 var
-  E: TZMEvent;
+  Gebeurtenis: TZMEvent;
 begin
-  FillChar(E, SizeOf(E), 0);
-  if Down then E.Kind := zeKeyDown else E.Kind := zeKeyUp;
-  E.Key := VK;
-  Inject(E);
+  FillChar(Gebeurtenis, SizeOf(Gebeurtenis), 0);
+  if Omlaag then Gebeurtenis.Kind := zeKeyDown else Gebeurtenis.Kind := zeKeyUp;
+  Gebeurtenis.Key := Toets;
+  Inject(Gebeurtenis);
 end;
 
-procedure ZMInjectChar(C: Char);
+procedure ZMInjectChar(Karakter: Char);
 var
-  E: TZMEvent;
+  Gebeurtenis: TZMEvent;
 begin
-  FillChar(E, SizeOf(E), 0);
-  E.Kind := zeText;
-  E.Text := C;
-  Inject(E);
+  FillChar(Gebeurtenis, SizeOf(Gebeurtenis), 0);
+  Gebeurtenis.Kind := zeText;
+  Gebeurtenis.Text := Karakter;
+  Inject(Gebeurtenis);
 end;
 
 procedure ZMPollInput;
 var
-  E: TZMEvent;
+  Gebeurtenis: TZMEvent;
   I: Integer;
-  Q: array of TZMEvent;
+  Gebeurtenissen: array of TZMEvent;
 begin
   EnsureBackend;
   if Assigned(ZMIdleHook) and not InIdleHook then
@@ -2222,31 +2222,31 @@ begin
   end;
   if Length(Injected) > 0 then
   begin
-    Q := Injected;
+    Gebeurtenissen := Injected;
     Injected := nil;
-    for I := 0 to High(Q) do HandleEvent(Q[I]);
+    for I := 0 to High(Gebeurtenissen) do HandleEvent(Gebeurtenissen[I]);
   end;
-  while ZMBackend.PollEvent(E) do
-    HandleEvent(E);
+  while ZMBackend.PollEvent(Gebeurtenis) do
+    HandleEvent(Gebeurtenis);
 end;
 
-procedure ZMPresent(Force: Boolean);
+procedure ZMPresent(Forceer: Boolean);
 var
-  Now: LongWord;
+  Nu: LongWord;
 begin
   if (ZMScreen = nil) or not ZMScreen.Dirty then Exit;
-  Now := ZMTicks;
-  if not Force and (Now - LastPresent < 15) then Exit;
+  Nu := ZMTicks;
+  if not Forceer and (Nu - LastPresent < 15) then Exit;
   EnsureBackend;
-  LastPresent := Now;
+  LastPresent := Nu;
   ZMScreen.Dirty := False;
   ZMBackend.Present(ZMScreen.Bits, ZMScreen.Width, ZMScreen.Height, ZMScreen.Stride);
 end;
 
-function ZMSaveScreenshot(const FileName: string): Boolean;
+function ZMSaveScreenshot(const Bestandsnaam: string): Boolean;
 begin
   ZMInit;
-  Result := ZMSavePNG(FileName, ZMScreen.Bits, ZMScreen.Width, ZMScreen.Height, ZMScreen.Stride);
+  Result := ZMSavePNG(Bestandsnaam, ZMScreen.Bits, ZMScreen.Width, ZMScreen.Height, ZMScreen.Stride);
 end;
 
 initialization

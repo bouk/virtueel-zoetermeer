@@ -1120,16 +1120,16 @@ end;
 
 function FindDragTarget(const Pos: TPoint; AllowDisabled: Boolean): TControl;
 var
-  Window: TWinControl;
-  Control: TControl;
+  Vensterobject: TWinControl;
+  Besturing: TControl;
 begin
   Result := nil;
-  Window := FindVCLWindow(Pos);
-  if Window <> nil then
+  Vensterobject := FindVCLWindow(Pos);
+  if Vensterobject <> nil then
   begin
-    Result := Window;
-    Control := Window.ControlAtPos(Window.ScreenToClient(Pos), AllowDisabled);
-    if Control <> nil then Result := Control;
+    Result := Vensterobject;
+    Besturing := Vensterobject.ControlAtPos(Vensterobject.ScreenToClient(Pos), AllowDisabled);
+    if Besturing <> nil then Result := Besturing;
   end;
 end;
 
@@ -1378,13 +1378,13 @@ end;
 
 procedure TControl.SetName(const Value: TComponentName);
 var
-  ChangeText: Boolean;
+  Tekstwijzigen: Boolean;
 begin
-  ChangeText := (csSetCaption in ControlStyle) and not (csLoading in ComponentState) and
+  Tekstwijzigen := (csSetCaption in ControlStyle) and not (csLoading in ComponentState) and
     (Name = Text) and ((Owner = nil) or not (Owner is TControl) or
     not (csLoading in TControl(Owner).ComponentState));
   inherited SetName(Value);
-  if ChangeText then Text := Value;
+  if Tekstwijzigen then Text := Value;
 end;
 
 procedure TControl.SetParent(AParent: TWinControl);
@@ -1526,17 +1526,17 @@ end;
 
 procedure TControl.SetAlign(Value: TAlign);
 var
-  OldAlign: TAlign;
+  Oudeuitlijning: TAlign;
 begin
   if FAlign <> Value then
   begin
-    OldAlign := FAlign;
+    Oudeuitlijning := FAlign;
     FAlign := Value;
     Anchors := [akLeft, akTop];
     if not (csLoading in ComponentState) and (Value in [alTop, alBottom, alLeft, alRight, alClient]) then
     begin
-      if ((OldAlign in [alTop, alBottom]) = (Value in [alRight, alLeft])) and
-        not (OldAlign in [alNone, alClient]) and not (Value in [alNone, alClient]) then
+      if ((Oudeuitlijning in [alTop, alBottom]) = (Value in [alRight, alLeft])) and
+        not (Oudeuitlijning in [alNone, alClient]) and not (Value in [alNone, alClient]) then
         SetBounds(Left, Top, Height, Width)
       else
         AdjustSize;
@@ -1604,20 +1604,20 @@ end;
 function TControl.CheckNewSize(var NewWidth, NewHeight: Integer): Boolean;
 var
   W, H: Integer;
-  MinW, MinH, MaxW, MaxH: Integer;
+  Minbreedte, Minhoogte, Maxbreedte, Maxhoogte: Integer;
 begin
   Result := False;
   W := NewWidth;
   H := NewHeight;
   if CanResize(W, H) then
   begin
-    MinW := FConstraints.MinWidth; MinH := FConstraints.MinHeight;
-    MaxW := FConstraints.MaxWidth; MaxH := FConstraints.MaxHeight;
-    ConstrainedResize(MinW, MinH, MaxW, MaxH);
-    if (MinW > 0) and (W < MinW) then W := MinW;
-    if (MaxW > 0) and (W > MaxW) then W := MaxW;
-    if (MinH > 0) and (H < MinH) then H := MinH;
-    if (MaxH > 0) and (H > MaxH) then H := MaxH;
+    Minbreedte := FConstraints.MinWidth; Minhoogte := FConstraints.MinHeight;
+    Maxbreedte := FConstraints.MaxWidth; Maxhoogte := FConstraints.MaxHeight;
+    ConstrainedResize(Minbreedte, Minhoogte, Maxbreedte, Maxhoogte);
+    if (Minbreedte > 0) and (W < Minbreedte) then W := Minbreedte;
+    if (Maxbreedte > 0) and (W > Maxbreedte) then W := Maxbreedte;
+    if (Minhoogte > 0) and (H < Minhoogte) then H := Minhoogte;
+    if (Maxhoogte > 0) and (H > Maxhoogte) then H := Maxhoogte;
     NewWidth := W;
     NewHeight := H;
     Result := True;
@@ -1682,10 +1682,10 @@ end;
 
 procedure TControl.SetClientSize(Value: TPoint);
 var
-  Client: TRect;
+  Clientgebied: TRect;
 begin
-  Client := GetClientRect;
-  SetBounds(FLeft, FTop, Width - Client.Right + Value.X, Height - Client.Bottom + Value.Y);
+  Clientgebied := GetClientRect;
+  SetBounds(FLeft, FTop, Width - Clientgebied.Right + Value.X, Height - Clientgebied.Bottom + Value.Y);
 end;
 
 procedure TControl.SetClientWidth(Value: Integer);
@@ -1709,20 +1709,20 @@ end;
 
 function TControl.ClientToScreen(const Point: TPoint): TPoint;
 var
-  Origin: TPoint;
+  Oorsprong: TPoint;
 begin
-  Origin := GetClientOrigin;
-  Result.X := Point.X + Origin.X;
-  Result.Y := Point.Y + Origin.Y;
+  Oorsprong := GetClientOrigin;
+  Result.X := Point.X + Oorsprong.X;
+  Result.Y := Point.Y + Oorsprong.Y;
 end;
 
 function TControl.ScreenToClient(const Point: TPoint): TPoint;
 var
-  Origin: TPoint;
+  Oorsprong: TPoint;
 begin
-  Origin := GetClientOrigin;
-  Result.X := Point.X - Origin.X;
-  Result.Y := Point.Y - Origin.Y;
+  Oorsprong := GetClientOrigin;
+  Result.X := Point.X - Oorsprong.X;
+  Result.Y := Point.Y - Oorsprong.Y;
 end;
 
 procedure TControl.SetVisible(Value: Boolean);
@@ -1754,11 +1754,11 @@ end;
 
 function TControl.GetText: TCaption;
 var
-  Len: Integer;
+  Lengte: Integer;
 begin
-  Len := GetTextLen;
-  SetString(Result, nil, Len);
-  if Len <> 0 then GetTextBuf(PChar(Result), Len + 1);
+  Lengte := GetTextLen;
+  SetString(Result, nil, Lengte);
+  if Lengte <> 0 then GetTextBuf(PChar(Result), Lengte + 1);
 end;
 
 function TControl.GetTextBufStr: string;
@@ -1817,20 +1817,20 @@ end;
 
 function TControl.Perform(Msg: Cardinal; WParam: WPARAM; LParam: LPARAM): LRESULT;
 var
-  Message: TMessage;
+  Bericht: TMessage;
 begin
-  FillChar(Message, SizeOf(Message), 0);
-  Message.Msg := Msg;
-  Message.WParam := WParam;
-  Message.LParam := LParam;
-  Message.Result := 0;
-  if Self <> nil then WindowProc(Message);
-  Result := Message.Result;
+  FillChar(Bericht, SizeOf(Bericht), 0);
+  Bericht.Msg := Msg;
+  Bericht.WParam := WParam;
+  Bericht.LParam := LParam;
+  Bericht.Result := 0;
+  if Self <> nil then WindowProc(Bericht);
+  Result := Bericht.Result;
 end;
 
 procedure TControl.WndProc(var Message: TMessage);
 var
-  Form: TWinControl;
+  Formulier: TWinControl;
 begin
   if (Message.Msg >= WM_MOUSEFIRST) and (Message.Msg <= WM_MOUSELAST) then
   begin
@@ -1858,8 +1858,8 @@ begin
   else if Message.Msg = CM_VISIBLECHANGED then
     with Message do
       SendDockNotification(Msg, WParam, LParam);
-  Form := nil;
-  if Form = nil then ;
+  Formulier := nil;
+  if Formulier = nil then ;
   Dispatch(Message);
 end;
 
@@ -1990,16 +1990,16 @@ end;
 procedure TControl.WMRButtonUp(var Message: TWMRButtonUp);
 var
   P: TPoint;
-  Handled: Boolean;
+  Afgehandeld: Boolean;
 begin
   inherited;
   DoMouseUp(Message, mbRight);
   if (Message.Result = 0) and (PopupMenu <> nil) then
   begin
     P := ClientToScreen(SmallPointToPoint(Message.Pos));
-    Handled := False;
-    DoContextPopup(SmallPointToPoint(Message.Pos), Handled);
-    if not Handled then PopupMenu.Popup(P.X, P.Y);
+    Afgehandeld := False;
+    DoContextPopup(SmallPointToPoint(Message.Pos), Afgehandeld);
+    if not Afgehandeld then PopupMenu.Popup(P.X, P.Y);
   end;
 end;
 
@@ -2112,13 +2112,13 @@ end;
 
 procedure TControl.InvalidateControl(IsVisible, IsOpaque: Boolean);
 var
-  Rect: TRect;
+  Rechthoek: TRect;
 begin
   if (IsVisible or (csDesigning in ComponentState) and not (csNoDesignVisible in ControlStyle)) and
     (Parent <> nil) and Parent.HandleAllocated then
   begin
-    Rect := BoundsRect;
-    InvalidateRect(Parent.Handle, @Rect, not (IsOpaque or (csOpaque in Parent.ControlStyle)));
+    Rechthoek := BoundsRect;
+    InvalidateRect(Parent.Handle, @Rechthoek, not (IsOpaque or (csOpaque in Parent.ControlStyle)));
   end;
 end;
 
@@ -2181,16 +2181,16 @@ end;
 
 procedure TControl.SetZOrderPosition(Position: Integer);
 var
-  I, Count: Integer;
+  I, Aantal: Integer;
 begin
   if FParent <> nil then
   begin
     I := FParent.FControls.IndexOf(Self);
     if I >= 0 then
     begin
-      Count := FParent.FControls.Count;
+      Aantal := FParent.FControls.Count;
       if Position < 0 then Position := 0;
-      if Position >= Count then Position := Count - 1;
+      if Position >= Aantal then Position := Aantal - 1;
       if Position <> I then
       begin
         FParent.FControls.Delete(I);
@@ -2250,7 +2250,7 @@ end;
 
 procedure TControl.DefineProperties(Filer: TFiler);
 
-  function DoWriteIsControl: Boolean;
+  function SchrijfIsBesturing: Boolean;
   begin
     if Filer.Ancestor <> nil then
       Result := TControl(Filer.Ancestor).IsControl <> IsControl
@@ -2260,7 +2260,7 @@ procedure TControl.DefineProperties(Filer: TFiler);
 
 begin
   inherited DefineProperties(Filer);
-  Filer.DefineProperty('IsControl', ReadIsControl, WriteIsControl, DoWriteIsControl);
+  Filer.DefineProperty('IsControl', ReadIsControl, WriteIsControl, SchrijfIsBesturing);
 end;
 
 procedure TControl.AssignTo(Dest: TPersistent);
@@ -2375,7 +2375,7 @@ end;
 destructor TWinControl.Destroy;
 var
   I: Integer;
-  Instance: TControl;
+  Exemplaar: TControl;
 begin
   Destroying;
   if FParent <> nil then RemoveFocus(True);
@@ -2383,9 +2383,9 @@ begin
   I := ControlCount;
   while I <> 0 do
   begin
-    Instance := Controls[I - 1];
-    Remove(Instance);
-    Instance.Destroy;
+    Exemplaar := Controls[I - 1];
+    Remove(Exemplaar);
+    Exemplaar.Destroy;
     I := ControlCount;
   end;
   FBrush.Free;
@@ -2397,29 +2397,29 @@ end;
 
 procedure TWinControl.FixupTabList;
 var
-  Count, I, J: Integer;
-  List: TList;
-  Control: TWinControl;
+  Aantal, I, J: Integer;
+  Lijst: TList;
+  Besturing: TWinControl;
 begin
   if FWinControls <> nil then
   begin
-    List := TList.Create;
+    Lijst := TList.Create;
     try
-      Count := FWinControls.Count;
-      List.Count := Count;
-      for I := 0 to Count - 1 do
+      Aantal := FWinControls.Count;
+      Lijst.Count := Aantal;
+      for I := 0 to Aantal - 1 do
       begin
-        Control := TWinControl(FWinControls[I]);
-        J := Control.FTabOrder;
-        if (J >= 0) and (J < Count) then List[J] := Control;
+        Besturing := TWinControl(FWinControls[I]);
+        J := Besturing.FTabOrder;
+        if (J >= 0) and (J < Aantal) then Lijst[J] := Besturing;
       end;
-      for I := 0 to Count - 1 do
+      for I := 0 to Aantal - 1 do
       begin
-        Control := TWinControl(List[I]);
-        if Control <> nil then Control.UpdateTabOrder(I);
+        Besturing := TWinControl(Lijst[I]);
+        if Besturing <> nil then Besturing.UpdateTabOrder(I);
       end;
     finally
-      List.Free;
+      Lijst.Free;
     end;
   end;
 end;
@@ -2512,10 +2512,10 @@ end;
 
 procedure TWinControl.RemoveFocus(Removing: Boolean);
 var
-  Form: TWinControl;
+  Formulier: TWinControl;
 begin
-  Form := ParentFormOf(Self);
-  if (Form <> nil) and Assigned(ZMDefocusHook) then ZMDefocusHook(Form, Self, Removing);
+  Formulier := ParentFormOf(Self);
+  if (Formulier <> nil) and Assigned(ZMDefocusHook) then ZMDefocusHook(Formulier, Self, Removing);
 end;
 
 function TWinControl.GetControl(Index: Integer): TControl;
@@ -2541,11 +2541,11 @@ end;
 
 procedure TWinControl.NotifyControls(Msg: Word);
 var
-  Message: TMessage;
+  Bericht: TMessage;
 begin
-  FillChar(Message, SizeOf(Message), 0);
-  Message.Msg := Msg;
-  Broadcast(Message);
+  FillChar(Bericht, SizeOf(Bericht), 0);
+  Bericht.Msg := Msg;
+  Broadcast(Bericht);
 end;
 
 function TWinControl.ContainsControl(Control: TControl): Boolean;
@@ -2591,12 +2591,12 @@ end;
 procedure TWinControl.GetChildren(Proc: TGetChildProc; Root: TComponent);
 var
   I: Integer;
-  Control: TControl;
+  Besturing: TControl;
 begin
   for I := 0 to ControlCount - 1 do
   begin
-    Control := Controls[I];
-    if Control.Owner = Root then Proc(Control);
+    Besturing := Controls[I];
+    if Besturing.Owner = Root then Proc(Besturing);
   end;
 end;
 
@@ -2640,7 +2640,7 @@ end;
 
 procedure TWinControl.AlignControl(AControl: TControl);
 var
-  Rect: TRect;
+  Rechthoek: TRect;
 begin
   if not HandleAllocated or (csDestroying in ComponentState) then
   begin
@@ -2656,8 +2656,8 @@ begin
   begin
     DisableAlign;
     try
-      Rect := GetClientRect;
-      AlignControls(AControl, Rect);
+      Rechthoek := GetClientRect;
+      AlignControls(AControl, Rechthoek);
     finally
       Exclude(FControlState, csAlignmentNeeded);
       EnableAlign;
@@ -2667,12 +2667,12 @@ end;
 
 procedure TWinControl.AlignControls(AControl: TControl; var Rect: TRect);
 var
-  AlignList: TList;
+  Uitlijnlijst: TList;
 
-  function InsertBefore(C1, C2: TControl; AAlign: TAlign): Boolean;
+  function Invoegvoor(C1, C2: TControl; Auitlijn: TAlign): Boolean;
   begin
     Result := False;
-    case AAlign of
+    case Auitlijn of
       alTop: Result := C1.Top < C2.Top;
       alBottom: Result := (C1.Top + C1.Height) >= (C2.Top + C2.Height);
       alLeft: Result := C1.Left < C2.Left;
@@ -2680,64 +2680,64 @@ var
     end;
   end;
 
-  procedure DoPosition(Control: TControl; AAlign: TAlign);
+  procedure DoPositie(Besturing: TControl; Auitlijn: TAlign);
   var
-    NewLeft, NewTop, NewWidth, NewHeight: Integer;
+    Nieuwlinks, Nieuwboven, Nieuwebreedte, Nieuwehoogte: Integer;
   begin
-    NewWidth := Rect.Right - Rect.Left;
-    if (NewWidth < 0) or (AAlign in [alLeft, alRight]) then NewWidth := Control.Width;
-    NewHeight := Rect.Bottom - Rect.Top;
-    if (NewHeight < 0) or (AAlign in [alTop, alBottom]) then NewHeight := Control.Height;
-    NewLeft := Rect.Left;
-    NewTop := Rect.Top;
-    case AAlign of
-      alTop: Inc(Rect.Top, NewHeight);
+    Nieuwebreedte := Rect.Right - Rect.Left;
+    if (Nieuwebreedte < 0) or (Auitlijn in [alLeft, alRight]) then Nieuwebreedte := Besturing.Width;
+    Nieuwehoogte := Rect.Bottom - Rect.Top;
+    if (Nieuwehoogte < 0) or (Auitlijn in [alTop, alBottom]) then Nieuwehoogte := Besturing.Height;
+    Nieuwlinks := Rect.Left;
+    Nieuwboven := Rect.Top;
+    case Auitlijn of
+      alTop: Inc(Rect.Top, Nieuwehoogte);
       alBottom:
         begin
-          Dec(Rect.Bottom, NewHeight);
-          NewTop := Rect.Bottom;
+          Dec(Rect.Bottom, Nieuwehoogte);
+          Nieuwboven := Rect.Bottom;
         end;
-      alLeft: Inc(Rect.Left, NewWidth);
+      alLeft: Inc(Rect.Left, Nieuwebreedte);
       alRight:
         begin
-          Dec(Rect.Right, NewWidth);
-          NewLeft := Rect.Right;
+          Dec(Rect.Right, Nieuwebreedte);
+          Nieuwlinks := Rect.Right;
         end;
     end;
-    Control.SetBounds(NewLeft, NewTop, NewWidth, NewHeight);
+    Besturing.SetBounds(Nieuwlinks, Nieuwboven, Nieuwebreedte, Nieuwehoogte);
     { het besturingselement accepteert de grootte mogelijk niet: pas de resterende rechthoek aan }
-    if (Control.Width <> NewWidth) or (Control.Height <> NewHeight) then
-      case AAlign of
-        alTop: Dec(Rect.Top, NewHeight - Control.Height);
-        alBottom: Inc(Rect.Bottom, NewHeight - Control.Height);
-        alLeft: Dec(Rect.Left, NewWidth - Control.Width);
-        alRight: Inc(Rect.Right, NewWidth - Control.Width);
+    if (Besturing.Width <> Nieuwebreedte) or (Besturing.Height <> Nieuwehoogte) then
+      case Auitlijn of
+        alTop: Dec(Rect.Top, Nieuwehoogte - Besturing.Height);
+        alBottom: Inc(Rect.Bottom, Nieuwehoogte - Besturing.Height);
+        alLeft: Dec(Rect.Left, Nieuwebreedte - Besturing.Width);
+        alRight: Inc(Rect.Right, Nieuwebreedte - Besturing.Width);
       end;
   end;
 
-  procedure DoAlign(AAlign: TAlign);
+  procedure DoUitlijnen(Auitlijn: TAlign);
   var
     I, J: Integer;
-    Control: TControl;
+    Besturing: TControl;
   begin
-    AlignList.Clear;
-    if (AControl <> nil) and (AControl.Align = AAlign) and AControl.Visible then
-      AlignList.Add(AControl);
+    Uitlijnlijst.Clear;
+    if (AControl <> nil) and (AControl.Align = Auitlijn) and AControl.Visible then
+      Uitlijnlijst.Add(AControl);
     for I := 0 to ControlCount - 1 do
     begin
-      Control := Controls[I];
-      if (Control.Align = AAlign) and Control.Visible and (Control <> AControl) then
+      Besturing := Controls[I];
+      if (Besturing.Align = Auitlijn) and Besturing.Visible and (Besturing <> AControl) then
       begin
         J := 0;
-        while (J < AlignList.Count) and not InsertBefore(Control, TControl(AlignList[J]), AAlign) do Inc(J);
-        AlignList.Insert(J, Control);
+        while (J < Uitlijnlijst.Count) and not Invoegvoor(Besturing, TControl(Uitlijnlijst[J]), Auitlijn) do Inc(J);
+        Uitlijnlijst.Insert(J, Besturing);
       end;
     end;
-    for I := 0 to AlignList.Count - 1 do
-      DoPosition(TControl(AlignList[I]), AAlign);
+    for I := 0 to Uitlijnlijst.Count - 1 do
+      DoPositie(TControl(Uitlijnlijst[I]), Auitlijn);
   end;
 
-  function AlignWork: Boolean;
+  function Uitlijnwerk: Boolean;
   var
     I: Integer;
   begin
@@ -2748,18 +2748,18 @@ var
   end;
 
 begin
-  if AlignWork then
+  if Uitlijnwerk then
   begin
     AdjustClientRect(Rect);
-    AlignList := TList.Create;
+    Uitlijnlijst := TList.Create;
     try
-      DoAlign(alTop);
-      DoAlign(alBottom);
-      DoAlign(alLeft);
-      DoAlign(alRight);
-      DoAlign(alClient);
+      DoUitlijnen(alTop);
+      DoUitlijnen(alBottom);
+      DoUitlijnen(alLeft);
+      DoUitlijnen(alRight);
+      DoUitlijnen(alClient);
     finally
-      AlignList.Free;
+      Uitlijnlijst.Free;
     end;
   end;
 end;
@@ -2997,13 +2997,13 @@ end;
 
 procedure TWinControl.CreateWindowHandle(const Params: TCreateParams);
 var
-  Txt: string;
+  Tkst: string;
   W: TZMWindow;
 begin
   with Params do
   begin
-    if Caption <> nil then Txt := StrPas(Caption) else Txt := '';
-    FHandle := ZMCreateWindow(ExStyle, StrPas(WinClassName), Txt, Style and not WS_VISIBLE,
+    if Caption <> nil then Tkst := StrPas(Caption) else Tkst := '';
+    FHandle := ZMCreateWindow(ExStyle, StrPas(WinClassName), Tkst, Style and not WS_VISIBLE,
       X, Y, Width, Height, WndParent, 0, MainWndProc, nil);
     W := ZMWindowObj(FHandle);
     if W <> nil then
@@ -3016,23 +3016,23 @@ end;
 
 procedure TWinControl.CreateWnd;
 var
-  Params: TCreateParams;
-  TempClass: TWndClass;
-  ClassRegistered: Boolean;
+  Parameters: TCreateParams;
+  Tijdelijkeklasse: TWndClass;
+  Klasseregistreerd: Boolean;
 begin
-  CreateParams(Params);
-  with Params do
+  CreateParams(Parameters);
+  with Parameters do
   begin
     if (WndParent = 0) and (Style and WS_CHILD <> 0) then
       if (Owner <> nil) and (csReading in Owner.ComponentState) and (Owner is TWinControl) then
         WndParent := TWinControl(Owner).Handle
       else
         raise EInvalidOperation.CreateFmt('Control ''%s'' has no parent window', [Name]);
-    ClassRegistered := False;
-    if ClassRegistered then TempClass := WindowClass;
+    Klasseregistreerd := False;
+    if Klasseregistreerd then Tijdelijkeklasse := WindowClass;
     CreationControl := Self;
     FWinCreated := False;
-    CreateWindowHandle(Params);
+    CreateWindowHandle(Parameters);
     CreationControl := nil;
     if FHandle = 0 then
       raise EOutOfResources.Create('Error creating window');
@@ -3066,14 +3066,14 @@ end;
 
 procedure TWinControl.DestroyWnd;
 var
-  Len: Integer;
+  Lengte: Integer;
 begin
-  Len := GetTextLen;
-  if Len < 1 then FText := ''
+  Lengte := GetTextLen;
+  if Lengte < 1 then FText := ''
   else
   begin
-    SetString(FText, nil, Len);
-    GetTextBuf(PChar(FText), Len + 1);
+    SetString(FText, nil, Lengte);
+    GetTextBuf(PChar(FText), Lengte + 1);
   end;
   DestroyWindowHandle;
 end;
@@ -3134,12 +3134,12 @@ end;
 
 procedure TWinControl.UpdateShowing;
 var
-  ShowControl: Boolean;
+  Toonbesturing: Boolean;
   I: Integer;
 begin
-  ShowControl := (FVisible or (csDesigning in ComponentState) and
+  Toonbesturing := (FVisible or (csDesigning in ComponentState) and
     not (csNoDesignVisible in ControlStyle)) and not (csReadingState in ControlState);
-  if ShowControl then
+  if Toonbesturing then
   begin
     if FHandle = 0 then CreateHandle;
     if FWinControls <> nil then
@@ -3147,13 +3147,13 @@ begin
         TWinControl(FWinControls[I]).UpdateShowing;
   end;
   if FHandle <> 0 then
-    if FShowing <> ShowControl then
+    if FShowing <> Toonbesturing then
     begin
-      FShowing := ShowControl;
+      FShowing := Toonbesturing;
       try
         Perform(CM_SHOWINGCHANGED, 0, 0);
       except
-        FShowing := not ShowControl;
+        FShowing := not Toonbesturing;
         raise;
       end;
     end;
@@ -3161,16 +3161,16 @@ end;
 
 procedure TWinControl.UpdateControlState;
 var
-  Control: TWinControl;
+  Besturing: TWinControl;
 begin
-  Control := Self;
-  while Control.Parent <> nil do
+  Besturing := Self;
+  while Besturing.Parent <> nil do
   begin
-    Control := Control.Parent;
-    if not Control.Showing then Exit;
+    Besturing := Besturing.Parent;
+    if not Besturing.Showing then Exit;
   end;
   { besturingselementen op het hoogste niveau (formulieren, popups) en besturingselementen in een vreemd venster }
-  if (Control.FParentWindow <> 0) or (Control.Parent = nil) then
+  if (Besturing.FParentWindow <> 0) or (Besturing.Parent = nil) then
     UpdateShowing;
 end;
 
@@ -3225,18 +3225,18 @@ end;
 
 procedure TWinControl.PaintWindow(DC: HDC);
 var
-  Message: TMessage;
+  Bericht: TMessage;
 begin
-  FillChar(Message, SizeOf(Message), 0);
-  Message.Msg := WM_PAINT;
-  Message.WParam := WPARAM(DC);
-  DefaultHandler(Message);
+  FillChar(Bericht, SizeOf(Bericht), 0);
+  Bericht.Msg := WM_PAINT;
+  Bericht.WParam := WPARAM(DC);
+  DefaultHandler(Bericht);
 end;
 
 procedure TWinControl.PaintControls(DC: HDC; First: TControl);
 var
-  I, Count, SaveIndex: Integer;
-  FrameBrush: HBRUSH;
+  I, Aantal, Bewaarindex: Integer;
+  Randkwast: HBRUSH;
   C: TControl;
 begin
   if FControls <> nil then
@@ -3247,8 +3247,8 @@ begin
       I := FControls.IndexOf(First);
       if I < 0 then I := 0;
     end;
-    Count := FControls.Count;
-    while I < Count do
+    Aantal := FControls.Count;
+    while I < Aantal do
     begin
       C := TControl(FControls[I]);
       if not (C is TWinControl) then
@@ -3257,11 +3257,11 @@ begin
             RectVisible(DC, Rect(Left, Top, Left + Width, Top + Height)) then
           begin
             if csPaintCopy in Self.FControlState then Include(FControlState, csPaintCopy);
-            SaveIndex := SaveDC(DC);
+            Bewaarindex := SaveDC(DC);
             MoveWindowOrg(DC, Left, Top);
             IntersectClipRect(DC, 0, 0, Width, Height);
             Perform(WM_PAINT, WPARAM(DC), 0);
-            RestoreDC(DC, SaveIndex);
+            RestoreDC(DC, Bewaarindex);
             Exclude(FControlState, csPaintCopy);
           end;
       Inc(I);
@@ -3273,12 +3273,12 @@ begin
         if FCtl3D and (csFramed in ControlStyle) and (Visible or (csDesigning in ComponentState) and
           not (csNoDesignVisible in ControlStyle)) then
         begin
-          FrameBrush := CreateSolidBrush(ColorToRGB(clBtnShadow));
-          FrameRect(DC, Rect(Left - 1, Top - 1, Left + Width, Top + Height), FrameBrush);
-          DeleteObject(FrameBrush);
-          FrameBrush := CreateSolidBrush(ColorToRGB(clBtnHighlight));
-          FrameRect(DC, Rect(Left, Top, Left + Width + 1, Top + Height + 1), FrameBrush);
-          DeleteObject(FrameBrush);
+          Randkwast := CreateSolidBrush(ColorToRGB(clBtnShadow));
+          FrameRect(DC, Rect(Left - 1, Top - 1, Left + Width, Top + Height), Randkwast);
+          DeleteObject(Randkwast);
+          Randkwast := CreateSolidBrush(ColorToRGB(clBtnHighlight));
+          FrameRect(DC, Rect(Left, Top, Left + Width + 1, Top + Height + 1), Randkwast);
+          DeleteObject(Randkwast);
         end;
 end;
 
@@ -3310,18 +3310,18 @@ end;
 
 procedure TWinControl.PaintTo(DC: HDC; X, Y: Integer);
 var
-  Msg: TWMPaint;
-  SaveIndex: Integer;
+  Bericht: TWMPaint;
+  Bewaarindex: Integer;
 begin
-  SaveIndex := SaveDC(DC);
+  Bewaarindex := SaveDC(DC);
   MoveWindowOrg(DC, X, Y);
   IntersectClipRect(DC, 0, 0, Width, Height);
-  FillChar(Msg, SizeOf(Msg), 0);
-  Msg.Msg := WM_PAINT;
-  Msg.DC := DC;
+  FillChar(Bericht, SizeOf(Bericht), 0);
+  Bericht.Msg := WM_PAINT;
+  Bericht.DC := DC;
   Perform(WM_ERASEBKGND, WPARAM(DC), 0);
-  PaintHandler(Msg);
-  RestoreDC(DC, SaveIndex);
+  PaintHandler(Bericht);
+  RestoreDC(DC, Bewaarindex);
 end;
 
 function TWinControl.PaletteChanged(Foreground: Boolean): Boolean;
@@ -3346,37 +3346,37 @@ end;
 
 function TWinControl.IsControlMouseMsg(var Message: TWMMouse): Boolean;
 var
-  Control: TControl;
+  Besturing: TControl;
   P: TPoint;
 begin
   if GetCapture = Handle then
   begin
-    Control := nil;
+    Besturing := nil;
     if (CaptureControl <> nil) and (CaptureControl.Parent = Self) then
-      Control := CaptureControl;
+      Besturing := CaptureControl;
   end
   else
-    Control := ControlAtPos(SmallPointToPoint(Message.Pos), False);
+    Besturing := ControlAtPos(SmallPointToPoint(Message.Pos), False);
   Result := False;
-  if Control <> nil then
+  if Besturing <> nil then
   begin
-    P.X := Message.XPos - Control.Left;
-    P.Y := Message.YPos - Control.Top;
-    Message.Result := Control.Perform(Message.Msg, Message.Keys, PointToLParam(P));
+    P.X := Message.XPos - Besturing.Left;
+    P.Y := Message.YPos - Besturing.Top;
+    Message.Result := Besturing.Perform(Message.Msg, Message.Keys, PointToLParam(P));
     Result := True;
   end;
 end;
 
 procedure TWinControl.WndProc(var Message: TMessage);
 var
-  Form: TWinControl;
+  Formulier: TWinControl;
 begin
   case Message.Msg of
     WM_SETFOCUS:
       begin
-        Form := ParentFormOf(Self);
-        if (Form <> nil) and Assigned(ZMSetFocusedControlHook) then
-          if not ZMSetFocusedControlHook(Form, Self) then Exit;
+        Formulier := ParentFormOf(Self);
+        if (Formulier <> nil) and Assigned(ZMSetFocusedControlHook) then
+          if not ZMSetFocusedControlHook(Formulier, Self) then Exit;
       end;
     WM_KILLFOCUS:
       if csFocusing in ControlState then Exit;
@@ -3436,8 +3436,8 @@ end;
 
 procedure TWinControl.HandleKeyMessage(var Message: TWMKey);
 var
-  Form: TWinControl;
-  Mask: Integer;
+  Formulier: TWinControl;
+  Masker: Integer;
 begin
   case Message.Msg of
     WM_KEYDOWN, WM_SYSKEYDOWN:
@@ -3445,17 +3445,17 @@ begin
         if DoKeyDown(Message) then Exit;
         if Message.CharCode = 0 then Exit;
         { dialoogtoetsen: Tab, pijltjes, Enter, Escape }
-        Mask := 0;
+        Masker := 0;
         case Message.CharCode of
-          VK_TAB: Mask := DLGC_WANTTAB;
-          VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN: Mask := DLGC_WANTARROWS;
-          VK_RETURN, VK_EXECUTE, VK_ESCAPE, VK_CANCEL: Mask := DLGC_WANTALLKEYS;
+          VK_TAB: Masker := DLGC_WANTTAB;
+          VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN: Masker := DLGC_WANTARROWS;
+          VK_RETURN, VK_EXECUTE, VK_ESCAPE, VK_CANCEL: Masker := DLGC_WANTALLKEYS;
         end;
-        if (Mask <> 0) and (Perform(CM_WANTSPECIALKEY, Message.CharCode, Message.KeyData) = 0) and
-          (Perform(WM_GETDLGCODE, 0, 0) and Mask = 0) then
+        if (Masker <> 0) and (Perform(CM_WANTSPECIALKEY, Message.CharCode, Message.KeyData) = 0) and
+          (Perform(WM_GETDLGCODE, 0, 0) and Masker = 0) then
         begin
-          Form := ParentFormOf(Self);
-          if (Form <> nil) and (Form.Perform(CM_DIALOGKEY, Message.CharCode, Message.KeyData) <> 0) then
+          Formulier := ParentFormOf(Self);
+          if (Formulier <> nil) and (Formulier.Perform(CM_DIALOGKEY, Message.CharCode, Message.KeyData) <> 0) then
           begin
             Message.Result := 1;
             Exit;
@@ -3468,8 +3468,8 @@ begin
         if DoKeyPress(Message) then Exit;
         if Message.Msg = WM_SYSCHAR then
         begin
-          Form := ParentFormOf(Self);
-          if (Form <> nil) and (Form.Perform(CM_DIALOGCHAR, Message.CharCode, Message.KeyData) <> 0) then Exit;
+          Formulier := ParentFormOf(Self);
+          if (Formulier <> nil) and (Formulier.Perform(CM_DIALOGCHAR, Message.CharCode, Message.KeyData) <> 0) then Exit;
         end;
         KeyPressDefault(Message);
       end;
@@ -3490,19 +3490,19 @@ end;
 
 function TWinControl.DoKeyDown(var Message: TWMKey): Boolean;
 var
-  ShiftState: TShiftState;
-  Form: TWinControl;
+  Schakelstaat: TShiftState;
+  Formulier: TWinControl;
 begin
   Result := True;
-  Form := ParentFormOf(Self);
-  if (Form <> nil) and (Form <> Self) and Assigned(ZMKeyPreviewHook) and ZMKeyPreviewHook(Form) and
-    TWinControl(Form).DoKeyDown(Message) then Exit;
+  Formulier := ParentFormOf(Self);
+  if (Formulier <> nil) and (Formulier <> Self) and Assigned(ZMKeyPreviewHook) and ZMKeyPreviewHook(Formulier) and
+    TWinControl(Formulier).DoKeyDown(Message) then Exit;
   with Message do
   begin
-    ShiftState := KeyDataToShiftState(KeyData);
+    Schakelstaat := KeyDataToShiftState(KeyData);
     if not (csNoStdEvents in ControlStyle) then
     begin
-      KeyDown(CharCode, ShiftState);
+      KeyDown(CharCode, Schakelstaat);
       if CharCode = 0 then Exit;
     end;
   end;
@@ -3511,13 +3511,13 @@ end;
 
 function TWinControl.DoKeyPress(var Message: TWMKey): Boolean;
 var
-  Form: TWinControl;
+  Formulier: TWinControl;
   Ch: Char;
 begin
   Result := True;
-  Form := ParentFormOf(Self);
-  if (Form <> nil) and (Form <> Self) and Assigned(ZMKeyPreviewHook) and ZMKeyPreviewHook(Form) and
-    TWinControl(Form).DoKeyPress(Message) then Exit;
+  Formulier := ParentFormOf(Self);
+  if (Formulier <> nil) and (Formulier <> Self) and Assigned(ZMKeyPreviewHook) and ZMKeyPreviewHook(Formulier) and
+    TWinControl(Formulier).DoKeyPress(Message) then Exit;
   if not (csNoStdEvents in ControlStyle) then
     with Message do
     begin
@@ -3531,19 +3531,19 @@ end;
 
 function TWinControl.DoKeyUp(var Message: TWMKey): Boolean;
 var
-  ShiftState: TShiftState;
-  Form: TWinControl;
+  Schakelstaat: TShiftState;
+  Formulier: TWinControl;
 begin
   Result := True;
-  Form := ParentFormOf(Self);
-  if (Form <> nil) and (Form <> Self) and Assigned(ZMKeyPreviewHook) and ZMKeyPreviewHook(Form) and
-    TWinControl(Form).DoKeyUp(Message) then Exit;
+  Formulier := ParentFormOf(Self);
+  if (Formulier <> nil) and (Formulier <> Self) and Assigned(ZMKeyPreviewHook) and ZMKeyPreviewHook(Formulier) and
+    TWinControl(Formulier).DoKeyUp(Message) then Exit;
   with Message do
   begin
-    ShiftState := KeyDataToShiftState(KeyData);
+    Schakelstaat := KeyDataToShiftState(KeyData);
     if not (csNoStdEvents in ControlStyle) then
     begin
-      KeyUp(CharCode, ShiftState);
+      KeyUp(CharCode, Schakelstaat);
       if CharCode = 0 then Exit;
     end;
   end;
@@ -3615,16 +3615,16 @@ end;
 
 function TWinControl.CanFocus: Boolean;
 var
-  Control: TWinControl;
+  Besturing: TWinControl;
 begin
   { zoals de VCL: elk besturingselement tot (exclusief) het formulier op het hoogste niveau moet
     zichtbaar en ingeschakeld zijn }
   Result := False;
-  Control := Self;
-  while Control.Parent <> nil do
+  Besturing := Self;
+  while Besturing.Parent <> nil do
   begin
-    if not (Control.FVisible and Control.Enabled) then Exit;
-    Control := Control.Parent;
+    if not (Besturing.FVisible and Besturing.Enabled) then Exit;
+    Besturing := Besturing.Parent;
   end;
   Result := True;
 end;
@@ -3636,11 +3636,11 @@ end;
 
 procedure TWinControl.SetFocus;
 var
-  Parent: TWinControl;
+  Ouder: TWinControl;
 begin
-  Parent := ParentFormOf(Self);
-  if (Parent <> nil) and Assigned(ZMFocusControlHook) then
-    ZMFocusControlHook(Parent, Self)
+  Ouder := ParentFormOf(Self);
+  if (Ouder <> nil) and Assigned(ZMFocusControlHook) then
+    ZMFocusControlHook(Ouder, Self)
   else if FParentWindow <> 0 then
     Windows.SetFocus(Handle)
   else
@@ -3685,51 +3685,51 @@ end;
 procedure TWinControl.GetTabOrderList(List: TList);
 var
   I: Integer;
-  Control: TWinControl;
+  Besturing: TWinControl;
 begin
   if FTabList <> nil then
     for I := 0 to FTabList.Count - 1 do
     begin
-      Control := TWinControl(FTabList[I]);
-      List.Add(Control);
-      Control.GetTabOrderList(List);
+      Besturing := TWinControl(FTabList[I]);
+      List.Add(Besturing);
+      Besturing.GetTabOrderList(List);
     end;
 end;
 
 function TWinControl.FindNextControl(CurControl: TWinControl; GoForward, CheckTabStop, CheckParent: Boolean): TWinControl;
 var
-  I, StartIndex: Integer;
-  List: TList;
+  I, Startindex: Integer;
+  Lijst: TList;
 begin
   Result := nil;
-  List := TList.Create;
+  Lijst := TList.Create;
   try
-    GetTabOrderList(List);
-    if List.Count > 0 then
+    GetTabOrderList(Lijst);
+    if Lijst.Count > 0 then
     begin
-      StartIndex := List.IndexOf(CurControl);
-      if StartIndex = -1 then
-        if GoForward then StartIndex := List.Count - 1 else StartIndex := 0;
-      I := StartIndex;
+      Startindex := Lijst.IndexOf(CurControl);
+      if Startindex = -1 then
+        if GoForward then Startindex := Lijst.Count - 1 else Startindex := 0;
+      I := Startindex;
       repeat
         if GoForward then
         begin
           Inc(I);
-          if I = List.Count then I := 0;
+          if I = Lijst.Count then I := 0;
         end
         else
         begin
-          if I = 0 then I := List.Count;
+          if I = 0 then I := Lijst.Count;
           Dec(I);
         end;
-        CurControl := TWinControl(List[I]);
+        CurControl := TWinControl(Lijst[I]);
         if CurControl.CanFocus and (not CheckTabStop or CurControl.TabStop) and
           (not CheckParent or (CurControl.Parent = Self)) then
           Result := CurControl;
-      until (Result <> nil) or (I = StartIndex);
+      until (Result <> nil) or (I = Startindex);
     end;
   finally
-    List.Free;
+    Lijst.Free;
   end;
 end;
 
@@ -3741,11 +3741,11 @@ end;
 
 procedure TWinControl.SelectFirst;
 var
-  Control: TWinControl;
+  Besturing: TWinControl;
 begin
-  Control := FindNextControl(nil, True, True, False);
-  if Control = nil then Control := FindNextControl(nil, True, False, False);
-  if Control <> nil then Control.SetFocus;
+  Besturing := FindNextControl(nil, True, True, False);
+  if Besturing = nil then Besturing := FindNextControl(nil, True, False, False);
+  if Besturing <> nil then Besturing.SetFocus;
 end;
 
 function TWinControl.GetTabOrder: TTabOrder;
@@ -3758,17 +3758,17 @@ end;
 
 procedure TWinControl.UpdateTabOrder(Value: TTabOrder);
 var
-  CurIndex, Count: Integer;
+  Huidigindex, Aantal: Integer;
 begin
-  CurIndex := GetTabOrder;
-  if CurIndex >= 0 then
+  Huidigindex := GetTabOrder;
+  if Huidigindex >= 0 then
   begin
-    Count := FParent.FTabList.Count;
+    Aantal := FParent.FTabList.Count;
     if Value < 0 then Value := 0;
-    if Value >= Count then Value := Count - 1;
-    if Value <> CurIndex then
+    if Value >= Aantal then Value := Aantal - 1;
+    if Value <> Huidigindex then
     begin
-      FParent.FTabList.Delete(CurIndex);
+      FParent.FTabList.Delete(Huidigindex);
       FParent.FTabList.Insert(Value, Self);
     end;
   end;
@@ -3789,17 +3789,17 @@ end;
 
 procedure TWinControl.SetZOrderPosition(Position: Integer);
 var
-  I, Count: Integer;
-  Pos: HWND;
+  I, Aantal: Integer;
+  Positie: HWND;
 begin
   if FParent <> nil then
   begin
     I := FParent.FControls.IndexOf(Self);
     if I >= 0 then
     begin
-      Count := FParent.FControls.Count;
+      Aantal := FParent.FControls.Count;
       if Position < 0 then Position := 0;
-      if Position >= Count then Position := Count - 1;
+      if Position >= Aantal then Position := Aantal - 1;
       if Position <> I then
       begin
         FParent.FControls.Delete(I);
@@ -3808,10 +3808,10 @@ begin
     end;
     if FHandle <> 0 then
     begin
-      if Position = 0 then Pos := HWND_BOTTOM
-      else if Position = FParent.FControls.Count - 1 then Pos := HWND_TOP
-      else Pos := HWND_TOP;
-      SetWindowPos(FHandle, Pos, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE);
+      if Position = 0 then Positie := HWND_BOTTOM
+      else if Position = FParent.FControls.Count - 1 then Positie := HWND_TOP
+      else Positie := HWND_TOP;
+      SetWindowPos(FHandle, Positie, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE);
     end;
   end;
 end;
@@ -3887,7 +3887,7 @@ end;
 procedure TWinControl.WMSetCursor(var Message: TWMSetCursor);
 var
   Cursor: TCursor;
-  Control: TControl;
+  Besturing: TControl;
   P: TPoint;
 begin
   with Message do
@@ -3897,9 +3897,9 @@ begin
       if Cursor = crDefault then
       begin
         GetCursorPos(P);
-        Control := ControlAtPos(ScreenToClient(P), False);
-        if (Control <> nil) and (Control.Cursor <> crDefault) then
-          Cursor := Control.Cursor
+        Besturing := ControlAtPos(ScreenToClient(P), False);
+        if (Besturing <> nil) and (Besturing.Cursor <> crDefault) then
+          Cursor := Besturing.Cursor
         else
           Cursor := FCursor;
       end;
@@ -3933,13 +3933,13 @@ end;
 
 procedure TWinControl.WMWindowPosChanged(var Message: TWMWindowPosChanged);
 var
-  Framed, Moved, Sized: Boolean;
+  Omlijnd, Verplaatst, Gedimensioneerd: Boolean;
 begin
-  Framed := FCtl3D and (csFramed in ControlStyle) and (Parent <> nil) and
+  Omlijnd := FCtl3D and (csFramed in ControlStyle) and (Parent <> nil) and
     (Message.WindowPos <> nil) and (Message.WindowPos^.flags and SWP_NOREDRAW = 0);
-  Moved := (Message.WindowPos <> nil) and (Message.WindowPos^.flags and SWP_NOMOVE = 0) and IsWindowVisible(FHandle);
-  Sized := (Message.WindowPos <> nil) and (Message.WindowPos^.flags and SWP_NOSIZE = 0) and IsWindowVisible(FHandle);
-  if Framed and (Moved or Sized) then InvalidateFrame;
+  Verplaatst := (Message.WindowPos <> nil) and (Message.WindowPos^.flags and SWP_NOMOVE = 0) and IsWindowVisible(FHandle);
+  Gedimensioneerd := (Message.WindowPos <> nil) and (Message.WindowPos^.flags and SWP_NOSIZE = 0) and IsWindowVisible(FHandle);
+  if Omlijnd and (Verplaatst or Gedimensioneerd) then InvalidateFrame;
   if not (csDestroyingHandle in ControlState) then UpdateBounds;
   inherited;
 end;

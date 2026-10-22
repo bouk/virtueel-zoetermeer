@@ -373,14 +373,14 @@ end;
 
 procedure TCustomGrid.SetColWidths(Index: Longint; Value: Integer);
 var
-  I, Old: Integer;
+  I, Oud: Integer;
 begin
   if Index < 0 then Exit;
   if Index >= Length(FColWidths) then
   begin
-    Old := Length(FColWidths);
+    Oud := Length(FColWidths);
     SetLength(FColWidths, Max(Index + 1, FColCount));
-    for I := Old to High(FColWidths) do FColWidths[I] := -1;
+    for I := Oud to High(FColWidths) do FColWidths[I] := -1;
   end;
   FColWidths[Index] := Value;
   ColWidthsChanged;
@@ -388,14 +388,14 @@ end;
 
 procedure TCustomGrid.SetRowHeights(Index: Longint; Value: Integer);
 var
-  I, Old: Integer;
+  I, Oud: Integer;
 begin
   if Index < 0 then Exit;
   if Index >= Length(FRowHeights) then
   begin
-    Old := Length(FRowHeights);
+    Oud := Length(FRowHeights);
     SetLength(FRowHeights, Max(Index + 1, FRowCount));
-    for I := Old to High(FRowHeights) do FRowHeights[I] := -1;
+    for I := Oud to High(FRowHeights) do FRowHeights[I] := -1;
   end;
   FRowHeights[Index] := Value;
   RowHeightsChanged;
@@ -417,32 +417,32 @@ end;
 
 procedure TCustomGrid.SetColCount(Value: Longint);
 var
-  Old: Longint;
+  Oud: Longint;
 begin
   if Value < 1 then Value := 1;
   if FColCount <> Value then
   begin
-    Old := FColCount;
+    Oud := FColCount;
     FColCount := Value;
     if FFixedCols >= Value then FFixedCols := Value - 1;
     if FCurrent.X >= Value then FCurrent.X := Value - 1;
-    SizeChanged(Old, FRowCount);
+    SizeChanged(Oud, FRowCount);
     Invalidate;
   end;
 end;
 
 procedure TCustomGrid.SetRowCount(Value: Longint);
 var
-  Old: Longint;
+  Oud: Longint;
 begin
   if Value < 1 then Value := 1;
   if FRowCount <> Value then
   begin
-    Old := FRowCount;
+    Oud := FRowCount;
     FRowCount := Value;
     if FFixedRows >= Value then FFixedRows := Value - 1;
     if FCurrent.Y >= Value then FCurrent.Y := Value - 1;
-    SizeChanged(FColCount, Old);
+    SizeChanged(FColCount, Oud);
     Invalidate;
   end;
 end;
@@ -696,7 +696,7 @@ procedure TCustomGrid.Paint;
 var
   C, R: Integer;
   Rc: TRect;
-  State: TGridDrawState;
+  Staat: TGridDrawState;
 begin
   Canvas.Font := Font;
   Canvas.Brush.Color := Color;
@@ -706,41 +706,41 @@ begin
     begin
       Rc := CellRect(C, R);
       if (Rc.Right <= Rc.Left) or (Rc.Left >= ClientWidth) or (Rc.Top >= ClientHeight) then Continue;
-      State := [];
+      Staat := [];
       if (C < FFixedCols) or (R < FFixedRows) then
-        Include(State, gdFixed)
+        Include(Staat, gdFixed)
       else
       begin
         with GetSelection do
           if (C >= Left) and (C <= Right) and (R >= Top) and (R <= Bottom) then
             if not ((C = FCurrent.X) and (R = FCurrent.Y)) or (goRowSelect in FOptions) or
               (goDrawFocusSelected in FOptions) then
-              Include(State, gdSelected);
-        if (C = FCurrent.X) and (R = FCurrent.Y) and Focused then Include(State, gdFocused);
+              Include(Staat, gdSelected);
+        if (C = FCurrent.X) and (R = FCurrent.Y) and Focused then Include(Staat, gdFocused);
       end;
       if FDefaultDrawing then
       begin
-        if gdFixed in State then Canvas.Brush.Color := FFixedColor
-        else if gdSelected in State then Canvas.Brush.Color := clHighlight
+        if gdFixed in Staat then Canvas.Brush.Color := FFixedColor
+        else if gdSelected in Staat then Canvas.Brush.Color := clHighlight
         else Canvas.Brush.Color := Color;
         Canvas.FillRect(Rc);
-        if gdSelected in State then Canvas.Font.Color := clHighlightText else Canvas.Font.Color := Font.Color;
+        if gdSelected in Staat then Canvas.Font.Color := clHighlightText else Canvas.Font.Color := Font.Color;
       end;
-      DrawCell(C, R, Rc, State);
-      if FDefaultDrawing and (gdFixed in State) then
+      DrawCell(C, R, Rc, Staat);
+      if FDefaultDrawing and (gdFixed in Staat) then
         ZMFrame3D(Canvas, Rect(Rc.Left, Rc.Top, Rc.Right + 1, Rc.Bottom + 1), clBtnHighlight, clBtnShadow);
-      if gdFocused in State then Canvas.DrawFocusRect(Rc);
+      if gdFocused in Staat then Canvas.DrawFocusRect(Rc);
       { rasterlijnen }
       if FGridLineWidth > 0 then
       begin
         Canvas.Pen.Color := clSilver;
-        if (gdFixed in State) then Canvas.Pen.Color := clBlack;
-        if ((gdFixed in State) and (goFixedVertLine in FOptions)) or (not (gdFixed in State) and (goVertLine in FOptions)) then
+        if (gdFixed in Staat) then Canvas.Pen.Color := clBlack;
+        if ((gdFixed in Staat) and (goFixedVertLine in FOptions)) or (not (gdFixed in Staat) and (goVertLine in FOptions)) then
         begin
           Canvas.MoveTo(Rc.Right, Rc.Top);
           Canvas.LineTo(Rc.Right, Rc.Bottom + 1);
         end;
-        if ((gdFixed in State) and (goFixedHorzLine in FOptions)) or (not (gdFixed in State) and (goHorzLine in FOptions)) then
+        if ((gdFixed in Staat) and (goFixedHorzLine in FOptions)) or (not (gdFixed in Staat) and (goHorzLine in FOptions)) then
         begin
           Canvas.MoveTo(Rc.Left, Rc.Bottom);
           Canvas.LineTo(Rc.Right + 1, Rc.Bottom);
@@ -795,16 +795,16 @@ end;
 
 procedure TCustomGrid.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
-  Cell: TGridCoord;
+  Cel: TGridCoord;
 begin
   if CanFocus and not Focused then SetFocus;
-  Cell := MouseCoord(X, Y);
-  if (Button = mbLeft) and (Cell.X >= FFixedCols) and (Cell.Y >= FFixedRows) then
+  Cel := MouseCoord(X, Y);
+  if (Button = mbLeft) and (Cel.X >= FFixedCols) and (Cel.Y >= FFixedRows) then
   begin
     if (ssDouble in Shift) and CanEditShow then
       ShowEditor
     else
-      MoveColRow(Cell.X, Cell.Y, not (ssShift in Shift) or not (goRangeSelect in FOptions), True);
+      MoveColRow(Cel.X, Cel.Y, not (ssShift in Shift) or not (goRangeSelect in FOptions), True);
   end;
   inherited MouseDown(Button, Shift, X, Y);
 end;

@@ -32,7 +32,7 @@ type
     FCursorShape: TZMCursorShape;
     FPending: TZMEvent;
     FHasPending: Boolean;
-    function Translate(const Ev: SDL_Event; out E: TZMEvent): Boolean;
+    function Translate(const Gebeurtenis: SDL_Event; out Uit: TZMEvent): Boolean;
   public
     function Name: string; override;
     function Open(const Title: string; W, H: Integer): Boolean; override;
@@ -53,39 +53,39 @@ implementation
 
 uses SysUtils, Windows;
 
-function EvU32(const Ev: SDL_Event; Ofs: Integer): LongWord; inline;
+function EvU32(const Gebeurtenis: SDL_Event; Ofset: Integer): LongWord; inline;
 begin
-  Result := PLongWord(@Ev.padding[Ofs])^;
+  Result := PLongWord(@Gebeurtenis.padding[Ofset])^;
 end;
 
-function EvI32(const Ev: SDL_Event; Ofs: Integer): LongInt; inline;
+function EvI32(const Gebeurtenis: SDL_Event; Ofset: Integer): LongInt; inline;
 begin
-  Result := PLongInt(@Ev.padding[Ofs])^;
+  Result := PLongInt(@Gebeurtenis.padding[Ofset])^;
 end;
 
-function EvF32(const Ev: SDL_Event; Ofs: Integer): Single; inline;
+function EvF32(const Gebeurtenis: SDL_Event; Ofset: Integer): Single; inline;
 begin
-  Result := PSingle(@Ev.padding[Ofs])^;
+  Result := PSingle(@Gebeurtenis.padding[Ofset])^;
 end;
 
-function EvU16(const Ev: SDL_Event; Ofs: Integer): Word; inline;
+function EvU16(const Gebeurtenis: SDL_Event; Ofset: Integer): Word; inline;
 begin
-  Result := PWord(@Ev.padding[Ofs])^;
+  Result := PWord(@Gebeurtenis.padding[Ofset])^;
 end;
 
-function EvU8(const Ev: SDL_Event; Ofs: Integer): Byte; inline;
+function EvU8(const Gebeurtenis: SDL_Event; Ofset: Integer): Byte; inline;
 begin
-  Result := Ev.padding[Ofs];
+  Result := Gebeurtenis.padding[Ofset];
 end;
 
 { SDL-scancode -> Windows-virtual-key }
-function ScanToVK(Scan: LongWord; Key: LongWord): Word;
+function ScanToVK(Scancode: LongWord; Toetscode: LongWord): Word;
 begin
   { letters volgen de toetsenbordindeling (keycode), al het andere de positie }
-  if (Key >= Ord('a')) and (Key <= Ord('z')) then Exit(Key - 32);
-  case Scan of
-    4..29: Result := Ord('A') + Scan - 4;
-    30..38: Result := Ord('1') + Scan - 30;
+  if (Toetscode >= Ord('a')) and (Toetscode <= Ord('z')) then Exit(Toetscode - 32);
+  case Scancode of
+    4..29: Result := Ord('A') + Scancode - 4;
+    30..38: Result := Ord('1') + Scancode - 30;
     39: Result := Ord('0');
     40: Result := VK_RETURN;
     41: Result := VK_ESCAPE;
@@ -104,7 +104,7 @@ begin
     55: Result := $BE;
     56: Result := $BF;
     57: Result := VK_CAPITAL;
-    58..69: Result := VK_F1 + Scan - 58;
+    58..69: Result := VK_F1 + Scancode - 58;
     70: Result := VK_SNAPSHOT;
     71: Result := VK_SCROLL;
     72: Result := VK_PAUSE;
@@ -124,7 +124,7 @@ begin
     86: Result := VK_SUBTRACT;
     87: Result := VK_ADD;
     88: Result := VK_RETURN;
-    89..97: Result := VK_NUMPAD1 + Scan - 89;
+    89..97: Result := VK_NUMPAD1 + Scancode - 89;
     98: Result := VK_NUMPAD0;
     99: Result := VK_DECIMAL;
     224: Result := VK_LCONTROL;
@@ -147,8 +147,8 @@ end;
 
 function TZMSdl3Backend.Open(const Title: string; W, H: Integer): Boolean;
 var
-  Scale: Integer;
-  Flags: QWord;
+  Schaal: Integer;
+  Vlaggen: QWord;
 begin
   Result := FOpen;
   if FOpen then Exit;
@@ -157,11 +157,11 @@ begin
     WriteLn(StdErr, 'SDL_Init mislukt: ', SDL_GetError);
     Exit(False);
   end;
-  Scale := StrToIntDef(GetEnvironmentVariable('ZM_SCALE'), 1);
-  if Scale < 1 then Scale := 1;
-  Flags := SDL_WINDOW_RESIZABLE;
-  if GetEnvironmentVariable('ZM_FULLSCREEN') = '1' then Flags := Flags or $1;  { SDL_WINDOW_FULLSCREEN }
-  FWindow := SDL_CreateWindow(PAnsiChar(AnsiString(Title)), W * Scale, H * Scale, Flags);
+  Schaal := StrToIntDef(GetEnvironmentVariable('ZM_SCALE'), 1);
+  if Schaal < 1 then Schaal := 1;
+  Vlaggen := SDL_WINDOW_RESIZABLE;
+  if GetEnvironmentVariable('ZM_FULLSCREEN') = '1' then Vlaggen := Vlaggen or $1;  { SDL_WINDOW_FULLSCREEN }
+  FWindow := SDL_CreateWindow(PAnsiChar(AnsiString(Title)), W * Schaal, H * Schaal, Vlaggen);
   if FWindow = nil then
   begin
     WriteLn(StdErr, 'SDL_CreateWindow mislukt: ', SDL_GetError);
@@ -192,11 +192,11 @@ end;
 
 procedure TZMSdl3Backend.Close;
 var
-  C: TZMCursorShape;
+  Vorm: TZMCursorShape;
 begin
   if not FOpen then Exit;
   FOpen := False;
-  for C := Low(C) to High(C) do FCursors[C] := nil;
+  for Vorm := Low(Vorm) to High(Vorm) do FCursors[Vorm] := nil;
   if FTexture <> nil then SDL_DestroyTexture(FTexture);
   if FRenderer <> nil then SDL_DestroyRenderer(FRenderer);
   if FWindow <> nil then SDL_DestroyWindow(FWindow);
@@ -217,81 +217,81 @@ begin
   SDL_RenderPresent(FRenderer);
 end;
 
-function TZMSdl3Backend.Translate(const Ev: SDL_Event; out E: TZMEvent): Boolean;
+function TZMSdl3Backend.Translate(const Gebeurtenis: SDL_Event; out Uit: TZMEvent): Boolean;
 var
-  T: LongWord;
-  Mods: Word;
-  P: PAnsiChar;
-  Ev2: SDL_Event;
+  Soort: LongWord;
+  Modificatoren: Word;
+  Tekstptr: PAnsiChar;
+  Omgezet: SDL_Event;
 begin
-  FillChar(E, SizeOf(E), 0);
+  FillChar(Uit, SizeOf(Uit), 0);
   Result := True;
-  T := Ev.type_;
-  case T of
+  Soort := Gebeurtenis.type_;
+  case Soort of
     SDL_EVENT_QUIT, SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-      E.Kind := zeQuit;
+      Uit.Kind := zeQuit;
     SDL_EVENT_WINDOW_EXPOSED:
-      E.Kind := zeExpose;
+      Uit.Kind := zeExpose;
     SDL_EVENT_WINDOW_FOCUS_GAINED:
-      E.Kind := zeActivate;
+      Uit.Kind := zeActivate;
     SDL_EVENT_WINDOW_FOCUS_LOST:
-      E.Kind := zeDeactivate;
+      Uit.Kind := zeDeactivate;
     SDL_EVENT_WINDOW_MOUSE_LEAVE:
-      E.Kind := zeMouseLeave;
+      Uit.Kind := zeMouseLeave;
     SDL_EVENT_MOUSE_MOTION, SDL_EVENT_MOUSE_BUTTON_DOWN, SDL_EVENT_MOUSE_BUTTON_UP,
     SDL_EVENT_MOUSE_WHEEL:
       begin
-        Ev2 := Ev;
-        SDL_ConvertEventToRenderCoordinates(FRenderer, @Ev2);
-        case T of
+        Omgezet := Gebeurtenis;
+        SDL_ConvertEventToRenderCoordinates(FRenderer, @Omgezet);
+        case Soort of
           SDL_EVENT_MOUSE_MOTION:
             begin
-              E.Kind := zeMouseMove;
-              E.X := Trunc(EvF32(Ev2, 28));
-              E.Y := Trunc(EvF32(Ev2, 32));
+              Uit.Kind := zeMouseMove;
+              Uit.X := Trunc(EvF32(Omgezet, 28));
+              Uit.Y := Trunc(EvF32(Omgezet, 32));
             end;
           SDL_EVENT_MOUSE_BUTTON_DOWN, SDL_EVENT_MOUSE_BUTTON_UP:
             begin
-              if T = SDL_EVENT_MOUSE_BUTTON_DOWN then E.Kind := zeMouseDown else E.Kind := zeMouseUp;
-              case EvU8(Ev2, 24) of
-                1: E.Button := 1;
-                2: E.Button := 3;
-                3: E.Button := 2;
+              if Soort = SDL_EVENT_MOUSE_BUTTON_DOWN then Uit.Kind := zeMouseDown else Uit.Kind := zeMouseUp;
+              case EvU8(Omgezet, 24) of
+                1: Uit.Button := 1;
+                2: Uit.Button := 3;
+                3: Uit.Button := 2;
               else
                 Exit(False);
               end;
-              E.X := Trunc(EvF32(Ev2, 28));
-              E.Y := Trunc(EvF32(Ev2, 32));
+              Uit.X := Trunc(EvF32(Omgezet, 28));
+              Uit.Y := Trunc(EvF32(Omgezet, 32));
             end;
           SDL_EVENT_MOUSE_WHEEL:
             begin
-              E.Kind := zeMouseWheel;
-              E.Wheel := Round(EvF32(Ev2, 28) * 120);
-              if EvU32(Ev2, 32) = 1 then E.Wheel := -E.Wheel;  { omgekeerd }
-              E.X := Trunc(EvF32(Ev2, 36));
-              E.Y := Trunc(EvF32(Ev2, 40));
-              if E.Wheel = 0 then Exit(False);
+              Uit.Kind := zeMouseWheel;
+              Uit.Wheel := Round(EvF32(Omgezet, 28) * 120);
+              if EvU32(Omgezet, 32) = 1 then Uit.Wheel := -Uit.Wheel;  { omgekeerd }
+              Uit.X := Trunc(EvF32(Omgezet, 36));
+              Uit.Y := Trunc(EvF32(Omgezet, 40));
+              if Uit.Wheel = 0 then Exit(False);
             end;
         end;
       end;
     SDL_EVENT_KEY_DOWN, SDL_EVENT_KEY_UP:
       begin
-        if T = SDL_EVENT_KEY_DOWN then E.Kind := zeKeyDown else E.Kind := zeKeyUp;
-        E.ScanCode := EvU32(Ev, 24);
-        E.Key := ScanToVK(EvU32(Ev, 24), EvU32(Ev, 28));
-        Mods := EvU16(Ev, 32);
-        E.Shift := Mods and SDL_KMOD_SHIFT <> 0;
-        E.Ctrl := Mods and SDL_KMOD_CTRL <> 0;
-        E.Alt := Mods and SDL_KMOD_ALT <> 0;
-        E.Repeated := EvU8(Ev, 37) <> 0;
-        if E.Key = 0 then Exit(False);
+        if Soort = SDL_EVENT_KEY_DOWN then Uit.Kind := zeKeyDown else Uit.Kind := zeKeyUp;
+        Uit.ScanCode := EvU32(Gebeurtenis, 24);
+        Uit.Key := ScanToVK(EvU32(Gebeurtenis, 24), EvU32(Gebeurtenis, 28));
+        Modificatoren := EvU16(Gebeurtenis, 32);
+        Uit.Shift := Modificatoren and SDL_KMOD_SHIFT <> 0;
+        Uit.Ctrl := Modificatoren and SDL_KMOD_CTRL <> 0;
+        Uit.Alt := Modificatoren and SDL_KMOD_ALT <> 0;
+        Uit.Repeated := EvU8(Gebeurtenis, 37) <> 0;
+        if Uit.Key = 0 then Exit(False);
       end;
     SDL_EVENT_TEXT_INPUT:
       begin
-        E.Kind := zeText;
-        P := PPAnsiChar(@Ev.padding[24])^;
-        if P <> nil then E.Text := Copy(ZMUtf8ToCp1252(P), 1, 15);
-        if E.Text = '' then Exit(False);
+        Uit.Kind := zeText;
+        Tekstptr := PPAnsiChar(@Gebeurtenis.padding[24])^;
+        if Tekstptr <> nil then Uit.Text := Copy(ZMUtf8ToCp1252(Tekstptr), 1, 15);
+        if Uit.Text = '' then Exit(False);
       end;
   else
     Result := False;
@@ -300,7 +300,7 @@ end;
 
 function TZMSdl3Backend.PollEvent(out E: TZMEvent): Boolean;
 var
-  Ev: SDL_Event;
+  Gebeurtenis: SDL_Event;
 begin
   if FHasPending then
   begin
@@ -314,13 +314,13 @@ begin
     FillChar(E, SizeOf(E), 0);
     Exit;
   end;
-  while SDL_PollEvent(@Ev) do
-    if Translate(Ev, E) then Exit(True);
+  while SDL_PollEvent(@Gebeurtenis) do
+    if Translate(Gebeurtenis, E) then Exit(True);
 end;
 
 procedure TZMSdl3Backend.WaitEvent(TimeoutMs: Integer);
 var
-  Ev: SDL_Event;
+  Gebeurtenis: SDL_Event;
 begin
   if not FOpen then
   begin
@@ -328,8 +328,8 @@ begin
     Exit;
   end;
   if FHasPending then Exit;
-  if SDL_WaitEventTimeout(@Ev, TimeoutMs) then
-    FHasPending := Translate(Ev, FPending);
+  if SDL_WaitEventTimeout(@Gebeurtenis, TimeoutMs) then
+    FHasPending := Translate(Gebeurtenis, FPending);
 end;
 
 function TZMSdl3Backend.Ticks: LongWord;
@@ -359,7 +359,7 @@ end;
 
 procedure TZMSdl3Backend.SetCursor(Shape: TZMCursorShape);
 const
-  Ids: array[TZMCursorShape] of LongInt = (SDL_SYSTEM_CURSOR_DEFAULT, SDL_SYSTEM_CURSOR_TEXT,
+  Codes: array[TZMCursorShape] of LongInt = (SDL_SYSTEM_CURSOR_DEFAULT, SDL_SYSTEM_CURSOR_TEXT,
     SDL_SYSTEM_CURSOR_WAIT, SDL_SYSTEM_CURSOR_CROSSHAIR, SDL_SYSTEM_CURSOR_POINTER,
     SDL_SYSTEM_CURSOR_MOVE, SDL_SYSTEM_CURSOR_NS_RESIZE, SDL_SYSTEM_CURSOR_EW_RESIZE,
     SDL_SYSTEM_CURSOR_NWSE_RESIZE, SDL_SYSTEM_CURSOR_NESW_RESIZE, SDL_SYSTEM_CURSOR_NOT_ALLOWED,
@@ -373,7 +373,7 @@ begin
     Exit;
   end;
   SDL_ShowCursor;
-  if FCursors[Shape] = nil then FCursors[Shape] := SDL_CreateSystemCursor(Ids[Shape]);
+  if FCursors[Shape] = nil then FCursors[Shape] := SDL_CreateSystemCursor(Codes[Shape]);
   if FCursors[Shape] <> nil then SDL_SetCursor(FCursors[Shape]);
 end;
 

@@ -41,9 +41,9 @@ type
   end;
 
 { Zoekt het lettertype dat het best bij een LOGFONT past (Windows-lettertypekoppeling, vereenvoudigd). }
-function ZMFindFace(const LF: TLogFont): PZMFace;
+function ZMFindFace(const Lettertype: TLogFont): PZMFace;
 function ZMFaceCount: Integer;
-function ZMFaceByIndex(I: Integer): PZMFace;
+function ZMFaceByIndex(Nummer: Integer): PZMFace;
 
 implementation
 
@@ -63,57 +63,57 @@ var
 
 procedure LoadFaces;
 var
-  I, G, P, N: Integer;
-  F: ^TZMFace;
-  DestLen: LongWord;
-  function RdW: Integer;
+  Teller, Glyph, Positie, Aantal: Integer;
+  Gezicht: ^TZMFace;
+  LengteUit: LongWord;
+  function LeesW: Integer;
   begin
-    Result := SmallInt(FontData[P] or (FontData[P + 1] shl 8));
-    Inc(P, 2);
+    Result := SmallInt(FontData[Positie] or (FontData[Positie + 1] shl 8));
+    Inc(Positie, 2);
   end;
-  procedure ReadGlyphs(var Glyphs: array of TZMGlyph; AA: Boolean);
+  procedure LeesGlyphs(var Glyphen: array of TZMGlyph; Antialias: Boolean);
   var
-    G2: Integer;
+    Glyphnr: Integer;
   begin
-    for G2 := 0 to 255 do
+    for Glyphnr := 0 to 255 do
     begin
-      Glyphs[G2].Adv := RdW;
-      Glyphs[G2].W := RdW;
-      Glyphs[G2].H := RdW;
-      Glyphs[G2].XOff := RdW;
-      Glyphs[G2].YOff := RdW;
-      if AA then N := Glyphs[G2].W * Glyphs[G2].H
-      else N := ((Glyphs[G2].W + 7) div 8) * Glyphs[G2].H;
-      if N > 0 then Glyphs[G2].Data := @FontData[P] else Glyphs[G2].Data := nil;
-      Inc(P, N);
+      Glyphen[Glyphnr].Adv := LeesW;
+      Glyphen[Glyphnr].W := LeesW;
+      Glyphen[Glyphnr].H := LeesW;
+      Glyphen[Glyphnr].XOff := LeesW;
+      Glyphen[Glyphnr].YOff := LeesW;
+      if Antialias then Aantal := Glyphen[Glyphnr].W * Glyphen[Glyphnr].H
+      else Aantal := ((Glyphen[Glyphnr].W + 7) div 8) * Glyphen[Glyphnr].H;
+      if Aantal > 0 then Glyphen[Glyphnr].Data := @FontData[Positie] else Glyphen[Glyphnr].Data := nil;
+      Inc(Positie, Aantal);
     end;
   end;
 begin
   Loaded := True;
   SetLength(FontData, ZMFontDataSize);
-  DestLen := ZMFontDataSize;
-  if uncompress(@FontData[0], DestLen, @ZMFontDataZ[0], Length(ZMFontDataZ)) <> Z_OK then
+  LengteUit := ZMFontDataSize;
+  if uncompress(@FontData[0], LengteUit, @ZMFontDataZ[0], Length(ZMFontDataZ)) <> Z_OK then
     raise Exception.Create('ZMFonts: cannot inflate the font data');
   SetLength(Faces, ZMFontFaceCount);
-  P := 0;
-  for I := 0 to ZMFontFaceCount - 1 do
+  Positie := 0;
+  for Teller := 0 to ZMFontFaceCount - 1 do
   begin
-    F := @Faces[I];
-    F^.Family := ZMFontFaceInfo[I].Family;
-    F^.Bold := ZMFontFaceInfo[I].Bold;
-    F^.Italic := ZMFontFaceInfo[I].Italic;
-    P := ZMFontFaceInfo[I].Offset;
-    F^.EmPx := RdW;
-    F^.Ascent := RdW;
-    F^.Descent := RdW;
-    F^.Height := F^.Ascent + F^.Descent;
-    F^.IntLeading := F^.Height - F^.EmPx;
-    if F^.IntLeading < 0 then F^.IntLeading := 0;
-    F^.AvgWidth := RdW;
-    F^.MaxWidth := RdW;
-    F^.Gray := RdW <> 0;
-    ReadGlyphs(F^.Glyphs, False);
-    ReadGlyphs(F^.AAGlyphs, True);
+    Gezicht := @Faces[Teller];
+    Gezicht^.Family := ZMFontFaceInfo[Teller].Family;
+    Gezicht^.Bold := ZMFontFaceInfo[Teller].Bold;
+    Gezicht^.Italic := ZMFontFaceInfo[Teller].Italic;
+    Positie := ZMFontFaceInfo[Teller].Offset;
+    Gezicht^.EmPx := LeesW;
+    Gezicht^.Ascent := LeesW;
+    Gezicht^.Descent := LeesW;
+    Gezicht^.Height := Gezicht^.Ascent + Gezicht^.Descent;
+    Gezicht^.IntLeading := Gezicht^.Height - Gezicht^.EmPx;
+    if Gezicht^.IntLeading < 0 then Gezicht^.IntLeading := 0;
+    Gezicht^.AvgWidth := LeesW;
+    Gezicht^.MaxWidth := LeesW;
+    Gezicht^.Gray := LeesW <> 0;
+    LeesGlyphs(Gezicht^.Glyphs, False);
+    LeesGlyphs(Gezicht^.AAGlyphs, True);
   end;
 end;
 
@@ -123,74 +123,74 @@ begin
   Result := Length(Faces);
 end;
 
-function ZMFaceByIndex(I: Integer): PZMFace;
+function ZMFaceByIndex(Nummer: Integer): PZMFace;
 begin
   if not Loaded then LoadFaces;
-  Result := @Faces[I];
+  Result := @Faces[Nummer];
 end;
 
-function FamilyOf(const Name: string; Pitch: Byte): string;
+function FamilyOf(const Naam: string; Spatiering: Byte): string;
 var
-  N: string;
+  Kleinnaam: string;
 begin
-  N := LowerCase(Trim(Name));
-  if (N = 'system') or (N = 'fixedsys') then
+  Kleinnaam := LowerCase(Trim(Naam));
+  if (Kleinnaam = 'system') or (Kleinnaam = 'fixedsys') then
     Result := 'system'
-  else if (Pos('courier', N) > 0) or (Pos('mono', N) > 0) or (N = 'terminal') or
-    (Pos('lucida console', N) > 0) then
+  else if (Pos('courier', Kleinnaam) > 0) or (Pos('mono', Kleinnaam) > 0) or (Kleinnaam = 'terminal') or
+    (Pos('lucida console', Kleinnaam) > 0) then
     Result := 'mono'
-  else if (Pos('times', N) > 0) or (Pos('serif', N) = 1) or (N = 'ms serif') or
-    (Pos('georgia', N) > 0) or (Pos('garamond', N) > 0) then
+  else if (Pos('times', Kleinnaam) > 0) or (Pos('serif', Kleinnaam) = 1) or (Kleinnaam = 'ms serif') or
+    (Pos('georgia', Kleinnaam) > 0) or (Pos('garamond', Kleinnaam) > 0) then
     Result := 'serif'
-  else if (N = '') and ((Pitch and 3) = FIXED_PITCH) then
+  else if (Kleinnaam = '') and ((Spatiering and 3) = FIXED_PITCH) then
     Result := 'mono'
   else
     Result := 'sans';
 end;
 
-function ZMFindFace(const LF: TLogFont): PZMFace;
+function ZMFindFace(const Lettertype: TLogFont): PZMFace;
 var
-  Fam: string;
-  Bold, Italic: Boolean;
-  Em, I, Score, Best, D: Integer;
-  F: ^TZMFace;
+  Familie: string;
+  Vet, Cursief: Boolean;
+  Emgrootte, Teller, Punten, Beste, Verschil: Integer;
+  Gezicht: ^TZMFace;
 begin
   if not Loaded then LoadFaces;
-  Fam := FamilyOf(StrPas(LF.lfFaceName), LF.lfPitchAndFamily);
-  Bold := LF.lfWeight >= 600;
-  Italic := LF.lfItalic <> 0;
-  Em := LF.lfHeight;
-  if Em = 0 then Em := 13
-  else if Em > 0 then
+  Familie := FamilyOf(StrPas(Lettertype.lfFaceName), Lettertype.lfPitchAndFamily);
+  Vet := Lettertype.lfWeight >= 600;
+  Cursief := Lettertype.lfItalic <> 0;
+  Emgrootte := Lettertype.lfHeight;
+  if Emgrootte = 0 then Emgrootte := 13
+  else if Emgrootte > 0 then
     { positieve hoogte = celhoogte; benader de em-grootte }
-    Em := (Em * 85 + 50) div 100;
-  if Em < 0 then Em := -Em;
-  if Fam = 'system' then
+    Emgrootte := (Emgrootte * 85 + 50) div 100;
+  if Emgrootte < 0 then Emgrootte := -Emgrootte;
+  if Familie = 'system' then
   begin
     { Het Windows-lettertype 'System' is een vet bitmaplettertype van 16px (em ~13), ongeacht wat er gevraagd wordt. }
-    Bold := True;
+    Vet := True;
   end;
   Result := nil;
-  Best := MaxInt;
-  for I := 0 to High(Faces) do
+  Beste := MaxInt;
+  for Teller := 0 to High(Faces) do
   begin
-    F := @Faces[I];
-    Score := 0;
-    if F^.Family <> Fam then
+    Gezicht := @Faces[Teller];
+    Punten := 0;
+    if Gezicht^.Family <> Familie then
     begin
-      if (Fam = 'system') and (F^.Family = 'sans') then Inc(Score, 500)
-      else if Fam = 'system' then Inc(Score, 100000)
-      else Inc(Score, 100000);
+      if (Familie = 'system') and (Gezicht^.Family = 'sans') then Inc(Punten, 500)
+      else if Familie = 'system' then Inc(Punten, 100000)
+      else Inc(Punten, 100000);
     end;
-    if F^.Bold <> Bold then Inc(Score, 2000);
-    if F^.Italic <> Italic then Inc(Score, 1000);
-    D := Abs(F^.EmPx - Em);
-    Inc(Score, D * 100);
-    if F^.EmPx > Em then Inc(Score, 10);  { bij gelijke score de kleinere voorkeur, zodat tekst past }
-    if Score < Best then
+    if Gezicht^.Bold <> Vet then Inc(Punten, 2000);
+    if Gezicht^.Italic <> Cursief then Inc(Punten, 1000);
+    Verschil := Abs(Gezicht^.EmPx - Emgrootte);
+    Inc(Punten, Verschil * 100);
+    if Gezicht^.EmPx > Emgrootte then Inc(Punten, 10);  { bij gelijke score de kleinere voorkeur, zodat tekst past }
+    if Punten < Beste then
     begin
-      Best := Score;
-      Result := F;
+      Beste := Punten;
+      Result := Gezicht;
     end;
   end;
   if Result = nil then
