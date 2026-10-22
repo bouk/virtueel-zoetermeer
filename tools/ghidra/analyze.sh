@@ -10,6 +10,7 @@ exe="$root/orig/game-$ver/ROS.exe"
 [ "$ver" = 1.0 ] && exe="$root/orig/game/ROS.exe"
 ghidra_home="$(dirname "$(readlink -f "$(command -v ghidra)")")"
 
+rm -rf "$root/build/decomp-$ver"
 mkdir -p "$root/build/ghidra" "$root/build/decomp-$ver"
 awk '(strtonum("0x"$3)-strtonum("0x"$2))>112' "$root/symbols/project-ranges-$ver.txt" > "$root/build/export-ranges-$ver.txt"
 if [ "${2:-}" = export ]; then
