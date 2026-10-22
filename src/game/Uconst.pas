@@ -139,6 +139,9 @@ begin
   { NOTE: the original's stack frame is zero-filled on entry, so the fields
     that are not read from the file (SpritesLoaded/KnopGemaakt) start as False and keep
     their value from line to line. }
+{$IFDEF FPC}
+  Info := Default(TContentsInfo);   { PORT: FPC does not zero-fill the frame }
+{$ENDIF}
   ContentsCount := 0;
   AssignFile(F, AddPath(AppPath, 'Objecten.csv'));
   Reset(F);
