@@ -11,3 +11,6 @@
 /symbols/*.pkl
 __pycache__/
 /src/game/*.dfm
+
+# Delphi 5-toolchain (eigendomsrecht): nooit committen
+/toolchain/
