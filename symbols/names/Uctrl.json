@@ -1,0 +1,21 @@
+{
+  "functions": {
+    "00477e74": "TCtrlForm.ControlToSprite",
+    "00477fe4": "TCtrlForm.AttachControls",
+    "0047817c": "TCtrlForm.DetachControls",
+    "00478338": "Uctrl.Finalization",
+    "00478408": "Uctrl.Initialization"
+  },
+  "globals": {
+    "00477c60": "Uctrl.TypeInfo_TControlDef",
+    "00488f20": "Uctrl.ControlDefs",
+    "0048b14c": "Uctrl.ComboBox"
+  },
+  "fields": {
+    "TControlDef": {
+      "0x0": ["ControlClass", "TControlClass"],
+      "0x4": ["Prefix", "string"]
+    }
+  },
+  "assumes": {}
+}
