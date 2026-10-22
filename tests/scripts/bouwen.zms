@@ -8,7 +8,22 @@ click 922 257      # knop Laagbouw
 wait 1000
 shot na-knop
 seed 4242          # geldt voor de volgende klik: het plaatsen (kiest een huisvariant)
-click 400 300      # op de kaart
+click 400 440      # op de kaart, langs de weg
 wait 1500
 shot na-plaatsen
 dump na-plaatsen
+click 922 257      # nog een huis
+wait 1000
+seed 777
+click 470 475      # langs de weg
+wait 1500
+dump twee-huizen
+seed 99            # de volgende ronde trekt ook willekeurige getallen
+click 920 727      # "Volgende ronde"
+wait 5000
+shot ronde2
+dump ronde2
+click 634 602      # OK in het rapport
+wait 2000
+dump na-rapport
+shot na-rapport
