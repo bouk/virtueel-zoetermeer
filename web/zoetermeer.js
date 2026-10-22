@@ -13,6 +13,8 @@
 
 const SCREEN_W = 1024, SCREEN_H = 768;
 const DEBUG = /[?&]debug\b/.test(location.search);
+// ?nolock: never capture the mouse (automated tests send absolute, synthetic events).
+const NO_LOCK = /[?&]nolock\b/.test(location.search);
 const debug = (...a) => { if (DEBUG) console.log('[zm]', ...a); };
 
 // ---------------------------------------------------------------- file system
@@ -564,6 +566,7 @@ class Host {
   }
 
   push(ev) {
+    if (DEBUG && ev.kind !== EV.MOVE) debug('event', JSON.stringify(ev));
     this.events.push(ev);
     if (this.events.length > 512) this.events.splice(0, this.events.length - 512);
     if (this.wake) { const w = this.wake; w(); }
@@ -649,8 +652,8 @@ class Host {
   pointerMoved(e) {
     if (this.locked) {
       const r = this.canvas.getBoundingClientRect();
-      this.mouse.x = Math.max(0, Math.min(SCREEN_W - 1, this.mouse.x + e.movementX * SCREEN_W / r.width));
-      this.mouse.y = Math.max(0, Math.min(SCREEN_H - 1, this.mouse.y + e.movementY * SCREEN_H / r.height));
+      this.mouse.x = Math.max(0, Math.min(SCREEN_W - 1, this.mouse.x + (e.movementX || 0) * SCREEN_W / r.width));
+      this.mouse.y = Math.max(0, Math.min(SCREEN_H - 1, this.mouse.y + (e.movementY || 0) * SCREEN_H / r.height));
     } else {
       this.mouse = this.toScreen(e);
     }
@@ -701,7 +704,7 @@ class Host {
     const cv = this.overlay;   // the overlay sits on top of the game canvas
     cv.addEventListener('contextmenu', (e) => e.preventDefault());
     cv.addEventListener('mousedown', (e) => {
-      if (!this.locked && cv.requestPointerLock) {
+      if (!this.locked && !NO_LOCK && cv.requestPointerLock) {
         // Capture the mouse; the click itself is delivered to the game too.
         this.mouse = this.toScreen(e);
         const p = cv.requestPointerLock({ unadjustedMovement: false });
