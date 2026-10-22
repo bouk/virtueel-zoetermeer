@@ -1,0 +1,11 @@
+# Start, dismiss the intro and level dialogs, then dump the starting world.
+wait 15000
+seed 12345
+dump start
+click 429 405      # "Verder" on the intro dialog
+wait 2000
+click 429 405      # "Verder" on the "Level 1" dialog
+wait 3000
+dump level1
+shot level1
+sprites level1

@@ -137,7 +137,9 @@ type
     procedure butScrolldownClick(Sender: TObject);
     procedure butScrollrightClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
-  private
+  public
+    { public rather than private so the test harness (src/tests) can read the game state;
+      visibility does not affect the layout }
     FTemplates: TSpriteList;             { +0x414  one template sprite per object type (Contents) }
     FKnoppen: TSpriteList;               { +0x418  the 'k_<name>' button image sprites }
     FDragSprite: TSprite;                { +0x41C  building being dragged onto the map }
