@@ -5,6 +5,7 @@
 # Tool / build state
 /.wine/
 /build/
+/.wrangler/
 /result
 *.gpr
 *.rep/
