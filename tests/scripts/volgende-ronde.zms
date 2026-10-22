@@ -1,0 +1,38 @@
+# "Volgende ronde" moet 2 tot 3 s na het bouwen verschijnen (drie tikken van timerRecalc).
+# Fout: bij een tikteller (GetTickCount) van 2^31 of meer draait TAutoSprite.Draw.DrawAutos
+# miljoenen keren rond, duurt elk beeld honderden ms en slaan de snelle timers tikken over; de
+# knop kwam dan te laat en de klik hieronder viel in het niets (geen rapport: geld bleef 4000).
+# De port gebruikte de GetTickCount van FPC's SysUtils (uptime van de computer) in plaats van die
+# van Windows/compat (zie src/compat/ZMKlok.pas); het origineel draait in een tijdnaamruimte.
+# Met ZM_TIKBEGIN=3000000000 laat de port het oorspronkelijke gedrag zien (dan wijkt 'rapport' af).
+wait 15000
+seed 1001
+click 429 405      # "Verder" (intro)
+wait 1500
+seed 1002
+click 429 405      # "Verder" (level 1)
+wait 1500
+seed 1003
+click 922 257      # Laagbouw
+wait 1500
+seed 1004
+click 400 400
+wait 2000
+seed 1005
+click 993 320      # Kerk
+wait 1500
+seed 1006
+click 520 330
+wait 2000
+dump gebouwd
+seed 1007
+click 922 320      # Molen
+wait 1500
+seed 1008
+click 180 318      # Molen plaatsen; timerRecalc.Tag := 3
+wait 2000          # de klik hieronder drukt 3,08 s na het plaatsen
+seed 1009
+click 920 727      # "Volgende ronde"
+wait 2500
+dump rapport
+shot rapport

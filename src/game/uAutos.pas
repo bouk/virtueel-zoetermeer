@@ -63,7 +63,8 @@ function MaakAutos(SpriteBox: TSpriteBox; Sjabloon: TSprite; AWorld: TWorld;
 implementation
 
 uses
-  SysUtils, Graphics, uTool, Uconst, SprBmp;
+  SysUtils, Graphics, uTool, Uconst, SprBmp
+  {$IFDEF FPC}, ZMKlok{$ENDIF}  { PORT: Delphi's GetTickCount };
 
 const
   { 00488EDC: aantal gezette bits in 0..15 (aantal aangesloten wegrichtingen) }
@@ -195,6 +196,9 @@ var
       CurDX := DX;
       CurDY := DY;
       T := N * 2000;
+      { LET OP: GetTickCount is een DWORD en FStartTik een Integer; het verschil wordt als
+        Int64 berekend. Vanaf GetTickCount >= 2^31 is FStartTik negatief, is F ongeveer 2^32 / T
+        en loopt de lus hieronder bij elke aanroep miljoenen keren (zie ZMKlok). }
       F := (GetTickCount - FStartTik) / T;
       while F >= 1 do
       begin

@@ -56,4 +56,15 @@ Vergelijk daarna met `diff build/diff/orig/<name>.state build/diff/port/<name>.s
 * Timers (de meeuw, auto's, treinen) trekken ook willekeurige getallen. Daarom werkt `seed` vlak voor de
   volgende muisklik: de willekeurige keuzes die die klik maakt zijn dan vergelijkbaar, maar keuzes die
   timers later maken kunnen om timingredenen nog afwijken.
+* De tikteller telt mee. Onder Wine is `GetTickCount` de uptime van de computer; vanaf 2^31 ms
+  (modulo 2^32, dus 24,9 tot 49,7 dagen na het opstarten) loopt `TAutoSprite.Draw.DrawAutos` bij
+  elke aanroep miljoenen keren rond (een fout in het origineel, zie `src/compat/ZMKlok.pas`).
+  Elk beeld duurt dan honderden ms, de snelle timers slaan tikken over en bijvoorbeeld de knop
+  "Volgende ronde" verschijnt op een willekeurig moment. `orig_probe.py` start Wine daarom in een
+  eigen tijdnaamruimte (`unshare --user --time`) met een uptime van 60 s; de port telt vanaf de
+  start van het programma. `ZM_GEEN_TIJDNAAMRUIMTE=1` (origineel) en `ZM_TIKBEGIN=<ms>` (port)
+  spelen het gedrag bij een grote tikteller na (`tests/scripts/volgende-ronde.zms`).
+* "Volgende ronde" verschijnt pas bij de derde tik van `timerRecalc` (1 s) na het bouwen; de fase
+  van die timer ligt vast vanaf de start van het programma. Klik er dus niet eerder dan ruim 3 s
+  na het bouwen op.
 * Screenshots verschillen in grootte (het Wine-bureaublad is 1280x1024 met het formulier op +128,+128).

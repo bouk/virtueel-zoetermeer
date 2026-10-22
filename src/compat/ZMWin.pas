@@ -209,9 +209,17 @@ const
 
 { ---------------------------------------------------------------- basis }
 
+var
+  TikBegin: Int64 = -1;
+
+{ Milliseconden sinds de start van het programma (GetTickCount, timeGetTime). Windows telt vanaf
+  het opstarten van de computer; ZM_TIKBEGIN=<ms> laat de teller bij die waarde beginnen, om
+  gedrag bij een grote tikteller na te spelen (zie ZMKlok). }
 function ZMTikken: LongWord;
 begin
-  Result := ZMBackend.KloktijdMs;
+  if TikBegin < 0 then
+    TikBegin := StrToInt64Def(GetEnvironmentVariable('ZM_TIKBEGIN'), 0);
+  Result := LongWord(Int64(ZMBackend.KloktijdMs) + TikBegin);
 end;
 
 function ZMVensterObj(Venster: HWND): TZMVenster;

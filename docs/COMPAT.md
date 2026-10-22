@@ -187,8 +187,18 @@ hoofdletter-variant-links nodig.
 | `ZM_SHADOW` | locatie van de schaduwmap (exact, niet per proces) |
 | `ZM_SAVE` | schrijfbare overlay (standaard `$XDG_DATA_HOME/zoetermeer`) |
 | `ZM_NO_AA=1` | geen anti-aliasing van tekst |
+| `ZM_TIKBEGIN=<ms>` | beginwaarde van `GetTickCount`/`timeGetTime` (standaard 0 bij de start van het programma; Windows telt vanaf het opstarten van de computer, zie `ZMKlok`) |
 
 SDL's eigen variabelen werken ook (`SDL_VIDEODRIVER=offscreen`).
+
+### Tikteller (`ZMKlok`)
+
+`GetTickCount` en `timeGetTime` tellen vanaf de start van het programma (`ZMWin.ZMTikken`).
+Delphi 5's SysUtils heeft geen `GetTickCount`, die van FPC wel (uptime van de computer); in
+spelunits die SysUtils na Windows gebruiken (Fmain, uAutos, uSpritebox) zou die winnen. Die units
+zetten daarom `ZMKlok` als laatste in hun uses (onder `IFDEF FPC`), zodat ze net als in Delphi de
+Windows-versie aanroepen. Een tikteller van 2^31 of meer maakt `TAutoSprite.Draw.DrawAutos`
+extreem traag (fout in het origineel); de kleine teller van compat vermijdt dat.
 
 ## Haken voor het differentiële-testharnas
 

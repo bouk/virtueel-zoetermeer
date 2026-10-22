@@ -169,7 +169,8 @@ var
 implementation
 
 uses
-  SysUtils, Forms, MMSystem, uTiming, uSprite, uTextBalloon, uGoblin;
+  SysUtils, Forms, MMSystem, uTiming, uSprite, uTextBalloon, uGoblin
+  {$IFDEF FPC}, ZMKlok{$ENDIF}  { PORT: Delphi's GetTickCount };
 
 {$J+}
 const

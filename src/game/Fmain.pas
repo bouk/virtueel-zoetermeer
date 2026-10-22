@@ -202,7 +202,7 @@ implementation
 uses
   uString, uTool, uPixie, Uconst, Sprframe, uTrein, uResizeScreen, uQuickDirectX,
   fReport
-  {$IFDEF FPC}, ZMRandom{$ENDIF}  { PORT: Delphi's Random };
+  {$IFDEF FPC}, ZMRandom, ZMKlok{$ENDIF}  { PORT: Delphi's Random en GetTickCount };
 
 {$IFNDEF FPC}
 {$R *.dfm}  { Alleen Delphi: de draagbare build laadt formulieren uit de ROS.exe van de gebruiker }

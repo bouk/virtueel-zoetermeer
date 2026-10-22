@@ -192,12 +192,35 @@ def run_script(p, script, outdir):
             raise ValueError('onbekend scriptcommando: %s' % line)
 
 
+# Uptime (s) die Wine in zijn tijdnaamruimte ziet; GetTickCount begint dan rond 60000.
+UPTIME_IN_NAAMRUIMTE = 60
+
+
+def wine_opdracht():
+    """Start Wine in een eigen tijdnaamruimte (Linux >= 5.6) met een kleine uptime.
+
+    Onder Wine is GetTickCount de uptime van de computer. Is die 2^31 ms of meer (modulo 2^32),
+    dan loopt TAutoSprite.Draw.DrawAutos (uAutos, @00475440) bij elke aanroep miljoenen keren
+    rond (zie src/compat/ZMKlok.pas): elk beeld duurt dan honderden ms, de snelle timers slaan
+    tikken over en de uitkomst van een script hangt af van hoe lang de computer aan staat. De
+    port begint zijn tikteller bij de start van het programma; hier krijgt het origineel
+    dezelfde soort invoer. ZM_GEEN_TIJDNAAMRUIMTE=1 zet dit uit."""
+    opdracht = ['wine', 'ROS.exe']
+    if os.environ.get('ZM_GEEN_TIJDNAAMRUIMTE') == '1':
+        return opdracht
+    verschuiving = int(float(open('/proc/uptime').read().split()[0])) - UPTIME_IN_NAAMRUIMTE
+    if verschuiving <= 0:
+        return opdracht
+    return ['unshare', '--user', '--map-current-user', '--time',
+            '--monotonic=-%d' % verschuiving, '--boottime=-%d' % verschuiving] + opdracht
+
+
 def main():
     rundir, script, outdir = sys.argv[1:4]
     os.makedirs(outdir, exist_ok=True)
     become_subreaper()
     env = dict(os.environ, WINEDEBUG='-all', WINEDLLOVERRIDES='mscoree,mshtml=')
-    wine = subprocess.Popen(['wine', 'ROS.exe'], cwd=rundir, env=env)
+    wine = subprocess.Popen(wine_opdracht(), cwd=rundir, env=env)
     try:
         p = find_game_pid()
         run_script(p, script, outdir)

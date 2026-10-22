@@ -1,5 +1,7 @@
 # Nagespeeld uit de playthrough (fase 6): level 1 en 2 bouwen, rondes afsluiten.
 # In level 2 crashte het rapport (TApplication.DoMouseIdle op een vrijgegeven besturingselement).
+# "Volgende ronde" verschijnt pas bij de derde tik van timerRecalc (1 s, fase vast vanaf de start
+# van het programma) na het bouwen, dus 2 tot 3 s later; vóór die klik wordt daarom ruim gewacht.
 wait 15000
 shot foto-2
 dump stap1
@@ -37,6 +39,7 @@ click 180 318
 wait 1500
 wait 500
 shot foto-21
+wait 1000
 seed 1009
 click 920 727
 wait 1500
@@ -86,6 +89,7 @@ wait 1500
 wait 500
 shot foto-49
 dump stap7
+wait 1000
 seed 1019
 click 920 727
 wait 1500
