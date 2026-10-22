@@ -15,9 +15,14 @@
         capstone  # x86 disassembly for diff tooling
         unicorn   # emulating original routines for differential tests
         lief      # PE rewriting / layout inspection
+        pillow    # rendering bitmap fonts for the compat layer (tools/gen-fonts.py)
       ]);
+
+      fpc-wasm = pkgs.callPackage ./nix/fpc-wasm.nix { };
     in
     {
+      packages.${system}.fpc-wasm = fpc-wasm;
+
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
           # Unpacking the original distribution
@@ -44,7 +49,11 @@
 
           # Portable rebuild (Free Pascal) and its platform layer
           fpc
+          fpc-wasm   # wasm32-wasip1 cross compiler (fpc-wasm)
+          wasmtime
+          binaryen   # wasm-opt --asyncify for the browser build
           sdl3
+          liberation_ttf  # free Arial/Times/Courier metric clones for the bitmap fonts
           pkg-config
 
           # Scripting: splitting, symbol maps, byte-for-byte diffing
