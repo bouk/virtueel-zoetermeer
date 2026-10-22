@@ -8,6 +8,17 @@
 
 Goal 1 comes first. It gives us source that is faithful by construction. Goals 2 and 3 are a portability layer on top of that source, and they must never break the matching build.
 
+## Decisions (confirmed 2026-10-22)
+
+- The plan below is confirmed as written, with one exception.
+- **We don't have a Delphi 5 compiler.** Byte-matching the project units needs Borland's exact dcc32. Until we have one (a legitimately bought second-hand Delphi 5 license is the realistic route), we work in **equivalence mode**:
+  - **Oracle.** The original `ROS.exe` stays the reference. Byte-matching is still the target for the data that does not depend on the compiler: VMT/RTTI layout, DFM resources, string tables and `Objecten.csv` parsing.
+  - **Compiler.** The decompiled Pascal is built with **Free Pascal** in `{$mode delphi}`, first for `i386-win32`, run under Wine. This is the same compiler we need for the ports anyway.
+  - **Correctness.** It is proven by **differential testing**. We run the original and the rebuild under Wine with the same scripted input, plus a fixed timer and RNG seed, then compare world-state dumps (money, inhabitants, house prices, overlast/reistijd scores) and screenshots per frame.
+  - **Per function.** Routines are checked by reviewing them against Ghidra/IDR output. Leaf routines are also unit-tested against the original. Possible approach: call the original code inside an emulator (unicorn) on the same inputs.
+  - **Later.** If Delphi 5 turns up, Phase 2's matching pipeline is switched on, and the source is tightened until it is byte-identical.
+- **Port UI:** a mini-VCL shim rendering into a software framebuffer. It uses SDL3 on macOS and `<canvas>` on the web.
+
 ## What we are dealing with (findings so far)
 
 `Virtueel Zoetermeer.zip` contains:
@@ -55,7 +66,9 @@ Goal 1 comes first. It gives us source that is faithful by construction. Goals 2
 - [x] `flake.nix` dev shell: 7z/unzip, binutils, icoutils, rizin, Ghidra, Wine (wow64), Python with pefile/capstone/lief.
 - [x] git repo. The original binaries are git-ignored and never committed.
 - [ ] `orig/`: a script that extracts the zip into `orig/` and verifies the sha256 sums above.
-- [ ] **Obtain Delphi 5 (dcc32.exe plus `lib/*.dcu`, `*.res`).** It is proprietary and not freely redistributable, so the user has to supply it. It goes outside the repo, or in a git-ignored `toolchain/`. Then confirm `dcc32` runs under Wine in the dev shell.
+- [ ] *(Deferred: not available.)* Obtain Delphi 5 (dcc32.exe plus `lib/*.dcu`, `*.res`). It is proprietary, so it would be a git-ignored `toolchain/`. Until then, follow equivalence mode (see Decisions).
+- [ ] Add Free Pascal (with the i386-win32 cross target) and unicorn to the flake. Check that an FPC `{$mode delphi}` VCL-free hello world builds and runs under Wine.
+- [ ] Differential-test harness: launch the original `ROS.exe` under Wine with input injection, and dump state through a small hooking DLL or memory reads.
 - [ ] Extract `update.exe` (Wise) and compare any game binary inside it with `ROS.exe`.
 
 ## Phase 1: Analysis and symbol recovery
