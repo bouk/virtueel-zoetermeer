@@ -65,30 +65,30 @@ Doel 1 komt eerst. Het levert broncode op die door de bouwwijze getrouw is. Doel
 
 - [x] `flake.nix` dev-shell: 7z/unzip, binutils, icoutils, rizin, Ghidra, Wine (wow64), Python met pefile/capstone/lief.
 - [x] git-repository. De originele binaries staan in `.gitignore` en worden nooit gecommit.
-- [ ] `orig/`: een script dat het zip-bestand in `orig/` uitpakt en de sha256-sommen hierboven verifieert.
+- [x] `orig/`: een script dat het zip-bestand in `orig/` uitpakt en de sha256-sommen hierboven verifieert. *Gedaan: `tools/extract-orig.sh` (ook de v1.1-`ROS.exe` uit `update.exe`), `orig.sha256`.*
 - [ ] *(Uitgesteld: niet beschikbaar.)* Delphi 5 verkrijgen (dcc32.exe plus `lib/*.dcu`, `*.res`). Het is eigendomsrecht, dus het zou in een door git genegeerde `toolchain/` komen. Tot die er is, volgen we de equivalentiemodus (zie Beslissingen).
-- [ ] Free Pascal (met de i386-win32 cross-target) en unicorn aan de flake toevoegen. Controleren dat een FPC `{$mode delphi}` hello world zonder VCL bouwt en onder Wine draait.
-- [ ] Harnas voor differentiële tests: het originele `ROS.exe` onder Wine starten met invoerinjectie, en de toestand dumpen via een kleine hook-DLL of geheugenlezingen.
-- [ ] `update.exe` (Wise) uitpakken en elk spelbinary erin vergelijken met `ROS.exe`.
+- [x] Free Pascal (met de i386-win32 cross-target) en unicorn aan de flake toevoegen. Controleren dat een FPC `{$mode delphi}` hello world zonder VCL bouwt en onder Wine draait. *Gedaan: FPC 3.2.2 (native) en unicorn in de flake; een i386-win32-build bleek niet nodig, de port draait native (fase 4).*
+- [x] Harnas voor differentiële tests: het originele `ROS.exe` onder Wine starten met invoerinjectie, en de toestand dumpen via een kleine hook-DLL of geheugenlezingen. *Gedaan: `tools/orig_probe.py` leest het geheugen via `/proc/<pid>/mem` en schrijft met `process_vm_writev`; invoer via xdotool. Zie `docs/DIFFTEST.md`.*
+- [x] `update.exe` (Wise) uitpakken en elk spelbinary erin vergelijken met `ROS.exe`. *Gedaan: de upgrade bevat `ROS.exe` v1.1; dat is het doel van de decompilatie.*
 
 ## Fase 1: Analyse en herstel van symbolen
 
-- [ ] **IDR (Interactive Delphi Reconstructor)** onder Wine draaien met zijn Delphi 5-kennisbank. Die herkent:
+- [x] **IDR (Interactive Delphi Reconstructor)** onder Wine draaien met zijn Delphi 5-kennisbank. Die herkent: *Gedaan zonder IDR-GUI: een eigen matcher gebruikt de Delphi 5-kennisbank van IDR (`tools/idrkb.py`, `tools/kbmatch.py`).*
   - RTL/VCL-routines
   - klasse-VMT's, RTTI en published methoden
   - het begin van de code van elke unit
-- [ ] De resultaten exporteren naar een symboolkaart: `symbols/ros.sym` (adres, grootte, unit, naam).
-- [ ] De symbolen importeren in Ghidra (een script in `tools/`) voor decompilatie.
-- [ ] `tools/units.py` bouwen. Die levert het adresbereik van elke projectunit uit de IDR-kaart en de PACKAGEINFO-volgorde. Dit meet ook hoeveel code van het project zelf is en hoeveel van Borland (verwacht: in de orde van 100–200 KB).
+- [x] De resultaten exporteren naar een symboolkaart: `symbols/ros.sym` (adres, grootte, unit, naam). *Gedaan: `symbols/ros-1.1.tsv`.*
+- [x] De symbolen importeren in Ghidra (een script in `tools/`) voor decompilatie. *Gedaan: `tools/ghidra/`, `tools/refresh.sh`; ook klassenstructuren.*
+- [x] `tools/units.py` bouwen. Die levert het adresbereik van elke projectunit uit de IDR-kaart en de PACKAGEINFO-volgorde. Dit meet ook hoeveel code van het project zelf is en hoeveel van Borland (verwacht: in de orde van 100–200 KB). *Gedaan: 34 projectunits, ~148 KB code.*
 - [ ] De exacte compilerbuild en schakelaars vastleggen. Kandidaten:
   - Delphi 5 basis of Update Pack 1
   - `$O` optimalisatie, `$W` stackframes, `$R/$Q` bereik-/overloopcontroles, `$A` uitlijning, `$D/$L` debuginformatie (heeft geen invloed op het exe, wel op het `.map`)
   - `$I` I/O-controles, `$H` lange strings
 
   We bevestigen deze door probe-units te compileren en codepatronen en de RTL-bytes te vergelijken.
-- [ ] De binaire DFM-resources omzetten naar tekstuele `.dfm` om ze te kunnen lezen. We bewaren de originele binaire formulierstromen als buildinvoer, zodat ze exact overeenkomen.
-- [ ] De `ddraw`-headerunit identificeren. Het is waarschijnlijk een publieke DirectX-headervertaling (Erik Unger / JEDI / Hori). Als we die vinden, gebruiken we de originele broncode in plaats van te decompileren.
-- [ ] Nagaan of `ExtLbox`, `Seldir` en `cEditCtr` publiek beschikbare voorbeeld- of third-partyunits zijn.
+- [x] De binaire DFM-resources omzetten naar tekstuele `.dfm` om ze te kunnen lezen. We bewaren de originele binaire formulierstromen als buildinvoer, zodat ze exact overeenkomen. *Gedaan: `tools/dfm.py`; de port leest de formulieren uit `ROS.exe`.*
+- [x] De `ddraw`-headerunit identificeren. Het is waarschijnlijk een publieke DirectX-headervertaling (Erik Unger / JEDI / Hori). Als we die vinden, gebruiken we de originele broncode in plaats van te decompileren. *Opgelost: alleen declaraties waren nodig; de compat-laag levert `ddraw`.*
+- [x] Nagaan of `ExtLbox`, `Seldir` en `cEditCtr` publiek beschikbare voorbeeld- of third-partyunits zijn. *Opgelost: weggelinkt door de smart linker; alleen `cEditCtr` heeft code en is gedecompileerd.*
 
 ## Fase 2: Build- en verificatiepipeline
 
@@ -132,6 +132,8 @@ Regels:
 
 Klaar wanneer er geen `asm db`-blobs meer in de projectunits zitten en de hash nog steeds klopt.
 
+**Stand (equivalentiemodus):** alle routines van de 34 projectunits hebben Pascal-broncode met adresmarkering (`tools/coverage.py`: 100%); de differentiële tests `smoke`, `bouwen` en de eerste stappen van `level2-rapport` geven dezelfde toestand als het origineel.
+
 ## Fase 4: Portable build met Free Pascal (Apple Silicon macOS)
 
 Free Pascal (FPC) compileert code in de Delphi-dialect (`{$mode delphi}`) en richt zich op zowel **aarch64-darwin** als **wasm32**. Dat maakt het de natuurlijke route naar beide ports, zonder het spel in een andere taal te herschrijven.
@@ -144,21 +146,21 @@ Portabiliteitskwesties om op te lossen:
 - **Pascal-semantiek die tussen Delphi 5 en FPC verschilt.** Dit zijn 32-bits `Integer`/pointergrootte-aannames, `string` = AnsiString, recordpakking en setgroottes. Controleer die op 64-bit aarch64.
 
 Stappen:
-- [ ] FPC (en eventueel SDL3) aan de flake toevoegen. Een cross-target `nix build .#ros-macos` (aarch64-darwin) maken.
-- [ ] `{$IFDEF FPC}` / `{$IFDEF PORTABLE}`-naden. De Delphi 5-matchbuild moet ongewijzigd blijven compileren.
-- [ ] macOS-platformlaag: SDL3 (venster, invoer, audio via een winmm-vervanging, timer), of een native Cocoa-laag als dat de voorkeur heeft.
-- [ ] Verpakken als `.app`-bundel met de gegevensbestanden.
+- [x] FPC (en eventueel SDL3) aan de flake toevoegen. Een cross-target `nix build .#ros-macos` (aarch64-darwin) maken. *Gedaan: `nix build .#zoetermeer` voor Linux en macOS (ook aarch64-darwin); op macOS zelf nog niet getest.*
+- [x] `{$IFDEF FPC}` / `{$IFDEF PORTABLE}`-naden. De Delphi 5-matchbuild moet ongewijzigd blijven compileren. *Gedaan: naden gemarkeerd met `PORT:`.*
+- [x] macOS-platformlaag: SDL3 (venster, invoer, audio via een winmm-vervanging, timer), of een native Cocoa-laag als dat de voorkeur heeft. *Gedaan: SDL3-backend; geluid is stil.*
+- [x] Verpakken als `.app`-bundel met de gegevensbestanden. *Gedaan in `nix/zoetermeer.nix`.*
 
 ## Fase 5: WebAssembly-port
 
-- [ ] Bouwen met FPC's `wasm32-wasi`-target (of `wasm32-embedded`) met een dunne JS-host die voorziet in:
+- [x] Bouwen met FPC's `wasm32-wasi`-target (of `wasm32-embedded`) met een dunne JS-host die voorziet in: *Gedaan: FPC trunk wasm32-wasip1 (`nix/fpc-wasm.nix`), Asyncify, `web/zoetermeer.js`.*
   - een framebuffer-blit naar `<canvas>`
   - toetsenbord- en muisevents
   - een frametimer (hoofdlus aangestuurd door requestAnimationFrame, dus de VCL-achtige berichtenlus moet herintreedbaar/callback-gestuurd worden)
   - een virtueel bestandssysteem vooraf gevuld met de BMP/INI/CSV-gegevens
   - `localStorage` voor highscores en instellingen
-- [ ] Terugvaloptie als FPC's wasm-target te onvolwassen is: SDL3 via Emscripten met een kleine C-brug naar de door FPC gecompileerde spelkern. Beslissen na Fase 4, op basis van hoe de platformlaag uitpakte.
-- [ ] Uitrollen als statische site.
+- [x] Terugvaloptie als FPC's wasm-target te onvolwassen is: SDL3 via Emscripten met een kleine C-brug naar de door FPC gecompileerde spelkern. Beslissen na Fase 4, op basis van hoe de platformlaag uitpakte. *Niet nodig gebleken.*
+- [ ] Uitrollen als statische site. *`nix build .#web` levert de site (met de spelbestanden van archive.org); nog niet gepubliceerd.*
 
 ## Fase 6: Verificatie door een volledige playthrough (Haiku-agent)
 
@@ -166,19 +168,19 @@ Naast de differentiële tests (`docs/DIFFTEST.md`), die korte scenario's byte vo
 origineel vergelijken, speelt een Haiku-agent het hele spel uit om te controleren dat de
 herbouw nergens crasht of vastloopt.
 
-- [ ] Interactieve bediening van het draaiende spel voor een agent: `tools/speel.py` start de
+- [x] Interactieve bediening van het draaiende spel voor een agent: `tools/speel.py` start de
   portable build (`RosTest`) headless en geeft subcommando's voor één stap tegelijk: `klik x y`,
   `toets naam`, `wacht ms`, `foto` (screenshot om te bekijken), `toestand` (state dump: level,
   geld, score, wijken) en `stop`. ZMHarness leest daarvoor commando's live uit een
   controlebestand in plaats van uit een vooraf geschreven script.
-- [ ] Crash- en hangdetectie: het proces loopt nog, er komen frames, er zijn geen exceptions in
+- [x] Crash- en hangdetectie: het proces loopt nog, er komen frames, er zijn geen exceptions in
   de log (`ZM_DEBUG`). Bij een crash worden het commandolog en de laatste screenshots bewaard,
   zodat het precies na te spelen is als `.zms`-script.
-- [ ] Een Haiku-agent (model `haiku`) speelt alle levels door: wijken openen, wegen, spoor,
+- [ ] Een Haiku-agent (model `haiku`) speelt alle levels door: wijken openen, wegen, spoor, *Eerste ronde: level 2 gehaald; een crash in het rapport (compat) gevonden en opgelost; vervolgronde nodig.*
   huizen, kantoren, voorzieningen en stations bouwen, rondes afsluiten, rapporten lezen, de stad
   bewaren en weer openen, en het spel afsluiten. Hij houdt een logboek bij en rapporteert elke
   crash, hang of zichtbare fout met het commandolog.
-- [ ] Gevonden fouten worden nagespeeld tegen het origineel onder Wine (zelfde script) om te
+- [x] Gevonden fouten worden nagespeeld tegen het origineel onder Wine (zelfde script) om te *Gedaan: `tests/scripts/level2-rapport.zms`.*
   bepalen of het een fout van de herbouw is of oorspronkelijk gedrag.
 - [ ] Hetzelfde voor de webversie (`tools/test-web.py`), minstens tot en met level 2.
 
