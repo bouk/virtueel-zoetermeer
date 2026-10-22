@@ -1,64 +1,63 @@
-# Brief for decompilation agents
+# Opdracht voor decompilatie-agenten
 
-You are part of a team decompiling **Virtueel Zoetermeer** (`ROS.exe` v1.1, Delphi 5, 2003), a
-Dutch educational city-building game, into Object Pascal source. The source is later built with
-Free Pascal for Apple Silicon macOS and WebAssembly, so it must be faithful *and* portable.
+Je maakt deel uit van het team dat **Virtueel Zoetermeer** (`ROS.exe` v1.1, Delphi 5, 2003), een
+Nederlands educatief stadsbouwspel, decompileert naar Object Pascal-broncode. De broncode wordt later
+met Free Pascal gebouwd voor Apple Silicon macOS en WebAssembly, dus hij moet getrouw *en* portable zijn.
 
-Repository: `/home/bouke/zoetermeer`. Run every tool through the Nix dev shell from the repo root:
-`nix develop --command <cmd>` (fpc, python with pefile/capstone, ghidra, wine are all there).
+Repository: `/home/bouke/zoetermeer`. Voer elk gereedschap uit via de Nix-dev-shell vanuit de repositorymap:
+`nix develop --command <cmd>` (fpc, python met pefile/capstone, ghidra, wine zijn er allemaal).
 
-## Read first
+## Eerst lezen
 
-1. `docs/DECOMP.md` — conventions (dialect, faithfulness, class layout, naming, portability,
-   the `symbols/names/<Unit>.json` you must write). Follow it exactly.
-2. `src/game/uString.pas` + `symbols/names/uString.json` — a finished unit, use as the style
-   reference.
+1. `docs/DECOMP.md`: conventies (dialect, getrouwheid, klasselay-out, naamgeving, portabiliteit,
+   het `symbols/names/<Unit>.json` dat je moet schrijven). Volg die exact.
+2. `src/game/uString.pas` + `symbols/names/uString.json`: een afgeronde unit, gebruik die als stijlreferentie.
 
-## Material per unit
+## Materiaal per unit
 
-* `build/decomp-1.1/<Unit>.s` — symbolized disassembly, every routine of the unit in address
-  order, including try/except/finally handler blocks. **Primary source of truth.**
-* `build/decomp-1.1/<Unit>.c` — Ghidra decompilation of the same routines (good for structure;
-  wrong about Delphi strings/exceptions/register calling convention details; verify with `.s`).
-* `symbols/classes-1.1.md` — every project class: VMT slots (NEW/override, with the ancestor
-  that introduced each slot), published fields/methods/properties with offsets/accessors,
-  dynamic (message) methods, instance sizes.
-* `symbols/vcl-vmt-slots.md` — slot → method names for VCL classes (`call [reg+0x34]` on a
-  `TStrings` is `Add`, etc.). Field names of VCL classes already appear in the Ghidra C.
-* `symbols/ros-1.1.tsv` — all known symbols (`address kind unit name`); `s` rows are string
-  literals (address of the characters, name = length).
-* `build/dfm-1.1/*.txt` — form resources as text (component names/types/events).
-* `symbols/unit-deps-1.1.json`, `symbols/units-1.1.json` — unit ranges and cross-references.
-* To look at raw bytes or data (typed constants, sets, tables in DATA/BSS), use python with
+* `build/decomp-1.1/<Unit>.s`: gesymboliseerde disassemblage, elke routine van de unit in adresvolgorde,
+  inclusief try/except/finally-handlerblokken. **Primaire bron van waarheid.**
+* `build/decomp-1.1/<Unit>.c`: Ghidra-decompilatie van dezelfde routines (goed voor structuur; fout over
+  Delphi-strings/exceptions/details van de register-aanroepconventie; controleer met `.s`).
+* `symbols/classes-1.1.md`: elke projectklasse: VMT-slots (NEW/override, met de voorouder die elk slot
+  introduceerde), published velden/methoden/eigenschappen met offsets/accessors, dynamische
+  (bericht)methoden, instantiegroottes.
+* `symbols/vcl-vmt-slots.md`: slot → methodenamen voor VCL-klassen (`call [reg+0x34]` op een `TStrings` is
+  `Add`, enz.). Veldnamen van VCL-klassen staan al in de Ghidra-C.
+* `symbols/ros-1.1.tsv`: alle bekende symbolen (`adres soort unit naam`); `s`-regels zijn stringliterals
+  (adres van de tekens, naam = lengte).
+* `build/dfm-1.1/*.txt`: formulierresources als tekst (componentnamen/-typen/events).
+* `symbols/unit-deps-1.1.json`, `symbols/units-1.1.json`: unitbereiken en kruisverwijzingen.
+* Om ruwe bytes of data te bekijken (getypeerde constanten, sets, tabellen in DATA/BSS), gebruik python met
   `tools/delphi.py`: `im = delphi.Image('orig/game-1.1/ROS.exe'); im.bytes(va, n)`.
 
-## Coordination
+## Coördinatie
 
-* Several agents work in parallel on different units. Only write the files assigned to you.
-* **Write the `interface` section of each of your units first** (types, class declarations with
-  all fields and methods, globals, routine headers) and save it early, with implementation
-  stubs if needed, so others can build on it. Then fill in implementations.
-* When you use a unit owned by someone else, read `src/game/<ThatUnit>.pas` if it exists and use
-  its names. If it does not exist yet, use the names from `symbols/classes-1.1.md` /
-  `symbols/ros-1.1.tsv`, and for anything unnamed pick a sensible name and list it in the
-  `"assumes"` section of your names JSON (`{"assumes": {"TWorld": ["FCells: TCellList (+0x8)"]}}`)
-  so integration can reconcile.
-* The platform layer (`src/compat/`: `Windows`, `Messages`, `Graphics`, `Controls`, `Forms`,
-  `StdCtrls`, `ExtCtrls`, `ddraw`, `MMSystem`, …) is written by another agent. Write game code
-  against the normal Delphi 5 API; never work around missing compat pieces in game code.
-* **Do not** commit to git, run `tools/refresh.sh`, or run Ghidra (shared state; the coordinator
-  does that). Do not edit files outside your assignment, except new notes under `docs/notes/`.
+* Meerdere agenten werken parallel aan verschillende units. Schrijf alleen de bestanden die aan jou zijn toegewezen.
+* **Schrijf het `interface`-gedeelte van je units eerst** (typen, klassedeclaraties met alle velden en methoden,
+  globals, routinekoppen) en sla het vroeg op, met implementatiestubs als dat nodig is, zodat anderen erop
+  kunnen bouwen. Vul daarna de implementaties in.
+* Als je een unit gebruikt die van iemand anders is, lees `src/game/<ThatUnit>.pas` als die bestaat en gebruik
+  zijn namen. Bestaat die nog niet, gebruik de namen uit `symbols/classes-1.1.md` /
+  `symbols/ros-1.1.tsv`, en kies voor alles zonder naam een verstandige naam en vermeld die in de
+  `"assumes"`-sectie van je namen-JSON (`{"assumes": {"TWorld": ["FCells: TCellList (+0x8)"]}}`),
+  zodat de integratie het kan afstemmen.
+* De platformlaag (`src/compat/`: `Windows`, `Messages`, `Graphics`, `Controls`, `Forms`,
+  `StdCtrls`, `ExtCtrls`, `ddraw`, `MMSystem`, …) wordt door een andere agent geschreven. Schrijf spelcode
+  tegen de gewone Delphi 5-API; werk nooit ontbrekende compat-onderdelen in spelcode heen.
+* **Doe niet** aan git committen, `tools/refresh.sh` draaien of Ghidra draaien (gedeelde staat; de coördinator
+  doet dat). Bewerk geen bestanden buiten je opdracht, behalve nieuwe notities onder `docs/notes/`.
 
-## Checking your work
+## Je werk controleren
 
-* `nix develop --command tools/build.sh src/game/<Unit>.pas` compiles a unit with FPC. It needs
-  the compat units your unit uses; if they do not exist yet, the compile fails on the `uses`
-  clause — that is expected early on. Re-try near the end of your work; fix every error that is
-  in *your* code. Report compat gaps instead of patching around them.
-* Re-read each routine against the `.s` once more before you finish: every branch, every call,
-  every constant, every string.
+* `nix develop --command tools/build.sh src/game/<Unit>.pas` compileert een unit met FPC. Het heeft de
+  compat-units nodig die je unit gebruikt; bestaan die nog niet, dan faalt de compilatie op de `uses`-clausule
+  — dat is vroeg in het werk te verwachten. Probeer het opnieuw vlak voor het einde van je werk; los elke fout
+  op die in *jouw* code zit. Meld compat-gaten in plaats van eromheen te patchen.
+* Lees elke routine nog een keer na tegen de `.s` voordat je klaar bent: elke branch, elke aanroep, elke
+  constante, elke string.
 
-## Final report (your last message)
+## Eindrapport (je laatste bericht)
 
-Short: units done, any routines you could not decompile confidently (address + why), names you
-assumed for other units' members, compat API you needed that looked unusual.
+Kort: units klaar, routines die je niet met zekerheid kon decompileren (adres + waarom), namen die je voor
+leden van andere units hebt aangenomen, en compat-API die je nodig had en die ongebruikelijk leek.

@@ -1,20 +1,20 @@
-# WebAssembly build notes
+# WebAssembly-buildnotities
 
 ## Toolchain
 
-* `fpc-wasm` (flake package `.#fpc-wasm`, `nix/fpc-wasm.nix`): FPC trunk pinned to a known-good
-  snapshot commit, cross compiler `ppcrosswasm32` for **wasm32-wasip1**, RTL built with
-  `-CTbfexceptions` (branchful exceptions: Delphi `try/except/finally` work without the wasm
-  exception-handling proposal). The wrapper presets `-Twasip1 -CTbfexceptions` and the RTL unit
-  paths; `wasm-ld` comes from lld.
-* `wasm-opt` (binaryen) for Asyncify.
+* `fpc-wasm` (flake-pakket `.#fpc-wasm`, `nix/fpc-wasm.nix`): FPC trunk vastgepind op een bekende goede
+  snapshot-commit, cross-compiler `ppcrosswasm32` voor **wasm32-wasip1**, RTL gebouwd met
+  `-CTbfexceptions` (branchful exceptions: Delphi `try/except/finally` werken zonder het
+  wasm-exception-handling-voorstel). De wrapper zet `-Twasip1 -CTbfexceptions` en de RTL-unitpaden;
+  `wasm-ld` komt uit lld.
+* `wasm-opt` (binaryen) voor Asyncify.
 
-## Blocking calls: Asyncify
+## Blokkerende aanroepen: Asyncify
 
-The game is written around blocking loops (`Application.Run`, `ShowModal`, `MessageBox`, sleeps).
-A browser cannot block, so the platform layer funnels every wait into a few imported host
-functions (e.g. "wait for next event / frame"), and the module is post-processed with Asyncify so
-those imports can suspend the whole call stack and resume it from a JS callback:
+Het spel is gebouwd rond blokkerende lussen (`Application.Run`, `ShowModal`, `MessageBox`, sleeps).
+Een browser kan niet blokkeren, dus de platformlaag leidt elke wacht via een paar geïmporteerde
+host-functies (bijv. "wacht op volgende event / frame"), en de module wordt nabewerkt met Asyncify
+zodat die imports de hele aanroepstack kunnen opschorten en vanuit een JS-callback kunnen hervatten:
 
 ```
 fpc-wasm -Mdelphi prog.pas
@@ -24,15 +24,15 @@ wasm-opt --enable-reference-types --enable-bulk-memory --enable-bulk-memory-opt 
          --pass-arg=asyncify-imports@zm.wait prog.wasm -o prog.async.wasm
 ```
 
-* Do **not** use `--all-features`: binaryen then emits import kinds browsers/node reject.
-* Verified with `web/proto/asyncify_test.pas` + `web/proto/run.mjs` (minimal Asyncify driver and
-  WASI subset under node): three suspend/resume cycles through an imported `zm.wait`, then an
-  exception raised and caught after resuming.
-* FPC trunk also has JSPI support (`__fpc_wasm_suspender`); JSPI could replace Asyncify once all
-  target browsers (notably Safari) support it.
+* Gebruik **niet** `--all-features`: binaryen zendt dan importsoorten uit die browsers/node weigeren.
+* Geverifieerd met `web/proto/asyncify_test.pas` + `web/proto/run.mjs` (minimale Asyncify-driver en
+  WASI-subset onder node): drie opschort-/hervatcycli via een geïmporteerde `zm.wait`, daarna een
+  exception die na het hervatten wordt gegooid en gevangen.
+* FPC trunk heeft ook JSPI-ondersteuning (`__fpc_wasm_suspender`); JSPI kan Asyncify vervangen zodra alle
+  doelbrowsers (met name Safari) het ondersteunen.
 
-## Game data
+## Spelgegevens
 
-The repository never contains game data. The web build asks the player for their own copy
-(the original zip / installer or an installed game folder), unpacks it in the browser and keeps it
-in IndexedDB; the WASI file layer serves it to the game.
+De repository bevat nooit spelgegevens. De webbuild vraagt de speler om zijn eigen kopie
+(het originele zip-bestand/installatieprogramma of een geïnstalleerde spelmap), pakt die uit in de
+browser en bewaart die in IndexedDB; de WASI-bestandslaag levert ze aan het spel.

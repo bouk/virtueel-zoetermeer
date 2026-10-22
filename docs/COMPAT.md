@@ -1,92 +1,91 @@
-# Compat layer (`src/compat/`)
+# Compatibiliteitslaag (`src/compat/`)
 
-The decompiled game units in `src/game/` are written against the Delphi 5 RTL/VCL,
-Win32 and DirectDraw. `src/compat/` provides units with the **same names and API**,
-implemented portably, so the unmodified game source builds with Free Pascal and runs on
-Linux, macOS (aarch64-darwin, SDL3) and later WebAssembly. FPC's own RTL supplies
-`System`, `SysUtils`, `Classes` (TReader/TWriter for the DFM streams), `Math`,
-`Contnrs` and `TypInfo`; compat does not shadow them. `IniFiles` is the exception: see
-"INI-bestanden" below.
+De gedecompileerde spelunits in `src/game/` zijn geschreven tegen de Delphi 5 RTL/VCL,
+Win32 en DirectDraw. `src/compat/` levert units met dezelfde namen en API, portable
+geïmplementeerd, zodat de ongewijzigde spelbroncode met Free Pascal bouwt en draait op
+Linux, macOS (aarch64-darwin, SDL3) en later WebAssembly. De eigen RTL van FPC levert
+`System`, `SysUtils`, `Classes` (TReader/TWriter voor de DFM-streams), `Math`,
+`Contnrs` en `TypInfo`; compat schaduwt die niet. `IniFiles` is de uitzondering: zie
+"INI-bestanden" hieronder.
 
-## Layers
+## Lagen
 
 ```
- game units (src/game)
-   |  Delphi API
+ spelunits (src/game)
+   |  Delphi-API
  Windows Messages MMSystem ddraw | Graphics Controls Forms StdCtrls ExtCtrls Buttons
                                  | ComCtrls Dialogs FileCtrl Menus Grids ImgList
    |
- ZMWin    window manager + message queue + timers + input + painting   (portable)
- ZMGdi    software GDI: DIBs, palettes, DCs, regions, ROP blits, text   (portable)
- ZMFonts  bitmap fonts (fonts/zmfontdata.inc, generated)               (portable)
- ZMData   data directory, ROS.exe PE resources, path resolution        (portable, Unix/other)
- ZMHandles handle table (HWND/HDC/HBITMAP... are small integers)       (portable)
+ ZMWin    vensterbeheer + berichtenwachtrij + timers + invoer + tekenen   (portable)
+ ZMGdi    software-GDI: DIBs, paletten, DC's, regio's, ROP-blits, tekst   (portable)
+ ZMFonts  bitmapfonts (fonts/zmfontdata.inc, gegenereerd)                 (portable)
+ ZMData   gegevensmap, PE-resources van ROS.exe, padresolutie             (portable, Unix/overig)
+ ZMHandles handletabel (HWND/HDC/HBITMAP... zijn kleine gehele getallen)  (portable)
    |
- ZMPlatform   backend interface (TZMBackend) + null backend + PNG writer
- sdl3/ZMSdl3Backend, sdl3/SDL3   SDL3 backend (dynamically loaded libSDL3)
+ ZMPlatform   backendinterface (TZMBackend) + null-backend + PNG-schrijver
+ sdl3/ZMSdl3Backend, sdl3/SDL3   SDL3-backend (dynamisch geladen libSDL3)
 ```
 
-`ZMDraw` holds the classic Windows 9x drawing helpers used by the controls.
+`ZMDraw` bevat de klassieke Windows 9x-tekenhulpen die de besturingselementen gebruiken.
 
-### Platform boundary (`ZMPlatform.TZMBackend`)
+### Platformgrens (`ZMPlatform.TZMBackend`)
 
-A backend opens one window showing the emulated screen, presents a 32-bit XRGB
-framebuffer, delivers input events (mouse in screen coordinates, Windows VK codes,
-Windows-1252 text), time (`Ticks`, `PerfCounter`), `Delay`, `WaitEvent(timeout)` and a
-cursor shape. Nothing else touches SDL. A browser backend implements the same class.
+Een backend opent één venster met het geëmuleerde scherm, presenteert een 32-bits XRGB-framebuffer,
+levert invoerevents (muis in schermcoördinaten, Windows-VK-codes, Windows-1252-tekst), tijd (`Ticks`,
+`PerfCounter`), `Delay`, `WaitEvent(timeout)` en een cursorvorm. Niets anders raakt SDL aan. Een
+browserbackend implementeert dezelfde klasse.
 
-The **only blocking point** is `ZMWin.ZMWaitMessage` (used by `WaitMessage`,
-`GetMessage`, `Application.HandleMessage`/`Idle`, `ShowModal`, `MessageBox`, the file
-dialogs). For WebAssembly this is where the program has to yield to the browser
-(Asyncify or an equivalent); everything else is non-blocking.
+Het **enige blokkerende punt** is `ZMWin.ZMWaitMessage` (gebruikt door `WaitMessage`,
+`GetMessage`, `Application.HandleMessage`/`Idle`, `ShowModal`, `MessageBox`, de bestandsdialogen).
+Voor WebAssembly is dit de plek waar het programma de browser de beurt moet geven (Asyncify of
+een equivalent); al het andere is niet-blokkerend.
 
-### Screen and windows
+### Scherm en vensters
 
-There is one emulated screen, a 1024x768 32-bit bitmap (`ZMScreen`). Top-level windows
-(forms, message boxes, popups) are placed on it; child windows (TWinControls) inside
-their parents. All windows draw **directly into the screen** through window DCs whose
-visible region is the window's client area minus overlapping siblings above it and minus
-its child windows (WS_CLIPSIBLINGS | WS_CLIPCHILDREN semantics), like non-composited
-Windows. The game's sprite engine does exactly what it did on Windows: `GetDC(Handle)`,
-`BitBlt`, `ReleaseDC`. Moving/hiding a window invalidates what it uncovers; WM_PAINT and
-WM_TIMER are synthesized when the posted-message queue is empty; non-client frames
-(caption, borders, client edges) are painted by the window manager in Win9x style.
-`ChangeDisplaySettings` and `IDirectDraw.SetDisplayMode` succeed without changing the
-screen size; `GetDeviceCaps(BITSPIXEL)` reports 32 (true colour, no palette device).
+Er is één geëmuleerd scherm, een 1024x768 32-bits bitmap (`ZMScreen`). Vensters op het hoogste niveau
+(formulieren, berichtvensters, popups) worden erop geplaatst; kindvensters (TWinControls) binnen hun
+ouders. Alle vensters tekenen **rechtstreeks in het scherm** via venster-DC's waarvan de zichtbare
+regio het clientgebied van het venster is, min overlappende broers erboven en min zijn kindvensters
+(WS_CLIPSIBLINGS | WS_CLIPCHILDREN-semantiek), zoals niet-gecomponeerd Windows. De sprite-engine van het
+spel doet precies wat die op Windows deed: `GetDC(Handle)`, `BitBlt`, `ReleaseDC`. Verplaatsen/verbergen
+van een venster ongeldig maakt wat het blootlegt; WM_PAINT en WM_TIMER worden gesynthetiseerd als de
+wachtrij met geposte berichten leeg is; niet-clientframes (titelbalk, randen, clientranden) worden door
+het vensterbeheer getekend in Win9x-stijl.
+`ChangeDisplaySettings` en `IDirectDraw.SetDisplayMode` slagen zonder de schermgrootte te wijzigen;
+`GetDeviceCaps(BITSPIXEL)` meldt 32 (ware kleur, geen paletapparaat).
 
 ### GDI
 
-`ZMGdi` implements bitmaps of 1/4/8/16/24/32 bpp (top-down rows, `ScanLine[]` works),
-colour tables, logical palettes, DCs with state stack, window/viewport origins, clip
-regions (rectangle lists), brushes (solid/hatch/pattern), pens, fonts, `BitBlt`/
-`StretchBlt`/`PatBlt` with **all 256 ternary ROPs** and the Windows colour conversion
-rules (mono to colour uses the destination DC's text/background colour, colour to mono
-compares with the source DC's background colour, 8-bit to 8-bit with different colour
-tables maps through RGB, ...), lines, rectangles, ellipses, polygons, flood fill,
-`TextOut`/`ExtTextOut`/`DrawText`/`GetTextExtentPoint`/`GetTextMetrics`.
+`ZMGdi` implementeert bitmaps van 1/4/8/16/24/32 bpp (rijen van boven naar beneden, `ScanLine[]` werkt),
+kleurtabellen, logische paletten, DC's met een toestandsstapel, venster-/viewportoorsprong, kliprgio's
+(rechthoeklijsten), kwasten (effen/arcering/patroon), pennen, lettertypen, `BitBlt`/`StretchBlt`/`PatBlt`
+met **alle 256 ternaire ROP's** en de kleurconversieregels van Windows (mono naar kleur gebruikt de
+tekst-/achtergrondkleur van de doel-DC, kleur naar mono vergelijkt met de achtergrondkleur van de bron-DC,
+8-bit naar 8-bit met verschillende kleurtabellen mapt via RGB, ...), lijnen, rechthoeken, ellipsen,
+veelhoeken, flood fill, `TextOut`/`ExtTextOut`/`DrawText`/`GetTextExtentPoint`/`GetTextMetrics`.
 
-### Fonts
+### Lettertypen
 
-`tools/gen-fonts.py` renders Liberation Sans/Serif/Mono (SIL OFL; metric clones of
-Arial, Times New Roman, Courier New; package `liberation_ttf`) without anti-aliasing at a
-range of pixel sizes into `src/compat/fonts/zmfontdata.inc` (committed, regenerate with
-`nix develop --command python tools/gen-fonts.py`). Font mapping: Arial / MS Sans Serif
-/ unknown -> sans, Courier* -> mono, Times* -> serif, `System` -> a 16 px bold face whose
-widths match the DFM label sizes of the original exactly.
+`tools/gen-fonts.py` rendert Liberation Sans/Serif/Mono (SIL OFL; metrische klonen van
+Arial, Times New Roman, Courier New; pakket `liberation_ttf`) zonder anti-aliasing op een reeks
+pixelgroottes naar `src/compat/fonts/zmfontdata.inc` (vastgelegd in git; opnieuw genereren met
+`nix develop --command python tools/gen-fonts.py`). Lettertypekoppeling: Arial / MS Sans Serif
+/ onbekend -> sans, Courier* -> mono, Times* -> serif, `System` -> een vet lettertype van 16 px waarvan de
+breedtes exact overeenkomen met de DFM-labelgroottes van het origineel.
 
 ### VCL
 
-`Controls`/`Forms` follow the Delphi 5 structure closely (WndProc, message handlers,
-`Perform`, `PaintHandler`/`PaintControls`, `AlignControls`, KeyPreview, CM_DIALOGKEY for
-default/cancel buttons, CM_MOUSEENTER/LEAVE, mouse capture, graphic controls painted by
-their parent, `TControlCanvas` DCs freed at idle). Standard controls are drawn by Pascal
-code (TButton, TBitBtn with stock glyphs, TLabel, TEdit, TMemo with scroll bar and
-word-wrapped `Lines` like Windows' edit control, TCheckBox, TRadioButton, TListBox,
-TComboBox with drop-down list, TScrollBar, TGroupBox, TPanel, TImage, TPaintBox, TBevel,
-TShape, TTimer, TTabControl (owner-draw, multi-line), TPageControl, TProgressBar,
-TStatusBar, TTrackBar, TStringGrid/TDrawGrid, TDirectoryListBox etc.). `MessageBox`,
-`ShowMessage`, `MessageDlg`, `InputQuery` and `TOpenDialog`/`TSaveDialog` are modal forms
-inside the emulated screen.
+`Controls`/`Forms` volgen de Delphi 5-structuur nauw (WndProc, berichtafhandelaars, `Perform`,
+`PaintHandler`/`PaintControls`, `AlignControls`, KeyPreview, CM_DIALOGKEY voor standaard- en
+annuleerknoppen, CM_MOUSEENTER/LEAVE, muisvastlegging, grafische besturingselementen worden door hun
+ouder getekend, `TControlCanvas`-DC's worden bij idle vrijgegeven). Standaardbesturingselementen worden
+getekend door Pascal-code (TButton, TBitBtn met standaardglyphs, TLabel, TEdit, TMemo met scrollbalk en
+woordafbrekende `Lines` zoals het edit-control van Windows, TCheckBox, TRadioButton, TListBox,
+TComboBox met vervolgkeuzelijst, TScrollBar, TGroupBox, TPanel, TImage, TPaintBox, TBevel,
+TShape, TTimer, TTabControl (owner-draw, meerregelig), TPageControl, TProgressBar,
+TStatusBar, TTrackBar, TStringGrid/TDrawGrid, TDirectoryListBox enz.). `MessageBox`,
+`ShowMessage`, `MessageDlg`, `InputQuery` en `TOpenDialog`/`TSaveDialog` zijn modale formulieren
+binnen het geëmuleerde scherm.
 
 TMemo breekt regels af zoals de edit-control van Wine (`EDIT_BuildLineDefs_ML`): het
 opmaakrechthoek is het clientgebied min de scrollbalk, 1 pixel per kant voor
@@ -96,13 +95,13 @@ een te brede regel krijgt een geschat breekpunt (breedte/opmaakbreedte, min 0,2 
 vaak korter dan nodig; de originele schermen (intro- en leveltekst) laten precies die
 afbrekingen zien, en het spel tekent de memoregels zelf (TBehavMemo).
 
-### Forms from ROS.exe
+### Formulieren uit ROS.exe
 
-`TCustomForm.Create` loads the RCDATA resource named after the form class (and its
-ancestors, like `InitInheritedComponent`) **from the user's original ROS.exe** (PE
-resource reader in `ZMData`) and streams it with FPC's `TReader`. Unknown properties are
-skipped (listed with `ZM_DEBUG=1`), missing event handlers are reported. No game data
-is in the repository; `{$R *.dfm}` in the game units is Delphi-only.
+`TCustomForm.Create` laadt de RCDATA-resource met de naam van de formulierklasse (en zijn
+voorouders, zoals `InitInheritedComponent`) **uit het ROS.exe van de gebruiker** (PE-resourcelezer in
+`ZMData`) en streamt die met FPC's `TReader`. Onbekende eigenschappen worden overgeslagen (vermeld bij
+`ZM_DEBUG=1`), ontbrekende event-handlers worden gemeld. Er staan geen spelgegevens in de repository;
+`{$R *.dfm}` in de spelunits is alleen voor Delphi.
 
 Anti-aliasing en breedtes, zoals Wine (de referentie) het doet:
 
@@ -120,28 +119,27 @@ Anti-aliasing en breedtes, zoals Wine (de referentie) het doet:
   tekstkleur, daartussen mengt `ZMGdi.AAComp` met de gammacurve van Wine
   (`dibdrv/primitives.c`). Hiermee zijn de teksten pixel-gelijk aan de referentie.
 
-### Data files and paths
+### Gegevensbestanden en paden
 
-`ZMData` finds the data directory from `--data=<dir>`, `$ZM_DATA`, the current
-directory or the executable's directory, and ROS.exe from `--exe=<file>`, `$ZM_EXE` or
-the data directory. The game builds paths as `ExtractFilePath(ParamStr(0)) + '\'` +
-`images\8bits\x.bmp` and opens them through the plain RTL (`TIniFile`, `AssignFile`,
-`FindFirst`, `TStrings.LoadFromFile`). To make that work unchanged on Unix:
+`ZMData` vindt de gegevensmap via `--data=<dir>`, `$ZM_DATA`, de huidige map of de map van het
+uitvoerbare bestand, en ROS.exe via `--exe=<file>`, `$ZM_EXE` of de gegevensmap. Het spel bouwt paden als
+`ExtractFilePath(ParamStr(0)) + '\'` + `images\8bits\x.bmp` en opent ze via de gewone RTL (`TIniFile`,
+`AssignFile`, `FindFirst`, `TStrings.LoadFromFile`). Om dat op Unix ongewijzigd te laten werken:
 
-* `Windows.ParamStr(0)` (shadows `System.ParamStr` in units that use `Windows`) returns
-  `<shadow>/ROS.exe`.
-* The shadow directory `$XDG_CACHE_HOME/zoetermeer/root-<hash>/` (override `ZM_SHADOW`)
-  holds symlinks whose *names* are the game's Windows-style relative paths
-  (`\ZoetermeerGame.ini`, `\images\8bits\Achterg.bmp`; backslashes are ordinary file
-  name characters on Unix). Root files get links in several letter cases (the game asks
-  for `ZoetermeerGame.ini`, the file is `ZoetermeerGame.Ini`); files in subdirectories get
-  one link each, so `FindFirst('<shadow>/\images\8bits\*.bmp')` returns every file once
-  (FPC's FindFirst lists `<shadow>/` and strips the `\...\` prefix from the names).
-  About 660 links; built in ~60 ms at start. Elk proces heeft een eigen schaduwmap
+* `Windows.ParamStr(0)` (schaduwt `System.ParamStr` in units die `Windows` gebruiken) geeft
+  `<shadow>/ROS.exe` terug.
+* De schaduwmap `$XDG_CACHE_HOME/zoetermeer/root-<hash>/` (overschrijven met `ZM_SHADOW`)
+  bevat symlinks waarvan de *namen* de Windows-achtige relatieve paden van het spel zijn
+  (`\ZoetermeerGame.ini`, `\images\8bits\Achterg.bmp`; backslashes zijn op Unix gewone
+  bestandsnaamtekens). Bestanden in de root krijgen links in meerdere hoofdlettervarianten (het spel vraagt
+  om `ZoetermeerGame.ini`, het bestand heet `ZoetermeerGame.Ini`); bestanden in submappen krijgen elk één
+  link, zodat `FindFirst('<shadow>/\images\8bits\*.bmp')` elk bestand precies één keer teruggeeft (FPC's
+  FindFirst somt `<shadow>/` op en haalt het `\...\`-voorvoegsel uit de namen).
+  Ongeveer 660 links; bij de start in ~60 ms opgebouwd. Elk proces heeft een eigen schaduwmap
   (`root-<hash>/<pid>/`, opgeruimd bij afsluiten; mappen van beëindigde processen
   ruimt de volgende start op), zodat twee gelijktijdige runs elkaar niet storen.
-* Compat's own file access (`TGraphic.LoadFromFile`, dialogs, `FileCtrl`) goes through
-  `ZMData.ZMResolvePath` (backslashes and letter case resolved against the real tree).
+* Het eigen bestandstoegang van compat (`TGraphic.LoadFromFile`, dialogen, `FileCtrl`) loopt via
+  `ZMData.ZMResolvePath` (backslashes en hoofdlettergebruik worden opgelost tegen de echte boomstructuur).
 
 **Schrijfbare overlay.** Het spel schrijft nooit in de datamap (bij `nix build
 .#zoetermeer` is dat een alleen-lezen store-pad). `ZMData.ZMWritePath` stuurt elke
@@ -169,58 +167,59 @@ Let op: de wasm-compiler zoekt de unitpaden van zijn fpc.cfg vóór `-Fu src/com
 vindt dan de `IniFiles` van FPC; de webbuild moet de unit expliciet noemen
 (`IniFiles in '../compat/IniFiles.pas'` in de uses van `RosWeb.dpr`).
 
-A cleaner alternative, if the game units may get FPC-only seams: make `uString.AddPath`
-and the `AppPath` initialisation in `uTool` use `PathDelim`; the shadow directory then only
-needs the case-variant links.
+Een schoner alternatief, als de spelunits FPC-specifieke naden mogen krijgen: laat `uString.AddPath`
+en de `AppPath`-initialisatie in `uTool` `PathDelim` gebruiken; de schaduwmap heeft dan alleen nog de
+hoofdletter-variant-links nodig.
 
-## Environment variables
+## Omgevingsvariabelen
 
-| Variable | Meaning |
+| Variabele | Betekenis |
 |---|---|
-| `ZM_DATA`, `--data=` | data directory (images/, *.Ini, Objecten.csv, wijken.dat) |
-| `ZM_EXE`, `--exe=` | the original ROS.exe (v1.1) for the form resources |
-| `ZM_HEADLESS=1` | no window (null backend); time runs from the wall clock |
-| `ZM_SCALE=n`, `ZM_FULLSCREEN=1` | SDL window scale / fullscreen |
-| `ZM_SDL3_LIB` | path of libSDL3 (else default names, then `sdl3.pc` libdirs on `PKG_CONFIG_PATH`) |
-| `ZM_SCREENSHOT=f.png`, `ZM_SCREENSHOT_AT=ms` | save the screen as PNG after ms (default 3000) |
-| `ZM_EXIT_AT=ms` | exit after ms |
-| `ZM_SCRIPT="ms:cmd;..."` | scripted input: `click:x,y`, `rclick:x,y`, `move:x,y`, `key:vk`, `char:c`, `shot:file`, `exit`; coordinates relative to the main form's client area |
-| `ZM_DEBUG=1` | log unknown DFM properties, message boxes, exception backtraces, window tree at screenshot |
-| `ZM_SHADOW` | location of the shadow directory (exact, niet per proces) |
+| `ZM_DATA`, `--data=` | gegevensmap (images/, *.Ini, Objecten.csv, wijken.dat) |
+| `ZM_EXE`, `--exe=` | het originele ROS.exe (v1.1) voor de formulierresources |
+| `ZM_HEADLESS=1` | geen venster (null-backend); tijd loopt mee met de klok van de computer |
+| `ZM_SCALE=n`, `ZM_FULLSCREEN=1` | SDL-vensterschaal / volledig scherm |
+| `ZM_SDL3_LIB` | pad van libSDL3 (anders standaardnamen, daarna de libdirs van `sdl3.pc` op `PKG_CONFIG_PATH`) |
+| `ZM_SCREENSHOT=f.png`, `ZM_SCREENSHOT_AT=ms` | sla het scherm als PNG op na ms (standaard 3000) |
+| `ZM_EXIT_AT=ms` | sluit af na ms |
+| `ZM_SCRIPT="ms:cmd;..."` | gescripte invoer: `click:x,y`, `rclick:x,y`, `move:x,y`, `key:vk`, `char:c`, `shot:file`, `exit`; coördinaten relatief aan het clientgebied van het hoofdformulier |
+| `ZM_DEBUG=1` | logt onbekende DFM-eigenschappen, berichtvensters, exception-backtraces, vensterboom bij screenshot |
+| `ZM_SHADOW` | locatie van de schaduwmap (exact, niet per proces) |
 | `ZM_SAVE` | schrijfbare overlay (standaard `$XDG_DATA_HOME/zoetermeer`) |
 | `ZM_NO_AA=1` | geen anti-aliasing van tekst |
 
-SDL's own variables work too (`SDL_VIDEODRIVER=offscreen`).
+SDL's eigen variabelen werken ook (`SDL_VIDEODRIVER=offscreen`).
 
-## Hooks for the differential-test harness
+## Haken voor het differentiële-testharnas
 
-* `ZMPlatform.ZMIdleHook: procedure` - called once per message-pump iteration
-  (every PeekMessage/GetMessage/WaitMessage, so also inside `ShowModal` and `MessageBox`).
+* `ZMPlatform.ZMIdleHook: procedure`: wordt één keer per iteratie van de berichtenpomp aangeroepen
+  (elke PeekMessage/GetMessage/WaitMessage, dus ook binnen `ShowModal` en `MessageBox`).
 * `ZMWin.ZMInjectMouse(X, Y, Button {0 move, 1 left, 2 right}, Down)`,
-  `ZMWin.ZMInjectKey(VK, Down)`, `ZMWin.ZMInjectChar(C)` - queue synthetic input exactly
-  like backend events (also headless). Coordinates are relative to the client area of
-  `ZMWin.ZMMainWindow` (set by `Application.CreateForm` for the main form).
+  `ZMWin.ZMInjectKey(VK, Down)`, `ZMWin.ZMInjectChar(C)`: zetten synthetische invoer in de wachtrij precies
+  zoals backend-events (ook headless). Coördinaten zijn relatief aan het clientgebied van
+  `ZMWin.ZMMainWindow` (ingesteld door `Application.CreateForm` voor het hoofdformulier).
 * `ZMWin.ZMSaveScreenshot(FileName)`, `ZMWin.ZMDumpWindows`.
 
 ## Tests
 
-`src/compat/tests/` has `test_controls` (standard controls, injected click),
-`test_bitmap` (8-bit DIB, StretchBlt, mono mask blit with SRCINVERT/SRCAND, ScanLine,
-format conversion), `test_dfm` (streams TFRMBLACK from ROS.exe) en `test_ini`
+`src/compat/tests/` bevat `test_controls` (standaardbesturingselementen, geïnjecteerde klik),
+`test_bitmap` (8-bit DIB, StretchBlt, mono-maskerblit met SRCINVERT/SRCAND, ScanLine,
+formaatconversie), `test_dfm` (streamt TFRMBLACK uit ROS.exe) en `test_ini`
 (leesregels van GetPrivateProfileString, schrijven ter plekke, de overlay; met een eigen
 synthetische, schrijfbeveiligde datamap).
-`nix develop --command tools/compat-test.sh` builds and runs them headless and writes
-screenshots to `build/compat-tests/`.
+`nix develop --command tools/compat-test.sh` bouwt en draait ze headless en schrijft
+screenshots naar `build/compat-tests/`.
 
-## Not implemented / stubs
+## Niet geïmplementeerd / stubs
 
-* Sound (`PlaySound`, `sndPlaySound`) returns success silently (the game has no sound).
-* DirectDraw surfaces (`CreateSurface` etc.) return `DDERR_UNSUPPORTED`; the game only
-  switches display modes.
-* `LoadLibrary`/`GetProcAddress` fail (callers use their fallbacks).
-* Custom cursors from ROS.exe are not loaded: named `LoadCursor` resources map to the
-  system hand cursor (the game's only custom cursor is a hand); `Screen.Cursor` maps to SDL system cursors.
-* Menus are data only (`TPopupMenu.Popup` shows nothing); drag and drop, hints, docking,
-  clipboard, printing, metafiles, icons (kept as data, not drawn) are stubs.
-* `StretchBlt` HALFTONE mode uses nearest-pixel sampling.
-* Arcs/pies/chords are drawn as full ellipses.
+* Geluid (`PlaySound`, `sndPlaySound`) geeft stilzwijgend succes terug (het spel heeft geen geluid).
+* DirectDraw-oppervlakken (`CreateSurface` enz.) geven `DDERR_UNSUPPORTED` terug; het spel schakelt alleen
+  schermmodi om.
+* `LoadLibrary`/`GetProcAddress` falen (aanroepers gebruiken hun terugvalmogelijkheden).
+* Eigen cursors uit ROS.exe worden niet geladen: benoemde `LoadCursor`-resources koppelen aan de
+  systeemhandcursor (de enige eigen cursor van het spel is een hand); `Screen.Cursor` koppelt aan
+  SDL-systeemcursors.
+* Menu's zijn alleen gegevens (`TPopupMenu.Popup` toont niets); slepen en neerzetten, hints, docking,
+  klembord, afdrukken, metafiles, pictogrammen (bewaard als gegevens, niet getekend) zijn stubs.
+* De HALFTONE-modus van `StretchBlt` gebruikt bemonstering op de dichtstbijzijnde pixel.
+* Bogen/taartstukken/koorden worden als volledige ellipsen getekend.

@@ -1,164 +1,164 @@
-# Virtueel Zoetermeer: matching decompilation plan
+# Virtueel Zoetermeer: plan voor een exacte decompilatie
 
-## Goals
+## Doelen
 
-1. **Matching decomp.** Object Pascal source that, built with the original compiler, produces an executable that is byte-for-byte identical to the shipped `ROS.exe`.
-2. **Native port.** The same source, built with Free Pascal, runs natively on Apple Silicon macOS (aarch64-darwin).
-3. **Web port.** The same source, built for WebAssembly, runs in a browser.
+1. **Exacte decompilatie.** Object Pascal-broncode die, gebouwd met de oorspronkelijke compiler, een uitvoerbaar bestand oplevert dat byte-voor-byte gelijk is aan het uitgeleverde `ROS.exe`.
+2. **Native port.** Dezelfde broncode, gebouwd met Free Pascal, draait native op Apple Silicon macOS (aarch64-darwin).
+3. **Webport.** Dezelfde broncode, gebouwd voor WebAssembly, draait in een browser.
 
-Goal 1 comes first. It gives us source that is faithful by construction. Goals 2 and 3 are a portability layer on top of that source, and they must never break the matching build.
+Doel 1 komt eerst. Het levert broncode op die door de bouwwijze getrouw is. Doelen 2 en 3 zijn een portabiliteitslaag bovenop die broncode, en ze mogen de exacte build nooit breken.
 
-## Decisions (confirmed 2026-10-22)
+## Beslissingen (bevestigd 2026-10-22)
 
-- The plan below is confirmed as written, with one exception.
-- **We don't have a Delphi 5 compiler.** Byte-matching the project units needs Borland's exact dcc32. Until we have one (a legitimately bought second-hand Delphi 5 license is the realistic route), we work in **equivalence mode**:
-  - **Oracle.** The original `ROS.exe` stays the reference. Byte-matching is still the target for the data that does not depend on the compiler: VMT/RTTI layout, DFM resources, string tables and `Objecten.csv` parsing.
-  - **Compiler.** The decompiled Pascal is built with **Free Pascal** in `{$mode delphi}`, first for `i386-win32`, run under Wine. This is the same compiler we need for the ports anyway.
-  - **Correctness.** It is proven by **differential testing**. We run the original and the rebuild under Wine with the same scripted input, plus a fixed timer and RNG seed, then compare world-state dumps (money, inhabitants, house prices, overlast/reistijd scores) and screenshots per frame.
-  - **Per function.** Routines are checked by reviewing them against Ghidra/IDR output. Leaf routines are also unit-tested against the original. Possible approach: call the original code inside an emulator (unicorn) on the same inputs.
-  - **Later.** If Delphi 5 turns up, Phase 2's matching pipeline is switched on, and the source is tightened until it is byte-identical.
-- **Port UI:** a mini-VCL shim rendering into a software framebuffer. It uses SDL3 on macOS and `<canvas>` on the web.
+- Het onderstaande plan is bevestigd zoals het is, met één uitzondering.
+- **We hebben geen Delphi 5-compiler.** Byte-matching van de projectunits vereist Borlands exacte dcc32. Tot we die hebben (een legaal tweedehands gekochte Delphi 5-licentie is de realistische route) werken we in **equivalentiemodus**:
+  - **Orakel.** Het originele `ROS.exe` blijft de referentie. Byte-matching blijft het doel voor de data die niet van de compiler afhangt: VMT/RTTI-lay-out, DFM-resources, stringtabellen en het parsen van `Objecten.csv`.
+  - **Compiler.** De gedecompileerde Pascal wordt gebouwd met **Free Pascal** in `{$mode delphi}`, eerst voor `i386-win32`, onder Wine gedraaid. Dit is toch dezelfde compiler die we voor de ports nodig hebben.
+  - **Correctheid.** Die wordt bewezen met **differentiële tests**. We draaien het origineel en de herbouw onder Wine met dezelfde gescripte invoer, plus een vaste timer- en RNG-seed, en vergelijken speltoestand-dumps (geld, inwoners, huizenprijzen, overlast-/reistijdscores) en screenshots per frame.
+  - **Per functie.** Routines worden gecontroleerd door ze na te lopen tegen Ghidra/IDR-uitvoer. Bladroutines worden ook met unittests tegen het origineel getoetst. Mogelijke aanpak: de originele code binnen een emulator (unicorn) aanroepen met dezelfde invoer.
+  - **Later.** Als Delphi 5 opduikt, wordt de matching-pipeline van Fase 2 aangezet en wordt de broncode aangescherpt tot hij byte-identiek is.
+- **UI-port:** een mini-VCL-shim die in een software-framebuffer tekent. Die gebruikt SDL3 op macOS en `<canvas>` in het web.
 
-## What we are dealing with (findings so far)
+## Waar we mee te maken hebben (bevindingen tot nu toe)
 
-`Virtueel Zoetermeer.zip` contains:
+`Virtueel Zoetermeer.zip` bevat:
 
-| File | What it is |
+| Bestand | Wat het is |
 |---|---|
-| `installatie.exe` | NSIS installer, repackaged in 2021. It unpacks into the files below. |
-| `ROS.exe` | **The game.** Delphi 5 PE32 GUI executable, file date 2003-07-14, 3.7 MB. sha256 `5b76da9044bddcd14597e80b60e18c60bccad47159e5ab03c4a07429b747f041` |
-| `Stub.exe` | Delphi 7 launcher added in 2011. It shows a "more games on zoetermeer.nl/games" prompt. sha256 `7f946e1e…0001` |
-| `update.exe` | 2003 Wise Installer, a 16-bit NE stub. It may contain an older or different build of the game. |
-| `images/8bits/*.bmp` (620 files), `*.Ini`, `Objecten.csv`, `wijken.dat` | Game data: 8-bit sprites, level rules (Dutch), object table, district map. |
-| `Lespakket Ben jij een goede burgemeester.pdf` | 2015 classroom lesson pack (documentation only). |
+| `installatie.exe` | NSIS-installatieprogramma, in 2021 opnieuw verpakt. Het pakt de bestanden hieronder uit. |
+| `ROS.exe` | **Het spel.** Delphi 5 PE32 GUI-uitvoerbaar bestand, bestandsdatum 2003-07-14, 3,7 MB. sha256 `5b76da9044bddcd14597e80b60e18c60bccad47159e5ab03c4a07429b747f041` |
+| `Stub.exe` | Delphi 7-launcher uit 2011. Die toont een melding "meer spellen op zoetermeer.nl/games". sha256 `7f946e1e…0001` |
+| `update.exe` | 2003 Wise Installer, een 16-bit NE-stub. Die kan een oudere of andere build van het spel bevatten. |
+| `images/8bits/*.bmp` (620 bestanden), `*.Ini`, `Objecten.csv`, `wijken.dat` | Spelgegevens: 8-bit sprites, niveauregels (Nederlands), objecttabel, wijkkaart. |
+| `Lespakket Ben jij een goede burgemeester.pdf` | 2015 lespakket voor in de klas (alleen documentatie). |
 
 ### ROS.exe in detail
 
-- **Compiler: Borland Delphi 5.** Evidence:
-  - Linker 2.25 and the fixed Delphi timestamp `1992-06-20`.
-  - `CODE/DATA/BSS` sections.
+- **Compiler: Borland Delphi 5.** Bewijs:
+  - Linker 2.25 en de vaste Delphi-tijdstempel `1992-06-20`.
+  - `CODE/DATA/BSS`-secties.
   - "Portions Copyright (c) 1983,99 Borland".
-  - The units `TFrame` and `DsgnIntf` are present.
-  - There is no `Variants`, `Types` or `RTLConsts` unit, so it predates Delphi 6.
-- **Layout:**
-  - `CODE` is 0x87B84 bytes (about 543 KB).
+  - De units `TFrame` en `DsgnIntf` zijn aanwezig.
+  - Er is geen `Variants`-, `Types`- of `RTLConsts`-unit, dus het dateert van vóór Delphi 6.
+- **Lay-out:**
+  - `CODE` is 0x87B84 bytes (ongeveer 543 KB).
   - `DATA` is 0x174C bytes.
-  - `.rsrc` is about 3.1 MB, mostly 5 DFM forms with embedded bitmaps: `TFRMMAIN` (2.6 MB), `TFRMBLACK`, `TFRMREPORT`, `TFRMSELECTDIR`, `TFORMDEBUGSHOW`.
-- **Imports:** kernel32, user32, gdi32, advapi32, ole32, oleaut32, comctl32, shell32, comdlg32, winmm, **DDRAW** (DirectDraw rendering).
-- **Units, in link order from `PACKAGEINFO`.** There are 88 units in total. Borland RTL/VCL units are omitted here. The ~40 project units are:
-  - **Game:** `Ros` (program), `Fmain`, `fReport`, `fBack`, `Uworld`, `Uview`, `Usett`, `Uconst`, `uAutos`, `uTrein`, `Uctrl`.
-  - **In-house sprite/GUI engine:**
+  - `.rsrc` is ongeveer 3,1 MB, vooral 5 DFM-formulieren met ingesloten bitmaps: `TFRMMAIN` (2,6 MB), `TFRMBLACK`, `TFRMREPORT`, `TFRMSELECTDIR`, `TFORMDEBUGSHOW`.
+- **Imports:** kernel32, user32, gdi32, advapi32, ole32, oleaut32, comctl32, shell32, comdlg32, winmm, **DDRAW** (DirectDraw-weergave).
+- **Units, in linkvolgorde uit `PACKAGEINFO`.** Er zijn 88 units in totaal. Borland-RTL/VCL-units zijn hier weggelaten. De ~40 projectunits zijn:
+  - **Spel:** `Ros` (programma), `Fmain`, `fReport`, `fBack`, `Uworld`, `Uview`, `Usett`, `Uconst`, `uAutos`, `uTrein`, `Uctrl`.
+  - **Eigen sprite-/GUI-engine:**
     - `SprCtrl`, `SprBmp`, `Sprframe`, `Sprsqlst`, `Sprfrmed`, `Sprbehav`
     - `uSprite`, `uSpritebox`, `uPixie`, `uGoblin`, `uSurface`
     - `uSequence`, `uTransition`, `uTextBalloon`, `uTiming`, `uMessage`, `uResizeScreen`
-    - `uQuickDirectX`, plus the `ddraw` header unit
-  - **Utilities / misc:** `uTool`, `uString`, `uLog`, `uDebug`, `fShow`, `Seldir`, `ExtLbox`, `cEditCtr`.
-- **RTTI.** Delphi RTTI, VMTs and the DFMs give us class names, published fields, event-handler names and form layouts for free. Only private and local names have to be invented.
+    - `uQuickDirectX`, plus de `ddraw`-headerunit
+  - **Hulpprogramma's / overig:** `uTool`, `uString`, `uLog`, `uDebug`, `fShow`, `Seldir`, `ExtLbox`, `cEditCtr`.
+- **RTTI.** Delphi-RTTI, VMT's en de DFM's geven ons klassennamen, published velden, namen van event-handlers en formulierlay-outs gratis. Alleen privé- en lokale namen moeten worden bedacht.
 
-### What "matching" means for Delphi
+### Wat "matchen" betekent voor Delphi
 
-- We write source only for the **project units**.
-- The RTL/VCL code (`System`, `SysUtils`, `Classes`, `Forms`, …) is linked from Borland's precompiled Delphi 5 `.dcu` files, exactly as the original was. That only matches if we use **the same Delphi 5 build** (base, or Update Pack 1). One of the first tasks is to determine which, by diffing RTL code against each candidate.
-- Delphi's compiler and linker are deterministic. Code is laid out unit by unit in a fixed order, and routines within a unit follow implementation order. So we can match one unit at a time and verify progress continuously.
+- We schrijven broncode alleen voor de **projectunits**.
+- De RTL/VCL-code (`System`, `SysUtils`, `Classes`, `Forms`, …) wordt gelinkt uit Borlands vooraf gecompileerde Delphi 5 `.dcu`-bestanden, precies zoals het origineel. Dat klopt alleen als we **dezelfde Delphi 5-build** gebruiken (basis of Update Pack 1). Een van de eerste taken is vaststellen welke, door RTL-code tegen elke kandidaat te diffen.
+- De compiler en linker van Delphi zijn deterministisch. Code wordt unit voor unit in een vaste volgorde neergelegd, en routines binnen een unit volgen de implementatievolgorde. We kunnen dus één unit tegelijk matchen en de voortgang continu verifiëren.
 
-## Phase 0: Project setup
+## Fase 0: Projectopzet
 
-- [x] `flake.nix` dev shell: 7z/unzip, binutils, icoutils, rizin, Ghidra, Wine (wow64), Python with pefile/capstone/lief.
-- [x] git repo. The original binaries are git-ignored and never committed.
-- [ ] `orig/`: a script that extracts the zip into `orig/` and verifies the sha256 sums above.
-- [ ] *(Deferred: not available.)* Obtain Delphi 5 (dcc32.exe plus `lib/*.dcu`, `*.res`). It is proprietary, so it would be a git-ignored `toolchain/`. Until then, follow equivalence mode (see Decisions).
-- [ ] Add Free Pascal (with the i386-win32 cross target) and unicorn to the flake. Check that an FPC `{$mode delphi}` VCL-free hello world builds and runs under Wine.
-- [ ] Differential-test harness: launch the original `ROS.exe` under Wine with input injection, and dump state through a small hooking DLL or memory reads.
-- [ ] Extract `update.exe` (Wise) and compare any game binary inside it with `ROS.exe`.
+- [x] `flake.nix` dev-shell: 7z/unzip, binutils, icoutils, rizin, Ghidra, Wine (wow64), Python met pefile/capstone/lief.
+- [x] git-repository. De originele binaries staan in `.gitignore` en worden nooit gecommit.
+- [ ] `orig/`: een script dat het zip-bestand in `orig/` uitpakt en de sha256-sommen hierboven verifieert.
+- [ ] *(Uitgesteld: niet beschikbaar.)* Delphi 5 verkrijgen (dcc32.exe plus `lib/*.dcu`, `*.res`). Het is eigendomsrecht, dus het zou in een door git genegeerde `toolchain/` komen. Tot die er is, volgen we de equivalentiemodus (zie Beslissingen).
+- [ ] Free Pascal (met de i386-win32 cross-target) en unicorn aan de flake toevoegen. Controleren dat een FPC `{$mode delphi}` hello world zonder VCL bouwt en onder Wine draait.
+- [ ] Harnas voor differentiële tests: het originele `ROS.exe` onder Wine starten met invoerinjectie, en de toestand dumpen via een kleine hook-DLL of geheugenlezingen.
+- [ ] `update.exe` (Wise) uitpakken en elk spelbinary erin vergelijken met `ROS.exe`.
 
-## Phase 1: Analysis and symbol recovery
+## Fase 1: Analyse en herstel van symbolen
 
-- [ ] Run **IDR (Interactive Delphi Reconstructor)** under Wine with its Delphi 5 knowledge base. It identifies:
-  - RTL/VCL routines
-  - class VMTs, RTTI and published methods
-  - the start of every unit's code
-- [ ] Export the results to a symbol map: `symbols/ros.sym` (address, size, unit, name).
-- [ ] Import the symbols into Ghidra (a script in `tools/`) for decompilation.
-- [ ] Build `tools/units.py`. It produces the address range of each project unit from the IDR map and the PACKAGEINFO order. This also measures how much code is the project's own versus Borland's (expected: on the order of 100–200 KB).
-- [ ] Pin down the exact compiler build and switches. Candidates:
-  - Delphi 5 base or Update Pack 1
-  - `$O` optimization, `$W` stack frames, `$R/$Q` range/overflow checks, `$A` alignment, `$D/$L` debug info (affects nothing in the exe, but affects `.map`)
-  - `$I` I/O checks, `$H` long strings
+- [ ] **IDR (Interactive Delphi Reconstructor)** onder Wine draaien met zijn Delphi 5-kennisbank. Die herkent:
+  - RTL/VCL-routines
+  - klasse-VMT's, RTTI en published methoden
+  - het begin van de code van elke unit
+- [ ] De resultaten exporteren naar een symboolkaart: `symbols/ros.sym` (adres, grootte, unit, naam).
+- [ ] De symbolen importeren in Ghidra (een script in `tools/`) voor decompilatie.
+- [ ] `tools/units.py` bouwen. Die levert het adresbereik van elke projectunit uit de IDR-kaart en de PACKAGEINFO-volgorde. Dit meet ook hoeveel code van het project zelf is en hoeveel van Borland (verwacht: in de orde van 100–200 KB).
+- [ ] De exacte compilerbuild en schakelaars vastleggen. Kandidaten:
+  - Delphi 5 basis of Update Pack 1
+  - `$O` optimalisatie, `$W` stackframes, `$R/$Q` bereik-/overloopcontroles, `$A` uitlijning, `$D/$L` debuginformatie (heeft geen invloed op het exe, wel op het `.map`)
+  - `$I` I/O-controles, `$H` lange strings
 
-  We confirm these by compiling probe units and comparing code patterns, plus the RTL bytes.
-- [ ] Convert the binary DFM resources to text `.dfm` for reading. We keep the original binary form streams as the build input so they match exactly.
-- [ ] Identify the `ddraw` header unit. It is likely a public DirectX header translation (Erik Unger / JEDI / Hori). If we find it, use the original source instead of decompiling it.
-- [ ] Check whether `ExtLbox`, `Seldir` and `cEditCtr` are publicly available sample or third-party units.
+  We bevestigen deze door probe-units te compileren en codepatronen en de RTL-bytes te vergelijken.
+- [ ] De binaire DFM-resources omzetten naar tekstuele `.dfm` om ze te kunnen lezen. We bewaren de originele binaire formulierstromen als buildinvoer, zodat ze exact overeenkomen.
+- [ ] De `ddraw`-headerunit identificeren. Het is waarschijnlijk een publieke DirectX-headervertaling (Erik Unger / JEDI / Hori). Als we die vinden, gebruiken we de originele broncode in plaats van te decompileren.
+- [ ] Nagaan of `ExtLbox`, `Seldir` en `cEditCtr` publiek beschikbare voorbeeld- of third-partyunits zijn.
 
-## Phase 2: Build and verify pipeline
+## Fase 2: Build- en verificatiepipeline
 
-Repo layout:
+Repository-indeling:
 
 ```
-src/            project .pas/.dpr/.dfm files (decompiled)
-src/stubs/      not-yet-decompiled units (see below)
-res/            .res inputs: icon, version info, bitmaps, binary DFMs
-tools/          python: extract, symbol map, diff, progress, Ghidra scripts
-symbols/        ros.sym (original addresses → names)
-orig/           (ignored) original files
-build/          (ignored) output
+src/            projectbestanden .pas/.dpr/.dfm (gedecompileerd)
+src/stubs/      nog niet gedecompileerde units (zie hieronder)
+res/            .res-invoer: pictogram, versie-informatie, bitmaps, binaire DFM's
+tools/          python: uitpakken, symboolkaart, diff, voortgang, Ghidra-scripts
+symbols/        ros.sym (originele adressen → namen)
+orig/           (genegeerd) originele bestanden
+build/          (genegeerd) uitvoer
 ```
 
-- [ ] `make` (or `just`) runs `wine dcc32 -B -GD src/Ros.dpr` with the pinned switches. That produces `build/ROS.exe` and a detailed `.map`.
-- [ ] `tools/diff.py` compares whole-file sha256 and section by section. It also compares each function: it maps routines through `build/ROS.map` and `symbols/ros.sym`, then disassembles both with capstone. Relocated operands are normalized so that one wrong function doesn't cascade into address noise everywhere.
-- [ ] `tools/progress.py` reports % of project-unit bytes matching, per unit, and writes a progress badge or JSON.
-- [ ] **Bootstrapping strategy.** We can't link a working exe until every unit exists, so:
-  1. Each not-yet-decompiled routine starts as an `asm … end` block containing the original bytes (`db` directives). Delphi's built-in assembler accepts this.
-  2. Relocations become symbolic references, which are recovered from `.reloc`.
-  3. This gives a matching build from day one.
-  4. Routines are replaced by real Pascal one at a time, and must keep the build matching.
+- [ ] `make` (of `just`) draait `wine dcc32 -B -GD src/Ros.dpr` met de vastgepinde schakelaars. Dat levert `build/ROS.exe` en een gedetailleerd `.map` op.
+- [ ] `tools/diff.py` vergelijkt de sha256 van het hele bestand en sectie voor sectie. Het vergelijkt ook elke functie: het koppelt routines via `build/ROS.map` en `symbols/ros.sym`, en disassembleert beide met capstone. Verplaatste operanden worden genormaliseerd, zodat één verkeerde functie niet overal adresruis veroorzaakt.
+- [ ] `tools/progress.py` meldt het % van de bytes van projectunits dat matcht, per unit, en schrijft een voortgangsbadge of JSON.
+- [ ] **Bootstrap-strategie.** We kunnen geen werkend exe linken zolang niet elke unit bestaat, dus:
+  1. Elke nog niet gedecompileerde routine begint als een `asm … end`-blok dat de originele bytes bevat (`db`-directives). De ingebouwde assembler van Delphi accepteert dat.
+  2. Relocaties worden symbolische verwijzingen, die uit `.reloc` worden hersteld.
+  3. Dit levert vanaf dag één een matchende build op.
+  4. Routines worden één voor één door echte Pascal vervangen, en de build moet matchend blijven.
 
-  This is the standard "split + incremental decomp" approach, adapted to Delphi.
-- [ ] CI: a GitHub Actions or Nix check that builds and asserts the hash. This depends on the toolchain being available to CI, which may only be possible locally because of Delphi licensing.
+  Dit is de standaardaanpak "split + incrementele decompilatie", aangepast voor Delphi.
+- [ ] CI: een GitHub Actions- of Nix-check die bouwt en de hash controleert. Dit hangt af van de beschikbaarheid van de toolchain voor CI, wat door de Delphi-licentie misschien alleen lokaal kan.
 
-## Phase 3: Decompile, unit by unit
+## Fase 3: Decompileren, unit voor unit
 
-Order: leaves first, so later units can rely on decompiled types.
+Volgorde: bladeren eerst, zodat latere units op gedecompileerde typen kunnen steunen.
 
-1. `Uconst`, `uString`, `uTool`, `uLog`, `uDebug`, `uTiming`. These are small and they teach us the compiler's idioms.
-2. Engine core: `uQuickDirectX`, `uSurface`, `SprBmp`, `uSprite`, `uPixie`, `uGoblin`, `uSpritebox`, `Sprframe`, `Sprsqlst`, `Sprbehav`, `SprCtrl`, `uSequence`, `uTransition`, `uTextBalloon`, `uMessage`, `uResizeScreen`.
-3. Game model: `Uworld`, `Usett`, `uAutos`, `uTrein`, `Uview`, `Uctrl`.
-4. Forms: `Fmain`, `fBack`, `fReport`, `fShow`, `Seldir`, and the editor units (`Sprfrmed`, `cEditCtr`, `ExtLbox`).
+1. `Uconst`, `uString`, `uTool`, `uLog`, `uDebug`, `uTiming`. Dit zijn kleine units en ze leren ons de idiomen van de compiler.
+2. Enginekern: `uQuickDirectX`, `uSurface`, `SprBmp`, `uSprite`, `uPixie`, `uGoblin`, `uSpritebox`, `Sprframe`, `Sprsqlst`, `Sprbehav`, `SprCtrl`, `uSequence`, `uTransition`, `uTextBalloon`, `uMessage`, `uResizeScreen`.
+3. Spelmodel: `Uworld`, `Usett`, `uAutos`, `uTrein`, `Uview`, `Uctrl`.
+4. Formulieren: `Fmain`, `fBack`, `fReport`, `fShow`, `Seldir`, en de editor-units (`Sprfrmed`, `cEditCtr`, `ExtLbox`).
 
-Rules:
-- Every commit keeps `build/ROS.exe` byte-identical.
-- Match the declaration order of classes, fields and virtual methods exactly, because it determines VMT and RTTI layout.
-- Use the RTTI and DFM names where they exist. Invented names follow Delphi conventions (`F` prefix for fields, `T` for types).
+Regels:
+- Elke commit houdt `build/ROS.exe` byte-identiek.
+- Match de declaratievolgorde van klassen, velden en virtuele methoden exact, omdat die de VMT- en RTTI-lay-out bepaalt.
+- Gebruik de RTTI- en DFM-namen waar die bestaan. Bedachte namen volgen de Delphi-conventies (`F`-voorvoegsel voor velden, `T` voor typen).
 
-Done when no `asm db` blobs remain in the project units and the hash still matches.
+Klaar wanneer er geen `asm db`-blobs meer in de projectunits zitten en de hash nog steeds klopt.
 
-## Phase 4: Portable build with Free Pascal (Apple Silicon macOS)
+## Fase 4: Portable build met Free Pascal (Apple Silicon macOS)
 
-Free Pascal (FPC) compiles Delphi-dialect code (`{$mode delphi}`) and targets both **aarch64-darwin** and **wasm32**. That makes it the natural route to both ports without rewriting the game in another language.
+Free Pascal (FPC) compileert code in de Delphi-dialect (`{$mode delphi}`) en richt zich op zowel **aarch64-darwin** als **wasm32**. Dat maakt het de natuurlijke route naar beide ports, zonder het spel in een andere taal te herschrijven.
 
-Portability issues to resolve:
-- **Rendering.** `uQuickDirectX` is DirectDraw over 8-bit palettized surfaces. It is replaced by a backend-neutral software framebuffer (palette plus 8-bit surfaces, blits done in Pascal), presented by a small platform layer.
-- **VCL.** The game uses Forms, StdCtrls, ExtCtrls, Grids, Dialogs and Buttons, but most of the UI is bitmap-based (TFRMMAIN embeds 2.6 MB of images). Recommended approach: a **mini-VCL shim**. It reimplements only the classes and properties actually used, with the same names, renders them into the framebuffer, and loads the original DFM streams with a small DFM reader. Game code then stays nearly unchanged. Alternative: Lazarus LCL, which supports Cocoa but has no usable wasm target.
-- **Win32 API calls** (registry, INI files, `timeGetTime`, `ShellExecute`, message boxes) go behind `uPlatform`.
-- **Data files.** Paths become case-sensitive and the INI files are Windows-1252. Handle both explicitly.
-- **Pascal semantics that differ between Delphi 5 and FPC.** These are 32-bit `Integer`/pointer size assumptions, `string` = AnsiString, record packing and set sizes. Audit them on 64-bit aarch64.
+Portabiliteitskwesties om op te lossen:
+- **Weergave.** `uQuickDirectX` is DirectDraw over 8-bit gepalettiseerde oppervlakken. Het wordt vervangen door een backend-onafhankelijke software-framebuffer (palet plus 8-bit oppervlakken, blits in Pascal), gepresenteerd door een kleine platformlaag.
+- **VCL.** Het spel gebruikt Forms, StdCtrls, ExtCtrls, Grids, Dialogs en Buttons, maar het meeste van de UI is bitmapgebaseerd (TFRMMAIN bevat 2,6 MB aan afbeeldingen). Aanbevolen aanpak: een **mini-VCL-shim**. Die herimplementeert alleen de klassen en eigenschappen die daadwerkelijk gebruikt worden, met dezelfde namen, tekent ze in de framebuffer, en laadt de originele DFM-streams met een kleine DFM-lezer. De spelcode blijft dan vrijwel ongewijzigd. Alternatief: Lazarus LCL, dat Cocoa ondersteunt maar geen bruikbaar wasm-doel heeft.
+- **Win32-API-aanroepen** (register, INI-bestanden, `timeGetTime`, `ShellExecute`, berichtvensters) komen achter `uPlatform` te staan.
+- **Gegevensbestanden.** Paden worden hoofdlettergevoelig en de INI-bestanden zijn Windows-1252. Behandel beide expliciet.
+- **Pascal-semantiek die tussen Delphi 5 en FPC verschilt.** Dit zijn 32-bits `Integer`/pointergrootte-aannames, `string` = AnsiString, recordpakking en setgroottes. Controleer die op 64-bit aarch64.
 
-Steps:
-- [ ] Add FPC (and possibly SDL3) to the flake. Make a cross-target `nix build .#ros-macos` (aarch64-darwin).
-- [ ] `{$IFDEF FPC}` / `{$IFDEF PORTABLE}` seams. The Delphi 5 matching build must keep compiling unchanged.
-- [ ] macOS platform layer: SDL3 (window, input, audio via winmm replacement, timer), or a native Cocoa layer if preferred.
-- [ ] Package as an `.app` bundle with the data files.
+Stappen:
+- [ ] FPC (en eventueel SDL3) aan de flake toevoegen. Een cross-target `nix build .#ros-macos` (aarch64-darwin) maken.
+- [ ] `{$IFDEF FPC}` / `{$IFDEF PORTABLE}`-naden. De Delphi 5-matchbuild moet ongewijzigd blijven compileren.
+- [ ] macOS-platformlaag: SDL3 (venster, invoer, audio via een winmm-vervanging, timer), of een native Cocoa-laag als dat de voorkeur heeft.
+- [ ] Verpakken als `.app`-bundel met de gegevensbestanden.
 
-## Phase 5: WebAssembly port
+## Fase 5: WebAssembly-port
 
-- [ ] Build with FPC's `wasm32-wasi` target (or `wasm32-embedded`) with a thin JS host that provides:
-  - a framebuffer blit to `<canvas>`
-  - keyboard/mouse events
-  - a frame timer (requestAnimationFrame-driven main loop, so the VCL-style message loop has to become re-entrant/callback-driven)
-  - a virtual filesystem preloaded with the BMP/INI/CSV data
-  - `localStorage` for high scores and settings
-- [ ] Fallback if FPC's wasm target is too immature: SDL3 via Emscripten with a small C bridge to the FPC-compiled game core. Decide after Phase 4, based on how the platform layer turned out.
-- [ ] Deploy as a static site.
+- [ ] Bouwen met FPC's `wasm32-wasi`-target (of `wasm32-embedded`) met een dunne JS-host die voorziet in:
+  - een framebuffer-blit naar `<canvas>`
+  - toetsenbord- en muisevents
+  - een frametimer (hoofdlus aangestuurd door requestAnimationFrame, dus de VCL-achtige berichtenlus moet herintreedbaar/callback-gestuurd worden)
+  - een virtueel bestandssysteem vooraf gevuld met de BMP/INI/CSV-gegevens
+  - `localStorage` voor highscores en instellingen
+- [ ] Terugvaloptie als FPC's wasm-target te onvolwassen is: SDL3 via Emscripten met een kleine C-brug naar de door FPC gecompileerde spelkern. Beslissen na Fase 4, op basis van hoe de platformlaag uitpakte.
+- [ ] Uitrollen als statische site.
 
 ## Fase 6: Verificatie door een volledige playthrough (Haiku-agent)
 
@@ -182,13 +182,13 @@ herbouw nergens crasht of vastloopt.
   bepalen of het een fout van de herbouw is of oorspronkelijk gedrag.
 - [ ] Hetzelfde voor de webversie (`tools/test-web.py`), minstens tot en met level 2.
 
-## Out of scope (for now)
+## Buiten scope (voorlopig)
 
-- `Stub.exe` (a 2011 Delphi 7 launcher, trivial) and `update.exe` (unless it holds a different game build worth matching).
-- Distributing game assets. The repo contains code and tools only; users supply their own copy of the original files.
+- `Stub.exe` (een Delphi 7-launcher uit 2011, triviaal) en `update.exe` (tenzij die een andere spelbuild bevat die het waard is om te matchen).
+- Het distribueren van spelbestanden. De repository bevat alleen code en gereedschap; gebruikers leveren hun eigen kopie van de originele bestanden.
 
-## Open questions for the user
+## Open vragen voor de gebruiker
 
-1. Do you have a **Delphi 5** install, and do you know which edition or Update Pack? Byte-matching is impossible without it.
-2. For the ports, which UI approach: the **mini-VCL shim over SDL3 / canvas** (recommended), or Lazarus LCL?
-3. Is matching `ROS.exe` alone the target, or should `Stub.exe` be in scope too?
+1. Heb je een **Delphi 5**-installatie, en weet je welke editie of Update Pack? Byte-matching is zonder die onmogelijk.
+2. Welke UI-aanpak voor de ports: de **mini-VCL-shim over SDL3 / canvas** (aanbevolen), of Lazarus LCL?
+3. Is het doel alleen `ROS.exe` matchen, of moet `Stub.exe` ook binnen scope vallen?
