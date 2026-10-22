@@ -1,7 +1,7 @@
 unit uQuickDirectX;
 
-{ Minimal DirectDraw use: exclusive full-screen mode switching.
-  Decompiled from ROS.exe v1.1, code 00477870-00477C5F. }
+{ Minimaal DirectDraw-gebruik: schakelen naar exclusieve volledig-schermmodus.
+  Gedecompileerd uit ROS.exe v1.1, code 00477870-00477C5F. }
 
 {$I zm.inc}
 
@@ -30,15 +30,15 @@ uses
 procedure StartDirectX(AWidth, AHeight: Integer);
 var
   DC: HDC;
-  Bits: Integer;
-  HexText: string;
+  Kleurdiepte: Integer;
+  HexTekst: string;
 begin
   if not DirectXActive then
   try
     DC := GetDC(0);
-    Bits := GetDeviceCaps(DC, BITSPIXEL);
+    Kleurdiepte := GetDeviceCaps(DC, BITSPIXEL);
     ReleaseDC(0, DC);
-    if Bits < 8 then
+    if Kleurdiepte < 8 then
       raise Exception.Create('Not in correct color mode');
     if DirectDrawCreate(nil, DirectDraw, nil) <> DD_OK then
       raise Exception.Create('Failed to create IDirectDraw object');
@@ -46,7 +46,7 @@ begin
       DDSCL_EXCLUSIVE or DDSCL_FULLSCREEN or DDSCL_ALLOWREBOOT or DDSCL_ALLOWMODEX);
     if DDResult <> DD_OK then
     begin
-      HexText := LongToHex(DDResult);   { NOTE: not used }
+      HexTekst := LongToHex(DDResult);   { LET OP: niet gebruikt }
       case DDResult of
         DDERR_EXCLUSIVEMODEALREADYSET:
           DDErrorText := 'Exclude mode already set';
@@ -66,7 +66,7 @@ begin
       raise Exception.Create('DirectDraw2 SetCooperativeLevel Failed: ' + DDErrorText);
     end;
     if DirectDraw.SetDisplayMode(AWidth, AHeight, 24) <> DD_OK then
-      if DirectDraw.SetDisplayMode(AWidth, AHeight, Bits) <> DD_OK then
+      if DirectDraw.SetDisplayMode(AWidth, AHeight, Kleurdiepte) <> DD_OK then
         raise Exception.Create('Set Display Mode Failed');
     DirectXActive := True;
   except
@@ -80,10 +80,11 @@ begin
   if DirectXActive then
   begin
     DirectDraw.RestoreDisplayMode;
-    { NOTE: the original ddraw header was the old class-based one (it uses OLE2), with
-      a Release method; _Release is the same vtable slot (+0x08) in interface-based headers }
+    { LET OP: de oorspronkelijke ddraw-header was de oude klassegebaseerde (die OLE2 gebruikt),
+      met een Release-methode; _Release is in interface-gebaseerde headers dezelfde vtable-slot
+      (+0x08) }
     DirectDraw._Release;
-    { the original clears the variable without another Release }
+    { het origineel maakt de variabele leeg zonder nog een Release }
     Pointer(DirectDraw) := nil;
   end;
 end;

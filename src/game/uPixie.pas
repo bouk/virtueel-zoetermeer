@@ -1,8 +1,8 @@
 unit uPixie;
 
-{ TPixie: abstract base class of everything a TSpriteBox draws (sprites, goblins,
-  text balloons, views).
-  Decompiled from ROS.exe v1.1, code 00463850-00463C13. }
+{ TPixie: abstracte basisklasse van alles wat een TSpriteBox tekent (sprites, goblins,
+  tekstballonnen, views).
+  Gedecompileerd uit ROS.exe v1.1, code 00463850-00463C13. }
 
 {$I zm.inc}
 
@@ -12,7 +12,7 @@ uses
   Windows, Classes, Controls, uSurface;
 
 type
-  { Snapshot of the visible state of a pixie, used to detect what must be redrawn }
+  { Momentopname van de zichtbare toestand van een pixie, gebruikt om te zien wat opnieuw getekend moet worden }
   TPixieState = record    { 0x18 bytes }
     Left: Integer;
     Top: Integer;
@@ -24,13 +24,13 @@ type
 
   TPixie = class(TComponent)
   protected
-    { protected, not private: uSprite's TSprite.GetChange reads and writes FState }
+    { protected, niet private: TSprite.GetChange in uSprite leest en schrijft FState }
     FVisible: Boolean;               { +0x24 }
     FLeft: SmallInt;                 { +0x26 }
     FTop: SmallInt;                  { +0x28 }
     FZ: SmallInt;                    { +0x2A }
-    FState: TPixieState;             { +0x2C  state at the last GetChange }
-    FReserved44: Integer;            { +0x44  not used in ROS.exe }
+    FState: TPixieState;             { +0x2C  toestand bij de laatste GetChange }
+    FReserved44: Integer;            { +0x44  niet gebruikt in ROS.exe }
     FOnMouseDown: TMouseEvent;       { +0x48 }
     FOnMouseUp: TMouseEvent;         { +0x50 }
     FOnMouseMove: TMouseMoveEvent;   { +0x58 }
@@ -157,9 +157,9 @@ end;
 { @00463A68 }
 function TPixie.Intersects(R: TRect): Boolean;
 var
-  Dummy: TRect;
+  Doel: TRect;
 begin
-  Result := IntersectRect(Dummy, GetBoundsRect, R);
+  Result := IntersectRect(Doel, GetBoundsRect, R);
 end;
 
 { @00463AA4 }
@@ -173,8 +173,8 @@ begin
   State.Visible := FVisible;
 end;
 
-{ @00463AE4  Returns the previous and the current state; when nothing changed both are
-  marked invisible so that nothing gets redrawn. }
+{ @00463AE4  Geeft de vorige en de huidige toestand terug; wanneer er niets veranderd is,
+  worden beide als onzichtbaar gemarkeerd zodat er niets opnieuw getekend wordt. }
 procedure TPixie.GetChange(var OldState, NewState: TPixieState);
 var
   S: TPixieState;
@@ -210,7 +210,7 @@ end;
 procedure TPixie.MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
   X, Y: Integer);
 begin
-  { NOTE: the original tests the event but never calls it }
+  { LET OP: het origineel test het event maar roept het nooit aan }
   if Assigned(FOnMouseDown) then
     ;
 end;

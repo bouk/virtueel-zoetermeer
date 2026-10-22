@@ -1,12 +1,12 @@
 unit Uctrl;
 
-{ TCtrlForm: a form whose standard controls can be moved onto a sprite box.
-  AttachControls reparents the controls into the sprite box and, for every
-  sprite named 'sprite<Name>' on the form, turns the control named
-  '<prefix><Name>' (prefix from ControlDefs, e.g. butStart for spriteStart)
-  into a behaviour of that sprite and hides the control. DetachControls undoes
-  this. TfrmMain derives from TCtrlForm.
-  Decompiled from ROS.exe v1.1, code 00477C60-0047841C. }
+{ TCtrlForm: een formulier waarvan de standaardbesturingen naar een spritebox
+  verplaatst kunnen worden. AttachControls koppelt de besturingen aan de spritebox
+  en maakt voor elke sprite met de naam 'sprite<Name>' op het formulier van de
+  besturing met de naam '<prefix><Name>' (prefix uit ControlDefs, bijv. butStart
+  voor spriteStart) een gedrag van die sprite en verbergt de besturing.
+  DetachControls maakt dit ongedaan. TfrmMain erft van TCtrlForm.
+  Gedecompileerd uit ROS.exe v1.1, code 00477C60-0047841C. }
 
 {$I zm.inc}
 
@@ -23,7 +23,7 @@ type
 
   TCtrlForm = class(TForm)
   private
-    procedure ControlToSprite(Control: TControl; Def: TControlDef;
+    procedure ControlToSprite(Control: TControl; Definitie: TControlDef;
       SpriteBox: TSpriteBox);
   public
     procedure AttachControls(MakeSprites: Boolean; SpriteBox: TSpriteBox);
@@ -54,7 +54,7 @@ var
   ComboBox: TComboBox;   { 0048B14C }
 
 { @00477E74 }
-procedure TCtrlForm.ControlToSprite(Control: TControl; Def: TControlDef;
+procedure TCtrlForm.ControlToSprite(Control: TControl; Definitie: TControlDef;
   SpriteBox: TSpriteBox);
 var
   I: Integer;
@@ -64,7 +64,7 @@ begin
     if Components[I] is TSprite then
     begin
       Sprite := Components[I] as TSprite;
-      if Def.Prefix + DelLeft(Sprite.Name, 6) = Control.Name then
+      if Definitie.Prefix + DelLeft(Sprite.Name, 6) = Control.Name then
       begin
         Sprite.SpriteBox := SpriteBox;
         ControlToBehaviour(Sprite, Control);

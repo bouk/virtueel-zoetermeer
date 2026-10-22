@@ -1,11 +1,11 @@
 program Ros;
 
 { Virtueel Zoetermeer.
-  Decompiled from ROS.exe v1.1, code 00486F64-004872CB (entry point 00487264).
-  The units are listed in the order of the PACKAGEINFO unit list
-  (symbols/units-1.1.json 'package_units'); Unit49 and Unit78 are the two
-  code-less units whose real names are unknown. The original does not call
-  Application.Initialize. }
+  Gedecompileerd uit ROS.exe v1.1, code 00486F64-004872CB (startpunt 00487264).
+  De units staan in de volgorde van de PACKAGEINFO-unitlijst
+  (symbols/units-1.1.json 'package_units'); Unit49 en Unit78 zijn de twee units
+  zonder code waarvan de echte namen onbekend zijn. Het origineel roept
+  Application.Initialize niet aan. }
 
 {$I zm.inc}
 
@@ -44,7 +44,7 @@ uses
   uAutos in 'uAutos.pas';
 
 {$IFNDEF FPC}
-{$R *.res}  { Delphi only: icon and version resources of the original project }
+{$R *.res}  { Alleen Delphi: pictogram- en versieresources van het oorspronkelijke project }
 {$ENDIF}
 
 { @00487264 }

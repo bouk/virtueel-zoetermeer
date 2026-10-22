@@ -1,7 +1,7 @@
 unit uResizeScreen;
 
-{ Switching the display resolution with ChangeDisplaySettings.
-  Decompiled from ROS.exe v1.1, code 00464F18-004653AF. }
+{ Het schermresolutie wisselen met ChangeDisplaySettings.
+  Gedecompileerd uit ROS.exe v1.1, code 00464F18-004653AF. }
 
 {$I zm.inc}
 
@@ -28,7 +28,7 @@ type
     property Frequency: Integer read FFrequency;
   end;
 
-  { All display modes of the primary display }
+  { Alle schermmodi van het primaire beeldscherm }
   TScrnModeList = class(TList)
   public
     constructor Create;
@@ -76,17 +76,17 @@ end;
 { @00465058 }
 function TScrnMode.Apply: Boolean;
 var
-  DevMode: TDeviceMode;
+  Modus: TDeviceMode;
 begin
-  DevMode.dmSize := SizeOf(DevMode);
-  DevMode.dmBitsPerPel := FBitsPerPel;
-  DevMode.dmPelsWidth := FWidth;
-  DevMode.dmPelsHeight := FHeight;
-  DevMode.dmDisplayFlags := 0;
-  DevMode.dmDisplayFrequency := FFrequency;
-  DevMode.dmFields := DM_BITSPERPEL or DM_PELSWIDTH or DM_PELSHEIGHT or DM_DISPLAYFREQUENCY;
+  Modus.dmSize := SizeOf(Modus);
+  Modus.dmBitsPerPel := FBitsPerPel;
+  Modus.dmPelsWidth := FWidth;
+  Modus.dmPelsHeight := FHeight;
+  Modus.dmDisplayFlags := 0;
+  Modus.dmDisplayFrequency := FFrequency;
+  Modus.dmFields := DM_BITSPERPEL or DM_PELSWIDTH or DM_PELSHEIGHT or DM_DISPLAYFREQUENCY;
   Result := False;
-  case ChangeDisplaySettings(DevMode, 0) of
+  case ChangeDisplaySettings(Modus, 0) of
     DISP_CHANGE_SUCCESSFUL:
       Result := True;
     DISP_CHANGE_RESTART:
@@ -102,7 +102,7 @@ begin
   end;
 end;
 
-{ @004650D4  AFrequency = -1 matches any refresh rate. }
+{ @004650D4  AFrequency = -1 komt overeen met elke verversingsfrequentie. }
 function TScrnMode.Matches(AWidth, AHeight, ABitsPerPel, AFrequency: Integer): Boolean;
 begin
   Result := (FBitsPerPel = ABitsPerPel) and (AWidth = FWidth) and (AHeight = FHeight);
@@ -114,17 +114,17 @@ end;
 constructor TScrnModeList.Create;
 var
   I: Integer;
-  More: Boolean;
-  DevMode: TDeviceMode;
+  Meer: Boolean;
+  Modus: TDeviceMode;
 begin
   inherited Create;
   I := 0;
   repeat
-    More := EnumDisplaySettings(nil, I, DevMode);
-    Add(TScrnMode.Create(DevMode.dmPelsWidth, DevMode.dmPelsHeight,
-      DevMode.dmBitsPerPel, DevMode.dmDisplayFrequency));
+    Meer := EnumDisplaySettings(nil, I, Modus);
+    Add(TScrnMode.Create(Modus.dmPelsWidth, Modus.dmPelsHeight,
+      Modus.dmBitsPerPel, Modus.dmDisplayFrequency));
     Inc(I);
-  until not More;
+  until not Meer;
   StoreCurrentMode;
 end;
 
@@ -138,17 +138,17 @@ end;
 { @004651CC }
 procedure TScrnModeList.StoreCurrentMode;
 var
-  W, H: Integer;
+  Breedte, Hoogte: Integer;
   DC: HDC;
-  Bits, Refresh: Integer;
+  Kleurdiepte, Ververs: Integer;
 begin
-  W := Screen.Width;    { NOTE: unused }
-  H := Screen.Height;   { NOTE: unused }
+  Breedte := Screen.Width;    { LET OP: ongebruikt }
+  Hoogte := Screen.Height;    { LET OP: ongebruikt }
   DC := GetDC(0);
-  Bits := GetDeviceCaps(DC, BITSPIXEL);
-  Refresh := GetDeviceCaps(DC, VREFRESH);
+  Kleurdiepte := GetDeviceCaps(DC, BITSPIXEL);
+  Ververs := GetDeviceCaps(DC, VREFRESH);
   ReleaseDC(0, DC);
-  OriginalMode := Find(Screen.Width, Screen.Height, Bits, Refresh);
+  OriginalMode := Find(Screen.Width, Screen.Height, Kleurdiepte, Ververs);
 end;
 
 { @00465240 }
@@ -181,7 +181,7 @@ end;
 { @004652D0 }
 function SetScreenMode(AWidth, AHeight, ABitsPerPel: Integer): Boolean;
 begin
-  { NOTE: Result is never assigned in the original (returns whatever was in EBX) }
+  { LET OP: Result wordt in het origineel nooit toegekend (geeft terug wat er in EBX stond) }
   ModeList := TScrnModeList.Create;
   if OriginalMode <> nil then
   begin

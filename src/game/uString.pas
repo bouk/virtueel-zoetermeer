@@ -1,14 +1,14 @@
 unit uString;
 
-{ String helpers shared by the sprite engine and the game.
-  Decompiled from ROS.exe v1.1, code 0045F98C-004609B3. }
+{ Tekenreekshulpfuncties, gedeeld door de sprite-engine en het spel.
+  Gedecompileerd uit ROS.exe v1.1, code 0045F98C-004609B3. }
 
 {$I zm.inc}
 
 interface
 
 var
-  StrConvError: Boolean;   { 0048A898: set by StrToIntDef0/StrToFloatDef0 }
+  StrConvError: Boolean;   { 0048A898: wordt gezet door StrToIntDef0/StrToFloatDef0 }
 
 function ReplaceStr(S, Find, Replace: string): string;
 function UpStr(S: string): string;
@@ -57,17 +57,17 @@ const
 { @0045F98C }
 function ReplaceStr(S, Find, Replace: string): string;
 var
-  Token: string;
+  Stuk: string;
 begin
   S := S + Find;
   Result := '';
-  Token := SplitFirst(S, Find);
+  Stuk := SplitFirst(S, Find);
   while S <> '' do
   begin
-    Result := Result + Token + Replace;
-    Token := SplitFirst(S, Find);
+    Result := Result + Stuk + Replace;
+    Stuk := SplitFirst(S, Find);
   end;
-  Result := Result + Token;
+  Result := Result + Stuk;
 end;
 
 { @0045FA48 }
@@ -142,17 +142,17 @@ end;
 function RealToStr(R: Double): string;
 var
   S: string;
-  L: Word;
+  Lengte: Word;
 begin
   Str(R:0:12, S);
-  L := Length(S);
+  Lengte := Length(S);
   if Pos('.', S) > 0 then
   begin
-    while S[L] = '0' do
-      Dec(L);
-    if S[L] = '.' then
-      Dec(L);
-    SetLength(S, L);
+    while S[Lengte] = '0' do
+      Dec(Lengte);
+    if S[Lengte] = '.' then
+      Dec(Lengte);
+    SetLength(S, Lengte);
   end;
   Result := S;
 end;
@@ -166,15 +166,15 @@ end;
 { @0045FE84 }
 function RepeatStr(S: string; N: Word): string;
 var
-  T: string;
+  Tekst: string;
 begin
-  T := '';
+  Tekst := '';
   while N > 0 do
   begin
-    T := T + S;
+    Tekst := Tekst + S;
     Dec(N);
   end;
-  Result := T;
+  Result := Tekst;
 end;
 
 { @0045FF00 }
@@ -238,8 +238,8 @@ begin
   if S <> '' then
   begin
     L := Length(S);
-    { NOTE: reaches S[0] (the byte before the text) for an all-blank string;
-      it is #0 or a length byte and the loop then ends at -1. }
+    { LET OP: bereikt S[0] (het byte voor de tekst) bij een tekenreeks die alleen spaties bevat;
+      dat is #0 of een lengtebyte, en de lus eindigt dan bij -1. }
     while S[L] in WhiteSpace do
     begin
       Dec(L);
@@ -334,14 +334,14 @@ end;
 function StrToIntDef0(S: string): Integer;
 var
   I: Integer;
-  C: Char;
-  Err: Word;
+  Teken: Char;
+  Fout: Word;
 begin
   TrimV(S);
   for I := 1 to Length(S) do
   begin
-    C := S[I];
-    if (C <> '-') and not IsDigit(C) then
+    Teken := S[I];
+    if (Teken <> '-') and not IsDigit(Teken) then
     begin
       SetLength(S, I - 1);
       Break;
@@ -354,11 +354,11 @@ begin
   begin
     try
       I := StrToInt(S);
-      Err := 0;
+      Fout := 0;
     except
-      Err := 1;
+      Fout := 1;
     end;
-    StrConvError := Err <> 0;
+    StrConvError := Fout <> 0;
     if StrConvError then
       I := 0;
     Result := I;
@@ -368,49 +368,49 @@ end;
 { @00460554 }
 function StrToFloatDef0(S: string): Double;
 var
-  Negative, HadSep: Boolean;
+  Negatief, HadScheiding: Boolean;
   I: Integer;
-  R: Double;
-  Err: Word;
+  Getal: Double;
+  Fout: Word;
 begin
   TrimV(S);
   if Length(S) = 0 then
     Result := 0
   else
   begin
-    Negative := False;
+    Negatief := False;
     if S[1] = '-' then
     begin
       S := Copy(S, 2, Length(S));
-      Negative := True;
+      Negatief := True;
     end;
-    HadSep := False;
+    HadScheiding := False;
     for I := 1 to Length(S) do
       if not IsDigit(S[I]) then
       begin
-        if HadSep or (S[I] <> DecimalSeparator) then
+        if HadScheiding or (S[I] <> DecimalSeparator) then
         begin
           SetLength(S, I - 1);
           Break;
         end;
-        HadSep := True;
+        HadScheiding := True;
       end;
     TrimV(S);
     if S = '' then
       Result := 0
     else
     begin
-      if Negative then
+      if Negatief then
         S := '-' + S;
       try
-        R := StrToFloat(S);
-        Err := 0;
+        Getal := StrToFloat(S);
+        Fout := 0;
       except
-        Err := 1;
-        R := 0;
+        Fout := 1;
+        Getal := 0;
       end;
-      StrConvError := Err <> 0;
-      Result := R;
+      StrConvError := Fout <> 0;
+      Result := Getal;
     end;
   end;
 end;
@@ -418,13 +418,13 @@ end;
 { @004606C4 }
 function CountChar(S: string; C: Char): Integer;
 var
-  I, N: Integer;
+  I, Aantal: Integer;
 begin
-  N := 0;
+  Aantal := 0;
   for I := 1 to Length(S) do
     if C = S[I] then
-      Inc(N);
-  Result := N;
+      Inc(Aantal);
+  Result := Aantal;
 end;
 
 { @0046072C }
@@ -452,17 +452,17 @@ end;
 function FloatToStrT(R: Double): string;
 var
   S: string;
-  L: Word;
+  Lengte: Word;
 begin
   Str(R:0:12, S);
-  L := Length(S);
+  Lengte := Length(S);
   if Pos('.', S) > 0 then
   begin
-    while S[L] = '0' do
-      Dec(L);
-    if S[L] = '.' then
-      Dec(L);
-    SetLength(S, L);
+    while S[Lengte] = '0' do
+      Dec(Lengte);
+    if S[Lengte] = '.' then
+      Dec(Lengte);
+    SetLength(S, Lengte);
   end;
   Result := S;
 end;

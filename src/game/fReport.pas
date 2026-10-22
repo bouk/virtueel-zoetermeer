@@ -1,9 +1,9 @@
 unit fReport;
 
-{ TfrmReport: the yearly report ("Rapportage"). One tab per district plus the
-  totals; TWorld.Rapport fills Lists[] (line 0 of every list is the tab caption,
-  the remaining lines are shown in the memo). Every tab has its own memo colour.
-  Decompiled from ROS.exe v1.1, code 0047FD68-00480257. }
+{ TfrmReport: het jaarrapport ("Rapportage"). Een tabblad per wijk plus de totalen;
+  TWorld.Rapport vult Lists[] (regel 0 van elke lijst is het tabbladopschrift, de
+  overige regels worden in het memo getoond). Elk tabblad heeft zijn eigen memokleur.
+  Gedecompileerd uit ROS.exe v1.1, code 0047FD68-00480257. }
 
 {$I zm.inc}
 
@@ -14,7 +14,7 @@ uses
   StdCtrls, ComCtrls;
 
 type
-  { VMT 0047FDB4, instance size $308 }
+  { VMT 0047FDB4, instantiegrootte $308 }
   TfrmReport = class(TForm)
     butOK: TButton;                    { +0x2D0 }
     tcTabs: TTabControl;               { +0x2D4 }
@@ -23,17 +23,17 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure butOKClick(Sender: TObject);
     procedure tcTabsChange(Sender: TObject);
-    procedure tcTabsDrawTab(Control: TCustomTabControl; TabIndex: Integer;
-      const Rect: TRect; Active: Boolean);
+    procedure tcTabsDrawTab(Besturing: TCustomTabControl; TabNr: Integer;
+      const Vlak: TRect; Actief: Boolean);
   private
-    procedure ShowTab(Index: Integer);
+    procedure ShowTab(Nr: Integer);
   public
-    Lists: array[0..10] of TStrings;   { +0x2DC  filled by TWorld.Rapport }
-    function Execute(TabCount: Integer): Integer;
+    Lists: array[0..10] of TStrings;   { +0x2DC  gevuld door TWorld.Rapport }
+    function Execute(AantalTabs: Integer): Integer;
   end;
 
 var
-  frmReport: TfrmReport;   { not referenced: removed by the linker }
+  frmReport: TfrmReport;   { niet gebruikt: wordt door de linker verwijderd }
 
 implementation
 
@@ -41,11 +41,11 @@ uses
   Fmain;
 
 {$IFNDEF FPC}
-{$R *.dfm}  { Delphi only: the portable build streams forms from the user's ROS.exe }
+{$R *.dfm}  { Alleen Delphi: de draagbare build laadt formulieren uit de ROS.exe van de gebruiker }
 {$ENDIF}
 
 const
-  { 0048919C, 004891A8, 004891B4: memo background colour per tab }
+  { 0048919C, 004891A8, 004891B4: achtergrondkleur van het memo per tabblad }
   TabR: array[0..11] of Byte =
     ($FF, $FF, $A5, $D4, $AA, $E3, $AA, $EF, $D4, $A5, $FF, $90);
   TabG: array[0..11] of Byte =
@@ -74,27 +74,27 @@ begin
 end;
 
 { @0047FFE0 }
-function TfrmReport.Execute(TabCount: Integer): Integer;
+function TfrmReport.Execute(AantalTabs: Integer): Integer;
 var
   I: Integer;
 begin
-  for I := 0 to TabCount - 1 do
+  for I := 0 to AantalTabs - 1 do
     tcTabs.Tabs.Add(Lists[I][0]);
   ShowTab(0);
   ShowModal;
-  { NOTE: Result is never assigned in the original (returns garbage); the
-    only caller ignores it. }
+  { LET OP: Result wordt in het origineel nooit toegekend (geeft een willekeurige
+    waarde terug); de enige aanroeper negeert het. }
 end;
 
 { @00480074 }
-procedure TfrmReport.ShowTab(Index: Integer);
+procedure TfrmReport.ShowTab(Nr: Integer);
 var
   I: Integer;
 begin
-  memoTab.Color := RGB(TabR[Index], TabG[Index], TabB[Index]);
+  memoTab.Color := RGB(TabR[Nr], TabG[Nr], TabB[Nr]);
   memoTab.Lines.Clear;
-  for I := 1 to Lists[Index].Count - 1 do
-    memoTab.Lines.Add(Lists[Index][I]);
+  for I := 1 to Lists[Nr].Count - 1 do
+    memoTab.Lines.Add(Lists[Nr][I]);
 end;
 
 { @00480144 }
@@ -110,16 +110,16 @@ begin
 end;
 
 { @0048016C }
-procedure TfrmReport.tcTabsDrawTab(Control: TCustomTabControl; TabIndex: Integer;
-  const Rect: TRect; Active: Boolean);
+procedure TfrmReport.tcTabsDrawTab(Besturing: TCustomTabControl; TabNr: Integer;
+  const Vlak: TRect; Actief: Boolean);
 var
   R: TRect;
 begin
-  R := Rect;
-  Inc(R.Left, 4);   { NOTE: R is never used }
-  Control.Canvas.Font.Color := clWhite;
-  Control.Canvas.TextRect(Rect, Rect.Left + 4, Rect.Top + 4, Lists[TabIndex][0]);
-  Control.Canvas.DrawFocusRect(Rect);
+  R := Vlak;
+  Inc(R.Left, 4);   { LET OP: R wordt nooit gebruikt }
+  Besturing.Canvas.Font.Color := clWhite;
+  Besturing.Canvas.TextRect(Vlak, Vlak.Left + 4, Vlak.Top + 4, Lists[TabNr][0]);
+  Besturing.Canvas.DrawFocusRect(Vlak);
 end;
 
 end.

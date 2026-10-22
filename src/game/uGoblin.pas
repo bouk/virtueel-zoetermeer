@@ -1,7 +1,7 @@
 unit uGoblin;
 
-{ TGoblin: a pixie that fills its area with a tiled surface.
-  Decompiled from ROS.exe v1.1, code 0046C478-0046C9CC. }
+{ TGoblin: een pixie die zijn gebied vult met een betegeld oppervlak.
+  Gedecompileerd uit ROS.exe v1.1, code 0046C478-0046C9CC. }
 
 {$I zm.inc}
 
@@ -13,10 +13,10 @@ uses
 type
   TGoblin = class(TPixie)
   private
-    FArea: TRect;                   { +0x68  area covered (never set in ROS.exe) }
-    FSurface: TSurface;             { +0x78  tile }
+    FArea: TRect;                   { +0x68  bedekt gebied (wordt nooit gezet in ROS.exe) }
+    FSurface: TSurface;             { +0x78  tegel }
     FSpriteBox: TSpriteBox;         { +0x7C }
-    FChanged: Boolean;              { +0x80  surface changed: force a redraw }
+    FChanged: Boolean;              { +0x80  oppervlak gewijzigd: forceer een hertekening }
     procedure SetSpriteBox(Value: TSpriteBox);
     procedure SetSurface(Value: TSurface);
   public
@@ -107,66 +107,66 @@ begin
   DrawDC(Surface.GetCanvas.Handle, DX, DY, ClipRect, Scale);
 end;
 
-{ @0046C71C  tiles FSurface over FArea; ClipRect and Scale are ignored }
+{ @0046C71C  tegelt FSurface over FArea; ClipRect en Scale worden genegeerd }
 procedure TGoblin.DrawDC(DC: HDC; DX, DY: Integer; ClipRect: TRect; Scale: Double);
 var
-  R: TRect;
-  OffsX, OffsY: Integer;
-  NX, NY, IX, IY: Integer;
-  SX, SY, EX, EY: Integer;
+  Kader: TRect;
+  VersX, VersY: Integer;
+  AantalX, AantalY, NrX, NrY: Integer;
+  BeginX, BeginY, EindX, EindY: Integer;
   PosX, PosY: Integer;
 begin
-  OffsX := FArea.Left - FArea.Left mod FSurface.Width;
-  OffsY := FArea.Top - FArea.Top mod FSurface.Height;
-  R := Rect(FArea.Left - OffsX, FArea.Top - OffsY, FArea.Right - OffsX,
-    FArea.Bottom - OffsY);
+  VersX := FArea.Left - FArea.Left mod FSurface.Width;
+  VersY := FArea.Top - FArea.Top mod FSurface.Height;
+  Kader := Rect(FArea.Left - VersX, FArea.Top - VersY, FArea.Right - VersX,
+    FArea.Bottom - VersY);
   repeat
-    if R.Left < 0 then
+    if Kader.Left < 0 then
     begin
-      Inc(R.Left, FSurface.Width);
-      Inc(R.Right, FSurface.Width);
+      Inc(Kader.Left, FSurface.Width);
+      Inc(Kader.Right, FSurface.Width);
     end;
-    if R.Top < 0 then
+    if Kader.Top < 0 then
     begin
-      Inc(R.Top, FSurface.Height);
-      Inc(R.Bottom, FSurface.Height);
+      Inc(Kader.Top, FSurface.Height);
+      Inc(Kader.Bottom, FSurface.Height);
     end;
-  until (R.Top >= 0) and (R.Left >= 0);
-  NX := 0;
+  until (Kader.Top >= 0) and (Kader.Left >= 0);
+  AantalX := 0;
   repeat
-    Inc(NX);
-  until FSurface.Width * NX >= R.Right;
-  NY := 0;
+    Inc(AantalX);
+  until FSurface.Width * AantalX >= Kader.Right;
+  AantalY := 0;
   repeat
-    Inc(NY);
-  until FSurface.Height * NY >= R.Bottom;
+    Inc(AantalY);
+  until FSurface.Height * AantalY >= Kader.Bottom;
   PosX := 0;
-  for IX := 1 to NX do
+  for NrX := 1 to AantalX do
   begin
-    if IX = 1 then
-      SX := R.Left
+    if NrX = 1 then
+      BeginX := Kader.Left
     else
-      SX := 0;
-    if IX = NX then
-      EX := R.Right - FSurface.Width * (IX - 1)
+      BeginX := 0;
+    if NrX = AantalX then
+      EindX := Kader.Right - FSurface.Width * (NrX - 1)
     else
-      EX := FSurface.Width;
+      EindX := FSurface.Width;
     PosY := 0;
-    for IY := 1 to NY do
+    for NrY := 1 to AantalY do
     begin
-      if IY = 1 then
-        SY := R.Top
+      if NrY = 1 then
+        BeginY := Kader.Top
       else
-        SY := 0;
-      if IY = NY then
-        EY := R.Bottom - FSurface.Height * (IY - 1)
+        BeginY := 0;
+      if NrY = AantalY then
+        EindY := Kader.Bottom - FSurface.Height * (NrY - 1)
       else
-        EY := FSurface.Height;
-      FSurface.DrawTo(DC, Rect(SX, SY, EX, EY),
-        Bounds(PosX + DX, PosY + DY, EX - SX, EY - SY), False, False);
-      PosY := EY + PosY - SY;
+        EindY := FSurface.Height;
+      FSurface.DrawTo(DC, Rect(BeginX, BeginY, EindX, EindY),
+        Bounds(PosX + DX, PosY + DY, EindX - BeginX, EindY - BeginY), False, False);
+      PosY := EindY + PosY - BeginY;
     end;
-    PosX := PosX + EX - SX;
+    PosX := PosX + EindX - BeginX;
   end;
 end;
 

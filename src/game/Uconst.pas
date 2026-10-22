@@ -1,10 +1,10 @@
 unit Uconst;
 
-{ Game constants and helpers: the object type table loaded from Objecten.csv
-  (TContentsInfo), criteria/rating names, road/rail/station name tests, the
-  isometric grid <-> world <-> screen coordinate conversions, profiling tick
-  counters and the fatal error box.
-  Decompiled from ROS.exe v1.1, code 00485A34-00486C6B. }
+{ Spelconstanten en hulpfuncties: de objecttypetabel die uit Objecten.csv wordt geladen
+  (TContentsInfo), namen van criteria/waarderingen, tests voor weg-, spoor- en stationsnamen,
+  de coordinaatomzettingen van het isometrische raster <-> wereld <-> scherm,
+  profileringstellers en de fatale foutbox.
+  Gedecompileerd uit ROS.exe v1.1, code 00485A34-00486C6B. }
 
 {$I zm.inc}
 
@@ -14,12 +14,12 @@ uses
   Windows;
 
 const
-  TileW = 88;        { width of a grid cell in world pixels }
-  OriginX = 2024;    { world X of grid (0,0) }
-  OriginY = -880;    { world Y of grid (0,0) }
+  TileW = 88;        { breedte van een rastercel in wereldpixels }
+  OriginX = 2024;    { wereld-X van raster (0,0) }
+  OriginY = -880;    { wereld-Y van raster (0,0) }
 
 type
-  { RTTI 00485A38 'TContentsInfo', size $48. One line of Objecten.csv. }
+  { RTTI 00485A38 'TContentsInfo', grootte $48. Een regel uit Objecten.csv. }
   TContentsInfo = record
     Name: string;          { +0x00 Name }
     Description: string;   { +0x04 Description }
@@ -38,8 +38,8 @@ type
     Value: Integer;        { +0x38 Value }
     Afstand: Integer;      { +0x3C Afstand }
     Wens: string;          { +0x40 Wens }
-    SpritesLoaded: Boolean;   { +0x44 set by TfrmMain.ReadSprites once the sprites are loaded }
-    KnopGemaakt: Boolean;     { +0x45 set by TfrmMain once the build button is created }
+    SpritesLoaded: Boolean;   { +0x44 ingesteld door TfrmMain.ReadSprites zodra de sprites zijn geladen }
+    KnopGemaakt: Boolean;     { +0x45 ingesteld door TfrmMain zodra de bouwknop is gemaakt }
   end;
 
   { RTTI 00485BAC '.4' }
@@ -49,24 +49,24 @@ const
   { 004892A0 }
   Criteria: array[0..6] of string =
     ('Vrijetijd', 'Groen', 'Veiligheid', 'Cultuur', 'Mobiliteit', 'Werk', 'Overlast');
-  { 004892BC: the part of the screen in which the city is drawn }
+  { 004892BC: het deel van het scherm waarin de stad wordt getekend }
   ViewRect: TRect = (Left: 30; Top: 81; Right: 822; Bottom: 686);
-  { 004892CC (not referenced) }
+  { 004892CC (niet gebruikt) }
   Waarderingen: array[0..4] of string =
     ('Zeer slecht', 'Onvoldoende', 'Matig', 'Redelijk', 'Goed');
-  { 004892E0 (not referenced) }
+  { 004892E0 (niet gebruikt) }
   Hoeveelheden: array[0..4] of string =
     ('Enorm', 'Veel', 'Matig', 'Acceptabel', 'Geen');
-  { 004892F4: world -> screen scale, set by Uview }
+  { 004892F4: schaal wereld -> scherm, ingesteld door Uview }
   Zoom: Double = 1;
-  { 004892FC, 00489300: world scroll offset, set by Uview }
+  { 004892FC, 00489300: scrollverschuiving van de wereld, ingesteld door Uview }
   ScrollX: Integer = 0;
   ScrollY: Integer = 0;
 
 var
   Contents: TContentsInfoArray;   { 0048B178 }
   ContentsCount: Integer;         { 0048B17C }
-  { Profiling tick counters (GetTickCount), reported by Fmain. }
+  { Profileringstellers (GetTickCount), gerapporteerd door Fmain. }
   PerfStart: Longint;             { 0048B180 }
   PerfView: Longint;              { 0048B184 }
   PerfAutos: Longint;             { 0048B188 }
@@ -74,26 +74,26 @@ var
   PerfOther: Longint;             { 0048B190 }
 
 procedure LoadContents;
-function IsSnelweg(Name, Onder: string): Boolean;
-function IsGewoneWeg(Name, Onder: string): Boolean;
-function IsWeg(Name, Onder: string): Boolean;
-function IsSpoor(Name: string; var Nr: Byte): Boolean;
-function IsRechtSpoor(Name: string): Boolean;
-function IsBochtSpoor(Name: string; var Nr: Byte): Boolean;
-function IsStation(Name: string; var Nr: Byte): Boolean;
-function IsTreinBestemming(Name: string): Boolean;
-function IsBebouwing(Name: string): Boolean;
+function IsSnelweg(Naam, Onder: string): Boolean;
+function IsGewoneWeg(Naam, Onder: string): Boolean;
+function IsWeg(Naam, Onder: string): Boolean;
+function IsSpoor(Naam: string; var Nr: Byte): Boolean;
+function IsRechtSpoor(Naam: string): Boolean;
+function IsBochtSpoor(Naam: string; var Nr: Byte): Boolean;
+function IsStation(Naam: string; var Nr: Byte): Boolean;
+function IsTreinBestemming(Naam: string): Boolean;
+function IsBebouwing(Naam: string): Boolean;
 function GridToWorld(P: TPoint): TPoint;
 function WorldToScreen(P: TPoint): TPoint;
 function GridToScreen(P: TPoint): TPoint;
 function ScreenToWorld(P: TPoint): TPoint;
 function WorldToGrid(P: TPoint): TPoint;
 function ScreenToGrid(P: TPoint): TPoint;
-function ContentsInfoByContents(Name: string): TContentsInfo;
-function ContentsDescription(Name: string): string;
+function ContentsInfoByContents(Naam: string): TContentsInfo;
+function ContentsDescription(Naam: string): string;
 function IsOutOfView(X, Y: Integer): Boolean;
 function InMap(X, Y: Integer): Boolean;
-procedure Fout(Msg: string);
+procedure Fout(Melding: string);
 
 implementation
 
@@ -101,169 +101,169 @@ uses
   SysUtils, Forms, uString, uTool, Fmain;
 
 { @00485BBC }
-procedure AddContents(Name, Description: string);
+procedure AddContents(Naam, Omschrijving: string);
 var
-  Info: TContentsInfo;
+  Gegevens: TContentsInfo;
 begin
-  Info.Name := Name;
-  Info.Description := Description;
-  Info.IsGround := 1;
-  Info.Singleton := False;
-  Info.Page := '';
-  Info.Level := 0;
-  Info.Prijs := 0;
-  Info.Onderhoud := 0;
-  Info.Afstand := 0;
-  Info.GrondvlakX := 1;
-  Info.GrondvlakY := 1;
-  Info.BaseScore := 0;
-  Info.Value := 0;
-  Info.Afstand := 0;
-  Info.Wens := '';
-  Info.SpritesLoaded := False;
-  Info.KnopGemaakt := False;
-  { NOTE: Capaciteit, MaxSpeed and Hoofdrubriek are not set. }
+  Gegevens.Name := Naam;
+  Gegevens.Description := Omschrijving;
+  Gegevens.IsGround := 1;
+  Gegevens.Singleton := False;
+  Gegevens.Page := '';
+  Gegevens.Level := 0;
+  Gegevens.Prijs := 0;
+  Gegevens.Onderhoud := 0;
+  Gegevens.Afstand := 0;
+  Gegevens.GrondvlakX := 1;
+  Gegevens.GrondvlakY := 1;
+  Gegevens.BaseScore := 0;
+  Gegevens.Value := 0;
+  Gegevens.Afstand := 0;
+  Gegevens.Wens := '';
+  Gegevens.SpritesLoaded := False;
+  Gegevens.KnopGemaakt := False;
+  { LET OP: Capaciteit, MaxSpeed en Hoofdrubriek worden niet ingesteld. }
   Inc(ContentsCount);
   SetLength(Contents, ContentsCount);
-  Contents[ContentsCount - 1] := Info;
+  Contents[ContentsCount - 1] := Gegevens;
 end;
 
 { @00485CD8 }
 procedure LoadContents;
 var
-  Header, Line, SX, SY: string;
-  F: TextFile;
-  Info: TContentsInfo;
+  Kop, Regel, GrondX, GrondY: string;
+  Bestand: TextFile;
+  Gegevens: TContentsInfo;
   S: string;
 begin
-  { NOTE: the original's stack frame is zero-filled on entry, so the fields
-    that are not read from the file (SpritesLoaded/KnopGemaakt) start as False and keep
-    their value from line to line. }
+  { LET OP: het stackframe van het origineel wordt bij binnenkomst op nul gezet, dus de
+    velden die niet uit het bestand worden gelezen (SpritesLoaded/KnopGemaakt) beginnen als
+    False en behouden hun waarde van regel tot regel. }
 {$IFDEF FPC}
-  Info := Default(TContentsInfo);   { PORT: FPC does not zero-fill the frame }
+  Gegevens := Default(TContentsInfo);   { PORT: FPC zet het frame niet op nul }
 {$ENDIF}
   ContentsCount := 0;
-  AssignFile(F, AddPath(AppPath, 'Objecten.csv'));
-  Reset(F);
-  ReadLn(F, Header);
-  while not Eof(F) do
+  AssignFile(Bestand, AddPath(AppPath, 'Objecten.csv'));
+  Reset(Bestand);
+  ReadLn(Bestand, Kop);
+  while not Eof(Bestand) do
   begin
-    ReadLn(F, Line);
-    if TrimStr(Line) <> '' then
+    ReadLn(Bestand, Regel);
+    if TrimStr(Regel) <> '' then
     begin
-      S := SplitFirst(Line, ';');
-      Info.Name := S;
-      if TrimStr(Info.Name) <> '' then
+      S := SplitFirst(Regel, ';');
+      Gegevens.Name := S;
+      if TrimStr(Gegevens.Name) <> '' then
       begin
-        S := SplitFirst(Line, ';');
-        Info.Page := S;
-        S := SplitFirst(Line, ';');
-        Info.Description := S;
-        S := SplitFirst(Line, ';');
-        Info.Level := StrToIntDef0(S);
-        S := SplitFirst(Line, ';');
-        Info.IsGround := StrToIntDef0(S);
-        S := SplitFirst(Line, ';');
-        Info.Singleton := S = '1';
-        S := SplitFirst(Line, ';');
-        Info.Prijs := StrToIntDef0(S);
-        S := SplitFirst(Line, ';');
-        Info.Onderhoud := StrToIntDef0(S);
-        S := SplitFirst(Line, ';');
-        Info.Capaciteit := StrToIntDef0(S);
-        S := SplitFirst(Line, ';');
-        Info.MaxSpeed := StrToIntDef0(S);
-        SX := SplitFirst(Line, ';');
-        SY := SplitFirst(Line, ';');
-        if SX = '' then
-          Info.GrondvlakX := 1
+        S := SplitFirst(Regel, ';');
+        Gegevens.Page := S;
+        S := SplitFirst(Regel, ';');
+        Gegevens.Description := S;
+        S := SplitFirst(Regel, ';');
+        Gegevens.Level := StrToIntDef0(S);
+        S := SplitFirst(Regel, ';');
+        Gegevens.IsGround := StrToIntDef0(S);
+        S := SplitFirst(Regel, ';');
+        Gegevens.Singleton := S = '1';
+        S := SplitFirst(Regel, ';');
+        Gegevens.Prijs := StrToIntDef0(S);
+        S := SplitFirst(Regel, ';');
+        Gegevens.Onderhoud := StrToIntDef0(S);
+        S := SplitFirst(Regel, ';');
+        Gegevens.Capaciteit := StrToIntDef0(S);
+        S := SplitFirst(Regel, ';');
+        Gegevens.MaxSpeed := StrToIntDef0(S);
+        GrondX := SplitFirst(Regel, ';');
+        GrondY := SplitFirst(Regel, ';');
+        if GrondX = '' then
+          Gegevens.GrondvlakX := 1
         else
-          Info.GrondvlakX := IMax(1, StrToIntDef0(SX));
-        if SY = '' then
-          Info.GrondvlakY := 1
+          Gegevens.GrondvlakX := IMax(1, StrToIntDef0(GrondX));
+        if GrondY = '' then
+          Gegevens.GrondvlakY := 1
         else
-          Info.GrondvlakY := IMax(1, StrToIntDef0(SY));
-        S := SplitFirst(Line, ';');
-        Info.Hoofdrubriek := S;
-        S := SplitFirst(Line, ';');
-        Info.BaseScore := StrToIntDef0(S);
-        S := SplitFirst(Line, ';');
-        Info.Value := StrToIntDef0(S);
-        S := SplitFirst(Line, ';');
-        Info.Afstand := StrToIntDef0(S);
-        S := SplitFirst(Line, ';');
-        Info.Wens := S;
+          Gegevens.GrondvlakY := IMax(1, StrToIntDef0(GrondY));
+        S := SplitFirst(Regel, ';');
+        Gegevens.Hoofdrubriek := S;
+        S := SplitFirst(Regel, ';');
+        Gegevens.BaseScore := StrToIntDef0(S);
+        S := SplitFirst(Regel, ';');
+        Gegevens.Value := StrToIntDef0(S);
+        S := SplitFirst(Regel, ';');
+        Gegevens.Afstand := StrToIntDef0(S);
+        S := SplitFirst(Regel, ';');
+        Gegevens.Wens := S;
         Inc(ContentsCount);
         SetLength(Contents, ContentsCount);
-        Contents[ContentsCount - 1] := Info;
+        Contents[ContentsCount - 1] := Gegevens;
       end;
     end;
   end;
-  CloseFile(F);
+  CloseFile(Bestand);
   AddContents('AndereStad', 'Andere stad');
   AddContents('Onbereikbaar', 'Buiten de stad');
 end;
 
 { @0048619C }
-function IsSnelweg(Name, Onder: string): Boolean;
+function IsSnelweg(Naam, Onder: string): Boolean;
 begin
-  Result := (Name = 'Snel') or
-    (((Name = 'Rails05') or (Name = 'Rails10')) and IsSnelweg(Onder, 'X'));
+  Result := (Naam = 'Snel') or
+    (((Naam = 'Rails05') or (Naam = 'Rails10')) and IsSnelweg(Onder, 'X'));
 end;
 
 { @00486270 }
-function IsGewoneWeg(Name, Onder: string): Boolean;
+function IsGewoneWeg(Naam, Onder: string): Boolean;
 begin
-  { NOTE: clears Onder when it is already empty; has no effect. }
-  if ((Name = 'Rails05') or (Name = 'Rails10')) and (Onder = '') then
+  { LET OP: wist Onder als het al leeg is; heeft geen effect. }
+  if ((Naam = 'Rails05') or (Naam = 'Rails10')) and (Onder = '') then
     Onder := '';
-  Result := (Name = 'Bakst') or (Name = 'Weg') or
-    (((Name = 'Rails05') or (Name = 'Rails10')) and IsGewoneWeg(Onder, 'X'));
+  Result := (Naam = 'Bakst') or (Naam = 'Weg') or
+    (((Naam = 'Rails05') or (Naam = 'Rails10')) and IsGewoneWeg(Onder, 'X'));
 end;
 
 { @0048638C }
-function IsWeg(Name, Onder: string): Boolean;
+function IsWeg(Naam, Onder: string): Boolean;
 begin
-  Result := IsGewoneWeg(Name, Onder) or IsSnelweg(Name, Onder);
+  Result := IsGewoneWeg(Naam, Onder) or IsSnelweg(Naam, Onder);
 end;
 
 { @00486404 }
-function IsSpoor(Name: string; var Nr: Byte): Boolean;
+function IsSpoor(Naam: string; var Nr: Byte): Boolean;
 begin
-  if IsStation(Name, Nr) then
+  if IsStation(Naam, Nr) then
     Result := True
   else
   begin
-    Nr := StrToIntDef0(Copy(Name, 6, 2));
-    Result := LeftStr(Name, 5) = 'Rails';
+    Nr := StrToIntDef0(Copy(Naam, 6, 2));
+    Result := LeftStr(Naam, 5) = 'Rails';
   end;
 end;
 
 { @004864B4 }
-function IsRechtSpoor(Name: string): Boolean;
+function IsRechtSpoor(Naam: string): Boolean;
 var
   Nr: Byte;
 begin
-  Result := IsSpoor(Name, Nr) and (Nr in [5, 10]);
+  Result := IsSpoor(Naam, Nr) and (Nr in [5, 10]);
 end;
 
 { @00486518 }
-function IsBochtSpoor(Name: string; var Nr: Byte): Boolean;
+function IsBochtSpoor(Naam: string; var Nr: Byte): Boolean;
 begin
-  Result := IsSpoor(Name, Nr) and (Nr in [3, 6, 9, 12]);
+  Result := IsSpoor(Naam, Nr) and (Nr in [3, 6, 9, 12]);
 end;
 
 { @00486584 }
-function IsStation(Name: string; var Nr: Byte): Boolean;
+function IsStation(Naam: string; var Nr: Byte): Boolean;
 begin
-  if Name = 'Hoofdstation' then
+  if Naam = 'Hoofdstation' then
   begin
     Nr := 10;
     Result := True;
   end
-  else if StartsWith(Name, 'Station') then
+  else if StartsWith(Naam, 'Station') then
   begin
-    Nr := StrToIntDef0(Copy(Name, 8, 2));
+    Nr := StrToIntDef0(Copy(Naam, 8, 2));
     Result := True;
   end
   else
@@ -271,18 +271,18 @@ begin
 end;
 
 { @0048664C }
-function IsTreinBestemming(Name: string): Boolean;
+function IsTreinBestemming(Naam: string): Boolean;
 var
   Nr: Byte;
 begin
-  Result := (Name = 'AndereStad') or IsStation(Name, Nr);
+  Result := (Naam = 'AndereStad') or IsStation(Naam, Nr);
 end;
 
 { @004866C8 }
-function IsBebouwing(Name: string): Boolean;
+function IsBebouwing(Naam: string): Boolean;
 begin
-  Result := (Name = 'Laagbouw') or (Name = 'Middenbouw') or
-    (Name = 'Hoogbouw') or (Name = 'Kantoor') or (Name = 'Molen');
+  Result := (Naam = 'Laagbouw') or (Naam = 'Middenbouw') or
+    (Naam = 'Hoogbouw') or (Naam = 'Kantoor') or (Naam = 'Molen');
 end;
 
 { @004867B8 }
@@ -316,11 +316,11 @@ end;
 { @004868C4 }
 function WorldToGrid(P: TPoint): TPoint;
 var
-  D: Double;
+  Getal: Double;
 begin
-  D := (P.X - OriginX) / TileW / 2 + (P.Y - OriginY) / TileW;
-  Result.X := Round(D);
-  Result.Y := Round((P.Y - OriginY) / TileW * 2 - D);
+  Getal := (P.X - OriginX) / TileW / 2 + (P.Y - OriginY) / TileW;
+  Result.X := Round(Getal);
+  Result.Y := Round((P.Y - OriginY) / TileW * 2 - Getal);
 end;
 
 { @00486950 }
@@ -331,23 +331,23 @@ begin
 end;
 
 { @00486988 }
-function ContentsInfoByContents(Name: string): TContentsInfo;
+function ContentsInfoByContents(Naam: string): TContentsInfo;
 var
   I: Integer;
 begin
   for I := 0 to ContentsCount - 1 do
-    if Contents[I].Name = Name then
+    if Contents[I].Name = Naam then
     begin
       Result := Contents[I];
       Exit;
     end;
-  Fout('ContentsInfoByContents: ' + Name + ' not found');
+  Fout('ContentsInfoByContents: ' + Naam + ' not found');
 end;
 
 { @00486A78 }
-function ContentsDescription(Name: string): string;
+function ContentsDescription(Naam: string): string;
 begin
-  Result := ContentsInfoByContents(Name).Description;
+  Result := ContentsInfoByContents(Naam).Description;
 end;
 
 { @00486AEC }
@@ -367,12 +367,12 @@ begin
 end;
 
 { @00486B44 }
-procedure Fout(Msg: string);
+procedure Fout(Melding: string);
 begin
   frmMain.Hide;
-  Msg := Msg + #0;
-  Application.MessageBox(@Msg[1], 'Foutmelding', MB_OK);
-  raise EMathError.Create(Msg);
+  Melding := Melding + #0;
+  Application.MessageBox(@Melding[1], 'Foutmelding', MB_OK);
+  raise EMathError.Create(Melding);
 end;
 
 end.

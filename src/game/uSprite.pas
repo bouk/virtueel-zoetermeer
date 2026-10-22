@@ -1,14 +1,15 @@
 unit uSprite;
 
-{ TSprite: an animated bitmap on a TSpriteBox. A sprite owns a TFrameList (the
-  images) and a TSequenceList (animations); a TFastTimer steps through the
-  current sequence. All changes of position, frame, visibility, margins and
-  scale go through ChangeState, which also fires OnMove and the hit test.
-  TBehaviour objects attached to a sprite get the sprite's events first.
-  Decompiled from ROS.exe v1.1, code 0046956C-0046C478. }
+{ TSprite: een geanimeerde bitmap op een TSpriteBox. Een sprite bezit een TFrameList (de
+  beelden) en een TSequenceList (animaties); een TFastTimer doorloopt de
+  huidige reeks. Alle wijzigingen van positie, frame, zichtbaarheid, marges en
+  schaal lopen via ChangeState, dat ook OnMove en de trefcontrole aanroept.
+  TBehaviour-objecten die aan een sprite zijn gekoppeld, krijgen eerst de
+  gebeurtenissen van de sprite.
+  Gedecompileerd uit ROS.exe v1.1, code 0046956C-0046C478. }
 
 {$I zm.inc}
-{$R+}   { the original was compiled with range checking on (@BoundErr after Round) }
+{$R+}   { het origineel is gecompileerd met bereikcontrole aan (@BoundErr na Round) }
 
 interface
 
@@ -25,11 +26,11 @@ type
 
   THitTest = (htNone, htRect, htPixel);
 
-  { The RTTI places TPlot/TPlotMode in Sprframe, which does not declare them. }
+  { De RTTI plaatst TPlot/TPlotMode in Sprframe, dat ze niet declareert. }
   TPlot = (BufferBackground, PlotTransparent);
   TPlotMode = set of TPlot;
 
-  { What a call of ChangeState changes while a change is already in progress }
+  { Wat een aanroep van ChangeState wijzigt terwijl er al een wijziging bezig is }
   TSpriteChange = (scX, scY, scZ, scMarginLeft, scMarginTop, scMarginRight,
     scMarginBottom, scFrameIndex, scVisible, scScale);
   TSpriteChanges = set of TSpriteChange;
@@ -44,33 +45,33 @@ type
 
   TSprite = class(TPixie)
   private
-    FAbout: string;                    { +0x68  streamed version, e.g. '2.5c' }
+    FAbout: string;                    { +0x68  gestreamde versie, bijv. '2.5c' }
     FSpriteBox: TSpriteBox;            { +0x6C }
     FFrameList: TFrameList;            { +0x70 }
     FSequenceList: TSequenceList;      { +0x74 }
     FSequence: TSequence;              { +0x78  sequence being played }
-    FReserved7C: Integer;              { +0x7C  not used }
+    FReserved7C: Integer;              { +0x7C  niet gebruikt }
     FPlotmode: TPlotMode;              { +0x80 }
     FFrameIndex: Integer;              { +0x84 }
     FTimer: TFastTimer;                { +0x88 }
-    FRepeatCount: Integer;             { +0x8C  -1: forever }
-    FStep: Integer;                    { +0x90  step within FSequence }
-    FDynamic: Boolean;                 { +0x94  created by CreateCopy: lists are shared }
-    FKilled: Boolean;                  { +0x95  free at the next opportunity }
+    FRepeatCount: Integer;             { +0x8C  -1: voor altijd }
+    FStep: Integer;                    { +0x90  stap binnen FSequence }
+    FDynamic: Boolean;                 { +0x94  gemaakt door CreateCopy: lijsten worden gedeeld }
+    FKilled: Boolean;                  { +0x95  vrijgeven bij de eerstvolgende gelegenheid }
     FHitTest: THitTest;                { +0x96 }
-    FReserved98: Integer;              { +0x98  set to 0, never read }
+    FReserved98: Integer;              { +0x98  op 0 gezet, nooit gelezen }
     FMirrorY: Boolean;                 { +0x9C }
     FMirrorX: Boolean;                 { +0x9D }
-    FReserved9E: Boolean;              { +0x9E  copied by CreateCopy, never read }
-    FFrozen: Boolean;                  { +0x9F  animation paused }
-    FStopped: Boolean;                 { +0xA0  StopSequence was called }
+    FReserved9E: Boolean;              { +0x9E  gekopieerd door CreateCopy, nooit gelezen }
+    FFrozen: Boolean;                  { +0x9F  animatie gepauzeerd }
+    FStopped: Boolean;                 { +0xA0  StopSequence is aangeroepen }
     FScale: Double;                    { +0xA8 }
     FData: TObject;                    { +0xB0  owned user object }
     FMarginLeft: Integer;              { +0xB4 }
     FMarginRight: Integer;             { +0xB8 }
     FMarginTop: Integer;               { +0xBC }
     FMarginBottom: Integer;            { +0xC0 }
-    FLastFrame: string;                { +0xC4  frame name at the last GetChange }
+    FLastFrame: string;                { +0xC4  framenaam bij de laatste GetChange }
     FMouseCapture: Boolean;            { +0xC8 }
     FNewX: Integer;                    { +0xCC  pending state of ChangeState }
     FNewY: Integer;                    { +0xD0 }
@@ -84,7 +85,7 @@ type
     FNewMarginBottom: Integer;         { +0xF4 }
     FChanging: Boolean;                { +0xF8 }
     FForceRedraw: Boolean;             { +0xF9 }
-    FReservedFC: Integer;              { +0xFC  not used }
+    FReservedFC: Integer;              { +0xFC  niet gebruikt }
     FOnVisible: TOnVisibleEvent;       { +0x100 }
     FOnMove: TOnMoveEvent;             { +0x108 }
     FOnFinishSequence: TOnFinishSequence; { +0x110 }
@@ -134,7 +135,7 @@ type
     procedure MouseMove(Sender: TObject; Shift: TShiftState;
       X, Y: Integer); override;
     procedure MouseLeave; override;
-    { new virtual methods }
+    { nieuwe virtuele methoden }
     function GetHotSpotX: Integer; virtual;                             { +0x88 }
     function GetHotSpotY: Integer; virtual;                             { +0x8C }
     function GetScale: Double; virtual;                                 { +0x90 }
@@ -151,7 +152,7 @@ type
       AMarginBottom, AFrameIndex: Integer; AVisible: Boolean; AScale: Double;
       Changes: TSpriteChanges); virtual;                                { +0xB0 }
     constructor CreateCopy(Source: TSprite); virtual;                   { +0xB4 }
-    { static methods }
+    { statische methoden }
     procedure Kill;
     procedure Redraw;
     procedure MoveTo(AX, AY: Integer);
@@ -225,15 +226,15 @@ type
     property Sprites[Index: Integer]: TSprite read GetSprite; default;
   end;
 
-  { Behaviour attached to a sprite: receives the sprite's events (while
-    Active) before the sprite's own event handlers. }
+  { Gedrag gekoppeld aan een sprite: ontvangt de gebeurtenissen van de sprite (zolang
+    Active waar is) voor de eigen gebeurtenis-handlers van de sprite. }
   TBehaviour = class(TObject)
   protected
     FName: string;                     { +0x04 }
     FSprite: TSprite;                  { +0x08 }
     FActive: Boolean;                  { +0x0C }
     FOnFinish: TNotifyEvent;           { +0x10 }
-    FNextBehaviour: string;            { +0x18  activated by Finish }
+    FNextBehaviour: string;            { +0x18  geactiveerd door Finish }
   public
     constructor Create;
     destructor Destroy; override;
@@ -281,8 +282,8 @@ uses
 
 {$J+}
 const
-  SpriteMotto: string = 'odi et amo';    { 00488E70  never used }
-  SpriteMotto2: string = 'dmo';          { 00488E74  never used }
+  SpriteMotto: string = 'odi et amo';    { 00488E70  nooit gebruikt }
+  SpriteMotto2: string = 'dmo';          { 00488E74  nooit gebruikt }
 {$J-}
 
 { -------------------------------------------------------------------- TSprite }
@@ -316,7 +317,7 @@ begin
   FBehaviours := TBehaviourList.Create;
 end;
 
-{ @00469ECC  a sprite that shares the frames and sequences of Source }
+{ @00469ECC  een sprite die de frames en reeksen van Source deelt }
 constructor TSprite.CreateCopy(Source: TSprite);
 var
   S: TName;
@@ -393,7 +394,7 @@ begin
   inherited Destroy;
 end;
 
-{ @0046A220  the sprite frees itself at the next timer tick or redraw }
+{ @0046A220  de sprite geeft zichzelf vrij bij de volgende timertik of hertekening }
 procedure TSprite.Kill;
 begin
   FKilled := True;
@@ -436,8 +437,8 @@ begin
   PlaySequenceAt(Name, RepeatCount, 0, 0);
 end;
 
-{ @0046A408  Name may be 'sequence:step' to start at a given step;
-  RepeatCount -1 repeats forever; DX, DY offset the sprite once. }
+{ @0046A408  Name mag 'reeks:stap' zijn om bij een gegeven stap te starten;
+  RepeatCount -1 herhaalt voor altijd; DX, DY verschuiven de sprite eenmalig. }
 procedure TSprite.PlaySequenceAt(Name: string; RepeatCount: Integer; DX, DY: Integer);
 var
   Rest: string;
@@ -448,7 +449,7 @@ var
 begin
   if FSequenceList.IndexOf(Name) = -1 then
   begin
-    P := Pos(':', Name);   { NOTE: result not used }
+    P := Pos(':', Name);   { LET OP: resultaat wordt niet gebruikt }
     Rest := Name;
     Name := SplitFirst(Rest, ':');
     StartStep := StrToIntDef0(Rest);
@@ -459,7 +460,7 @@ begin
   FRepeatCount := RepeatCount;
   FStep := StartStep;
   FTimer.Enabled := True;
-  { NOTE: the offsets of the step are not used here }
+  { LET OP: de offsets van de stap worden hier niet gebruikt }
   FSequence.GetStep(FStep, NewFrame, SDX, SDY, SDZ, Delay);
   if FChanging then
   begin
@@ -575,7 +576,7 @@ begin
   FBehaviours.Pack;
 end;
 
-{ @0046A9D4  like TPixie.GetChange, but a changed frame or Redraw also counts }
+{ @0046A9D4  zoals TPixie.GetChange, maar een gewijzigd frame of Redraw telt ook mee }
 procedure TSprite.GetChange(var OldState, NewState: TPixieState);
 var
   State: TPixieState;
@@ -606,7 +607,7 @@ begin
     Continue := True;
     FOnFrameSkipped(Self, Continue);
     if Continue then
-      ;   { NOTE: the result is tested but not used }
+      ;   { LET OP: het resultaat wordt getest maar niet gebruikt }
   end;
 end;
 
@@ -672,7 +673,7 @@ begin
   Scale := GetScale * Scale;
   X1 := DX + Round(FMarginLeft * Scale);
   Y1 := DY + Round(FMarginTop * Scale);
-  { NOTE: unlike Draw, only the right and top margins are subtracted }
+  { LET OP: anders dan Draw worden alleen de rechter- en bovenmarge afgetrokken }
   W := Round((GetWidth - FMarginRight) * Scale);
   H := Round((GetHeight - FMarginTop) * Scale);
   if FFrameIndex > -1 then
@@ -702,7 +703,7 @@ begin
   DoAfterBlit(Surface, DX, DY, ClipRect, Scale);
 end;
 
-{ @0046AFE8  OnSkipTimer of FTimer }
+{ @0046AFE8  OnSkipTimer van FTimer }
 procedure TSprite.TimerSkip(Sender: TObject);
 var
   Continue: Boolean;
@@ -711,7 +712,7 @@ begin
   TimerTick(Sender);
 end;
 
-{ @0046B008  OnTimer of FTimer: next step of the current sequence }
+{ @0046B008  OnTimer van FTimer: volgende stap van de huidige reeks }
 procedure TSprite.TimerTick(Sender: TObject);
 var
   OldWidth, OldHeight: Integer;
@@ -761,7 +762,7 @@ begin
     end;
     if FTimer.Enabled then
     begin
-      { NOTE: the offsets are only applied above, for the step just finished }
+      { LET OP: de offsets worden alleen hierboven toegepast, voor de zojuist afgeronde stap }
       FSequence.GetStep(FStep, NewFrame, SDX, SDY, SDZ, Delay);
       if FMirrorX then
         OffsX := FFrameList.Frames[NewFrame].Width - OldWidth
@@ -784,8 +785,8 @@ begin
   Result := FScale;
 end;
 
-{ @0046B2EC  applies a new state; nested calls (from event handlers) only
-  update the pending values selected by Changes }
+{ @0046B2EC  past een nieuwe toestand toe; geneste aanroepen (vanuit gebeurtenis-handlers)
+  werken alleen de wachtende waarden bij die door Changes zijn geselecteerd }
 procedure TSprite.ChangeState(AX, AY, AZ, AMarginLeft, AMarginTop, AMarginRight,
   AMarginBottom, AFrameIndex: Integer; AVisible: Boolean; AScale: Double;
   Changes: TSpriteChanges);
@@ -828,7 +829,7 @@ begin
     FNewMarginTop := AMarginTop;
     FNewMarginRight := AMarginRight;
     FNewMarginBottom := AMarginBottom;
-    { NOTE: the original reads the old state here without using it }
+    { LET OP: het origineel leest hier de oude toestand zonder die te gebruiken }
     GetLeft;
     GetTop;
     GetX;
@@ -860,7 +861,7 @@ begin
   Result := '2.5c';
 end;
 
-{ @0046B5C8  surface holding the frames of the current frame }
+{ @0046B5C8  oppervlak met de frames van het huidige frame }
 function TSprite.GetSurface: TSurface;
 begin
   if FFrameIndex = -1 then
@@ -1017,7 +1018,7 @@ begin
       Value, FFrameIndex, Visible, GetScale, [scMarginBottom]);
 end;
 
-{ @0046BAF4  X is the position of the hot spot }
+{ @0046BAF4  X is de positie van het hotspot-punt }
 function TSprite.GetX: Integer;
 begin
   Result := GetLeft + Round(GetHotSpotX * GetScale);
@@ -1129,7 +1130,7 @@ begin
   end;
 end;
 
-{ @0046BE60  NOTE: at run time FrameIndex -1 is ignored }
+{ @0046BE60  LET OP: tijdens het uitvoeren wordt FrameIndex -1 genegeerd }
 procedure TSprite.SetFrameIndex(Value: Integer);
 begin
   if csDesigning in ComponentState then
@@ -1308,7 +1309,7 @@ begin
   FActive := Value;
 end;
 
-{ @0046C2B0  deactivates itself and activates NextBehaviour }
+{ @0046C2B0  deactiveert zichzelf en activeert NextBehaviour }
 procedure TBehaviour.Finish;
 begin
   SetActive(False);
@@ -1333,7 +1334,7 @@ begin
   Result := TObject(Get(Index)) as TBehaviour;
 end;
 
-{ @0046C318  case-sensitive }
+{ @0046C318  hoofdlettergevoelig }
 function TBehaviourList.Find(Name: string): TBehaviour;
 var
   I: Integer;
@@ -1348,7 +1349,7 @@ begin
   Result := nil;
 end;
 
-{ @0046C3A0  only clears the slot; Pack removes it }
+{ @0046C3A0  wist alleen de plek; Pack verwijdert hem }
 function TBehaviourList.Remove(Behaviour: TBehaviour): Integer;
 begin
   Result := IndexOf(Behaviour);
@@ -1363,7 +1364,7 @@ begin
     Put(Index, nil);
 end;
 
-{ @0046C3D4  removes the cleared slots }
+{ @0046C3D4  verwijdert de gewiste plekken }
 procedure TBehaviourList.Pack;
 var
   I: Integer;
@@ -1379,6 +1380,6 @@ begin
   Result := (GetBehaviour(Index) <> nil) and GetBehaviour(Index).FActive;
 end;
 
-{ The finalization at @0046C42C releases SpriteMotto and SpriteMotto2. }
+{ De finalization bij @0046C42C geeft SpriteMotto en SpriteMotto2 vrij. }
 
 end.

@@ -1,10 +1,10 @@
 unit uTextBalloon;
 
-{ TTextBalloon: a speech balloon (rounded rectangle with a pointer towards
-  the speaker) with word-wrapped text, drawn as a pixie of a TSpriteBox.
-  The text is split into lines so that the text block gets close to a
-  sqrt(2) aspect ratio.
-  Decompiled from ROS.exe v1.1, code 004653E8-00466FA8. }
+{ TTextBalloon: een spreekballon (afgeronde rechthoek met een punt naar
+  de spreker) met tekst die per woord over regels wordt verdeeld, getekend als pixie van een TSpriteBox.
+  De tekst wordt in regels verdeeld zodat het tekstblok dicht bij een
+  verhouding van sqrt(2) uitkomt.
+  Gedecompileerd uit ROS.exe v1.1, code 004653E8-00466FA8. }
 
 {$I zm.inc}
 
@@ -14,22 +14,22 @@ uses
   Windows, Classes, Graphics, uSurface, uPixie, uSpritebox;
 
 type
-  { number of words per text line }
+  { aantal woorden per tekstregel }
   TLineWords = array[0..99] of Integer;
 
   TTextBalloon = class(TPixie)
   private
     FBalloonText: string;           { +0x68 }
-    FTipX: Integer;                 { +0x6C  pointer tip, relative to Left }
+    FTipX: Integer;                 { +0x6C  punt van de aanwijzer, ten opzichte van Left }
     FTipY: Integer;                 { +0x70 }
     FSpriteBox: TSpriteBox;         { +0x74 }
     FSideColor: TColor;             { +0x78 }
     FBackGroundColor: TColor;       { +0x7C }
-    FXOffset: Integer;              { +0x80  balloon position relative to X }
+    FXOffset: Integer;              { +0x80  positie van de ballon ten opzichte van X }
     FYOffset: Integer;              { +0x84 }
-    FX: Integer;                    { +0x88  the point the balloon points at }
+    FX: Integer;                    { +0x88  het punt waar de ballon naar wijst }
     FY: Integer;                    { +0x8C }
-    FBodyX: Integer;                { +0x90  balloon body, relative to Left }
+    FBodyX: Integer;                { +0x90  ballonlichaam, ten opzichte van Left }
     FBodyY: Integer;                { +0x94 }
     FExtentX: Integer;              { +0x98  Width - 1 }
     FExtentY: Integer;              { +0x9C  Height - 1 }
@@ -49,11 +49,11 @@ type
     procedure SetBackGroundColor(Value: TColor);
     procedure DrawBalloon(Canvas: TCanvas; Left, Top, Right, Bottom, TipX,
       TipY: Integer);
-    function LineRatio(LineCount: Integer; Text: string; Canvas: TCanvas;
-      var MaxWidth: Integer; var Words: TLineWords; MaxLines: Integer): Double;
-    procedure FitText(Text: string; Canvas: TCanvas; Left, Top: Integer;
-      var Right, Bottom, LineCount, MaxWidth: Integer; var Words: TLineWords;
-      MaxLines: Integer);
+    function LineRatio(AantalRegels: Integer; Tekst: string; Canvas: TCanvas;
+      var MaxBreedte: Integer; var Woorden: TLineWords; MaxRegels: Integer): Double;
+    procedure FitText(Tekst: string; Canvas: TCanvas; Left, Top: Integer;
+      var Right, Bottom, AantalRegels, MaxBreedte: Integer; var Woorden: TLineWords;
+      MaxRegels: Integer);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -86,8 +86,8 @@ uses
   uString, uTool;
 
 type
-  { Point index of each of the 8 balloon corner points, after the 3 points of
-    the pointer (indices 0..2); the order depends on the side of the pointer. }
+  { Puntindex van elk van de 8 hoekpunten van de ballon, na de 3 punten van
+    de aanwijzer (indices 0..2); de volgorde hangt af van de zijde van de aanwijzer. }
   TCornerOrder = array[0..7] of Integer;
 
 {$J+}
@@ -155,21 +155,21 @@ begin
   end;
 end;
 
-{ @004657C0  computes size, position, body and pointer of the balloon }
+{ @004657C0  berekent grootte, positie, lichaam en aanwijzer van de ballon }
 procedure TTextBalloon.UpdateLayout;
 var
-  Right, Bottom, MaxWidth, LineCount: Integer;
-  Words: TLineWords;
-  OldFont: TFont;
+  Right, Bottom, MaxBreedte, AantalRegels: Integer;
+  Woorden: TLineWords;
+  OudeFont: TFont;
 begin
   if csDesigning in ComponentState then
     Exit;
   if FSpriteBox = nil then
     Exit;
-  OldFont := FSpriteBox.Canvas.Font;
+  OudeFont := FSpriteBox.Canvas.Font;
   FSpriteBox.Canvas.Font := FFont;
-  FitText(FBalloonText, FSpriteBox.Canvas, 0, 0, Right, Bottom, LineCount,
-    MaxWidth, Words, 100);
+  FitText(FBalloonText, FSpriteBox.Canvas, 0, 0, Right, Bottom, AantalRegels,
+    MaxBreedte, Woorden, 100);
   if FXOffset > Round(Right / 2) then
   begin
     SetLeft(GetX);
@@ -216,7 +216,7 @@ begin
   SetTop(GetTop - Round(FBalloonLineWidth / 2));
   Inc(FExtentX, FBalloonLineWidth);
   Inc(FExtentY, FBalloonLineWidth);
-  FSpriteBox.Canvas.Font := OldFont;
+  FSpriteBox.Canvas.Font := OudeFont;
 end;
 
 { @00465C08 }
@@ -281,153 +281,153 @@ begin
     FBackGroundColor := Value;
 end;
 
-{ @00465C9C  balloon body (Left, Top, Right, Bottom) with a pointer towards
-  (TipX, TipY), as one polygon; rounded corners get N extra points each }
+{ @00465C9C  ballonlichaam (Left, Top, Right, Bottom) met een aanwijzer naar
+  (TipX, TipY), als een veelhoek; afgeronde hoeken krijgen elk N extra punten }
 procedure TTextBalloon.DrawBalloon(Canvas: TCanvas; Left, Top, Right, Bottom,
   TipX, TipY: Integer);
 var
-  Radius, N: Integer;
-  HalfW, HalfH: Integer;
-  Slope, A, B: Double;
-  Tip: TPoint;
-  Order: TCornerOrder;
-  Points: array[0..70] of TPoint;
+  Straal, N: Integer;
+  HalfBreedte, HalfHoogte: Integer;
+  Helling, A, B: Double;
+  Spits: TPoint;
+  Volgorde: TCornerOrder;
+  Punten: array[0..70] of TPoint;
   I, K: Integer;
 begin
   Canvas.Pen.Width := FBalloonLineWidth;
   Canvas.Pen.Color := FSideColor;
   Canvas.Brush.Color := FBackGroundColor;
-  Radius := 10;
+  Straal := 10;
   if FRoundCorner then
-    N := IMin(15, Round(Radius / 2))
+    N := IMin(15, Round(Straal / 2))
   else
     N := 0;
-  HalfW := Round((Right - Left) / 2);
-  HalfH := Round((Bottom - Top) / 2);
-  { the diagonals of the body: Y = X * Slope + A and Y = -X * Slope + B }
-  Slope := (Bottom - Top) / (Right - Left);
-  A := Top - Left * Slope;
-  B := Bottom + Left * Slope;
-  Tip.X := TipX;
-  Tip.Y := TipY;
-  Points[1].X := TipX;
-  Points[1].Y := TipY;
-  { pointer on the left side }
-  if (TipX * Slope + A < TipY) and (TipY < -Slope * TipX + B) then
+  HalfBreedte := Round((Right - Left) / 2);
+  HalfHoogte := Round((Bottom - Top) / 2);
+  { de diagonalen van het lichaam: Y = X * Slope + A en Y = -X * Slope + B }
+  Helling := (Bottom - Top) / (Right - Left);
+  A := Top - Left * Helling;
+  B := Bottom + Left * Helling;
+  Spits.X := TipX;
+  Spits.Y := TipY;
+  Punten[1].X := TipX;
+  Punten[1].Y := TipY;
+  { aanwijzer aan de linkerzijde }
+  if (TipX * Helling + A < TipY) and (TipY < -Helling * TipX + B) then
   begin
-    Move(CornerOrderLeft, Order, SizeOf(Order));
-    Points[0].X := Left;
-    Points[2].X := Left;
-    if Top + HalfH < TipY then
+    Move(CornerOrderLeft, Volgorde, SizeOf(Volgorde));
+    Punten[0].X := Left;
+    Punten[2].X := Left;
+    if Top + HalfHoogte < TipY then
     begin
-      Points[0].Y := Top + HalfH;
-      Points[2].Y := Top + HalfH + Radius;
+      Punten[0].Y := Top + HalfHoogte;
+      Punten[2].Y := Top + HalfHoogte + Straal;
     end
     else
     begin
-      Points[0].Y := Top + HalfH - Radius;
-      Points[2].Y := Top + HalfH;
+      Punten[0].Y := Top + HalfHoogte - Straal;
+      Punten[2].Y := Top + HalfHoogte;
     end;
   end;
-  { right side }
-  if (TipY < TipX * Slope + A) and (TipY > -Slope * TipX + B) then
+  { rechterzijde }
+  if (TipY < TipX * Helling + A) and (TipY > -Helling * TipX + B) then
   begin
-    Move(CornerOrderRight, Order, SizeOf(Order));
-    Points[0].X := Right;
-    Points[2].X := Right;
-    if Top + HalfH < TipY then
+    Move(CornerOrderRight, Volgorde, SizeOf(Volgorde));
+    Punten[0].X := Right;
+    Punten[2].X := Right;
+    if Top + HalfHoogte < TipY then
     begin
-      Points[2].Y := Top + HalfH;
-      Points[0].Y := Top + HalfH + Radius;
+      Punten[2].Y := Top + HalfHoogte;
+      Punten[0].Y := Top + HalfHoogte + Straal;
     end
     else
     begin
-      Points[2].Y := Top + HalfH - Radius;
-      Points[0].Y := Top + HalfH;
+      Punten[2].Y := Top + HalfHoogte - Straal;
+      Punten[0].Y := Top + HalfHoogte;
     end;
   end;
-  { top side }
-  if ((TipY - A) / Slope <= TipX) and (TipX <= -(TipY - B) / Slope) then
+  { bovenzijde }
+  if ((TipY - A) / Helling <= TipX) and (TipX <= -(TipY - B) / Helling) then
   begin
-    Move(CornerOrderTop, Order, SizeOf(Order));
-    Points[0].Y := Top;
-    Points[2].Y := Top;
-    if TipX > Left + HalfW then
+    Move(CornerOrderTop, Volgorde, SizeOf(Volgorde));
+    Punten[0].Y := Top;
+    Punten[2].Y := Top;
+    if TipX > Left + HalfBreedte then
     begin
-      Points[2].X := Left + HalfW;
-      Points[0].X := Left + HalfW + Radius;
+      Punten[2].X := Left + HalfBreedte;
+      Punten[0].X := Left + HalfBreedte + Straal;
     end
     else
     begin
-      Points[2].X := Left + HalfW - Radius;
-      Points[0].X := Left + HalfW;
+      Punten[2].X := Left + HalfBreedte - Straal;
+      Punten[0].X := Left + HalfBreedte;
     end;
   end;
-  { bottom side }
-  if (TipX <= (TipY - A) / Slope) and (TipX >= -(TipY - B) / Slope) then
+  { onderzijde }
+  if (TipX <= (TipY - A) / Helling) and (TipX >= -(TipY - B) / Helling) then
   begin
-    Move(CornerOrderBottom, Order, SizeOf(Order));
-    Points[0].Y := Bottom;
-    Points[2].Y := Bottom;
-    if TipX > Left + HalfW then
+    Move(CornerOrderBottom, Volgorde, SizeOf(Volgorde));
+    Punten[0].Y := Bottom;
+    Punten[2].Y := Bottom;
+    if TipX > Left + HalfBreedte then
     begin
-      Points[0].X := Left + HalfW;
-      Points[2].X := Left + HalfW + Radius;
+      Punten[0].X := Left + HalfBreedte;
+      Punten[2].X := Left + HalfBreedte + Straal;
     end
     else
     begin
-      Points[0].X := Left + HalfW - Radius;
-      Points[2].X := Left + HalfW;
+      Punten[0].X := Left + HalfBreedte - Straal;
+      Punten[2].X := Left + HalfBreedte;
     end;
   end;
-  { tip inside the body: no pointer }
-  if PtInRect(Rect(Left, Top, Right, Bottom), Tip) then
-    Points[1] := Points[0];
-  { bottom right corner }
-  Points[Order[0] + (Order[0] - 2) div 2 * N].X := Right - Radius;
-  Points[Order[0] + (Order[0] - 2) div 2 * N].Y := Bottom;
+  { punt binnen het lichaam: geen aanwijzer }
+  if PtInRect(Rect(Left, Top, Right, Bottom), Spits) then
+    Punten[1] := Punten[0];
+  { rechtsonder hoek }
+  Punten[Volgorde[0] + (Volgorde[0] - 2) div 2 * N].X := Right - Straal;
+  Punten[Volgorde[0] + (Volgorde[0] - 2) div 2 * N].Y := Bottom;
   for I := 1 to N do
   begin
-    K := Order[0] + I + (Order[0] - 2) div 2 * N;
-    Points[K].X := Round(Sin(I * (Pi / 2) / (N + 1)) * Radius) + (Right - Radius);
-    Points[K].Y := Round(Cos(I * (Pi / 2) / (N + 1)) * Radius) + (Bottom - Radius);
+    K := Volgorde[0] + I + (Volgorde[0] - 2) div 2 * N;
+    Punten[K].X := Round(Sin(I * (Pi / 2) / (N + 1)) * Straal) + (Right - Straal);
+    Punten[K].Y := Round(Cos(I * (Pi / 2) / (N + 1)) * Straal) + (Bottom - Straal);
   end;
-  Points[Order[1] + (Order[1] - 2) div 2 * N].X := Right;
-  Points[Order[1] + (Order[1] - 2) div 2 * N].Y := Bottom - Radius;
-  { top right corner }
-  Points[Order[2] + (Order[2] - 2) div 2 * N].X := Right;
-  Points[Order[2] + (Order[2] - 2) div 2 * N].Y := Top + Radius;
+  Punten[Volgorde[1] + (Volgorde[1] - 2) div 2 * N].X := Right;
+  Punten[Volgorde[1] + (Volgorde[1] - 2) div 2 * N].Y := Bottom - Straal;
+  { rechtsboven hoek }
+  Punten[Volgorde[2] + (Volgorde[2] - 2) div 2 * N].X := Right;
+  Punten[Volgorde[2] + (Volgorde[2] - 2) div 2 * N].Y := Top + Straal;
   for I := 1 to N do
   begin
-    K := Order[2] + I + (Order[2] - 2) div 2 * N;
-    Points[K].X := Round(Cos(I * (Pi / 2) / (N + 1)) * Radius) + (Right - Radius);
-    Points[K].Y := Top + Radius - Round(Sin(I * (Pi / 2) / (N + 1)) * Radius);
+    K := Volgorde[2] + I + (Volgorde[2] - 2) div 2 * N;
+    Punten[K].X := Round(Cos(I * (Pi / 2) / (N + 1)) * Straal) + (Right - Straal);
+    Punten[K].Y := Top + Straal - Round(Sin(I * (Pi / 2) / (N + 1)) * Straal);
   end;
-  Points[Order[3] + (Order[3] - 2) div 2 * N].X := Right - Radius;
-  Points[Order[3] + (Order[3] - 2) div 2 * N].Y := Top;
-  { top left corner }
-  Points[Order[4] + (Order[4] - 2) div 2 * N].X := Left + Radius;
-  Points[Order[4] + (Order[4] - 2) div 2 * N].Y := Top;
+  Punten[Volgorde[3] + (Volgorde[3] - 2) div 2 * N].X := Right - Straal;
+  Punten[Volgorde[3] + (Volgorde[3] - 2) div 2 * N].Y := Top;
+  { linksboven hoek }
+  Punten[Volgorde[4] + (Volgorde[4] - 2) div 2 * N].X := Left + Straal;
+  Punten[Volgorde[4] + (Volgorde[4] - 2) div 2 * N].Y := Top;
   for I := 1 to N do
   begin
-    K := Order[4] + I + (Order[4] - 2) div 2 * N;
-    Points[K].X := Left + Radius - Round(Sin(I * (Pi / 2) / (N + 1)) * Radius);
-    Points[K].Y := Top + Radius - Round(Cos(I * (Pi / 2) / (N + 1)) * Radius);
+    K := Volgorde[4] + I + (Volgorde[4] - 2) div 2 * N;
+    Punten[K].X := Left + Straal - Round(Sin(I * (Pi / 2) / (N + 1)) * Straal);
+    Punten[K].Y := Top + Straal - Round(Cos(I * (Pi / 2) / (N + 1)) * Straal);
   end;
-  Points[Order[5] + (Order[5] - 2) div 2 * N].X := Left;
-  Points[Order[5] + (Order[5] - 2) div 2 * N].Y := Top + Radius;
-  { bottom left corner }
-  Points[Order[6] + (Order[6] - 2) div 2 * N].X := Left;
-  Points[Order[6] + (Order[6] - 2) div 2 * N].Y := Bottom - Radius;
+  Punten[Volgorde[5] + (Volgorde[5] - 2) div 2 * N].X := Left;
+  Punten[Volgorde[5] + (Volgorde[5] - 2) div 2 * N].Y := Top + Straal;
+  { linksonder hoek }
+  Punten[Volgorde[6] + (Volgorde[6] - 2) div 2 * N].X := Left;
+  Punten[Volgorde[6] + (Volgorde[6] - 2) div 2 * N].Y := Bottom - Straal;
   for I := 1 to N do
   begin
-    K := Order[6] + I + (Order[6] - 2) div 2 * N;
-    Points[K].X := Left + Radius - Round(Cos(I * (Pi / 2) / (N + 1)) * Radius);
-    Points[K].Y := Round(Sin(I * (Pi / 2) / (N + 1)) * Radius) + (Bottom - Radius);
+    K := Volgorde[6] + I + (Volgorde[6] - 2) div 2 * N;
+    Punten[K].X := Left + Straal - Round(Cos(I * (Pi / 2) / (N + 1)) * Straal);
+    Punten[K].Y := Round(Sin(I * (Pi / 2) / (N + 1)) * Straal) + (Bottom - Straal);
   end;
-  Points[Order[7] + (Order[7] - 2) div 2 * N].X := Left + Radius;
-  Points[Order[7] + (Order[7] - 2) div 2 * N].Y := Bottom;
-  Canvas.Polygon(Slice(Points, N * 4 + 11));
+  Punten[Volgorde[7] + (Volgorde[7] - 2) div 2 * N].X := Left + Straal;
+  Punten[Volgorde[7] + (Volgorde[7] - 2) div 2 * N].Y := Bottom;
+  Canvas.Polygon(Slice(Punten, N * 4 + 11));
 end;
 
 { @0046663C }
@@ -437,215 +437,215 @@ begin
   DrawDC(Surface.GetCanvas.Handle, DX, DY, ClipRect, Scale);
 end;
 
-{ @00466688  splits Text into LineCount lines (Words); returns the ratio of
-  the widest line to the line height (0: no text, -1: fewer words than lines) }
-function TTextBalloon.LineRatio(LineCount: Integer; Text: string; Canvas: TCanvas;
-  var MaxWidth: Integer; var Words: TLineWords; MaxLines: Integer): Double;
+{ @00466688  verdeelt Text in LineCount regels (Words); geeft de verhouding van
+  de breedste regel tot de regelhoogte (0: geen tekst, -1: minder woorden dan regels) }
+function TTextBalloon.LineRatio(AantalRegels: Integer; Tekst: string; Canvas: TCanvas;
+  var MaxBreedte: Integer; var Woorden: TLineWords; MaxRegels: Integer): Double;
 var
-  S, Word: string;
-  SpaceWidth, LineHeight, WordCount: Integer;
-  WordWidths: array[0..100] of Integer;
-  LineWidths: array[0..100] of Integer;
-  Counts: array[0..100] of Integer;
-  BestCounts: array[0..100] of Integer;
-  Rest, Total, Count, Width, Widest: Integer;
-  I, J, K, MinLine, MaxLine, BestWidest: Integer;
-  Ratio, BestRatio: Double;
-  Done: Boolean;
+  S, Woord: string;
+  SpatieBreedte, RegelHoogte, WoordAantal: Integer;
+  WoordBreedtes: array[0..100] of Integer;
+  RegelBreedtes: array[0..100] of Integer;
+  Aantallen: array[0..100] of Integer;
+  BesteAantallen: array[0..100] of Integer;
+  Rest, Totaal, Aantal, Breedte, Breedste: Integer;
+  I, J, K, MinRegel, MaxRegel, BesteBreedte: Integer;
+  Verhouding, BesteVerhouding: Double;
+  Klaar: Boolean;
 begin
-  { NOTE: MaxLines is not used }
-  S := Text;
-  SpaceWidth := Canvas.TextWidth(' ');
-  LineHeight := Round(FFont.Size * (LineCount + 0.5 + (LineCount - 1) * 0.75));
-  WordCount := 0;
+  { LET OP: MaxLines wordt niet gebruikt }
+  S := Tekst;
+  SpatieBreedte := Canvas.TextWidth(' ');
+  RegelHoogte := Round(FFont.Size * (AantalRegels + 0.5 + (AantalRegels - 1) * 0.75));
+  WoordAantal := 0;
   while S <> '' do
   begin
-    Word := SplitFirst(S, ' ');
-    WordWidths[WordCount] := Canvas.TextWidth(Word);
-    Inc(WordCount);
+    Woord := SplitFirst(S, ' ');
+    WoordBreedtes[WoordAantal] := Canvas.TextWidth(Woord);
+    Inc(WoordAantal);
   end;
-  if WordCount = 0 then
+  if WoordAantal = 0 then
     Result := 0
-  else if WordCount < LineCount then
+  else if WoordAantal < AantalRegels then
     Result := -1
-  else if WordCount > 15 then
+  else if WoordAantal > 15 then
   begin
-    { many words: spread them evenly over the lines }
-    Rest := WordCount;
-    Total := 0;
-    for I := 0 to LineCount - 2 do
+    { veel woorden: verdeel ze gelijkmatig over de regels }
+    Rest := WoordAantal;
+    Totaal := 0;
+    for I := 0 to AantalRegels - 2 do
     begin
-      Count := Round(Rest / (LineCount - I));
-      Words[I] := Count;
-      Inc(Total, Count);
-      Dec(Rest, Count);
+      Aantal := Round(Rest / (AantalRegels - I));
+      Woorden[I] := Aantal;
+      Inc(Totaal, Aantal);
+      Dec(Rest, Aantal);
     end;
-    Words[LineCount - 1] := WordCount - Total;
+    Woorden[AantalRegels - 1] := WoordAantal - Totaal;
     K := 0;
-    Widest := -1;
-    for I := 0 to LineCount - 1 do
+    Breedste := -1;
+    for I := 0 to AantalRegels - 1 do
     begin
-      Width := 0;
-      for J := 0 to Words[I] - 1 do
+      Breedte := 0;
+      for J := 0 to Woorden[I] - 1 do
       begin
         if J > 0 then
-          Inc(Width, SpaceWidth);
-        Inc(Width, WordWidths[K]);
+          Inc(Breedte, SpatieBreedte);
+        Inc(Breedte, WoordBreedtes[K]);
         Inc(K);
       end;
-      if Width > Widest then
-        Widest := Width;
+      if Breedte > Breedste then
+        Breedste := Breedte;
     end;
-    MaxWidth := Widest;
-    Result := Widest / LineHeight;
+    MaxBreedte := Breedste;
+    Result := Breedste / RegelHoogte;
   end
   else
   begin
-    { few words: try every split and keep the most even one }
-    BestRatio := -1;
-    Counts[0] := WordCount;
-    for I := 1 to LineCount - 1 do
-      Counts[I] := 0;
-    Done := False;
-    while not Done do
+    { weinig woorden: probeer elke splitsing en houd de meest gelijkmatige }
+    BesteVerhouding := -1;
+    Aantallen[0] := WoordAantal;
+    for I := 1 to AantalRegels - 1 do
+      Aantallen[I] := 0;
+    Klaar := False;
+    while not Klaar do
     begin
       K := 0;
-      for I := 0 to LineCount - 1 do
+      for I := 0 to AantalRegels - 1 do
       begin
-        LineWidths[I] := 0;
-        for J := 0 to Counts[I] - 1 do
+        RegelBreedtes[I] := 0;
+        for J := 0 to Aantallen[I] - 1 do
         begin
-          Inc(LineWidths[I], WordWidths[K]);
+          Inc(RegelBreedtes[I], WoordBreedtes[K]);
           if J > 0 then
-            Inc(LineWidths[I], SpaceWidth);
+            Inc(RegelBreedtes[I], SpatieBreedte);
           Inc(K);
         end;
       end;
-      MinLine := 0;
-      MaxLine := 0;
-      for I := 0 to LineCount - 1 do
+      MinRegel := 0;
+      MaxRegel := 0;
+      for I := 0 to AantalRegels - 1 do
       begin
-        if LineWidths[MaxLine] < LineWidths[I] then
-          MaxLine := I;
-        if LineWidths[I] < LineWidths[MinLine] then
-          MinLine := I;
+        if RegelBreedtes[MaxRegel] < RegelBreedtes[I] then
+          MaxRegel := I;
+        if RegelBreedtes[I] < RegelBreedtes[MinRegel] then
+          MinRegel := I;
       end;
-      Ratio := LineWidths[MinLine] / LineWidths[MaxLine];
-      if Ratio > BestRatio then
+      Verhouding := RegelBreedtes[MinRegel] / RegelBreedtes[MaxRegel];
+      if Verhouding > BesteVerhouding then
       begin
-        BestRatio := Ratio;
-        for I := 0 to LineCount - 1 do
+        BesteVerhouding := Verhouding;
+        for I := 0 to AantalRegels - 1 do
         begin
-          BestCounts[I] := Counts[I];
-          BestWidest := LineWidths[MaxLine];
+          BesteAantallen[I] := Aantallen[I];
+          BesteBreedte := RegelBreedtes[MaxRegel];
         end;
       end;
-      { next split }
-      I := LineCount - 2;
-      while (I >= 0) and (Counts[I] = 0) do
+      { volgende splitsing }
+      I := AantalRegels - 2;
+      while (I >= 0) and (Aantallen[I] = 0) do
         Dec(I);
       if I = -1 then
-        Done := True
+        Klaar := True
       else
       begin
-        Dec(Counts[I]);
-        Inc(Counts[I + 1]);
-        for J := I + 2 to LineCount - 1 do
+        Dec(Aantallen[I]);
+        Inc(Aantallen[I + 1]);
+        for J := I + 2 to AantalRegels - 1 do
         begin
-          Inc(Counts[I + 1], Counts[J]);
-          Counts[J] := 0;
+          Inc(Aantallen[I + 1], Aantallen[J]);
+          Aantallen[J] := 0;
         end;
       end;
     end;
-    Result := BestWidest / LineHeight;
-    MaxWidth := BestWidest;
-    for I := 0 to LineCount - 1 do
-      Words[I] := BestCounts[I];
+    Result := BesteBreedte / RegelHoogte;
+    MaxBreedte := BesteBreedte;
+    for I := 0 to AantalRegels - 1 do
+      Woorden[I] := BesteAantallen[I];
   end;
 end;
 
-{ @00466A58  chooses the number of lines whose block ratio is closest to
-  sqrt(2) and returns the balloon body (Left, Top)-(Right, Bottom) }
-procedure TTextBalloon.FitText(Text: string; Canvas: TCanvas; Left, Top: Integer;
-  var Right, Bottom, LineCount, MaxWidth: Integer; var Words: TLineWords;
-  MaxLines: Integer);
+{ @00466A58  kiest het aantal regels waarvan de blokverhouding het dichtst bij
+  sqrt(2) ligt en geeft het ballonlichaam terug (Left, Top)-(Right, Bottom) }
+procedure TTextBalloon.FitText(Tekst: string; Canvas: TCanvas; Left, Top: Integer;
+  var Right, Bottom, AantalRegels, MaxBreedte: Integer; var Woorden: TLineWords;
+  MaxRegels: Integer);
 var
-  N, Margin: Integer;
-  Ratio, BestDiff: Double;
+  N, Marge: Integer;
+  Verhouding, BesteVerschil: Double;
 begin
   N := 0;
-  Ratio := 10;
-  BestDiff := 10000;
-  while Ratio <> -1 do
+  Verhouding := 10;
+  BesteVerschil := 10000;
+  while Verhouding <> -1 do
   begin
     Inc(N);
-    Ratio := LineRatio(N, Text, Canvas, MaxWidth, Words, MaxLines);
-    if Ratio = 0 then
+    Verhouding := LineRatio(N, Tekst, Canvas, MaxBreedte, Woorden, MaxRegels);
+    if Verhouding = 0 then
     begin
-      LineCount := 0;
+      AantalRegels := 0;
       Right := Left + 50;
       Bottom := Top + 36;
       Exit;
     end;
-    if (Abs(Sqrt(2) - Ratio) < BestDiff) and (Ratio <> -1) then
-      BestDiff := Abs(Sqrt(2) - Ratio)
+    if (Abs(Sqrt(2) - Verhouding) < BesteVerschil) and (Verhouding <> -1) then
+      BesteVerschil := Abs(Sqrt(2) - Verhouding)
     else
     begin
-      LineCount := N - 1;
+      AantalRegels := N - 1;
       Break;
     end;
   end;
-  Ratio := LineRatio(LineCount, Text, Canvas, MaxWidth, Words, MaxLines);
-  Margin := 20;
-  Right := Round(MaxWidth + Left + Margin);
-  Bottom := Round(MaxWidth / Ratio + Top + Margin);
+  Verhouding := LineRatio(AantalRegels, Tekst, Canvas, MaxBreedte, Woorden, MaxRegels);
+  Marge := 20;
+  Right := Round(MaxBreedte + Left + Marge);
+  Bottom := Round(MaxBreedte / Verhouding + Top + Marge);
 end;
 
 { @00466DE8 }
 procedure TTextBalloon.DrawDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
   Scale: Double);
 var
-  Words: TLineWords;
+  Woorden: TLineWords;
   Canvas: TCanvas;
-  MaxWidth: Integer;
+  MaxBreedte: Integer;
   BodyLeft, BodyTop: Integer;
-  BodyRight, BodyBottom, LineCount: Integer;
+  BodyRight, BodyBottom, AantalRegels: Integer;
   TipX, TipY: Integer;
-  OldFont: TFont;
+  OudeFont: TFont;
 
   { @00466BD4 }
-  procedure DrawLines(LineCount: Integer; Text: string);
+  procedure DrawLines(AantalRegels: Integer; Tekst: string);
   var
-    Lines: TStringList;
-    S, Line, Word: string;
-    I, J, Margin, X: Integer;
+    Regels: TStringList;
+    S, Regel, Woord: string;
+    I, J, Marge, X: Integer;
   begin
-    Lines := TStringList.Create;   { NOTE: never freed }
-    S := Text;
-    Line := '';
-    for I := 0 to LineCount - 1 do
+    Regels := TStringList.Create;   { LET OP: wordt nooit vrijgegeven }
+    S := Tekst;
+    Regel := '';
+    for I := 0 to AantalRegels - 1 do
     begin
-      Line := '';
-      for J := 1 to Words[I] do
-        if Line <> '' then
+      Regel := '';
+      for J := 1 to Woorden[I] do
+        if Regel <> '' then
         begin
-          Word := SplitFirst(S, ' ');
-          Line := Line + ' ' + Word;
+          Woord := SplitFirst(S, ' ');
+          Regel := Regel + ' ' + Woord;
         end
         else
         begin
-          Word := SplitFirst(S, ' ');
-          Line := Line + Word;
+          Woord := SplitFirst(S, ' ');
+          Regel := Regel + Woord;
         end;
-      Lines.Add(Line);
+      Regels.Add(Regel);
     end;
-    Margin := 10;
+    Marge := 10;
     Canvas.Brush.Style := bsClear;
-    for I := 0 to LineCount - 1 do
+    for I := 0 to AantalRegels - 1 do
     begin
-      X := Round((MaxWidth - Canvas.TextWidth(Lines[I])) / 2);
-      Canvas.TextOut(BodyLeft + X + Margin,
-        Round(Canvas.Font.Size * (I * 1.75) + (BodyTop + Margin)), Lines[I]);
+      X := Round((MaxBreedte - Canvas.TextWidth(Regels[I])) / 2);
+      Canvas.TextOut(BodyLeft + X + Marge,
+        Round(Canvas.Font.Size * (I * 1.75) + (BodyTop + Marge)), Regels[I]);
     end;
   end;
 
@@ -656,13 +656,13 @@ begin
   BodyTop := FBodyY + DY;
   TipX := DX + FTipX;
   TipY := DY + FTipY;
-  OldFont := Canvas.Font;
+  OudeFont := Canvas.Font;
   Canvas.Font := FFont;
   FitText(FBalloonText, Canvas, BodyLeft, BodyTop, BodyRight, BodyBottom,
-    LineCount, MaxWidth, Words, 100);
+    AantalRegels, MaxBreedte, Woorden, 100);
   DrawBalloon(Canvas, BodyLeft, BodyTop, BodyRight, BodyBottom, TipX, TipY);
-  DrawLines(LineCount, FBalloonText);
-  Canvas.Font := OldFont;
+  DrawLines(AantalRegels, FBalloonText);
+  Canvas.Font := OudeFont;
   Canvas.Free;
 end;
 
@@ -703,6 +703,6 @@ begin
   Result := FY;
 end;
 
-{ The finalization at @00466F70 is the empty compiler-generated stub. }
+{ De finalization op @00466F70 is de lege, door de compiler gegenereerde stub. }
 
 end.

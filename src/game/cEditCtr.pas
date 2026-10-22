@@ -1,8 +1,8 @@
 unit cEditCtr;
 
-{ TComment: borderless, black edit used as a caption/comment control; also registers
-  the "HANDJE" (hand) cursor.
-  Decompiled from ROS.exe v1.1, code 00469244-0046952B. }
+{ TComment: randloos, zwart invoerveld dat als onderschrift- of opmerkingbesturing
+  wordt gebruikt; registreert ook de cursor "HANDJE" (hand).
+  Gedecompileerd uit ROS.exe v1.1, code 00469244-0046952B. }
 
 {$I zm.inc}
 
@@ -17,7 +17,7 @@ const
 type
   TComment = class(TCustomEdit)
   private
-    procedure SetCaption(Value: string);
+    procedure SetCaption(Waarde: string);
     function GetCaption: string;
   public
     constructor Create(AOwner: TComponent); override;
@@ -28,9 +28,9 @@ type
 implementation
 
 { @004693B8 }
-procedure TComment.SetCaption(Value: string);
+procedure TComment.SetCaption(Waarde: string);
 begin
-  Text := Value;
+  Text := Waarde;
 end;
 
 { @00469404 }

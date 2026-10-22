@@ -1,9 +1,9 @@
 unit Sprframe;
 
-{ Sprite frames. A TFrameList owns one surface on which all its frames are laid out
-  side by side; a TFrame is a named rectangle of that surface. The list is streamed
-  in the DFM as the binary property 'Data'.
-  Decompiled from ROS.exe v1.1, code 00463C14-00464F17. }
+{ Sprite-frames. Een TFrameList bezit een oppervlak waarop al zijn frames naast elkaar liggen;
+  een TFrame is een benoemde rechthoek van dat oppervlak. De lijst wordt in de DFM gestreamd
+  als de binaire eigenschap 'Data'.
+  Gedecompileerd uit ROS.exe v1.1, code 00463C14-00464F17. }
 
 {$I zm.inc}
 
@@ -23,7 +23,7 @@ type
   private
     FName: TFrameName;          { +0x04 }
     FFrameList: TFrameList;     { +0x58 }
-    FX: SmallInt;               { +0x5C  position on the frame list surface }
+    FX: SmallInt;               { +0x5C  positie op het oppervlak van de framelijst }
     FY: SmallInt;               { +0x5E }
     FWidth: SmallInt;           { +0x60 }
     FHeight: SmallInt;          { +0x62 }
@@ -62,7 +62,7 @@ type
     property Surface: TSurface read GetSurface;
   end;
 
-  { List that owns (frees) its objects }
+  { Lijst die zijn objecten bezit (en vrijgeeft) }
   TPersistentList = class(TPersistent)
   private
     FList: TList;               { +0x04 }
@@ -80,7 +80,7 @@ type
     FTransparentColor: TColor;  { +0x08 }
     FSurface: TSurface;         { +0x0C }
     FClearing: Boolean;         { +0x10 }
-    FFormat: string[127];       { +0x11  image format of the streamed data ('DFM' / 'BMP') }
+    FFormat: string[127];       { +0x11  beeldformaat van de gestreamde data ('DFM' / 'BMP') }
     procedure ReadData(Stream: TStream);
     procedure WriteData(Stream: TStream);
   protected
@@ -107,10 +107,10 @@ type
 
 const
   ElrondMode: Boolean = False;  { 00488D80 }
-  FrameCount: Integer = 0;      { 00488D84: number of TFrame instances alive }
+  FrameCount: Integer = 0;      { 00488D84: aantal levende TFrame-instanties }
 
 var
-  OnFrameProgress: TFrameProgressEvent;  { 0048A8D8: called while frames are streamed }
+  OnFrameProgress: TFrameProgressEvent;  { 0048A8D8: wordt aangeroepen terwijl frames gestreamd worden }
 
 implementation
 
@@ -180,25 +180,25 @@ end;
 { @004640F8 }
 procedure TFrame.Assign(Source: TPersistent);
 var
-  Src: TFrame;
+  Bron: TFrame;
 begin
   if not (Source is TFrame) then
     inherited Assign(Source)
   else
   begin
-    Src := Source as TFrame;
-    FName := Src.FName;
-    FX := Src.FX;
-    FY := Src.FY;
-    FWidth := Src.FWidth;
-    FHeight := Src.FHeight;
-    FHotSpotX := Src.FHotSpotX;
-    FHotSpotY := Src.FHotSpotY;
+    Bron := Source as TFrame;
+    FName := Bron.FName;
+    FX := Bron.FX;
+    FY := Bron.FY;
+    FWidth := Bron.FWidth;
+    FHeight := Bron.FHeight;
+    FHotSpotX := Bron.FHotSpotX;
+    FHotSpotY := Bron.FHotSpotY;
     FreeData;
-    if Src.FData <> nil then
+    if Bron.FData <> nil then
     begin
       FData := TMemoryStream.Create;
-      FData.LoadFromStream(Src.FData);
+      FData.LoadFromStream(Bron.FData);
     end;
   end;
 end;
@@ -262,31 +262,31 @@ end;
 { @00464274 }
 procedure TFrame.Draw(Dest: TSurface; DestRect: TRect; MirrorX, MirrorY, Transparent: Boolean);
 var
-  S: TSurface;
+  Oppervlak: TSurface;
 begin
   if Transparent then
     GetSurface.SetTransparentColor(FFrameList.FTransparentColor)
   else
     GetSurface.SetTransparentColor(clNoTransparent);
-  S := GetSurface;
-  Dest.CopyFrom(S, Rect(FX, FY, FX + FWidth, FY + FHeight), DestRect, MirrorX, MirrorY);
+  Oppervlak := GetSurface;
+  Dest.CopyFrom(Oppervlak, Rect(FX, FY, FX + FWidth, FY + FHeight), DestRect, MirrorX, MirrorY);
 end;
 
 { @00464310 }
 procedure TFrame.ReadData(Stream: TStream);
 var
-  Version: Byte;
+  Versie: Byte;
 begin
   DoProgress(Stream);
-  Stream.ReadBuffer(Version, 1);
-  if Version <= 1 then
+  Stream.ReadBuffer(Versie, 1);
+  if Versie <= 1 then
   begin
     Stream.ReadBuffer(FName, SizeOf(FName));
     Stream.ReadBuffer(FX, 2);
     Stream.ReadBuffer(FY, 2);
     Stream.ReadBuffer(FWidth, 2);
     Stream.ReadBuffer(FHeight, 2);
-    if Version = 1 then
+    if Versie = 1 then
     begin
       Stream.ReadBuffer(FHotSpotX, 2);
       Stream.ReadBuffer(FHotSpotY, 2);
@@ -302,10 +302,10 @@ end;
 { @00464440 }
 procedure TFrame.WriteData(Stream: TStream);
 var
-  Version: Byte;
+  Versie: Byte;
 begin
-  Version := 1;
-  Stream.WriteBuffer(Version, 1);
+  Versie := 1;
+  Stream.WriteBuffer(Versie, 1);
   Stream.WriteBuffer(FName, SizeOf(FName));
   Stream.WriteBuffer(FX, 2);
   Stream.WriteBuffer(FY, 2);
@@ -363,8 +363,8 @@ begin
   inherited Destroy;
 end;
 
-{ @00464604  Cuts the frame's strip out of the surface and moves the frames right of it
-  to the left. }
+{ @00464604  Snijdt de strook van het frame uit het oppervlak en schuift de frames rechts ervan
+  naar links op. }
 procedure TFrameList.RemoveFrame(Frame: TFrame);
 var
   DestRect, SrcRect: TRect;
@@ -383,7 +383,7 @@ begin
   FSurface.Width := FSurface.Width - Frame.GetWidth;
 end;
 
-{ @0046470C  Appends Image to the right of the surface (or at X, Y when given). }
+{ @0046470C  Voegt Image rechts aan het oppervlak toe (of op X, Y wanneer die zijn opgegeven). }
 procedure TFrameList.AddImage(Image: TSurface; var X, Y: SmallInt);
 begin
   if (X = -1) or (Y = -1) then
@@ -441,26 +441,26 @@ end;
 { @00464940 }
 procedure TFrameList.Assign(Source: TPersistent);
 var
-  Src: TFrameList;
+  Bron: TFrameList;
   I: Integer;
-  F: TFrame;
+  Nieuw: TFrame;
 begin
   if not (Source is TFrameList) then
     inherited Assign(Source)
   else
   begin
     SetTransparentColor(clNoTransparent);
-    Src := Source as TFrameList;
+    Bron := Source as TFrameList;
     Clear;
     FClearing := False;
-    FSurface.Assign(Src.FSurface);
-    for I := 0 to Src.GetCount - 1 do
+    FSurface.Assign(Bron.FSurface);
+    for I := 0 to Bron.GetCount - 1 do
     begin
-      F := TFrame.CreateEmpty(Self);
-      F.Assign(Src.GetFrame(I));
-      FList.Add(F);
+      Nieuw := TFrame.CreateEmpty(Self);
+      Nieuw.Assign(Bron.GetFrame(I));
+      FList.Add(Nieuw);
     end;
-    SetTransparentColor(Src.FTransparentColor);
+    SetTransparentColor(Bron.FTransparentColor);
   end;
 end;
 
@@ -520,26 +520,26 @@ end;
 { @00464C64 }
 procedure TFrameList.ReadData(Stream: TStream);
 var
-  N: SmallInt;
+  Aantal: SmallInt;
   I: Integer;
-  F: TFrame;
+  Beeld: TFrame;
 begin
   FSurface.SetTransparentColor(clNoTransparent);
   DoProgress(Stream);
-  Stream.ReadBuffer(N, 2);
-  if N >= 0 then
-    FFormat := 'DFM'   { old data: no format header, N is the frame count }
+  Stream.ReadBuffer(Aantal, 2);
+  if Aantal >= 0 then
+    FFormat := 'DFM'   { oude data: geen formaatkop, Aantal is het aantal frames }
   else
   begin
-    Stream.ReadBuffer(FFormat[1], -N);
-    SetLength(FFormat, -N);
-    Stream.ReadBuffer(N, 2);
+    Stream.ReadBuffer(FFormat[1], -Aantal);
+    SetLength(FFormat, -Aantal);
+    Stream.ReadBuffer(Aantal, 2);
   end;
-  for I := 1 to N do
+  for I := 1 to Aantal do
   begin
-    F := TFrame.CreateEmpty(Self);
-    F.ReadData(Stream);
-    FList.Add(F);
+    Beeld := TFrame.CreateEmpty(Self);
+    Beeld.ReadData(Stream);
+    FList.Add(Beeld);
   end;
   if GetCount <> 0 then
     FSurface.LoadFromStream(Stream);
@@ -547,35 +547,35 @@ begin
   FSurface.SetTransparentColor(FTransparentColor);
 end;
 
-{ @00464D28  does nothing (debugging leftover) }
-procedure DebugStr(S: string);
+{ @00464D28  doet niets (overblijfsel van het debuggen) }
+procedure DebugStr(Tekst: string);
 begin
-  S := S + 'X';
+  Tekst := Tekst + 'X';
 end;
 
 { @00464D80 }
 procedure TFrameList.WriteData(Stream: TStream);
 var
-  OldTransparent: TColor;
-  N: SmallInt;
-  Fmt: string;
+  OudTransparant: TColor;
+  Aantal: SmallInt;
+  Formaat: string;
   I: Integer;
 begin
   try
-    OldTransparent := FTransparentColor;
+    OudTransparant := FTransparentColor;
     SetTransparentColor(clNoTransparent);
-    N := -3;
-    Fmt := 'BMP';
-    Stream.WriteBuffer(N, 2);
-    Stream.WriteBuffer(Fmt[1], -N);
-    N := GetCount;
-    Stream.WriteBuffer(N, 2);
-    for I := 0 to N - 1 do
+    Aantal := -3;
+    Formaat := 'BMP';
+    Stream.WriteBuffer(Aantal, 2);
+    Stream.WriteBuffer(Formaat[1], -Aantal);
+    Aantal := GetCount;
+    Stream.WriteBuffer(Aantal, 2);
+    for I := 0 to Aantal - 1 do
       GetFrame(I).WriteData(Stream);
     DebugStr(IntToStr(FSurface.Width));
     if GetCount <> 0 then
       FSurface.SaveToStream(Stream);
-    SetTransparentColor(OldTransparent);
+    SetTransparentColor(OudTransparant);
   except
     on E: Exception do
       ShowMessage(E.Message);

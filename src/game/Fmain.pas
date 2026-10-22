@@ -1,13 +1,13 @@
 unit Fmain;
 
-{ TfrmMain: the main form of Virtueel Zoetermeer. It owns the game model
-  (TSettings, TStatus, TWorld), the city view (TView) on the sprite box, and
-  implements the whole user interface: the building buttons ("knoppen") per
-  page/tab, dragging a building onto the map, hints, the dialog sprites
-  (explanation memo with Start/Cancel/Ja/Nee buttons), the criteria meters,
-  the yearly report, the level/round logic, scrolling and zooming, and saving
-  and loading a city.
-  Decompiled from ROS.exe v1.1, code 00479510-0047FD67. }
+{ TfrmMain: het hoofdvenster van Virtueel Zoetermeer. Het bevat het spelmodel
+  (TSettings, TStatus, TWorld), de stadsweergave (TView) op het spritevak, en
+  implementeert de hele gebruikersinterface: de gebouwknoppen ("knoppen") per
+  pagina/tabblad, een gebouw naar de kaart slepen, hints, de dialoogsprites
+  (uitlegmemo met de knoppen Start/Cancel/Ja/Nee), de criteriummeters,
+  het jaarrapport, de niveau- en rondelogica, scrollen en zoomen, en opslaan
+  en laden van een stad.
+  Gedecompileerd uit ROS.exe v1.1, code 00479510-0047FD67. }
 
 {$I zm.inc}
 
@@ -19,7 +19,7 @@ uses
   Usett, Uworld, Uview, uAutos, fBack;
 
 type
-  { VMT 0047955C, instance size $48C }
+  { VMT 0047955C, instantiegrootte $48C }
   TfrmMain = class(TCtrlForm)
     sbStage: TSpriteBox;                 { +0x2D0 }
     memoMessages: TMemo;                 { +0x2D4 }
@@ -82,7 +82,7 @@ type
     spriteWegenEnSpoor: TSprite;         { +0x3B8 }
     spriteSportEnRecreatie: TSprite;     { +0x3BC }
     spriteStadsvoorzieningen: TSprite;   { +0x3C0 }
-    timerRecalc: TFastTimer;             { +0x3C4  Tag: seconds until the travel times are recalculated }
+    timerRecalc: TFastTimer;             { +0x3C4  Tag: seconden tot de reistijden opnieuw worden berekend }
     Label2: TLabel;                      { +0x3C8 }
     lblRecalc: TLabel;                   { +0x3CC }
     lblTimers: TLabel;                   { +0x3D0 }
@@ -138,57 +138,57 @@ type
     procedure butScrollrightClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
   public
-    { public rather than private so the test harness (src/tests) can read the game state;
-      visibility does not affect the layout }
-    FTemplates: TSpriteList;             { +0x414  one template sprite per object type (Contents) }
-    FKnoppen: TSpriteList;               { +0x418  the 'k_<name>' button image sprites }
-    FDragSprite: TSprite;                { +0x41C  building being dragged onto the map }
-    FDragIndex: Integer;                 { +0x420  its index in Contents }
+    { publiek in plaats van private, zodat het testharnas (src/tests) de spelstatus kan lezen;
+      de zichtbaarheid heeft geen invloed op de indeling }
+    FTemplates: TSpriteList;             { +0x414  een sjabloonsprite per objecttype (Contents) }
+    FKnoppen: TSpriteList;               { +0x418  de knopafbeeldingsprites 'k_<name>' }
+    FDragSprite: TSprite;                { +0x41C  gebouw dat naar de kaart wordt gesleept }
+    FDragIndex: Integer;                 { +0x420  de index ervan in Contents }
     FWorld: TWorld;                      { +0x424 }
     FView: TView;                        { +0x428 }
     FStatus: TStatus;                    { +0x42C }
     FSettings: TSettings;                { +0x430 }
     FLevel: Integer;                     { +0x434 }
-    FReserved438: Integer;               { +0x438  set to 0 by SetDrag, never read }
-    FGeldSprite: TSprite;                { +0x43C  shows the money (Geld) }
-    FDialog: Boolean;                    { +0x440  the dialog (ShowDialog) is visible }
+    FReserved438: Integer;               { +0x438  door SetDrag op 0 gezet, nooit gelezen }
+    FGeldSprite: TSprite;                { +0x43C  toont het geld (Geld) }
+    FDialog: Boolean;                    { +0x440  het dialoogvenster (ShowDialog) is zichtbaar }
     FHintVisible: Boolean;               { +0x441 }
-    FHintText: string;                   { +0x444  text drawn on spriteHint }
-    FBackground: TSurface;               { +0x448  copy of the empty sprite box picture }
-    FEvent: string;                      { +0x44C  last event passed to Dialog }
-    FBouwMsg: string;                    { +0x450  why the last building could not be placed }
-    FOldSize: TPoint;                    { +0x454  screen size before SetResolution (X = 0: unchanged) }
-    FDirectX: Boolean;                   { +0x45C  screen mode was set with DirectX }
-    FStarted: Boolean;                   { +0x45D  the first level has been started }
-    FPages: TStringList;                 { +0x460  page name -> number of buttons on it }
-    FGeldCaption: TCaption;              { +0x464  text of FGeldSprite }
+    FHintText: string;                   { +0x444  tekst die op spriteHint wordt getekend }
+    FBackground: TSurface;               { +0x448  kopie van het lege spritevak-plaatje }
+    FEvent: string;                      { +0x44C  laatste gebeurtenis die aan Dialog is doorgegeven }
+    FBouwMsg: string;                    { +0x450  waarom het laatste gebouw niet geplaatst kon worden }
+    FOldSize: TPoint;                    { +0x454  schermgrootte voor SetResolution (X = 0: ongewijzigd) }
+    FDirectX: Boolean;                   { +0x45C  schermmodus is ingesteld met DirectX }
+    FStarted: Boolean;                   { +0x45D  het eerste niveau is gestart }
+    FPages: TStringList;                 { +0x460  paginanaam -> aantal knoppen erop }
+    FGeldCaption: TCaption;              { +0x464  tekst van FGeldSprite }
     FBlack: TfrmBlack;                   { +0x468 }
-    FPage: string;                       { +0x46C  page (tab) whose buttons are shown }
+    FPage: string;                       { +0x46C  pagina (tabblad) waarvan de knoppen worden getoond }
     FAutos: TAutoSprite;                 { +0x470 }
-    FCritSprites: array[0..5] of TSprite;  { +0x474  meters for Criteria[0..5] }
+    FCritSprites: array[0..5] of TSprite;  { +0x474  meters voor Criteria[0..5] }
     procedure WMEraseBkgnd(var Message: TWMEraseBkgnd); message WM_ERASEBKGND;
-    procedure ReadSprites(Level: Integer);
-    procedure CreateKnoppen(Level: Integer);
-    procedure ShowLoading(Msg: string);
-    procedure SetDrag(Name: string; Index: Integer);
-    procedure ShowDialog(Buttons: Integer; Kop, Uitleg: string);
+    procedure ReadSprites(Niveau: Integer);
+    procedure CreateKnoppen(Niveau: Integer);
+    procedure ShowLoading(Bericht: string);
+    procedure SetDrag(Naam: string; Nr: Integer);
+    procedure ShowDialog(Knoppen: Integer; Kop, Uitleg: string);
     procedure HideDialog;
-    procedure Rapport(Detail: Boolean);
-    procedure Dialog(Event: string);
+    procedure Rapport(Uitgebreid: Boolean);
+    procedure Dialog(Gebeurtenis: string);
     function CritIndex(C: Byte): Integer;
     procedure UpdateStatus;
-    procedure StartLevel(Level: Integer);
+    procedure StartLevel(Niveau: Integer);
     procedure StatusChange(Sender: TObject);
-    procedure ShowHintSprite(Text: string);
+    procedure ShowHintSprite(Tekst: string);
     procedure HideHintSprite;
-    procedure ShowBouwHint(X, Y: Integer; Name: string);
+    procedure ShowBouwHint(X, Y: Integer; Naam: string);
     procedure ShowKnopHint(X, Y: Integer);
     procedure ShowCellHint(X, Y: Integer);
-    procedure SetResolution(Size: TPoint);
-    procedure ShowPage(Page: string);
+    procedure SetResolution(Grootte: TPoint);
+    procedure ShowPage(Blad: string);
     procedure Quit;
     procedure CritMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    function ComponentExists(Name: string): Boolean;
+    function ComponentExists(Naam: string): Boolean;
   public
     function GetView: TView;
     property View: TView read GetView;
@@ -205,12 +205,12 @@ uses
   {$IFDEF FPC}, ZMRandom{$ENDIF}  { PORT: Delphi's Random };
 
 {$IFNDEF FPC}
-{$R *.dfm}  { Delphi only: the portable build streams forms from the user's ROS.exe }
+{$R *.dfm}  { Alleen Delphi: de draagbare build laadt formulieren uit de ROS.exe van de gebruiker }
 {$ENDIF}
 
 {$J+}
 const
-  StartedLevel: string = '';   { 00489198: level number (as text) last started by butStartClick }
+  StartedLevel: string = '';   { 00489198: niveaunummer (als tekst) dat het laatst is gestart door butStartClick }
 {$J-}
 
 { @00479F50 }
@@ -221,9 +221,9 @@ end;
 { @00479F54 }
 procedure TfrmMain.FormCreate(Sender: TObject);
 var
-  Answer: string;
-  NewSize: TPoint;
-  Behav: TBehavButton;
+  Antwoord: string;
+  NieuweGrootte: TPoint;
+  Gedrag: TBehavButton;
 begin
   PerfStart := 0;
   PerfView := 0;
@@ -252,20 +252,20 @@ begin
       'Om dit spel te kunnen draaien, moeten de eigenschappen van het scherm worden ' +
       'aangepast. Zal ik deze verandering maken?', 'Scherminstellingen verkeerd',
       MB_OKCANCEL or MB_ICONQUESTION) of
-      IDCANCEL: Answer := 'Quit';
-      IDOK: Answer := 'Yes';
+      IDCANCEL: Antwoord := 'Quit';
+      IDOK: Antwoord := 'Yes';
     end;
     FOldSize.X := 0;
     FOldSize.Y := 0;
-    if Answer = 'Quit' then
+    if Antwoord = 'Quit' then
       Quit;
-    if Answer = 'Yes' then
+    if Antwoord = 'Yes' then
     begin
       FOldSize.X := Screen.Width;
       FOldSize.Y := Screen.Height;
-      NewSize.X := 1024;
-      NewSize.Y := 768;
-      SetResolution(NewSize);
+      NieuweGrootte.X := 1024;
+      NieuweGrootte.Y := 768;
+      SetResolution(NieuweGrootte);
     end;
   end;
   FTemplates := TSpriteList.Create;
@@ -326,13 +326,13 @@ begin
     Visible := True;
   end;
   spriteHint.GetSurface.SetSize(150, 100, False);
-  Behav := TBehavButton.Create('Ja_up', 'Ja_dn', 'Ja_or');
-  Behav.OnClick := butJaClick;
-  spriteJa.AddBehaviour('KNOP', Behav);
+  Gedrag := TBehavButton.Create('Ja_up', 'Ja_dn', 'Ja_or');
+  Gedrag.OnClick := butJaClick;
+  spriteJa.AddBehaviour('KNOP', Gedrag);
   spriteJa.GetBehaviour('KNOP').Active := True;
-  Behav := TBehavButton.Create('Nee_up', 'Nee_dn', 'Nee_or');
-  Behav.OnClick := butNeeClick;
-  spriteNee.AddBehaviour('KNOP', Behav);
+  Gedrag := TBehavButton.Create('Nee_up', 'Nee_dn', 'Nee_or');
+  Gedrag.OnClick := butNeeClick;
+  spriteNee.AddBehaviour('KNOP', Gedrag);
   spriteNee.GetBehaviour('KNOP').Active := True;
   AddTextBehaviour(spriteWijk, '', 0, 0, lblWijk.Font);
   AddTextBehaviour(spriteLevel, '', 0, 0, lblLevel.Font);
@@ -353,24 +353,24 @@ end;
 { @0047A904 }
 procedure TfrmMain.sbStageStarted(Sender: TObject);
 var
-  Font: TFont;
+  Lettertype: TFont;
 begin
-  Font := TFont.Create;
-  Font.Name := 'Arial';
-  Font.Color := clWhite;
-  Font.Size := 12;
-  Font.Style := [fsBold];
+  Lettertype := TFont.Create;
+  Lettertype.Name := 'Arial';
+  Lettertype.Color := clWhite;
+  Lettertype.Size := 12;
+  Lettertype.Style := [fsBold];
   with FGeldSprite do
   begin
     SpriteBox := sbStage;
     Transparent := clBlack;
     FrameList.AddFrame('null', NewSurfaceSize(100, 20));
     FrameIndex := 0;
-    FGeldCaption := AddTextBehaviour(FGeldSprite, '', 0, 0, Font);
+    FGeldCaption := AddTextBehaviour(FGeldSprite, '', 0, 0, Lettertype);
     MoveTo(868, 191);
     Visible := True;
   end;
-  Font.Free;
+  Lettertype.Free;
   FStatus.OnChange := StatusChange;
   FStatus.Task := TTask.Create(0, 0);
   FBackground := NewSurface;
@@ -385,30 +385,30 @@ begin
 end;
 
 { @0047AC48 }
-procedure TfrmMain.ReadSprites(Level: Integer);
+procedure TfrmMain.ReadSprites(Niveau: Integer);
 var
-  FileName: string;
-  Files: TStringList;
+  BestandsNaam: string;
+  Bestanden: TStringList;
   Bmp: TSurface;
-  Dir: string;
+  Map: string;
 
   { @0047AACC }
-  procedure LoadFrames(Sprite: TSprite; Prefix: string);
+  procedure LaadFrames(Sprite: TSprite; Voorvoegsel: string);
   var
     I: Integer;
-    Token: string;
+    Deel: string;
   begin
-    ShowLoading(Prefix);
-    Prefix := LowStr(Prefix);
-    for I := 0 to Files.Count - 1 do
+    ShowLoading(Voorvoegsel);
+    Voorvoegsel := LowStr(Voorvoegsel);
+    for I := 0 to Bestanden.Count - 1 do
     begin
-      FileName := LowStr(Files[I]);
-      if StartsWith(FileName, Prefix) then
+      BestandsNaam := LowStr(Bestanden[I]);
+      if StartsWith(BestandsNaam, Voorvoegsel) then
       begin
         Bmp := NewSurface;
-        Bmp.LoadFromFile(AddPath(Dir, FileName));
-        Token := SplitFirst(FileName, '.');
-        Sprite.FrameList.AddFrame(Token, Bmp);
+        Bmp.LoadFromFile(AddPath(Map, BestandsNaam));
+        Deel := SplitFirst(BestandsNaam, '.');
+        Sprite.FrameList.AddFrame(Deel, Bmp);
         Bmp.Free;
       end;
     end;
@@ -417,24 +417,24 @@ var
 var
   C: Byte;
   I, J, L: Integer;
-  Name: string;
+  Naam: string;
   Sprite, Knop: TSprite;
-  Token: string;
+  Deel: string;
 begin
-  Dir := AddPath(AddPath(AppPath, 'images'), '8bits');
-  Files := TStringList.Create;
-  FindFiles(AddPath(Dir, '*.bmp'), $3F {faAnyFile}, Files);
-  if Level = 1 then
+  Map := AddPath(AddPath(AppPath, 'images'), '8bits');
+  Bestanden := TStringList.Create;
+  FindFiles(AddPath(Map, '*.bmp'), $3F {faAnyFile}, Bestanden);
+  if Niveau = 1 then
   begin
-    LoadFrames(spriteStoep, 'Stoep');
-    LoadFrames(FView.TreinSprite, 'Trein');
+    LaadFrames(spriteStoep, 'Stoep');
+    LaadFrames(FView.TreinSprite, 'Trein');
     for C := 0 to 5 do
       if not ComponentExists(Criteria[C]) then
       begin
         FCritSprites[C] := TSprite.Create(Self);
         FCritSprites[C].SpriteBox := sbStage;
         FCritSprites[C].Name := Criteria[C];
-        LoadFrames(FCritSprites[C], 'Cr_' + Criteria[C]);
+        LaadFrames(FCritSprites[C], 'Cr_' + Criteria[C]);
         FCritSprites[C].MoveTo(C * 100 + 225 - 1, 30);
         FCritSprites[C].Visible := False;
         FCritSprites[C].OnMouseMove := CritMouseMove;
@@ -442,69 +442,69 @@ begin
   end;
   for I := 0 to ContentsCount - 1 do
   begin
-    Name := Contents[I].Name;
-    if not ComponentExists(Name) then
+    Naam := Contents[I].Name;
+    if not ComponentExists(Naam) then
     begin
-      if (Copy(Name, 1, 5) = 'Rails') or (Copy(Name, 1, 4) = 'Snel') then
+      if (Copy(Naam, 1, 5) = 'Rails') or (Copy(Naam, 1, 4) = 'Snel') then
         L := 1
       else
         L := Contents[I].Level;
-      if not Contents[I].SpritesLoaded and (L <= Level) then
+      if not Contents[I].SpritesLoaded and (L <= Niveau) then
       begin
         ShowLoading(Contents[I].Description);
         Sprite := TSprite.Create(Self);
-        Sprite.Name := Name;
+        Sprite.Name := Naam;
         Sprite.SpriteBox := sbStage;
         FTemplates.Add(Sprite);
-        if Name <> 'Onbereikbaar' then
+        if Naam <> 'Onbereikbaar' then
         begin
-          if not ComponentExists('k_' + Name) then
+          if not ComponentExists('k_' + Naam) then
           begin
             Knop := TSprite.Create(Self);
-            Knop.Name := 'k_' + Name;
+            Knop.Name := 'k_' + Naam;
             Knop.SpriteBox := sbStage;
             FKnoppen.Add(Knop);
           end;
-          { NOTE: if 'k_<Name>' already exists, Knop keeps its previous value }
+          { LET OP: als 'k_<Name>' al bestaat, behoudt Knop zijn vorige waarde }
         end
         else
           Knop := nil;
-        for J := 0 to Files.Count - 1 do
+        for J := 0 to Bestanden.Count - 1 do
         begin
-          FileName := LowStr(Files[J]);
-          if StartsWith(FileName, LowStr(Name)) then
+          BestandsNaam := LowStr(Bestanden[J]);
+          if StartsWith(BestandsNaam, LowStr(Naam)) then
           begin
             Bmp := NewSurface;
-            Bmp.LoadFromFile(AddPath(Dir, FileName));
+            Bmp.LoadFromFile(AddPath(Map, BestandsNaam));
             with Sprite.FrameList do
             begin
-              Token := SplitFirst(FileName, '.');
-              AddFrame(Token, Bmp);
+              Deel := SplitFirst(BestandsNaam, '.');
+              AddFrame(Deel, Bmp);
               Frames[Count - 1].HotSpotX := Contents[I].GrondvlakX * TileW;
               Frames[Count - 1].HotSpotY := Frames[Count - 1].Height - 44;
             end;
             Bmp.Free;
           end
-          else if StartsWith(FileName, 'k-' + LowStr(Name)) then
+          else if StartsWith(BestandsNaam, 'k-' + LowStr(Naam)) then
           begin
             Bmp := NewSurface;
-            Bmp.LoadFromFile(AddPath(Dir, FileName));
-            Token := SplitFirst(FileName, '.');
-            FileName := DelLeft(Token, 2);
-            if EndsWith(FileName, '_ov') then
+            Bmp.LoadFromFile(AddPath(Map, BestandsNaam));
+            Deel := SplitFirst(BestandsNaam, '.');
+            BestandsNaam := DelLeft(Deel, 2);
+            if EndsWith(BestandsNaam, '_ov') then
             begin
-              Token := SplitFirst(FileName, '_');
-              FileName := Token + '_or';
+              Deel := SplitFirst(BestandsNaam, '_');
+              BestandsNaam := Deel + '_or';
             end;
             with Knop.FrameList do
             begin
-              AddFrame(FileName, Bmp);
-              if EndsWith(FileName, '_tr') then
+              AddFrame(BestandsNaam, Bmp);
+              if EndsWith(BestandsNaam, '_tr') then
               begin
                 Frames[Count - 1].HotSpotX := Contents[I].GrondvlakX * TileW;
                 Frames[Count - 1].HotSpotY := Frames[Count - 1].Height - 44;
                 if Contents[I].GrondvlakY = 5 then
-                  Dir := Dir + '';   { NOTE: no-op in the original (LStrCat with '') }
+                  Map := Map + '';   { LET OP: in het origineel een no-op (LStrCat met '') }
               end;
             end;
             Bmp.Free;
@@ -512,32 +512,32 @@ begin
         end;
         if Sprite.FrameList.Count = 0 then
           Fout('ReadSprites: No images found for template sprite ' + Sprite.Name);
-        if (Name <> 'AndereStad') and (Name <> 'Onbereikbaar') and
+        if (Naam <> 'AndereStad') and (Naam <> 'Onbereikbaar') and
           (Knop.FrameList.Count = 0) then
           Fout('ReadSprites: No images found for knop sprite ' + Knop.Name);
         Contents[I].SpritesLoaded := True;
       end;
     end;
   end;
-  Files.Free;
+  Bestanden.Free;
 end;
 
 { @0047B470 }
-procedure TfrmMain.CreateKnoppen(Level: Integer);
+procedure TfrmMain.CreateKnoppen(Niveau: Integer);
 var
   I: Integer;
   Plek: Integer;
-  Behav: TBehavButton;
+  Gedrag: TBehavButton;
   Sprite: TSprite;
 begin
   for I := 0 to ContentsCount - 3 do
-    if (Contents[I].Level <= Level) and not Contents[I].KnopGemaakt and
+    if (Contents[I].Level <= Niveau) and not Contents[I].KnopGemaakt and
       not ComponentExists('KNOP' + IntToStr(I)) then
     begin
       Plek := StrToIntDef0(FPages.Values[Contents[I].Page]);
-      Behav := TBehavButton.Create(Contents[I].Name + '_up', Contents[I].Name + '_dn',
+      Gedrag := TBehavButton.Create(Contents[I].Name + '_up', Contents[I].Name + '_dn',
         Contents[I].Name + '_or');
-      Behav.OnClick := butPlaceSomethingClick;
+      Gedrag.OnClick := butPlaceSomethingClick;
       Sprite := FKnoppen.SpriteByName('k_' + Contents[I].Name);
       if Sprite = nil then
         Fout('Could not find sprite ' + Contents[I].Name);
@@ -549,7 +549,7 @@ begin
       Sprite.X := (Plek mod 3) * 64 + 829;
       Sprite.Y := (Plek div 3) * 64 + 228;
       FPages.Values[Contents[I].Page] := IntStr(Plek + 1);
-      Sprite.AddBehaviour('KNOP', Behav);
+      Sprite.AddBehaviour('KNOP', Gedrag);
       Sprite.GetBehaviour('KNOP').Active := True;
       Contents[I].KnopGemaakt := True;
     end;
@@ -557,15 +557,15 @@ begin
 end;
 
 { @0047B778 }
-procedure TfrmMain.ShowLoading(Msg: string);
+procedure TfrmMain.ShowLoading(Bericht: string);
 var
-  Token: string;
+  Deel: string;
 begin
-  if Pos('_', Msg) > 0 then
-    Token := SplitFirst(Msg, '_');
+  if Pos('_', Bericht) > 0 then
+    Deel := SplitFirst(Bericht, '_');
   with FBlack.lblLoading do
   begin
-    Caption := Msg;
+    Caption := Bericht;
     Left := FBlack.imgLoading.Left + 12;
     Top := FBlack.imgLoading.Top + 120;
   end;
@@ -586,24 +586,24 @@ begin
 end;
 
 { @0047B8A8 }
-procedure TfrmMain.SetDrag(Name: string; Index: Integer);
+procedure TfrmMain.SetDrag(Naam: string; Nr: Integer);
 var
-  FrameName: string;
-  Template: TSprite;
+  Beeldnaam: string;
+  Sjabloon: TSprite;
 begin
-  FrameName := Name + '_tr';
-  Name := 'k_' + Name;
+  Beeldnaam := Naam + '_tr';
+  Naam := 'k_' + Naam;
   if FDragSprite <> nil then
     FDragSprite.Kill;
-  Template := FKnoppen.SpriteByName(Name);
-  if Template = nil then
-    Fout('SetDrag: Sprite niet gevonden: ' + Name);
-  FDragSprite := TSprite.CreateCopy(Template);
-  if FDragSprite.FrameList.IndexOf(FrameName) = -1 then
-    Fout('PaintCell: could not find frame ' + FrameName + ' in sprite ' + FDragSprite.Name);
-  FDragSprite.CurrentFrame := FrameName;
+  Sjabloon := FKnoppen.SpriteByName(Naam);
+  if Sjabloon = nil then
+    Fout('SetDrag: Sprite niet gevonden: ' + Naam);
+  FDragSprite := TSprite.CreateCopy(Sjabloon);
+  if FDragSprite.FrameList.IndexOf(Beeldnaam) = -1 then
+    Fout('PaintCell: could not find frame ' + Beeldnaam + ' in sprite ' + FDragSprite.Name);
+  FDragSprite.CurrentFrame := Beeldnaam;
   FDragSprite.Scale := Zoom;
-  FDragIndex := Index;
+  FDragIndex := Nr;
   FReserved438 := 0;
 end;
 
@@ -625,7 +625,7 @@ var
   G, P: TPoint;
   Cell: TCell;
   Info: TContentsInfo;
-  Msg: string;
+  Melding: string;
 begin
   HideHintSprite;
   if FDragSprite <> nil then
@@ -646,8 +646,8 @@ begin
       else
       begin
         Info := Contents[FDragIndex];
-        Msg := Cell.KanBouwen(Info.Name);
-        FBouwMsg := Msg;
+        Melding := Cell.KanBouwen(Info.Name);
+        FBouwMsg := Melding;
         if FBouwMsg = '' then
         begin
           if Info.Singleton or (Info.GrondvlakX > 1) or (Info.GrondvlakY > 1) then
@@ -710,23 +710,23 @@ begin
 end;
 
 { @0047BEDC
-  Buttons: 1 = Start, 4 = Ja, 8 = Nee. Lines of Uitleg are separated by '\n'. }
-procedure TfrmMain.ShowDialog(Buttons: Integer; Kop, Uitleg: string);
+  Buttons: 1 = Start, 4 = Ja, 8 = Nee. Regels van Uitleg zijn gescheiden door '\n'. }
+procedure TfrmMain.ShowDialog(Knoppen: Integer; Kop, Uitleg: string);
 var
-  Line: string;
+  Regel: string;
   Memo: TBehavMemo;
 begin
   FDialog := True;
   HideHintSprite;
   memoMessages.Lines.Clear;
-  { NOTE: tests the form's own Text (its caption), not Uitleg; always true }
+  { LET OP: test de eigen Text van het formulier (het opschrift), niet Uitleg; is altijd waar }
   if Text <> '' then
   begin
     memoUitleg.Lines.Clear;
     while Uitleg <> '' do
     begin
-      Line := SplitFirst(Uitleg, '\n');
-      memoUitleg.Lines.Add(Line);
+      Regel := SplitFirst(Uitleg, '\n');
+      memoUitleg.Lines.Add(Regel);
     end;
   end;
   if Kop <> '' then
@@ -743,9 +743,9 @@ begin
   spriteStart.Z := -5101;
   spriteJa.Z := -5101;
   spriteNee.Z := -5101;
-  spriteStart.Visible := (Buttons and 1) > 0;
-  spriteJa.Visible := (Buttons and 4) > 0;
-  spriteNee.Visible := (Buttons and 8) > 0;
+  spriteStart.Visible := (Knoppen and 1) > 0;
+  spriteJa.Visible := (Knoppen and 4) > 0;
+  spriteNee.Visible := (Knoppen and 8) > 0;
   with spriteUitlegBackground do
   begin
     Z := -5100;
@@ -771,20 +771,20 @@ begin
 end;
 
 { @0047C184
-  Shows the yearly report. Without Detail the yearly income and costs are
-  booked (end of a round). }
-procedure TfrmMain.Rapport(Detail: Boolean);
+  Toont het jaarrapport. Zonder Detail worden de jaarlijkse inkomsten en kosten
+  geboekt (aan het einde van een ronde). }
+procedure TfrmMain.Rapport(Uitgebreid: Boolean);
 var
   Totaal, Opbrengst, Kosten: Integer;
-  Frm: TfrmReport;
+  Rapportvenster: TfrmReport;
 begin
   Totaal := 0;
-  Frm := TfrmReport.Create(Self);
-  FWorld.Rapport(Frm.Lists, Totaal, Opbrengst, Kosten, Detail);
-  if not Detail then
+  Rapportvenster := TfrmReport.Create(Self);
+  FWorld.Rapport(Rapportvenster.Lists, Totaal, Opbrengst, Kosten, Uitgebreid);
+  if not Uitgebreid then
     FStatus.Geld := FStatus.Geld - Kosten + Opbrengst;
-  Frm.Execute(FWorld.OpenWijken + 1);
-  Frm.Free;
+  Rapportvenster.Execute(FWorld.OpenWijken + 1);
+  Rapportvenster.Free;
   FStatus.Score := Totaal;
   PerfStart := GetTickCount;
   PerfView := 0;
@@ -794,11 +794,11 @@ begin
 end;
 
 { @0047C368
-  Events: 'StartGame', 'Begin', 'Level <n>', 'NextLevel', 'EndGame...' }
-procedure TfrmMain.Dialog(Event: string);
+  Gebeurtenissen: 'StartGame', 'Begin', 'Level <n>', 'NextLevel', 'EndGame...' }
+procedure TfrmMain.Dialog(Gebeurtenis: string);
 
   { @0047C240 }
-  function ScoreText: string;
+  function ScoreTekst: string;
   var
     Punten: Integer;
     S: string;
@@ -815,24 +815,24 @@ procedure TfrmMain.Dialog(Event: string);
   end;
 
 var
-  Uitleg, Kop, Token: string;
+  Uitleg, Kop, Deel: string;
 begin
-  if Event = 'NextLevel' then
+  if Gebeurtenis = 'NextLevel' then
   begin
     if FLevel < 11 then
-      Event := 'Level ' + IntToStr(FLevel + 1)
+      Gebeurtenis := 'Level ' + IntToStr(FLevel + 1)
     else
-      Event := 'Level ' + IntToStr(FLevel);
+      Gebeurtenis := 'Level ' + IntToStr(FLevel);
   end;
-  FEvent := Event;
-  if (FLevel = 11) and (LeftStr(Event, 7) <> 'EndGame') then
+  FEvent := Gebeurtenis;
+  if (FLevel = 11) and (LeftStr(Gebeurtenis, 7) <> 'EndGame') then
   begin
     memoUitleg.Lines.Clear;
     Uitleg := 'Het spel is afgelopen, bedankt voor het spelen.\nJe kunt nog doorspelen ' +
       'om je stad zo mooi mogelijk\nte maken';
     ShowDialog(1, 'Einde Spel!', Uitleg);
   end
-  else if Event = 'StartGame' then
+  else if Gebeurtenis = 'StartGame' then
   begin
     FWorld.Clear;
     FView.ProcessChanges;
@@ -843,33 +843,33 @@ begin
     FStatus.Task.Clear;
     ShowDialog(1, FSettings.IntroKop, FSettings.IntroTekst);
   end
-  else if Event = 'Begin' then
-    { NOTE: NiveauTekst (+0x14) is passed both as heading and as text }
+  else if Gebeurtenis = 'Begin' then
+    { LET OP: NiveauTekst (+0x14) wordt zowel als kop als tekst doorgegeven }
     ShowDialog(1, FSettings.NiveauTekst, FSettings.NiveauTekst)
-  else if LeftStr(Event, 5) = 'Level' then
+  else if LeftStr(Gebeurtenis, 5) = 'Level' then
   begin
-    Kop := Event;
-    Token := SplitFirst(Event, ' ');
-    Uitleg := FSettings.Levels[StrToInt(Event)].Uitleg;
-    if Event <> '1' then
-      Uitleg := Uitleg + ScoreText;
+    Kop := Gebeurtenis;
+    Deel := SplitFirst(Gebeurtenis, ' ');
+    Uitleg := FSettings.Levels[StrToInt(Gebeurtenis)].Uitleg;
+    if Gebeurtenis <> '1' then
+      Uitleg := Uitleg + ScoreTekst;
     ShowDialog(1, Kop, Uitleg);
   end
-  else if LeftStr(Event, 7) = 'EndGame' then
+  else if LeftStr(Gebeurtenis, 7) = 'EndGame' then
     ShowDialog(12, 'Einde Spel?', 'Wil je het spel nu verlaten?');
 end;
 
 { @0047C77C }
 procedure TfrmMain.butStartClick(Sender: TObject);
 var
-  Token: string;
+  Deel: string;
 begin
   HideDialog;
   if FEvent = 'StartGame' then
     Dialog('Level 1')
   else if LeftStr(FEvent, 5) = 'Level' then
   begin
-    Token := SplitFirst(FEvent, ' ');
+    Deel := SplitFirst(FEvent, ' ');
     if FEvent <> StartedLevel then
     begin
       StartedLevel := FEvent;
@@ -904,15 +904,15 @@ begin
   else
     Result := IMin(9, IMax(0, Round(((FWorld.Score(C) + 90) / 33.33) *
       ((FWorld.Score(C) + 90) / 33.33))));
-  { NOTE: the original ends with a dead 'test eax,eax; je @@1; sub eax,0; @@1:'
-    on the result (an empty case statement?) }
+  { LET OP: het origineel eindigt met een dode 'test eax,eax; je @@1; sub eax,0; @@1:'
+    op het resultaat (een leeg case-statement?) }
 end;
 
 { @0047CBA0 }
 procedure TfrmMain.UpdateStatus;
 
   { @0047CA90 }
-  procedure UpdateCrit(C: Byte);
+  procedure VerversCrit(C: Byte);
   var
     Sprite: TSprite;
   begin
@@ -928,7 +928,7 @@ procedure TfrmMain.UpdateStatus;
   end;
 
 var
-  Msg: string;
+  Melding: string;
   C: Byte;
   R: Double;
 begin
@@ -941,16 +941,16 @@ begin
       spriteReady.Left := 829;
       spriteReady.Top := 713;
       if timerRecalc.Tag <= 0 then
-        spriteReady.Visible := FWorld.Bereikbaar(Msg)
+        spriteReady.Visible := FWorld.Bereikbaar(Melding)
       else
         spriteReady.Visible := False;
-      if Msg <> '' then
+      if Melding <> '' then
       begin
         memoMessages.Lines.Clear;
-        memoMessages.Lines.Add(Msg);
+        memoMessages.Lines.Add(Melding);
       end;
       for C := 0 to 5 do
-        UpdateCrit(C);
+        VerversCrit(C);
       R := FMin(1, FMax(0, FStatus.Geld / FSettings.Levels[FStatus.Level].StartGeld));
       if R < 0.25 then
         spriteGeld.FrameIndex := 3
@@ -960,34 +960,34 @@ begin
         spriteGeld.FrameIndex := 1
       else
         spriteGeld.FrameIndex := 0;
-      if (R < 0) and (FStatus.Level > 1) then   { NOTE: R is never < 0 }
+      if (R < 0) and (FStatus.Level > 1) then   { LET OP: R is nooit < 0 }
         Dialog('EndGame');
     end;
   end;
 end;
 
 { @0047CDC0 }
-procedure TfrmMain.StartLevel(Level: Integer);
+procedure TfrmMain.StartLevel(Niveau: Integer);
 var
   SnelwegY, SpoorY: Integer;
-  OldGeld: Integer;
+  OudGeld: Integer;
   X: Integer;
 begin
-  FLevel := Level;
-  FStatus.Level := Level;
+  FLevel := Niveau;
+  FStatus.Level := Niveau;
   if FLevel > 1 then
   begin
     ReadSprites(FLevel);
     CreateKnoppen(FLevel);
   end;
-  FStatus.Task.Add(FSettings.Levels[Level].Task);
-  FStatus.Geld := FStatus.Geld + FSettings.Levels[Level].StartGeld;
-  OldGeld := FStatus.Geld;
+  FStatus.Task.Add(FSettings.Levels[Niveau].Task);
+  FStatus.Geld := FStatus.Geld + FSettings.Levels[Niveau].StartGeld;
+  OudGeld := FStatus.Geld;
   FStatus.Geld := 1000000;
-  FWorld.OpenWijk(FSettings.Levels[Level].OpenWijk);
+  FWorld.OpenWijk(FSettings.Levels[Niveau].OpenWijk);
   SnelwegY := 28;
   SpoorY := 31;
-  if Level = 1 then
+  if Niveau = 1 then
   begin
     for X := 1 to 43 do
     begin
@@ -1000,28 +1000,28 @@ begin
     FWorld.GetCell(0, SnelwegY).Bouw('AndereStad');
     FWorld.GetCell(44, SnelwegY).Bouw('AndereStad');
   end
-  else if Level = 2 then
+  else if Niveau = 2 then
   begin
     for X := 1 to 43 do
       if InMap(X, SnelwegY) and
-        (FWorld.GetCell(X, SnelwegY).Wijk > FSettings.Levels[Level].OpenWijk) then
+        (FWorld.GetCell(X, SnelwegY).Wijk > FSettings.Levels[Niveau].OpenWijk) then
         FWorld.GetCell(X, SnelwegY).Bouw('Weg');
   end
-  else if Level = 3 then
+  else if Niveau = 3 then
   begin
     for X := 1 to 43 do
       if InMap(X, SnelwegY) and
-        (FWorld.GetCell(X, SnelwegY).Wijk > FSettings.Levels[Level].OpenWijk) then
+        (FWorld.GetCell(X, SnelwegY).Wijk > FSettings.Levels[Niveau].OpenWijk) then
       begin
         FWorld.GetCell(X, SnelwegY).Bouw('Snel');
         FWorld.GetCell(X, SnelwegY).Update;
       end;
   end;
-  FStatus.Geld := OldGeld;
+  FStatus.Geld := OudGeld;
   ShowPage('');
   FView.ProcessChanges;
   (spriteLevel.GetBehaviour('CONTROL_BEHAV') as TBehavText).SetCaption('memobg',
-    'Level ' + LongToStr(Level));
+    'Level ' + LongToStr(Niveau));
   spriteLevel.Redraw;
   sbStage.InvalidateRect(Rect(0, 0, 1024, 768));
   sbStage.Flip;
@@ -1033,7 +1033,7 @@ end;
 procedure TfrmMain.StatusChange(Sender: TObject);
 begin
   FGeldCaption.Text := 'Geld: '#128 + IntToStr((Sender as TStatus).Geld) + ',-';
-  { force a redraw }
+  { dwing een hertekening af }
   FGeldSprite.Left := FGeldSprite.Left xor 1;
 end;
 
@@ -1048,103 +1048,103 @@ begin
 end;
 
 { @0047D244
-  NOTE: the hint drawing in this handler is unreachable in the original: it
-  starts with Exit, and the test of FHintVisible after it has an empty
-  then-branch (stray semicolon). The code is kept as the compiler emitted it. }
+  LET OP: het tekenen van de hint in deze handler is in het origineel onbereikbaar: het
+  begint met Exit, en de test van FHintVisible daarna heeft een lege
+  then-tak (losse puntkomma). De code is behouden zoals de compiler hem uitvoerde. }
 procedure TfrmMain.spriteHintAfterBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
   Where: TRect; Size: Real);
 var
-  W, H, N: Integer;
-  Font: TFont;
-  S, Line: string;
+  Breedte, Hoogte, Aantal: Integer;
+  Lettertype: TFont;
+  S, Regel: string;
   R: TRect;
-  OldColor: TColor;
+  OudeKleur: TColor;
 begin
   Exit;
   if FHintVisible then;
-  Font := TFont.Create;
-  Font.Name := 'Arial';
-  Font.Color := clBlack;
-  Font.Size := 8;
+  Lettertype := TFont.Create;
+  Lettertype.Name := 'Arial';
+  Lettertype.Color := clBlack;
+  Lettertype.Size := 8;
   S := FHintText;
-  N := 0;
-  W := 0;
+  Aantal := 0;
+  Breedte := 0;
   while S <> '' do
   begin
-    Line := SplitFirst(S, '\n');
-    Inc(N);
-    W := IMax(W, Surface.TextWidth(Font, ' ' + Line));
+    Regel := SplitFirst(S, '\n');
+    Inc(Aantal);
+    Breedte := IMax(Breedte, Surface.TextWidth(Lettertype, ' ' + Regel));
   end;
-  H := Surface.TextHeight(Font, FHintText);
-  R := Bounds(X, Y, W + 4, H * N + 4);
+  Hoogte := Surface.TextHeight(Lettertype, FHintText);
+  R := Bounds(X, Y, Breedte + 4, Hoogte * Aantal + 4);
   Surface.FillRect(R, Surface.ColorToIndex(clBlack));
-  OldColor := Surface.Canvas.Brush.Color;
+  OudeKleur := Surface.Canvas.Brush.Color;
   Surface.Canvas.Brush.Style := bsSolid;
   Surface.Canvas.Brush.Color := $A0FFFF;
-  Surface.Canvas.FillRect(Bounds(X + 1, Y + 1, W + 2, H * N + 2));
-  Surface.Canvas.Brush.Color := OldColor;
+  Surface.Canvas.FillRect(Bounds(X + 1, Y + 1, Breedte + 2, Hoogte * Aantal + 2));
+  Surface.Canvas.Brush.Color := OudeKleur;
   Surface.Canvas.Brush.Style := bsClear;
   S := FHintText;
-  N := 0;
+  Aantal := 0;
   while S <> '' do
   begin
-    Line := SplitFirst(S, '\n');
-    Surface.TextOut(X + 2, Y + 2 + H * N, Font, ' ' + Line);
-    Inc(N);
+    Regel := SplitFirst(S, '\n');
+    Surface.TextOut(X + 2, Y + 2 + Hoogte * Aantal, Lettertype, ' ' + Regel);
+    Inc(Aantal);
   end;
   Surface.Canvas.Brush.Style := bsSolid;
-  Font.Free;
+  Lettertype.Free;
 end;
 
 { @0047D794 }
-procedure TfrmMain.ShowHintSprite(Text: string);
+procedure TfrmMain.ShowHintSprite(Tekst: string);
 
   { @0047D4D4
-    Draws the hint text (lines separated by '\n') on the hint sprite. }
-  procedure DrawHint(Surface: TSurface);
+    Tekent de hinttekst (regels gescheiden door '\n') op de hintsprite. }
+  procedure TekenHint(Surface: TSurface);
   var
-    W, H, N: Integer;
-    Font: TFont;
-    S, Line: string;
+    Breedte, Hoogte, Aantal: Integer;
+    Lettertype: TFont;
+    S, Regel: string;
     R: TRect;
-    OldColor: TColor;
+    OudeKleur: TColor;
   begin
-    S := Text;
-    Font := TFont.Create;
-    Font.Name := 'Arial';
-    Font.Color := clBlack;
-    Font.Size := 8;
-    N := 0;
-    W := 0;
+    S := Tekst;
+    Lettertype := TFont.Create;
+    Lettertype.Name := 'Arial';
+    Lettertype.Color := clBlack;
+    Lettertype.Size := 8;
+    Aantal := 0;
+    Breedte := 0;
     while S <> '' do
     begin
-      Line := SplitFirst(S, '\n');
-      Inc(N);
-      W := IMax(W, Surface.TextWidth(Font, ' ' + Line));
+      Regel := SplitFirst(S, '\n');
+      Inc(Aantal);
+      Breedte := IMax(Breedte, Surface.TextWidth(Lettertype, ' ' + Regel));
     end;
-    H := Surface.TextHeight(Font, Text);
-    Surface.SetSize(W + 4, H * N + 4, False);
+    Hoogte := Surface.TextHeight(Lettertype, Tekst);
+    Surface.SetSize(Breedte + 4, Hoogte * Aantal + 4, False);
     Surface.Transparent := False;
-    spriteHint.FrameList.Frames[0].Width := W + 4;
-    spriteHint.FrameList.Frames[0].Height := H * N + 4;
-    R := Bounds(0, 0, W + 4, H * N + 4);
+    spriteHint.FrameList.Frames[0].Width := Breedte + 4;
+    spriteHint.FrameList.Frames[0].Height := Hoogte * Aantal + 4;
+    R := Bounds(0, 0, Breedte + 4, Hoogte * Aantal + 4);
     Surface.FillRect(R, Surface.ColorToIndex(clBlack));
-    OldColor := Surface.Canvas.Brush.Color;
+    OudeKleur := Surface.Canvas.Brush.Color;
     Surface.Canvas.Brush.Style := bsSolid;
     Surface.Canvas.Brush.Color := $A0FFFF;
-    Surface.Canvas.FillRect(Bounds(1, 1, W + 2, H * N + 2));
-    Surface.Canvas.Brush.Color := OldColor;
+    Surface.Canvas.FillRect(Bounds(1, 1, Breedte + 2, Hoogte * Aantal + 2));
+    Surface.Canvas.Brush.Color := OudeKleur;
     Surface.Canvas.Brush.Style := bsClear;
-    S := Text;
-    N := 0;
+    S := Tekst;
+    Aantal := 0;
     while S <> '' do
     begin
-      Line := SplitFirst(S, '\n');
-      Surface.TextOut(2, H * N + 2, Font, ' ' + Line);
-      Inc(N);
+      Regel := SplitFirst(S, '\n');
+      Surface.TextOut(2, Hoogte * Aantal + 2, Lettertype, ' ' + Regel);
+      Inc(Aantal);
     end;
     Surface.Canvas.Brush.Style := bsSolid;
-    Font.Free;
+    Lettertype.Free;
   end;
 
 var
@@ -1162,9 +1162,9 @@ begin
       Z := -4000;
       Visible := True;
     end;
-    if FHintText <> Text then
-      DrawHint(spriteHint.GetSurface);
-    FHintText := Text;
+    if FHintText <> Tekst then
+      TekenHint(spriteHint.GetSurface);
+    FHintText := Tekst;
   end;
 end;
 
@@ -1180,23 +1180,23 @@ begin
 end;
 
 { @0047D8C0
-  Hint while dragging building Name over the map: the price, or why it cannot
-  be built there. }
-procedure TfrmMain.ShowBouwHint(X, Y: Integer; Name: string);
+  Hint terwijl gebouw Name over de kaart wordt gesleept: de prijs, of waarom het niet
+  daar gebouwd kan worden. }
+procedure TfrmMain.ShowBouwHint(X, Y: Integer; Naam: string);
 var
   P, G: TPoint;
   Cell: TCell;
-  Msg: string;
+  Melding: string;
 begin
   P := Point(X, Y);
   G := ScreenToGrid(P);
   Cell := FWorld.GetCell(G.X, G.Y);
   if Cell <> nil then
   begin
-    Msg := Cell.KanBouwen(Name);
-    if Msg = '' then
+    Melding := Cell.KanBouwen(Naam);
+    if Melding = '' then
     begin
-      if Name = 'Sloop' then
+      if Naam = 'Sloop' then
       begin
         if (Cell.Contents = 'AndereStad') or (Cell.Contents = 'Onbereikbaar') then
           ShowHintSprite('Slopen niet mogelijk')
@@ -1204,17 +1204,17 @@ begin
           ShowHintSprite('sloop terrein');
       end
       else
-        ShowHintSprite(IntToStr(ContentsInfoByContents(Name).Prijs) + ' euro');
+        ShowHintSprite(IntToStr(ContentsInfoByContents(Naam).Prijs) + ' euro');
     end
     else
-      ShowHintSprite(Msg);
+      ShowHintSprite(Melding);
   end
   else
     HideHintSprite;
 end;
 
 { @0047DA88
-  Hint for the building button under the mouse: description and price. }
+  Hint voor de gebouwknop onder de muis: omschrijving en prijs. }
 procedure TfrmMain.ShowKnopHint(X, Y: Integer);
 var
   Pixie: TPixie;
@@ -1238,7 +1238,7 @@ begin
 end;
 
 { @0047DBB8
-  Hint for the cell under the mouse: what is built there. }
+  Hint voor het vakje onder de muis: wat er daar gebouwd is. }
 procedure TfrmMain.ShowCellHint(X, Y: Integer);
 var
   P, G: TPoint;
@@ -1292,14 +1292,14 @@ begin
 end;
 
 { @0047DD34
-  Switches the screen to Size (DirectX, or else ChangeDisplaySettings);
-  called with the saved size it restores the original mode. }
-procedure TfrmMain.SetResolution(Size: TPoint);
+  Schakelt het scherm naar Size (DirectX, anders ChangeDisplaySettings);
+  aangeroepen met de bewaarde grootte herstelt het de oorspronkelijke modus. }
+procedure TfrmMain.SetResolution(Grootte: TPoint);
 var
   DC: HDC;
-  BitsPerPixel: Integer;
+  Kleurdiepte: Integer;
 begin
-  if (FOldSize.X = Size.X) and (FOldSize.Y = Size.Y) then
+  if (FOldSize.X = Grootte.X) and (FOldSize.Y = Grootte.Y) then
   begin
     if FDirectX then
       StopDirectX
@@ -1310,13 +1310,13 @@ begin
   begin
     FDirectX := False;
     DC := GetDC(0);
-    BitsPerPixel := GetDeviceCaps(DC, BITSPIXEL);
+    Kleurdiepte := GetDeviceCaps(DC, BITSPIXEL);
     ReleaseDC(0, DC);
     try
-      StartDirectX(Size.X, Size.Y);
+      StartDirectX(Grootte.X, Grootte.Y);
       FDirectX := True;
     except
-      SetScreenMode(Size.X, Size.Y, BitsPerPixel);
+      SetScreenMode(Grootte.X, Grootte.Y, Kleurdiepte);
       if not IsScreenChanged then
       begin
         Application.MessageBox('Het scherm kan niet op de juiste grootte worden gezet. ' +
@@ -1364,15 +1364,15 @@ begin
 end;
 
 { @0047DFAC
-  Shows the buttons of Page ('' = the current page) that are available in
-  this level. }
-procedure TfrmMain.ShowPage(Page: string);
+  Toont de knoppen van Page ('' = de huidige pagina) die beschikbaar zijn in
+  dit niveau. }
+procedure TfrmMain.ShowPage(Blad: string);
 var
   I: Integer;
   Sprite: TSprite;
 begin
-  if Page <> '' then
-    FPage := Page;
+  if Blad <> '' then
+    FPage := Blad;
   for I := 0 to ContentsCount - 1 do
   begin
     Sprite := FindComponent('KNOP' + IntToStr(I)) as TSprite;
@@ -1441,92 +1441,92 @@ begin
 end;
 
 { @0047E394
-  Save file (text, see butSaveClick):
+  Bestand opslaan (tekst, zie butSaveClick):
     Level <n>
     Geld <n>
     Centrum <x>,<y>
     Zoom <real>
-    <TWorld.SaveToStrings lines> }
+    <TWorld.SaveToStrings regels> }
 procedure TfrmMain.butLoadClick(Sender: TObject);
 var
-  Line: string;
-  Msg: string;
+  Regel: string;
+  Melding: string;
   Geld: Integer;
   CX, CY: Integer;
   Z: Double;
-  Lines: TStringList;
-  Token: string;
+  Regels: TStringList;
+  Deel: string;
 begin
   if not FDialog and OpenDialog.Execute then
   begin
     Application.ProcessMessages;
     ShowDialog(0, 'Je stad wordt geladen', 'Dit kan even duren...');
     sbStage.Flip;
-    Lines := TStringList.Create;
-    Lines.LoadFromFile(OpenDialog.FileName);
-    Line := Lines[0];
-    Token := SplitFirst(Line, ' ');
-    if Token <> 'Level' then
+    Regels := TStringList.Create;
+    Regels.LoadFromFile(OpenDialog.FileName);
+    Regel := Regels[0];
+    Deel := SplitFirst(Regel, ' ');
+    if Deel <> 'Level' then
     begin
-      Msg := 'Kan ' + OpenDialog.FileName + ' niet openen. Het is geen juist bestand.'#0;
-      Application.MessageBox(@Msg[1], 'Oeps!', 0);
+      Melding := 'Kan ' + OpenDialog.FileName + ' niet openen. Het is geen juist bestand.'#0;
+      Application.MessageBox(@Melding[1], 'Oeps!', 0);
     end
     else
     begin
-      FLevel := StrToIntDef0(Line);
+      FLevel := StrToIntDef0(Regel);
       FStatus.Level := FLevel;
       (spriteLevel.GetBehaviour('CONTROL_BEHAV') as TBehavText).SetCaption('memobg',
         'Level ' + LongToStr(FLevel));
       spriteLevel.Redraw;
-      Lines.Delete(0);
+      Regels.Delete(0);
       ReadSprites(FLevel);
       CreateKnoppen(FLevel);
-      Line := Lines[0];
-      Token := SplitFirst(Line, ' ');
-      Lines.Delete(0);
-      Geld := StrToIntDef0(Line);
-      Line := Lines[0];
-      Token := SplitFirst(Line, ' ');
-      Lines.Delete(0);
-      Token := SplitFirst(Line, ',');
-      CX := StrToIntDef0(Token);
-      CY := StrToIntDef0(Line);
-      Line := Lines[0];
-      Token := SplitFirst(Line, ' ');
-      Lines.Delete(0);
-      Z := StrToFloatDef0(Line);
+      Regel := Regels[0];
+      Deel := SplitFirst(Regel, ' ');
+      Regels.Delete(0);
+      Geld := StrToIntDef0(Regel);
+      Regel := Regels[0];
+      Deel := SplitFirst(Regel, ' ');
+      Regels.Delete(0);
+      Deel := SplitFirst(Regel, ',');
+      CX := StrToIntDef0(Deel);
+      CY := StrToIntDef0(Regel);
+      Regel := Regels[0];
+      Deel := SplitFirst(Regel, ' ');
+      Regels.Delete(0);
+      Z := StrToFloatDef0(Regel);
       if Z = 0 then
-        Z := StrToFloatDef0(ReplaceStr(Line, '.', ','));
+        Z := StrToFloatDef0(ReplaceStr(Regel, '.', ','));
       FStatus.Geld := 10000000;
       FWorld.Clear;
       FWorld.OpenWijk(FSettings.Levels[FLevel].OpenWijk);
-      FWorld.LoadFromStrings(Lines);
-      Lines.Destroy;
+      FWorld.LoadFromStrings(Regels);
+      Regels.Destroy;
       FStatus.Geld := Geld;
       FView.ScrollTo(CX, CY, Z);
       FView.ProcessChanges;
       HideDialog;
       UpdateStatus;
     end;
-    { NOTE: Lines is not freed when the file is rejected }
+    { LET OP: Lines wordt niet vrijgegeven als het bestand wordt geweigerd }
   end;
 end;
 
 { @0047E7E0 }
 procedure TfrmMain.butSaveClick(Sender: TObject);
 var
-  Lines: TStringList;
+  Regels: TStringList;
 begin
   if not FDialog and SaveDialog.Execute then
   begin
-    Lines := TStringList.Create;
-    Lines.Add('Level ' + IntStr(FLevel));
-    Lines.Add('Geld ' + IntStr(FStatus.Geld));
-    Lines.Add('Centrum ' + IntStr(FView.GetCenter.X) + ',' + IntStr(FView.GetCenter.Y));
-    Lines.Add('Zoom ' + RealToStr(Zoom));
-    Lines.AddStrings(FWorld.SaveToStrings);   { NOTE: the returned list is never freed }
-    Lines.SaveToFile(SaveDialog.FileName);
-    Lines.Destroy;
+    Regels := TStringList.Create;
+    Regels.Add('Level ' + IntStr(FLevel));
+    Regels.Add('Geld ' + IntStr(FStatus.Geld));
+    Regels.Add('Centrum ' + IntStr(FView.GetCenter.X) + ',' + IntStr(FView.GetCenter.Y));
+    Regels.Add('Zoom ' + RealToStr(Zoom));
+    Regels.AddStrings(FWorld.SaveToStrings);   { LET OP: de teruggegeven lijst wordt nooit vrijgegeven }
+    Regels.SaveToFile(SaveDialog.FileName);
+    Regels.Destroy;
   end;
 end;
 
@@ -1557,7 +1557,7 @@ begin
   GetCursorPos(P);
   Dec(P.Y, Top);
   sbStage.InvalidateRect(ViewRect);
-  { NOTE: the divisor (PerfStart - GetTickCount) is negative }
+  { LET OP: de deler (PerfStart - GetTickCount) is negatief }
   lblTimers.Caption := FloatToStrT(PerfView / (PerfStart - GetTickCount)) + #13#10 +
     FloatToStrT(PerfAutos / (PerfStart - GetTickCount)) + #13#10 +
     FloatToStrT(PerfSprites / (PerfStart - GetTickCount)) + #13#10 +
@@ -1565,14 +1565,14 @@ begin
 end;
 
 { @0047EBB8
-  OnMouseMove of the criteria meters: advice for that criterion. }
+  OnMouseMove van de criteriummeters: advies voor dat criterium. }
 procedure TfrmMain.CritMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
   S: string;
 begin
   if Sender is TBehaviour then
     Sender := (Sender as TBehaviour).Sprite;
-  { NOTE: renames the form itself (Self.Name), a local variable was probably intended }
+  { LET OP: hernoemt het formulier zelf (Self.Name); waarschijnlijk was een lokale variabele bedoeld }
   Name := (Sender as TSprite).Name;
   S := 'Advies\nover meerdere regels\nEn nog een paar';
   if Name = Criteria[2] then
@@ -1682,13 +1682,13 @@ begin
 end;
 
 { @0047FBC4 }
-function TfrmMain.ComponentExists(Name: string): Boolean;
+function TfrmMain.ComponentExists(Naam: string): Boolean;
 begin
-  Result := FindComponent(Name) <> nil;
+  Result := FindComponent(Naam) <> nil;
 end;
 
 { @0047FC18
-  Debug: dumps the centre of the map into Memo1 (hidden). }
+  Debug: dumpt het midden van de kaart in Memo1 (verborgen). }
 procedure TfrmMain.Button1Click(Sender: TObject);
 var
   X, Y: Integer;

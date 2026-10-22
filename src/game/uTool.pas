@@ -1,8 +1,8 @@
 unit uTool;
 
-{ General helpers of the sprite engine: position lists, min/max/interpolation,
-  file search, application path.
-  Decompiled from ROS.exe v1.1, code 004609B4-004615D3. }
+{ Algemene hulpfuncties van de sprite-engine: positielijsten, min/max/interpolatie,
+  bestandszoeken, programmapad.
+  Gedecompileerd uit ROS.exe v1.1, code 004609B4-004615D3. }
 
 {$I zm.inc}
 
@@ -38,11 +38,11 @@ type
     property Rect: TRect read GetRect write SetRect;
   end;
 
-  { List of TPos, optionally kept sorted on (X, Y) for binary search }
+  { Lijst van TPos, optioneel gesorteerd op (X, Y) voor binair zoeken }
   TPosList = class(TList)
   private
-    FSorted: Boolean;      { +0x10  list is currently sorted }
-    FKeepSorted: Boolean;  { +0x11  insert in sort order / resort after Insert }
+    FSorted: Boolean;      { +0x10  lijst is momenteel gesorteerd }
+    FKeepSorted: Boolean;  { +0x11  invoegen in sorteervolgorde / opnieuw sorteren na Insert }
   public
     constructor Create;
     procedure Sort;
@@ -76,8 +76,8 @@ const
     'zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag');
 
 var
-  AppPath: string;   { 0048A8A0: directory of the executable, with trailing '\' }
-  AppName: string;   { 0048A8A4: file name of the executable }
+  AppPath: string;   { 0048A8A0: map van het programma, met een afsluitende '\' }
+  AppName: string;   { 0048A8A4: bestandsnaam van het programma }
 
 function IMax(A, B: Integer): Integer;
 function IMin(A, B: Integer): Integer;
@@ -142,7 +142,7 @@ begin
   Result := F * A + (1 - F) * B;
 end;
 
-{ @00460C54  Frees all objects of a list (each distinct object once) and empties it. }
+{ @00460C54  Geeft alle objecten van een lijst vrij (elk verschillend object een keer) en leegt hem. }
 procedure FreeList(List: TList);
 var
   I, J: Integer;
@@ -170,7 +170,7 @@ end;
 { @00460CF0 }
 constructor TPos.Create(AX, AY: Integer);
 begin
-  { NOTE: does not call inherited Create }
+  { LET OP: roept geen inherited Create aan }
   FX := AX;
   FY := AY;
 end;
@@ -207,9 +207,9 @@ end;
 { @00460E28 }
 function TRectPos.Intersects(ARect: TRectPos): Boolean;
 var
-  Dummy: TRect;
+  Doel: TRect;
 begin
-  Result := IntersectRect(Dummy, ARect.GetRect, GetRect);
+  Result := IntersectRect(Doel, ARect.GetRect, GetRect);
 end;
 
 { @00460E64 }
@@ -233,51 +233,51 @@ end;
 procedure TPosList.Sort;
 
   { @00460EE4 }
-  function Key(I: Integer): Integer;
+  function Sleutel(I: Integer): Integer;
   begin
     Result := (Items[I].FX shl 16) + Items[I].FY;
   end;
 
   { @00460F18 }
-  procedure SetKey(I, K: Integer);
+  procedure ZetSleutel(I, K: Integer);
   begin
     Items[I].FX := K div $10000;
     Items[I].FY := K and $FFFF;
   end;
 
   { @00460F5C }
-  procedure QuickSort(L, R: Integer);
+  procedure SnelSorteren(L, R: Integer);
   var
-    I, J, P, T: Integer;
+    I, J, P, Tijdelijk: Integer;
   begin
     I := L;
     J := R;
-    P := Key((L + R) div 2);
+    P := Sleutel((L + R) div 2);
     repeat
-      while P > Key(I) do
+      while P > Sleutel(I) do
         Inc(I);
-      while P < Key(J) do
+      while P < Sleutel(J) do
         Dec(J);
       if I <= J then
       begin
-        T := Key(I);
-        SetKey(I, Key(J));
-        SetKey(J, T);
+        Tijdelijk := Sleutel(I);
+        ZetSleutel(I, Sleutel(J));
+        ZetSleutel(J, Tijdelijk);
         Inc(I);
         Dec(J);
       end;
     until I > J;
     if L < J then
-      QuickSort(L, J);
+      SnelSorteren(L, J);
     if I < R then
-      QuickSort(I, R);
+      SnelSorteren(I, R);
   end;
 
 begin
   if not FSorted then
   begin
     if Count > 0 then
-      QuickSort(0, Count - 1);
+      SnelSorteren(0, Count - 1);
     FSorted := True;
   end;
 end;
@@ -333,19 +333,19 @@ begin
     Result := True;
 end;
 
-{ @00461104  Binary search in the sorted list: index of (X, Y), or the index where it
-  would have to be inserted; -1 if the list is empty or not sorted. }
+{ @00461104  Binair zoeken in de gesorteerde lijst: index van (X, Y), of de index waar het
+  ingevoegd moet worden; -1 als de lijst leeg is of niet gesorteerd. }
 function TPosList.Find(X, Y: Integer): Integer;
 var
-  Step, I: Integer;
-  Last: Boolean;
+  Stap, I: Integer;
+  Laatste: Boolean;
 begin
   Result := -1;
   if (Count = 0) or not FSorted then
     Exit;
-  Step := Count div 2;
-  I := Step;
-  Last := False;
+  Stap := Count div 2;
+  I := Stap;
+  Laatste := False;
   while True do
   begin
     if (X = Items[I].FX) and (Items[I].FY = Y) then
@@ -353,7 +353,7 @@ begin
       Result := I;
       Exit;
     end;
-    if Last or (Step = 0) then
+    if Laatste or (Stap = 0) then
     begin
       if (X > Items[I].FX) or ((X = Items[I].FX) and (Items[I].FY < Y)) then
         Result := I + 1
@@ -364,24 +364,24 @@ begin
     if X = Items[I].FX then
     begin
       if Items[I].FY < Y then
-        Inc(I, Step)
+        Inc(I, Stap)
       else
-        Dec(I, Step);
+        Dec(I, Stap);
     end
     else if X > Items[I].FX then
-      Inc(I, Step)
+      Inc(I, Stap)
     else
-      Dec(I, Step);
+      Dec(I, Stap);
     if I < 0 then
       I := 0;
     if I >= Count then
       I := Count - 1;
-    if IsEven(Step) then
-      Step := Step div 2
-    else if Step = 1 then
-      Last := True
+    if IsEven(Stap) then
+      Stap := Stap div 2
+    else if Stap = 1 then
+      Laatste := True
     else
-      Step := (Step + 1) div 2;
+      Stap := (Stap + 1) div 2;
   end;
 end;
 
@@ -453,7 +453,7 @@ end;
 { @00461398 }
 function RoundUp(X: Double): Integer;
 begin
-  { NOTE: Round(X + 1) is not a ceiling for fractions >= 0.5 (2.7 -> 4); kept as in the original }
+  { LET OP: Round(X + 1) is geen afronding naar boven voor breuken >= 0.5 (2.7 -> 4); behouden zoals in het origineel }
   Result := Round(X + 1);
   if Frac(X) = 0 then
     Dec(Result);
@@ -472,9 +472,9 @@ begin
     MOV B, AL
   end;
 {$ELSE}
-  { PORT: no port I/O on the portable targets. The only port the game reads is the VGA
-    input status register $3DA (uTiming's retrace wait); emulate its vertical-retrace bit
-    (bit 3) at 60 Hz so the wait loops terminate. }
+  { PORT: geen poort-I/O op de draagbare doelplatforms. De enige poort die het spel leest is het
+    VGA-invoerstatusregister $3DA (de retrace-wachtlus van uTiming); emuleer de verticale-
+    retracebit (bit 3) op 60 Hz zodat de wachtlussen eindigen. }
   if (Port = $3DA) and (GetTickCount64 mod 17 = 0) then
     B := 8;
 {$ENDIF}
@@ -484,26 +484,26 @@ end;
 { @004613EC }
 procedure GetWinVersion(var V: TWinVersion);
 var
-  VI: TOSVersionInfo;
+  VersieInfo: TOSVersionInfo;
 begin
-  VI.dwOSVersionInfoSize := SizeOf(VI);
-  GetVersionEx(VI);
-  V.Major := VI.dwMajorVersion;
-  V.Minor := VI.dwMinorVersion;
+  VersieInfo.dwOSVersionInfoSize := SizeOf(VersieInfo);
+  GetVersionEx(VersieInfo);
+  V.Major := VersieInfo.dwMajorVersion;
+  V.Minor := VersieInfo.dwMinorVersion;
   V.Valid := True;
-  V.IsNT := VI.dwPlatformId = VER_PLATFORM_WIN32_NT;
+  V.IsNT := VersieInfo.dwPlatformId = VER_PLATFORM_WIN32_NT;
 end;
 
 { @00461428 }
 procedure FindFiles(Path: string; Attr: Integer; List: TStrings);
 var
-  SR: TSearchRec;
+  Zoekrecord: TSearchRec;
 begin
-  if FindFirst(Path, Attr, SR) = 0 then
+  if FindFirst(Path, Attr, Zoekrecord) = 0 then
     repeat
-      List.Add(SR.Name);
-    until FindNext(SR) <> 0;
-  FindClose(SR);
+      List.Add(Zoekrecord.Name);
+    until FindNext(Zoekrecord) <> 0;
+  FindClose(Zoekrecord);
 end;
 
 { @0046152C }

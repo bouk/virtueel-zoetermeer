@@ -1,11 +1,11 @@
 unit uTrein;
 
-{ TTrein: the train. It appears on a random rail cell outside the view, then
-  rides from cell to cell along the rails ('Rails05'/'Rails10' straight,
-  'Rails03/06/09/12' curves of 3x3 cells), stopping at stations. Its sprite is
-  the TView's train sprite; the positions within a cell come from the path
-  strings below ('<frame>=<x>,<y>;' per step, a leading '-' mirrors the frame).
-  Decompiled from ROS.exe v1.1, code 0047841C-0047950F. }
+{ TTrein: de trein. Hij verschijnt op een willekeurige spoorcel buiten het zicht, daarna
+  rijdt van cel naar cel langs de sporen ('Rails05'/'Rails10' recht,
+  'Rails03/06/09/12' bochten van 3x3 cellen), en stopt bij stations. Zijn sprite is
+  de treinsprite van de TView; de posities binnen een cel komen uit de padstrings
+  hieronder ('<frame>=<x>,<y>;' per stap, een voorloopse '-' spiegelt het frame).
+  Gedecompileerd uit ROS.exe v1.1, code 0047841C-0047950F. }
 
 {$I zm.inc}
 
@@ -15,22 +15,22 @@ uses
   Windows, Classes, uSprite, Uworld;
 
 type
-  { VMT 0047886C, instance size $30. }
+  { VMT 0047886C, instantiegrootte $30. }
   TTrein = class(TObject)
   private
-    FSprite: TSprite;              { +0x04  TView.TreinSprite; Data is a TPos with the cell }
+    FSprite: TSprite;              { +0x04  TView.TreinSprite; Data is een TPos met de cel }
     FWorld: TWorld;                { +0x08 }
-    FCell: TCell;                  { +0x0C  current cell (the main cell of a curve) }
-    FNr: Byte;                     { +0x10  rail piece (IsSpoor): 5/10 straight, 3/6/9/12 curve }
-    FRichting: Boolean;            { +0x11  direction of travel }
-    FActief: Boolean;              { +0x12  riding (False: look for a new start) }
-    FStap: Integer;                { +0x14  step within the path of the current cell }
-    FReserved18: Integer;          { +0x18  set to 0 / -1, never read }
-    FX: Integer;                   { +0x1C  world position }
+    FCell: TCell;                  { +0x0C  huidige cel (de hoofdcel van een bocht) }
+    FNr: Byte;                     { +0x10  spoorstuk (IsSpoor): 5/10 recht, 3/6/9/12 bocht }
+    FRichting: Boolean;            { +0x11  rijrichting }
+    FActief: Boolean;              { +0x12  rijdt (False: zoek een nieuw startpunt) }
+    FStap: Integer;                { +0x14  stap binnen het pad van de huidige cel }
+    FReserved18: Integer;          { +0x18  ingesteld op 0 / -1, nooit gelezen }
+    FX: Integer;                   { +0x1C  wereldpositie }
     FY: Integer;                   { +0x20 }
-    FWacht: Integer;               { +0x24  steps before the train may stop at a station again }
-    FInterval: Integer;            { +0x28  ticks per step }
-    FTeller: Integer;              { +0x2C  ticks since the last step }
+    FWacht: Integer;               { +0x24  stappen voordat de trein weer bij een station mag stoppen }
+    FInterval: Integer;            { +0x28  ticks per stap }
+    FTeller: Integer;              { +0x2C  ticks sinds de laatste stap }
     procedure Start;
     procedure Step;
     procedure Volgende;
@@ -42,18 +42,18 @@ type
     property World: TWorld read FWorld;
   end;
 
-  { Transition from one rail piece to the next (16 bytes) }
+  { Overgang van het ene spoorstuk naar het volgende (16 bytes) }
   TOvergang = record
-    Nr: Byte;                      { +0x0 current piece }
-    Richting: Boolean;             { +0x1 current direction }
-    NieuwNr: Byte;                 { +0x2 next piece }
-    DX: Integer;                   { +0x4 offset of the next cell }
+    Nr: Byte;                      { +0x0 huidig stuk }
+    Richting: Boolean;             { +0x1 huidige richting }
+    NieuwNr: Byte;                 { +0x2 volgend stuk }
+    DX: Integer;                   { +0x4 verschuiving van de volgende cel }
     DY: Integer;                   { +0x8 }
-    NieuwRichting: Boolean;        { +0xC next direction }
+    NieuwRichting: Boolean;        { +0xC volgende richting }
   end;
 
 const
-  { 00488F78: from a straight piece onto a curve }
+  { 00488F78: van een recht stuk naar een bocht }
   RechtNaarBocht: array[0..7] of TOvergang = (
     (Nr: 5; Richting: True; NieuwNr: 6; DX: 1; DY: -1; NieuwRichting: False),
     (Nr: 5; Richting: True; NieuwNr: 12; DX: 0; DY: -1; NieuwRichting: True),
@@ -63,7 +63,7 @@ const
     (Nr: 10; Richting: True; NieuwNr: 6; DX: -1; DY: 1; NieuwRichting: True),
     (Nr: 10; Richting: False; NieuwNr: 9; DX: 2; DY: 0; NieuwRichting: True),
     (Nr: 10; Richting: False; NieuwNr: 12; DX: 2; DY: 1; NieuwRichting: False));
-  { 00488FF8: from a curve onto a straight piece }
+  { 00488FF8: van een bocht naar een recht stuk }
   BochtNaarRecht: array[0..7] of TOvergang = (
     (Nr: 3; Richting: False; NieuwNr: 5; DX: -1; DY: -3; NieuwRichting: True),
     (Nr: 3; Richting: True; NieuwNr: 10; DX: 2; DY: 0; NieuwRichting: False),
@@ -73,7 +73,7 @@ const
     (Nr: 9; Richting: True; NieuwNr: 5; DX: 0; DY: -3; NieuwRichting: True),
     (Nr: 12; Richting: False; NieuwNr: 5; DX: 0; DY: 2; NieuwRichting: False),
     (Nr: 12; Richting: True; NieuwNr: 10; DX: -3; DY: -1; NieuwRichting: True));
-  { 00489078: from a curve onto the next curve }
+  { 00489078: van een bocht naar de volgende bocht }
   BochtNaarBocht: array[0..15] of TOvergang = (
     (Nr: 3; Richting: False; NieuwNr: 6; DX: 0; DY: -4; NieuwRichting: False),
     (Nr: 3; Richting: False; NieuwNr: 12; DX: -1; DY: -4; NieuwRichting: True),
@@ -91,13 +91,13 @@ const
     (Nr: 12; Richting: False; NieuwNr: 3; DX: 1; DY: 4; NieuwRichting: True),
     (Nr: 12; Richting: True; NieuwNr: 6; DX: -4; DY: 0; NieuwRichting: True),
     (Nr: 12; Richting: True; NieuwNr: 3; DX: -4; DY: -1; NieuwRichting: False));
-  { 00489178: paths through the curves 3, 6, 9, 12 (FRichting = False) }
+  { 00489178: paden door de bochten 3, 6, 9, 12 (FRichting = False) }
   BochtA: array[1..4] of string = (
     ' 0505=206,151; 0606=175,111; 0707=183,84; 0808=199,59; 0900=181,55;  1000=175,36;  1100=198,10; 1312=175,-4;1413=175,-4;1413=172,-24;15,14=202,49',
     ' 1615=-10,71;  1716=25,73;   1800=55,79;  1900=105,70;-1900=144,70; -1800=192,79; -1716=232,73;-1615=278,71',
     '-0404=269,-38;-0303=222,-19;-0200=184,-5;-0100=138,17; 0100=108,17;  0200=71,-5;   0303=43,-19; 0404=5,-38',
     '-1514=-98,-49;-1413=-46,-24;-1312=-7,-4, -1211=20,10; -1100=44,21;  -1000=67,36;  -0900=36,55; -0808=15,59; -0707=-17,84; -0606=-49,11');
-  { 00489188: paths through the curves 3, 6, 9, 12 (FRichting = True) }
+  { 00489188: paden door de bochten 3, 6, 9, 12 (FRichting = True) }
   BochtB: array[1..4] of string = (
     ' 1514=159,-69; 1413=121,-38; 1312=115,-14;1211=130,2;  0010=117,17; 0009=124,42; 0808=137,67;  0707=122,95; 0606=118,123; 0505=167,172',
     '-1615=310,46; -1716=256,44; -0017=173,50;  0018=121,43; 0017=59,50;  1716=1,44;   1615=-41,46',
@@ -105,7 +105,7 @@ const
     '-0505=-63,172;-0606=8,123;  -0707=44,95;  -0808=77,67;-0009=116,42;-0010=124,17;-1211=88,2;   -1312=53,-14;-1413=5,-37;   -1514=-55,-69');
 
 var
-  { 0048B150: paths along the straight pieces 5 and 10 (FRichting = True), built by TTrein.Create }
+  { 0048B150: paden langs de rechte stukken 5 en 10 (FRichting = True), opgebouwd door TTrein.Create }
   RechtA: array[1..2] of string;
   { 0048B158: (FRichting = False) }
   RechtB: array[1..2] of string;
@@ -162,7 +162,7 @@ begin
   end;
 end;
 
-{ @00478B68  Looks for a rail cell outside the view to start from (400 tries). }
+{ @00478B68  Zoekt een spoorcel buiten het zicht om vanaf te starten (400 pogingen). }
 procedure TTrein.Start;
 var
   I, X, Y: Integer;
@@ -214,10 +214,10 @@ begin
   (FSprite.Data as TPos).Y := FCell.Y;
 end;
 
-{ @00478CF0  Moves the train one step along the path of the current cell. }
+{ @00478CF0  Verplaatst de trein één stap langs het pad van de huidige cel. }
 procedure TTrein.Step;
 var
-  Pad, Item, Key, Vorige, S: string;
+  Pad, Item, Sleutel, Vorige, S: string;
   P: TPoint;
   I, X, Y: Integer;
 begin
@@ -260,15 +260,15 @@ begin
     else
     begin
       S := SplitFirst(Item, '=');
-      Key := TrimStr(S);
-      if Key[1] = '-' then
+      Sleutel := TrimStr(S);
+      if Sleutel[1] = '-' then
       begin
         FSprite.MirrorX := True;
-        Key := DelLeft(Key, 1);
+        Sleutel := DelLeft(Sleutel, 1);
       end
       else
         FSprite.MirrorX := False;
-      FSprite.CurrentFrame := 'Trein_' + Copy(Key, 1, 2) + '-' + Copy(Key, 3, 4);
+      FSprite.CurrentFrame := 'Trein_' + Copy(Sleutel, 1, 2) + '-' + Copy(Sleutel, 3, 4);
     end;
     Item := TrimStr(Item);
     S := SplitFirst(Item, ',');
@@ -314,7 +314,7 @@ begin
     FInterval := 2;
 end;
 
-{ @00479168  Moves the train onto the next rail piece, or stops it. }
+{ @00479168  Zet de trein op het volgende spoorstuk, of stopt hem. }
 procedure TTrein.Volgende;
 var
   D: TPoint;
@@ -324,9 +324,9 @@ var
   I: Integer;
 
   { @00479104 }
-  procedure GaNaar(Cell: TCell);
+  procedure GaNaar(Cel: TCell);
   begin
-    FCell := Cell;
+    FCell := Cel;
     FStap := 0;
     (FSprite.Data as TPos).X := FCell.X;
     (FSprite.Data as TPos).Y := FCell.Y;

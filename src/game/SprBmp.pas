@@ -1,8 +1,8 @@
 unit SprBmp;
 
-{ TBmpSurface: TSurface implemented with a GDI TBitmap (24-bit DIB) and, when a
-  transparent colour is set, a monochrome mask bitmap.
-  Decompiled from ROS.exe v1.1, code 00461C00-00463223. }
+{ TBmpSurface: TSurface geimplementeerd met een GDI-TBitmap (24-bit DIB) en, wanneer een
+  transparante kleur is ingesteld, een monochroom maskerbitmap.
+  Gedecompileerd uit ROS.exe v1.1, code 00461C00-00463223. }
 
 {$I zm.inc}
 
@@ -15,7 +15,7 @@ type
   TBmpSurface = class(TSurface)
   private
     FBitmap: TBitmap;            { +0x30 }
-    FMask: TBitmap;              { +0x34  white where transparent; nil when no transparent colour }
+    FMask: TBitmap;              { +0x34  wit waar transparant; nil wanneer geen transparante kleur is ingesteld }
     FTransparentColor: TColor;   { +0x38 }
     procedure CreateMask;
     class procedure StretchDraw(DC: HDC; Mask, Bitmap: TBitmap; SrcRect, DestRect: TRect;
@@ -57,15 +57,15 @@ type
     property Mask: TBitmap read FMask;
   end;
 
-  { msimg32.TransparentBlt. NOTE: declared without stdcall in the original; it is never
-    called because the DLL is never loaded (HasTransparentBlt stays False). }
+  { msimg32.TransparentBlt. LET OP: in het origineel zonder stdcall gedeclareerd; hij wordt nooit
+    aangeroepen omdat de DLL nooit geladen wordt (HasTransparentBlt blijft False). }
   TTransparentBltProc = function(DC: HDC; X, Y, W, H: Integer; SrcDC: HDC;
     SX, SY, SW, SH: Integer; Color: UINT): BOOL;
 
 const
-  HandleCheck: Integer = 0;        { 00488D40: handles are mixed in to force their creation }
-  BmpSurfaceCount: Integer = 0;    { 00488D44: number of TBmpSurface instances alive }
-  { 00488D48: BITMAPFILEHEADER + BITMAPINFOHEADER of a 256x100 8-bit bitmap }
+  HandleCheck: Integer = 0;        { 00488D40: handles worden erin gemengd om hun aanmaak af te dwingen }
+  BmpSurfaceCount: Integer = 0;    { 00488D44: aantal levende TBmpSurface-instanties }
+  { 00488D48: BITMAPFILEHEADER + BITMAPINFOHEADER van een 256x100 8-bit bitmap }
   PaletteBmpHeader: array[0..$35] of Byte = (
     $42, $4D, $36, $68, $00, $00, $00, $00, $00, $00, $36, $04, $00, $00,
     $28, $00, $00, $00, $00, $01, $00, $00, $64, $00, $00, $00, $01, $00,
@@ -73,7 +73,7 @@ const
     $C4, $0E, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00);
 
 var
-  BmpScreen: TSurfaceScreen;               { 0048A8BC: always nil }
+  BmpScreen: TSurfaceScreen;               { 0048A8BC: is altijd nil }
   TransparentBltProc: TTransparentBltProc; { 0048A8C4 }
   HasTransparentBlt: Boolean;              { 0048A8C8 }
 
@@ -92,14 +92,14 @@ var
 { @00461D3C }
 procedure SetupBitmap(Bmp: TBitmap);
 var
-  V: TWinVersion;
+  Versie: TWinVersion;
 begin
   Bmp.HandleType := bmDIB;
   Bmp.PixelFormat := pf24bit;
   Exit;
-  { NOTE: unreachable in the original as well }
-  GetWinVersion(V);
-  if (V.IsNT and (V.Major < 4)) or (V.Major = $5F) or (V.Minor = 0) then
+  { LET OP: in het origineel ook onbereikbaar }
+  GetWinVersion(Versie);
+  if (Versie.IsNT and (Versie.Major < 4)) or (Versie.Major = $5F) or (Versie.Minor = 0) then
     Bmp.HandleType := bmDDB
   else
   begin
@@ -119,7 +119,7 @@ end;
 { @00461DC8 }
 constructor TBmpSurface.CreateSize(AWidth, AHeight: Integer);
 var
-  Form: TForm;
+  Formulier: TForm;
 begin
   inherited CreateSize(AWidth, AHeight);
   FBitmap := TBitmap.Create;
@@ -127,9 +127,9 @@ begin
   FBitmap.Width := AWidth;
   FBitmap.Height := AHeight;
   BitBlt(FBitmap.Canvas.Handle, 0, 0, AWidth, AHeight, FBitmap.Canvas.Handle, 0, 0, BLACKNESS);
-  Form := TForm.Create(nil);
-  Form.Canvas.Draw(0, 0, FBitmap);
-  Form.Free;
+  Formulier := TForm.Create(nil);
+  Formulier.Canvas.Draw(0, 0, FBitmap);
+  Formulier.Free;
   Blank := True;
   FMask := nil;
   FTransparentColor := clNoTransparent;
@@ -164,10 +164,10 @@ end;
 { @00461F20 }
 procedure TBmpSurface.SetPixel(X, Y: Integer; Index: Byte);
 var
-  C: TRGBQuad;
+  Kleur: TRGBQuad;
 begin
-  C := GetPaletteColor(Index);
-  FBitmap.Canvas.Pixels[X, Y] := (C.rgbBlue shl 16) + (C.rgbGreen shl 8) + C.rgbRed;
+  Kleur := GetPaletteColor(Index);
+  FBitmap.Canvas.Pixels[X, Y] := (Kleur.rgbBlue shl 16) + (Kleur.rgbGreen shl 8) + Kleur.rgbRed;
 end;
 
 { @00461F74 }
@@ -179,25 +179,25 @@ end;
 { @00461F80 }
 function TBmpSurface.GetPaletteColor(Index: Integer): TRGBQuad;
 var
-  Entry: TPaletteEntry;
+  Invoer: TPaletteEntry;
 begin
-  GetPaletteEntries(FBitmap.Palette, Index, 1, Entry);
-  Result.rgbBlue := Entry.peBlue;
-  Result.rgbGreen := Entry.peGreen;
-  Result.rgbRed := Entry.peRed;
-  { NOTE: rgbReserved is left undefined, as in the original }
+  GetPaletteEntries(FBitmap.Palette, Index, 1, Invoer);
+  Result.rgbBlue := Invoer.peBlue;
+  Result.rgbGreen := Invoer.peGreen;
+  Result.rgbRed := Invoer.peRed;
+  { LET OP: rgbReserved blijft ongedefinieerd, zoals in het origineel }
 end;
 
 { @00461FC0 }
 procedure TBmpSurface.SetPaletteColor(Index: Integer; Color: TRGBQuad);
 var
-  Entry: TPaletteEntry;
+  Invoer: TPaletteEntry;
 begin
-  Entry.peBlue := Color.rgbBlue;
-  Entry.peGreen := Color.rgbGreen;
-  Entry.peRed := Color.rgbRed;
-  Entry.peFlags := PC_NOCOLLAPSE;
-  SetPaletteEntries(FBitmap.Palette, Index, 1, Entry);
+  Invoer.peBlue := Color.rgbBlue;
+  Invoer.peGreen := Color.rgbGreen;
+  Invoer.peRed := Color.rgbRed;
+  Invoer.peFlags := PC_NOCOLLAPSE;
+  SetPaletteEntries(FBitmap.Palette, Index, 1, Invoer);
 end;
 
 { @00462004 }
@@ -219,13 +219,13 @@ end;
 { @00462058 }
 procedure TBmpSurface.SetTransparentColor(Value: TColor);
 var
-  OldBkColor: COLORREF;
-  OldPenColor: TColor;
-  RGBValue: Integer;
-  Tmp: TBitmap;
+  OudAchtergrond: COLORREF;
+  OudePenKleur: TColor;
+  RGBWaarde: Integer;
+  Tijdelijk: TBitmap;
   X, Y: Integer;
-  SrcLine, MaskLine, Line: PByteArray;
-  Src, Dst: PInteger;
+  BronRegel, MaskerRegel, Regel: PByteArray;
+  Bron, Doel: PInteger;
   S0, S1, S2, M0, M1, M2: PByte;
 begin
   if Value = FTransparentColor then
@@ -237,14 +237,14 @@ begin
   end;
   if (FTransparentColor <> 0) and (FTransparentColor <> clNoTransparent) then
   begin
-    { give the transparent pixels (blackened by SRCAND below) their colour back }
-    OldPenColor := FMask.Canvas.Pen.Color;
+    { geef de transparante pixels (zwart gemaakt door SRCAND hieronder) hun kleur terug }
+    OudePenKleur := FMask.Canvas.Pen.Color;
     FBitmap.Canvas.Pen.Color := 0;
-    OldBkColor := SetBkColor(FBitmap.Canvas.Handle, FTransparentColor);
+    OudAchtergrond := SetBkColor(FBitmap.Canvas.Handle, FTransparentColor);
     BitBlt(FBitmap.Canvas.Handle, 0, 0, FBitmap.Width, FBitmap.Height,
       FMask.Canvas.Handle, 0, 0, SRCPAINT);
-    SetBkColor(FBitmap.Canvas.Handle, OldBkColor);
-    FBitmap.Canvas.Pen.Color := OldPenColor;
+    SetBkColor(FBitmap.Canvas.Handle, OudAchtergrond);
+    FBitmap.Canvas.Pen.Color := OudePenKleur;
   end;
   if FTransparentColor = clNoTransparent then
     CreateMask;
@@ -255,41 +255,41 @@ begin
     FMask := nil;
     Exit;
   end;
-  OldBkColor := SetBkColor(FBitmap.Canvas.Handle, FTransparentColor);
-  { TColor $00BBGGRR -> $00RRGGBB as stored in a 24-bit scan line }
-  RGBValue := ((FTransparentColor and $FF) shl 16) + (FTransparentColor and $FF00) +
+  OudAchtergrond := SetBkColor(FBitmap.Canvas.Handle, FTransparentColor);
+  { TColor $00BBGGRR -> $00RRGGBB zoals opgeslagen in een 24-bit scanregel }
+  RGBWaarde := ((FTransparentColor and $FF) shl 16) + (FTransparentColor and $FF00) +
     ((FTransparentColor and $FF0000) shr 16);
   FMask.HandleType := bmDIB;
   FMask.PixelFormat := pf24bit;
-  Tmp := TBitmap.Create;
-  Tmp.HandleType := bmDIB;
-  Tmp.PixelFormat := pf24bit;
-  Tmp.Width := FBitmap.Width;
-  Tmp.Height := FBitmap.Height;
-  BitBlt(Tmp.Canvas.Handle, 0, 0, FBitmap.Width, FBitmap.Height,
+  Tijdelijk := TBitmap.Create;
+  Tijdelijk.HandleType := bmDIB;
+  Tijdelijk.PixelFormat := pf24bit;
+  Tijdelijk.Width := FBitmap.Width;
+  Tijdelijk.Height := FBitmap.Height;
+  BitBlt(Tijdelijk.Canvas.Handle, 0, 0, FBitmap.Width, FBitmap.Height,
     FBitmap.Canvas.Handle, 0, 0, SRCCOPY);
-  for Y := 0 to Tmp.Height - 1 do
+  for Y := 0 to Tijdelijk.Height - 1 do
   begin
-    SrcLine := Tmp.ScanLine[Y];
-    MaskLine := FMask.ScanLine[Y];
+    BronRegel := Tijdelijk.ScanLine[Y];
+    MaskerRegel := FMask.ScanLine[Y];
     for X := 0 to FBitmap.Width - 1 do
     begin
-      Src := PInteger(@SrcLine[X * 3]);
-      Dst := PInteger(@MaskLine[X * 3]);
-      if X = Tmp.Width - 1 then
+      Bron := PInteger(@BronRegel[X * 3]);
+      Doel := PInteger(@MaskerRegel[X * 3]);
+      if X = Tijdelijk.Width - 1 then
       begin
-        { last pixel of the line: byte access, a dword would read past the end }
-        S0 := @SrcLine[X * 3];
+        { laatste pixel van de regel: bytetoegang, een dword zou voorbij het eind lezen }
+        S0 := @BronRegel[X * 3];
         S1 := S0;
         Inc(S1);
         S2 := S0;
         Inc(S2, 2);
-        M0 := @MaskLine[X * 3];
+        M0 := @MaskerRegel[X * 3];
         M1 := M0;
         Inc(M1);
         M2 := M0;
         Inc(M2, 2);
-        if ((S0^ + S1^ shl 8 + S2^ shl 16) and $FFFFFF) = (RGBValue and $FFFFFF) then
+        if ((S0^ + S1^ shl 8 + S2^ shl 16) and $FFFFFF) = (RGBWaarde and $FFFFFF) then
         begin
           M0^ := M0^ or $FF;
           M1^ := M1^ or $FF;
@@ -302,30 +302,30 @@ begin
           M2^ := M2^ and 0;
         end;
       end
-      else if (Src^ and $FFFFFF) = (RGBValue and $FFFFFF) then
-        Dst^ := Dst^ or $FFFFFF
+      else if (Bron^ and $FFFFFF) = (RGBWaarde and $FFFFFF) then
+        Doel^ := Doel^ or $FFFFFF
       else
-        Dst^ := Dst^ and Integer($FF000000);
+        Doel^ := Doel^ and Integer($FF000000);
     end;
   end;
   FMask.Monochrome := True;
-  Tmp.Free;
-  SetBkColor(FBitmap.Canvas.Handle, OldBkColor);
+  Tijdelijk.Free;
+  SetBkColor(FBitmap.Canvas.Handle, OudAchtergrond);
   if (Value <> 0) and (FTransparentColor <> clNoTransparent) then
   begin
     if FBitmap.PixelFormat = pf8bit then
     begin
       for Y := 0 to FBitmap.Height - 1 do
       begin
-        Line := FBitmap.ScanLine[Y];
+        Regel := FBitmap.ScanLine[Y];
         for X := 0 to FBitmap.Width - 1 do
-          if Line[X] = $FC then
-            Line[X] := 0;
+          if Regel[X] = $FC then
+            Regel[X] := 0;
       end;
     end
     else
     begin
-      { blacken the transparent pixels so the image can be ORed onto the masked target }
+      { maak de transparante pixels zwart zodat het beeld met OR op het gemaskerde doel gezet kan worden }
       BitBlt(FMask.Canvas.Handle, 0, 0, FMask.Width, FMask.Height,
         FMask.Canvas.Handle, 0, 0, DSTINVERT);
       BitBlt(FBitmap.Canvas.Handle, 0, 0, FBitmap.Width, FBitmap.Height,
@@ -380,81 +380,81 @@ begin
     SetPaletteColor(I, Source.GetPaletteColor(I));
 end;
 
-{ @00462588  Writes the palette as a 256x100 bitmap file (one column per entry). }
+{ @00462588  Schrijft het palet als een 256x100 bitmapbestand (een kolom per item). }
 procedure TBmpSurface.SavePalette(FileName: string);
 var
-  F: file;
-  Buf: array[0..$6835] of Byte;
+  Bestand: file;
+  Buffer: array[0..$6835] of Byte;
   I, Y: Integer;
 begin
   for I := 0 to $35 do
-    Buf[I] := PaletteBmpHeader[I];
+    Buffer[I] := PaletteBmpHeader[I];
   for I := 0 to 255 do
   begin
-    { NOTE: the original reads the colour as a Longint: byte 0, shr 8, shr 16 }
-    Buf[$36 + I * 4] := GetPaletteColor(I).rgbBlue;
-    Buf[$36 + I * 4 + 1] := GetPaletteColor(I).rgbGreen;
-    Buf[$36 + I * 4 + 2] := GetPaletteColor(I).rgbRed;
-    Buf[$36 + I * 4 + 3] := 0;
+    { LET OP: het origineel leest de kleur als Longint: byte 0, shr 8, shr 16 }
+    Buffer[$36 + I * 4] := GetPaletteColor(I).rgbBlue;
+    Buffer[$36 + I * 4 + 1] := GetPaletteColor(I).rgbGreen;
+    Buffer[$36 + I * 4 + 2] := GetPaletteColor(I).rgbRed;
+    Buffer[$36 + I * 4 + 3] := 0;
     for Y := 0 to 99 do
-      Buf[$436 + I + Y * 256] := I;
+      Buffer[$436 + I + Y * 256] := I;
   end;
-  AssignFile(F, FileName);
-  Rewrite(F, 1);
-  BlockWrite(F, Buf, SizeOf(Buf));
-  CloseFile(F);
+  AssignFile(Bestand, FileName);
+  Rewrite(Bestand, 1);
+  BlockWrite(Bestand, Buffer, SizeOf(Buffer));
+  CloseFile(Bestand);
 end;
 
 { @004626C0 }
 procedure TBmpSurface.CopyFrom(Source: TSurface; SrcRect, DestRect: TRect;
   MirrorX, MirrorY: Boolean);
 var
-  Src: TBmpSurface;
+  Bron: TBmpSurface;
   A, B: TBmpSurface;
 begin
   if not (Source is TBmpSurface) then
     raise Exception.Create('Can only copy from BmpSurfaces');
-  Src := Source as TBmpSurface;
+  Bron := Source as TBmpSurface;
   HandleCheck := HandleCheck + Integer(FBitmap.Handle);
   HandleCheck := HandleCheck + Integer(FBitmap.Canvas.Handle);
-  A := Src;
+  A := Bron;
   B := Self;
   if A.Blank and B.Blank then
     Exit;
   if B.Blank <> A.Blank then
   begin
-    { the blank one adopts the palette of the other }
+    { de lege neemt het palet van de andere over }
     if B.Blank then
     begin
       A := Self;
-      B := Src;
+      B := Bron;
     end;
     A.Blank := False;
     A.FBitmap.Palette := B.FBitmap.Palette;
   end;
-  Src.DrawTo(FBitmap.Canvas.Handle, SrcRect, DestRect, MirrorX, MirrorY);
+  Bron.DrawTo(FBitmap.Canvas.Handle, SrcRect, DestRect, MirrorX, MirrorY);
 end;
 
 { @004627D4 }
 procedure SwapInt(var A, B: Integer);
 var
-  T: Integer;
+  Hulp: Integer;
 begin
-  T := A;
+  Hulp := A;
   A := B;
-  B := T;
+  B := Hulp;
 end;
 
 { @004627E0 }
 class procedure TBmpSurface.StretchDraw(DC: HDC; Mask, Bitmap: TBitmap; SrcRect, DestRect: TRect;
   MirrorX, MirrorY: Boolean);
 var
-  HasMask: Boolean;
-  OldPal, OldBmpPal: HPALETTE;
-  OldMode: Integer;
-  Rop: DWORD;
+  HeeftMasker: Boolean;
+  OudPalet, OudBitmapPalet: HPALETTE;
+  OudModus: Integer;
+  Rasterop: DWORD;
 begin
-  HasMask := Mask <> nil;
+  HeeftMasker := Mask <> nil;
   if MirrorX then
   begin
     SwapInt(DestRect.Left, DestRect.Right);
@@ -467,30 +467,30 @@ begin
     Dec(DestRect.Top);
     Dec(DestRect.Bottom);
   end;
-  if HasMask then
+  if HeeftMasker then
     StretchBlt(DC, DestRect.Left, DestRect.Top, DestRect.Right - DestRect.Left,
       DestRect.Bottom - DestRect.Top, Mask.Canvas.Handle, SrcRect.Left, SrcRect.Top,
       SrcRect.Right - SrcRect.Left, SrcRect.Bottom - SrcRect.Top, SRCAND);
   if Bitmap.Palette <> 0 then
   begin
-    OldPal := SelectPalette(DC, Bitmap.Palette, True);
+    OudPalet := SelectPalette(DC, Bitmap.Palette, True);
     RealizePalette(DC);
-    OldBmpPal := SelectPalette(Bitmap.Canvas.Handle, Bitmap.Palette, True);
+    OudBitmapPalet := SelectPalette(Bitmap.Canvas.Handle, Bitmap.Palette, True);
     RealizePalette(Bitmap.Canvas.Handle);
   end;
-  if HasMask then
-    Rop := SRCPAINT
+  if HeeftMasker then
+    Rasterop := SRCPAINT
   else
-    Rop := SRCCOPY;
-  OldMode := SetStretchBltMode(DC, COLORONCOLOR);
+    Rasterop := SRCCOPY;
+  OudModus := SetStretchBltMode(DC, COLORONCOLOR);
   StretchBlt(DC, DestRect.Left, DestRect.Top, DestRect.Right - DestRect.Left,
     DestRect.Bottom - DestRect.Top, Bitmap.Canvas.Handle, SrcRect.Left, SrcRect.Top,
-    SrcRect.Right - SrcRect.Left, SrcRect.Bottom - SrcRect.Top, Rop);
-  SetStretchBltMode(DC, OldMode);
+    SrcRect.Right - SrcRect.Left, SrcRect.Bottom - SrcRect.Top, Rasterop);
+  SetStretchBltMode(DC, OudModus);
   if Bitmap.Palette <> 0 then
   begin
-    SelectPalette(DC, OldPal, True);
-    SelectPalette(Bitmap.Canvas.Handle, OldBmpPal, True);
+    SelectPalette(DC, OudPalet, True);
+    SelectPalette(Bitmap.Canvas.Handle, OudBitmapPalet, True);
   end;
 end;
 
@@ -525,19 +525,19 @@ end;
 { @00462A94 }
 procedure TBmpSurface.Assign(Source: TPersistent);
 var
-  Src: TBmpSurface;
+  Bron: TBmpSurface;
 begin
   if Source is TBmpSurface then
   begin
-    Src := Source as TBmpSurface;
-    Blank := Src.Blank;
-    FBitmap.Assign(Src.FBitmap);
-    FTransparentColor := Src.GetTransparentColor;
+    Bron := Source as TBmpSurface;
+    Blank := Bron.Blank;
+    FBitmap.Assign(Bron.FBitmap);
+    FTransparentColor := Bron.GetTransparentColor;
     if FTransparentColor <> clNoTransparent then
     begin
       if FMask = nil then
         CreateMask;
-      FMask.Assign(Src.FMask);
+      FMask.Assign(Bron.FMask);
       RealizeBitmap(FMask);
     end
     else
@@ -550,19 +550,19 @@ begin
     inherited Assign(Source);
 end;
 
-{ @00462B20  Accepts a bitmap with or without a 2- or 8-byte prefix before the 'BM'. }
+{ @00462B20  Accepteert een bitmap met of zonder een prefix van 2 of 8 bytes voor de 'BM'. }
 procedure TBmpSurface.LoadFromStream(Stream: TStream);
 var
-  Sig: Word;
+  Signatuur: Word;
 begin
-  Stream.Read(Sig, 2);
-  if Sig = $4D42 then
+  Stream.Read(Signatuur, 2);
+  if Signatuur = $4D42 then
     Stream.Seek(-2, soFromCurrent)
   else
   begin
     Stream.Seek(2, soFromCurrent);
-    Stream.Read(Sig, 2);
-    if Sig = $4D42 then
+    Stream.Read(Signatuur, 2);
+    if Signatuur = $4D42 then
       Stream.Seek(-2, soFromCurrent)
     else
       Stream.Seek(6, soFromCurrent);
@@ -585,8 +585,8 @@ end;
 { @00462BF0 }
 procedure TBmpSurface.SetSize(AWidth, AHeight: Integer; Stretch: Boolean);
 var
-  Tmp: TBitmap;
-  OldMode: Integer;
+  Tijdelijk: TBitmap;
+  OudModus: Integer;
 begin
   if not Stretch then
   begin
@@ -604,62 +604,62 @@ begin
   end
   else
   begin
-    Tmp := TBitmap.Create;
-    SetupBitmap(Tmp);
-    Tmp.Assign(FBitmap);
-    RealizeBitmap(Tmp);
-    Tmp.Width := AWidth;
-    RealizeBitmap(Tmp);
-    Tmp.Height := AHeight;
-    RealizeBitmap(Tmp);
-    OldMode := SetStretchBltMode(Tmp.Canvas.Handle, COLORONCOLOR);
-    StretchBlt(Tmp.Canvas.Handle, 0, 0, AWidth, AHeight, FBitmap.Canvas.Handle, 0, 0,
+    Tijdelijk := TBitmap.Create;
+    SetupBitmap(Tijdelijk);
+    Tijdelijk.Assign(FBitmap);
+    RealizeBitmap(Tijdelijk);
+    Tijdelijk.Width := AWidth;
+    RealizeBitmap(Tijdelijk);
+    Tijdelijk.Height := AHeight;
+    RealizeBitmap(Tijdelijk);
+    OudModus := SetStretchBltMode(Tijdelijk.Canvas.Handle, COLORONCOLOR);
+    StretchBlt(Tijdelijk.Canvas.Handle, 0, 0, AWidth, AHeight, FBitmap.Canvas.Handle, 0, 0,
       FBitmap.Width, FBitmap.Height, SRCCOPY);
-    SetStretchBltMode(Tmp.Canvas.Handle, OldMode);
+    SetStretchBltMode(Tijdelijk.Canvas.Handle, OudModus);
     RealizeBitmap(FBitmap);
     FBitmap.Width := AWidth;
     RealizeBitmap(FBitmap);
     FBitmap.Height := AHeight;
     RealizeBitmap(FBitmap);
-    BitBlt(FBitmap.Canvas.Handle, 0, 0, AWidth, AHeight, Tmp.Canvas.Handle, 0, 0, SRCCOPY);
+    BitBlt(FBitmap.Canvas.Handle, 0, 0, AWidth, AHeight, Tijdelijk.Canvas.Handle, 0, 0, SRCCOPY);
     RealizeBitmap(FBitmap);
     if FMask <> nil then
     begin
-      Tmp.Assign(FMask);
-      RealizeBitmap(Tmp);
-      Tmp.Width := AWidth;
-      RealizeBitmap(Tmp);
-      Tmp.Height := AHeight;
-      OldMode := SetStretchBltMode(Tmp.Canvas.Handle, COLORONCOLOR);
-      { NOTE: stretches FBitmap (already resized), not the old mask, into the new mask }
-      StretchBlt(Tmp.Canvas.Handle, 0, 0, AWidth, AHeight, FBitmap.Canvas.Handle, 0, 0,
+      Tijdelijk.Assign(FMask);
+      RealizeBitmap(Tijdelijk);
+      Tijdelijk.Width := AWidth;
+      RealizeBitmap(Tijdelijk);
+      Tijdelijk.Height := AHeight;
+      OudModus := SetStretchBltMode(Tijdelijk.Canvas.Handle, COLORONCOLOR);
+      { LET OP: rekt FBitmap (al vergroot), niet het oude masker, naar het nieuwe masker }
+      StretchBlt(Tijdelijk.Canvas.Handle, 0, 0, AWidth, AHeight, FBitmap.Canvas.Handle, 0, 0,
         FBitmap.Width, FBitmap.Height, SRCCOPY);
-      SetStretchBltMode(Tmp.Canvas.Handle, OldMode);
-      FMask.Assign(Tmp);
+      SetStretchBltMode(Tijdelijk.Canvas.Handle, OudModus);
+      FMask.Assign(Tijdelijk);
     end;
-    Tmp.Free;
+    Tijdelijk.Free;
   end;
 end;
 
 { @00462E3C }
 procedure TBmpSurface.TextOut(X, Y: Integer; AFont: TFont; Text: string);
 var
-  OldTransparent: TColor;
-  OldFont: TFont;
+  OudTransparant: TColor;
+  OudLettertype: TFont;
 begin
   if GetTransparentColor <> clNoTransparent then
   begin
-    OldTransparent := GetTransparentColor;
+    OudTransparant := GetTransparentColor;
     SetTransparentColor(0);
   end;
-  OldFont := TFont.Create;
-  OldFont.Assign(FBitmap.Canvas.Font);
+  OudLettertype := TFont.Create;
+  OudLettertype.Assign(FBitmap.Canvas.Font);
   FBitmap.Canvas.Font.Assign(AFont);
   FBitmap.Canvas.TextOut(X, Y, Text);
-  FBitmap.Canvas.Font.Assign(OldFont);
-  OldFont.Free;
+  FBitmap.Canvas.Font.Assign(OudLettertype);
+  OudLettertype.Free;
   if GetTransparentColor <> clNoTransparent then
-    SetTransparentColor(OldTransparent);
+    SetTransparentColor(OudTransparant);
 end;
 
 { @00462F24 }
@@ -671,58 +671,58 @@ end;
 { @00462F70 }
 function TBmpSurface.TextWidth(AFont: TFont; Text: string): Integer;
 var
-  S: TSurface;
+  Vlak: TSurface;
 begin
-  S := NewSurface;
-  S.GetCanvas.Font := AFont;
-  Result := S.GetCanvas.TextWidth(Text);
-  S.Free;
+  Vlak := NewSurface;
+  Vlak.GetCanvas.Font := AFont;
+  Result := Vlak.GetCanvas.TextWidth(Text);
+  Vlak.Free;
 end;
 
 { @00462FE4 }
 function TBmpSurface.TextHeight(AFont: TFont; Text: string): Integer;
 var
-  S: TSurface;
+  Vlak: TSurface;
 begin
-  S := NewSurface;
-  S.GetCanvas.Font := AFont;
-  Result := S.GetCanvas.TextHeight(Text);
-  S.Free;
+  Vlak := NewSurface;
+  Vlak.GetCanvas.Font := AFont;
+  Result := Vlak.GetCanvas.TextHeight(Text);
+  Vlak.Free;
 end;
 
 { @00463058 }
 procedure TBmpSurface.FillRect(R: TRect; Color: Byte);
 var
-  C: Integer;
-  Rop: DWORD;
-  OldStyle: TBrushStyle;
-  OldBrushColor, OldPenColor: TColor;
+  Waarde: Integer;
+  Rasterop: DWORD;
+  OudeStijl: TBrushStyle;
+  OudeKwastKleur, OudePenKleur: TColor;
 begin
-  C := Color;
-  { NOTE: a Byte can never be $FFFFFF }
-  if (C = 0) or (C = $FFFFFF) then
+  Waarde := Color;
+  { LET OP: een Byte kan nooit $FFFFFF zijn }
+  if (Waarde = 0) or (Waarde = $FFFFFF) then
   begin
-    if C = 0 then
-      Rop := BLACKNESS
+    if Waarde = 0 then
+      Rasterop := BLACKNESS
     else
-      Rop := WHITENESS;
+      Rasterop := WHITENESS;
     BitBlt(FBitmap.Canvas.Handle, R.Left, R.Top, R.Right - R.Left, R.Bottom - R.Top,
-      FBitmap.Canvas.Handle, 0, 0, Rop);
+      FBitmap.Canvas.Handle, 0, 0, Rasterop);
   end
   else
   begin
-    C := IndexToColor(C);
+    Waarde := IndexToColor(Waarde);
     RealizeBitmap(FBitmap);
-    OldStyle := FBitmap.Canvas.Brush.Style;
-    OldBrushColor := FBitmap.Canvas.Brush.Color;
-    OldPenColor := FBitmap.Canvas.Pen.Color;
+    OudeStijl := FBitmap.Canvas.Brush.Style;
+    OudeKwastKleur := FBitmap.Canvas.Brush.Color;
+    OudePenKleur := FBitmap.Canvas.Pen.Color;
     FBitmap.Canvas.Brush.Style := bsClear;
-    FBitmap.Canvas.Brush.Color := C;
-    FBitmap.Canvas.Pen.Color := C;
+    FBitmap.Canvas.Brush.Color := Waarde;
+    FBitmap.Canvas.Pen.Color := Waarde;
     FBitmap.Canvas.FillRect(R);
-    FBitmap.Canvas.Pen.Color := OldPenColor;
-    FBitmap.Canvas.Brush.Style := OldStyle;
-    FBitmap.Canvas.Brush.Color := OldBrushColor;
+    FBitmap.Canvas.Pen.Color := OudePenKleur;
+    FBitmap.Canvas.Brush.Style := OudeStijl;
+    FBitmap.Canvas.Brush.Color := OudeKwastKleur;
   end;
 end;
 
@@ -731,8 +731,8 @@ initialization
   if SurfaceClass <> nil then
     SurfaceClass := TBmpSurface;
   BmpScreen := nil;
-  { NOTE: msimg32.dll is never loaded (the handle is a constant 0 in the original, kept
-    in a register), so TransparentBlt is never used }
+  { LET OP: msimg32.dll wordt nooit geladen (de handle is in het origineel een constante 0, die in een
+    register bewaard wordt), dus TransparentBlt wordt nooit gebruikt }
   MsImgHandle := 0;
   if MsImgHandle <> 0 then
   begin

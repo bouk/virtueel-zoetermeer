@@ -1,9 +1,9 @@
 unit fBack;
 
-{ TfrmBlack: the black full-screen backdrop behind the main form, showing the
-  loading picture, the loading progress text and the version number. Keys and
-  mouse clicks on it are passed on to the main form.
-  Decompiled from ROS.exe v1.1, code 00486C6C-00486F63. }
+{ TfrmBlack: het zwarte, schermvullende achtergrondvenster achter het hoofdvenster,
+  met het laadplaatje, de laadvoortgangstekst en het versienummer. Toetsaanslagen
+  en muisklikken erop worden doorgegeven aan het hoofdvenster.
+  Gedecompileerd uit ROS.exe v1.1, code 00486C6C-00486F63. }
 
 {$I zm.inc}
 
@@ -14,7 +14,7 @@ uses
   StdCtrls, ExtCtrls;
 
 type
-  { VMT 00486CB8, instance size $2E0 }
+  { VMT 00486CB8, instantiegrootte $2E0 }
   TfrmBlack = class(TForm)
     imgLoading: TImage;                { +0x2D0 }
     lblLoading: TLabel;                { +0x2D4 }
@@ -28,7 +28,7 @@ type
   end;
 
 var
-  frmBlack: TfrmBlack;   { not referenced: removed by the linker }
+  frmBlack: TfrmBlack;   { niet gebruikt: wordt door de linker verwijderd }
 
 implementation
 
@@ -36,7 +36,7 @@ uses
   Fmain;
 
 {$IFNDEF FPC}
-{$R *.dfm}  { Delphi only: the portable build streams forms from the user's ROS.exe }
+{$R *.dfm}  { Alleen Delphi: de draagbare build laadt formulieren uit de ROS.exe van de gebruiker }
 {$ENDIF}
 
 { @00486E68 }

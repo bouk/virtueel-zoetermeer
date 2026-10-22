@@ -1,8 +1,8 @@
 unit uSurface;
 
-{ TSurface: abstract palette-based drawing surface of the sprite engine (a TGraphic).
-  The only implementation linked into ROS.exe is TBmpSurface (unit SprBmp).
-  Decompiled from ROS.exe v1.1, code 00463224-0046384F. }
+{ TSurface: abstract palet-gebaseerd tekenoppervlak van de sprite-engine (een TGraphic).
+  De enige implementatie die in ROS.exe gelinkt is, is TBmpSurface (unit SprBmp).
+  Gedecompileerd uit ROS.exe v1.1, code 00463224-0046384F. }
 
 {$I zm.inc}
 
@@ -12,16 +12,16 @@ uses
   Windows, Classes, Graphics;
 
 const
-  { "no transparent colour" marker used by all surfaces }
+  { markering "geen transparante kleur", gebruikt door alle oppervlakken }
   clNoTransparent = $2FFFFFF;
 
 type
   TSurface = class;
   TSurfaceClass = class of TSurface;
 
-  { Screen object of a hardware (DirectDraw) surface implementation, returned by
-    TSurface.GetScreen. No implementation of it is linked into ROS.exe (TBmpSurface
-    returns nil); only the slots that uSpritebox calls are known. }
+  { Schermobject van een hardware-(DirectDraw-)oppervlakimplementatie, teruggegeven door
+    TSurface.GetScreen. Er is geen implementatie ervan gelinkt in ROS.exe (TBmpSurface
+    geeft nil terug); alleen de slots die uSpritebox aanroept zijn bekend. }
   TSurfaceScreen = class(TObject)
   public
     procedure Virtual00; virtual; abstract;               { +0x00 }
@@ -32,11 +32,11 @@ type
 
   TSurface = class(TGraphic)
   private
-    FReserved1C: Integer;    { +0x1C  not used by any code in ROS.exe }
-    FBlank: Boolean;         { +0x20  surface has no image (and palette) of its own yet }
-    FReserved24: Integer;    { +0x24  not used }
-    FReserved28: Integer;    { +0x28  not used }
-    FReserved2C: Integer;    { +0x2C  not used }
+    FReserved1C: Integer;    { +0x1C  wordt door geen enkele code in ROS.exe gebruikt }
+    FBlank: Boolean;         { +0x20  oppervlak heeft (nog) geen eigen beeld (en palet) }
+    FReserved24: Integer;    { +0x24  niet gebruikt }
+    FReserved28: Integer;    { +0x28  niet gebruikt }
+    FReserved2C: Integer;    { +0x2C  niet gebruikt }
   protected
     procedure Draw(ACanvas: TCanvas; const ARect: TRect); override;           { +0x14 }
     function GetEmpty: Boolean; override;                                      { +0x1C }
@@ -83,7 +83,7 @@ type
   end;
 
 var
-  SurfaceClass: TSurfaceClass;   { 0048A8CC: class used by NewSurface }
+  SurfaceClass: TSurfaceClass;   { 0048A8CC: klasse die door NewSurface gebruikt wordt }
 
 function NewSurface: TSurface;
 function NewSurfaceSize(AWidth, AHeight: Integer): TSurface;
@@ -123,25 +123,25 @@ end;
 { @0046343C }
 procedure TSurface.SetSize(AWidth, AHeight: Integer; Stretch: Boolean);
 var
-  Tmp: TSurface;
+  Tijdelijk: TSurface;
   I: Integer;
-  R: TRect;
-  OldTransparent: TColor;
+  Doel: TRect;
+  OudTransparant: TColor;
 begin
-  Tmp := NewSurfaceSize(AWidth, AHeight);
+  Tijdelijk := NewSurfaceSize(AWidth, AHeight);
   for I := 0 to 255 do
-    Tmp.SetPaletteColor(I, GetPaletteColor(I));
-  Tmp.CopyPalette(Self);
+    Tijdelijk.SetPaletteColor(I, GetPaletteColor(I));
+  Tijdelijk.CopyPalette(Self);
   if Stretch then
-    R := Classes.Rect(0, 0, AWidth, AHeight)
+    Doel := Classes.Rect(0, 0, AWidth, AHeight)
   else
-    R := Classes.Rect(0, 0, Width, Height);
-  OldTransparent := GetTransparentColor;
+    Doel := Classes.Rect(0, 0, Width, Height);
+  OudTransparant := GetTransparentColor;
   SetTransparentColor(clNoTransparent);
-  Tmp.CopyFrom(Self, Classes.Rect(0, 0, Width, Height), R, False, False);
-  Assign(Tmp);
-  SetTransparentColor(OldTransparent);
-  Tmp.Free;
+  Tijdelijk.CopyFrom(Self, Classes.Rect(0, 0, Width, Height), Doel, False, False);
+  Assign(Tijdelijk);
+  SetTransparentColor(OudTransparant);
+  Tijdelijk.Free;
 end;
 
 { @00463534 }
@@ -195,22 +195,22 @@ end;
 { @004636B0 }
 function TSurface.ColorToIndex(Color: TColor): Integer;
 var
-  B, R, G: Integer;
-  BestDist, Dist, I: Integer;
-  C: TRGBQuad;
+  Blauw, Rood, Groen: Integer;
+  BesteAfstand, Afstand, I: Integer;
+  Kleur: TRGBQuad;
 begin
-  B := GetBValue(Color);
-  R := GetRValue(Color);
-  G := GetGValue(Color);
-  BestDist := 765;
+  Blauw := GetBValue(Color);
+  Rood := GetRValue(Color);
+  Groen := GetGValue(Color);
+  BesteAfstand := 765;
   Result := -1;
   for I := 0 to GetPaletteCount - 1 do
   begin
-    C := GetPaletteColor(I);
-    Dist := Abs(B - C.rgbBlue) + Abs(G - C.rgbGreen) + Abs(R - C.rgbRed);
-    if Dist < BestDist then
+    Kleur := GetPaletteColor(I);
+    Afstand := Abs(Blauw - Kleur.rgbBlue) + Abs(Groen - Kleur.rgbGreen) + Abs(Rood - Kleur.rgbRed);
+    if Afstand < BesteAfstand then
     begin
-      BestDist := Dist;
+      BesteAfstand := Afstand;
       Result := I;
     end;
   end;
@@ -219,11 +219,11 @@ end;
 { @0046377C }
 function TSurface.IndexToColor(Index: Integer): TColor;
 var
-  C: TRGBQuad;
+  Kleur: TRGBQuad;
 begin
-  C := GetPaletteColor(Index);
-  { = PaletteRGB(C.rgbRed, C.rgbGreen, C.rgbBlue) }
-  Result := ((C.rgbBlue + $200) shl 8 + C.rgbGreen) shl 8 + C.rgbRed;
+  Kleur := GetPaletteColor(Index);
+  { = PaletteRGB(Kleur.rgbRed, Kleur.rgbGreen, Kleur.rgbBlue) }
+  Result := ((Kleur.rgbBlue + $200) shl 8 + Kleur.rgbGreen) shl 8 + Kleur.rgbRed;
 end;
 
 { @004637B4 }

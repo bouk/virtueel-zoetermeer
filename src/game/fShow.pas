@@ -1,7 +1,7 @@
 unit fShow;
 
-{ Debug window that shows a bitmap (TSurface.DebugShow).
-  Decompiled from ROS.exe v1.1, code 004616A8-00461B0F; form in build/dfm-1.1/TFORMDEBUGSHOW.txt. }
+{ Debugvenster dat een bitmap toont (TSurface.DebugShow).
+  Gedecompileerd uit ROS.exe v1.1, code 004616A8-00461B0F; formulier in build/dfm-1.1/TFORMDEBUGSHOW.txt. }
 
 {$I zm.inc}
 
@@ -25,9 +25,9 @@ type
   private
     FKind: TDebugShowKind;       { +0x2E0 }
     FGraphic: TGraphic;          { +0x2E4 }
-    FView: TControl;             { +0x2E8  control that is resized with the form }
+    FView: TControl;             { +0x2E8  besturing die samen met het formulier van grootte verandert }
   public
-    procedure ShowGraphic(AGraphic: TGraphic; ACaption: string);
+    procedure ShowGraphic(AAfbeelding: TGraphic; ATitel: string);
   end;
 
 var
@@ -35,22 +35,22 @@ var
 
 procedure CreateDebugShow;
 procedure FreeDebugShow;
-procedure ShowBitmap(AGraphic: TGraphic; ACaption: string);
+procedure ShowBitmap(AAfbeelding: TGraphic; ATitel: string);
 
 implementation
 
 {$IFNDEF FPC}
-{$R *.dfm}  { Delphi only: the portable build streams forms from the user's ROS.exe }
+{$R *.dfm}  { Alleen Delphi: de draagbare build laadt formulieren uit de ROS.exe van de gebruiker }
 {$ENDIF}
 
 { @00461898 }
-procedure TformDebugShow.ShowGraphic(AGraphic: TGraphic; ACaption: string);
+procedure TformDebugShow.ShowGraphic(AAfbeelding: TGraphic; ATitel: string);
 begin
-  FGraphic := AGraphic;
+  FGraphic := AAfbeelding;
   FKind := dkGraphic;
   FView := PaintBox1;
   PaintBox1.Visible := True;
-  Caption := ACaption;
+  Caption := ATitel;
   ShowModal;
 end;
 
@@ -77,15 +77,15 @@ end;
 { @004619FC }
 procedure TformDebugShow.FormResize(Sender: TObject);
 var
-  W, H: Integer;
+  Breedte, Hoogte: Integer;
 begin
-  { NOTE: uses the global formDebugShow instead of Self }
-  W := formDebugShow.Width - 24;
-  if W > 25 then
-    FView.Width := W;
-  H := formDebugShow.Height - 91;
-  if H > 25 then
-    FView.Height := H;
+  { LET OP: gebruikt de globale formDebugShow in plaats van Self }
+  Breedte := formDebugShow.Width - 24;
+  if Breedte > 25 then
+    FView.Width := Breedte;
+  Hoogte := formDebugShow.Height - 91;
+  if Hoogte > 25 then
+    FView.Height := Hoogte;
 end;
 
 { @00461A3C }
@@ -106,10 +106,10 @@ begin
 end;
 
 { @00461A7C }
-procedure ShowBitmap(AGraphic: TGraphic; ACaption: string);
+procedure ShowBitmap(AAfbeelding: TGraphic; ATitel: string);
 begin
   CreateDebugShow;
-  formDebugShow.ShowGraphic(AGraphic, ACaption);
+  formDebugShow.ShowGraphic(AAfbeelding, ATitel);
   FreeDebugShow;
 end;
 

@@ -1,11 +1,11 @@
 unit uSpritebox;
 
-{ TSpriteBox: the control on which all pixies (sprites, goblins, text
-  balloons) are drawn over a background picture. Each Flip collects the
-  changed areas of all pixies and redraws only those, either on a DirectDraw
-  screen (FullFlip/DirtyFlip, not available in this build) or directly with
-  GDI (GDIFlip/DrawRegion). TThreeD adds a simple perspective projection.
-  Decompiled from ROS.exe v1.1, code 0046C9CC-0046EA44. }
+{ TSpriteBox: het besturingselement waarop alle pixies (sprites, goblins,
+  tekstballonnen) over een achtergrondafbeelding worden getekend. Elke Flip verzamelt de
+  gewijzigde gebieden van alle pixies en tekent alleen die opnieuw, hetzij op een
+  DirectDraw-scherm (FullFlip/DirtyFlip, niet beschikbaar in deze build) of direct met
+  GDI (GDIFlip/DrawRegion). TThreeD voegt een eenvoudige perspectiefprojectie toe.
+  Gedecompileerd uit ROS.exe v1.1, code 0046C9CC-0046EA44. }
 
 {$I zm.inc}
 
@@ -16,7 +16,7 @@ uses
   uTool, uSurface, uPixie;
 
 type
-  { Perspective: a point (X, Y, Z) is projected towards (XDis, YDis) with
+  { Perspectief: een punt (X, Y, Z) wordt geprojecteerd naar (XDis, YDis) met
     factor DiaF / (ZDis + Z). }
   TThreeD = class(TPersistent)
   private
@@ -40,32 +40,32 @@ type
 
   TSpriteBox = class(TCustomControl)
   private
-    FReserved1F4: Integer;          { +0x1F4  not used }
-    FBackRects: TRectPosList;       { +0x1F8  changed areas, kept for a screen surface }
-    FDirtyRects: TRectPosList;      { +0x1FC  changed areas since the last flip }
+    FReserved1F4: Integer;          { +0x1F4  niet gebruikt }
+    FBackRects: TRectPosList;       { +0x1F8  gewijzigde gebieden, bewaard voor een schermoppervlak }
+    FDirtyRects: TRectPosList;      { +0x1FC  gewijzigde gebieden sinds de laatste flip }
     FAutoFlip: Boolean;             { +0x200 }
-    FFrozen: Boolean;               { +0x201  Flip does nothing (never set) }
+    FFrozen: Boolean;               { +0x201  Flip doet niets (wordt nooit gezet) }
     FCenter: Boolean;               { +0x202 }
     FAutoSize: Boolean;             { +0x203 }
     FStretch: Boolean;              { +0x204 }
-    FPicture: TSurface;             { +0x208  background }
+    FPicture: TSurface;             { +0x208  achtergrond }
     FPaletteImage: TSurface;        { +0x20C }
-    FPalette: HPALETTE;             { +0x210  halftone palette }
-    FReserved214: Boolean;          { +0x214  set to False, never read }
-    FPixies: TList;                 { +0x218  sorted on Z, highest first }
-    FReserved21C: TRect;            { +0x21C  not used }
-    FFlipMode: Byte;                { +0x22C  0: FullFlip, 1: DirtyFlip (never set) }
-    FDrawWindow: HWND;              { +0x230  window to draw on instead of Handle (never set) }
+    FPalette: HPALETTE;             { +0x210  halftone-palet }
+    FReserved214: Boolean;          { +0x214  op False gezet, nooit gelezen }
+    FPixies: TList;                 { +0x218  gesorteerd op Z, hoogste eerst }
+    FReserved21C: TRect;            { +0x21C  niet gebruikt }
+    FFlipMode: Byte;                { +0x22C  0: FullFlip, 1: DirtyFlip (wordt nooit gezet) }
+    FDrawWindow: HWND;              { +0x230  venster om op te tekenen in plaats van Handle (wordt nooit gezet) }
     FThreeD: TThreeD;               { +0x234 }
     FReload: string;                { +0x238 }
-    FStarted: Boolean;              { +0x23C  first Paint done }
+    FStarted: Boolean;              { +0x23C  eerste Paint uitgevoerd }
     FOnFlip: TNotifyEvent;          { +0x240 }
     FOnStarted: TNotifyEvent;       { +0x248 }
     FOnShow: TNotifyEvent;          { +0x250 }
     FScale: Double;                 { +0x258 }
-    FCapturePixie: TPixie;          { +0x260  pixie that captured the mouse }
-    FMousePixie: TPixie;            { +0x264  pixie under the mouse }
-    FFrameTime: Integer;            { +0x268  smoothed ms per flip }
+    FCapturePixie: TPixie;          { +0x260  pixie die de muis heeft vastgelegd }
+    FMousePixie: TPixie;            { +0x264  pixie onder de muis }
+    FFrameTime: Integer;            { +0x268  gladgestreken ms per flip }
     FLastTick: Integer;             { +0x26C }
     FHandleBackGround: THandleBackGround; { +0x270 }
     FBackGroundColor: TColor;       { +0x274 }
@@ -76,10 +76,10 @@ type
     procedure SetPicture(Value: TSurface);
     procedure SetPaletteImage(Value: TSurface);
     procedure AddUpdateRect(R: TRect);
-    procedure MergeRects(List: TRectPosList);
-    procedure DrawRegion(DC: HDC; R: TRect; OffsX, OffsY: Integer);
-    function ZOrderDirection(Index: Integer): Integer;
-    procedure UpdateZOrderAt(Index: Integer);
+    procedure MergeRects(Lijst: TRectPosList);
+    procedure DrawRegion(DC: HDC; R: TRect; VersX, VersY: Integer);
+    function ZOrderDirection(Nr: Integer): Integer;
+    procedure UpdateZOrderAt(Nr: Integer);
   protected
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
@@ -97,7 +97,7 @@ type
     procedure Flip; virtual;                                             { +0xCC }
     procedure InvalidateArea(R: TRect; Z: Integer); virtual;             { +0xD0 }
     function NoPicture: Boolean;
-    function GetPixie(Index: Integer): TPixie;
+    function GetPixie(Nr: Integer): TPixie;
     function PixieCount: Integer;
     function GetDrawWindow: HWND;
     procedure InvalidateRect(R: TRect);
@@ -106,10 +106,10 @@ type
     procedure AddPixie(Pixie: TPixie);
     procedure RemovePixie(Pixie: TPixie);
     procedure UpdateZOrder(Pixie: TPixie);
-    procedure UpdatePalette(Background: Boolean);
+    procedure UpdatePalette(Achtergrond: Boolean);
     procedure SetCapturePixie(Pixie: TPixie);
     property Count: Integer read PixieCount;
-    property Items[Index: Integer]: TPixie read GetPixie;
+    property Items[Nr: Integer]: TPixie read GetPixie;
     property Canvas;
     property Scale: Double read FScale write FScale;
     property FrameTime: Integer read FFrameTime;
@@ -156,13 +156,13 @@ type
   TSpriteBoxList = class(TList)
   public
     function Add(Box: TSpriteBox): TSpriteBox;
-    function GetSpriteBox(Index: Integer): TSpriteBox;
+    function GetSpriteBox(Nr: Integer): TSpriteBox;
     procedure FlipAll;
-    property SpriteBoxes[Index: Integer]: TSpriteBox read GetSpriteBox; default;
+    property SpriteBoxes[Nr: Integer]: TSpriteBox read GetSpriteBox; default;
   end;
 
 var
-  TempSurface: TSurface;            { 0048A934  scratch surface of DrawRegion }
+  TempSurface: TSurface;            { 0048A934  werkoppervlak van DrawRegion }
   SpriteBoxes: TSpriteBoxList;      { 0048A938 }
   OldExitProc: Pointer;             { 0048A940 }
 
@@ -173,7 +173,7 @@ uses
 
 {$J+}
 const
-  DrawDepth: Integer = 0;           { 00488E78  nesting of DrawRegion, clipped at 5 }
+  DrawDepth: Integer = 0;           { 00488E78  nesting van DrawRegion, begrensd op 5 }
 {$J-}
 
 { ----------------------------------------------------------------- TSpriteBox }
@@ -232,9 +232,9 @@ begin
 end;
 
 { @0046D41C }
-function TSpriteBox.GetPixie(Index: Integer): TPixie;
+function TSpriteBox.GetPixie(Nr: Integer): TPixie;
 begin
-  Result := TObject(FPixies[Index]) as TPixie;
+  Result := TObject(FPixies[Nr]) as TPixie;
 end;
 
 { @0046D440 }
@@ -253,7 +253,7 @@ begin
   end;
 end;
 
-{ @0046D460  posted by the first Paint: starts the timer loop }
+{ @0046D460  gepost door de eerste Paint: start de timerlus }
 procedure TSpriteBox.WMStarted(var Message: TMessage);
 begin
   if not (csDesigning in ComponentState) then
@@ -338,7 +338,7 @@ var
 begin
   P := PixieAt(X, Y);
   if P <> nil then
-    if P <> nil then   { NOTE: tested twice in the original }
+    if P <> nil then   { LET OP: in het origineel tweemaal getest }
       P.MouseUp(P, Button, Shift, X - P.GetLeft, Y - P.GetTop);
   inherited MouseUp(Button, Shift, X, Y);
 end;
@@ -388,21 +388,21 @@ begin
   end;
 end;
 
-{ @0046D880  joins overlapping rectangles; joined ones get X = -9999 }
-procedure TSpriteBox.MergeRects(List: TRectPosList);
+{ @0046D880  voegt overlappende rechthoeken samen; samengevoegde krijgen X = -9999 }
+procedure TSpriteBox.MergeRects(Lijst: TRectPosList);
 var
   I, J: Integer;
   A, B: TRectPos;
   T: DWORD;
 begin
-  T := timeGetTime;   { NOTE: timing leftover, not used }
-  for I := List.Count - 1 downto 1 do
+  T := timeGetTime;   { LET OP: overblijfsel van timing, niet gebruikt }
+  for I := Lijst.Count - 1 downto 1 do
     for J := I - 1 downto 0 do
     begin
-      A := TRectPos(TList(List)[I]);
+      A := TRectPos(TList(Lijst)[I]);
       if A.X <> -9999 then
       begin
-        B := TRectPos(TList(List)[J]);
+        B := TRectPos(TList(Lijst)[J]);
         if B.Intersects(A) then
         begin
           B.Union(A);
@@ -423,14 +423,14 @@ begin
     Result := Handle;
 end;
 
-{ @0046D914  redraws everything on the screen surface }
+{ @0046D914  tekent alles opnieuw op het schermoppervlak }
 procedure TSpriteBox.FullFlip;
 var
   RP: TRectPos;
   I: Integer;
   P: TPixie;
   PX, PY: Integer;
-  Size: Double;
+  Schaal: Double;
 begin
   if FBackRects.Count <> 0 then
   begin
@@ -439,7 +439,7 @@ begin
     FPicture.SetTransparentColor(clNoTransparent);
     SurfaceScreen.GetBackSurface.CopyFrom(FPicture, Rect(0, 0, Width - 1, Height - 1),
       Rect(0, 0, Width - 1, Height - 1), False, False);
-    RP := TRectPos.Create(0, 0, 0, 0);   { NOTE: never freed }
+    RP := TRectPos.Create(0, 0, 0, 0);   { LET OP: wordt nooit vrijgegeven }
     for I := 0 to FPixies.Count - 1 do
     begin
       P := GetPixie(I);
@@ -448,31 +448,31 @@ begin
         if not FThreeD.Enabled then
         begin
           RP.SetRect(GetPixie(I).GetBoundsRect);
-          Size := 1.0;
+          Schaal := 1.0;
         end
         else
         begin
-          FThreeD.Project(P.GetLeft, P.GetTop, P.GetZ, PX, PY, Size);
-          RP.SetRect(Bounds(PX, PY, Round(GetPixie(I).GetWidth * Size),
-            Round(GetPixie(I).GetHeight * Size)));
+          FThreeD.Project(P.GetLeft, P.GetTop, P.GetZ, PX, PY, Schaal);
+          RP.SetRect(Bounds(PX, PY, Round(GetPixie(I).GetWidth * Schaal),
+            Round(GetPixie(I).GetHeight * Schaal)));
         end;
-        P.Draw(SurfaceScreen.GetBackSurface, 0, 0, RP.GetRect, Size);
+        P.Draw(SurfaceScreen.GetBackSurface, 0, 0, RP.GetRect, Schaal);
       end;
     end;
     SurfaceScreen.Flip;
   end;
 end;
 
-{ @0046DB0C  redraws the changed areas on the screen surface }
+{ @0046DB0C  tekent de gewijzigde gebieden opnieuw op het schermoppervlak }
 procedure TSpriteBox.DirtyFlip;
 var
   RP: TRectPos;
   I, J: Integer;
   P: TPixie;
   PX, PY: Integer;
-  Size: Double;
-  Hit: Boolean;
-  Tmp: TRectPosList;
+  Schaal: Double;
+  Geraakt: Boolean;
+  Tijdelijk: TRectPosList;
 begin
   if FBackRects.Count <> 0 then
   begin
@@ -485,7 +485,7 @@ begin
         else
           SurfaceScreen.GetBackSurface.CopyFrom(FPicture, FDirtyRects[I].GetRect,
             FDirtyRects[I].GetRect, False, False);
-    RP := TRectPos.Create(0, 0, 0, 0);   { NOTE: never freed }
+    RP := TRectPos.Create(0, 0, 0, 0);   { LET OP: wordt nooit vrijgegeven }
     for I := 0 to FPixies.Count - 1 do
     begin
       P := GetPixie(I);
@@ -494,50 +494,50 @@ begin
         if not FThreeD.Enabled then
         begin
           RP.SetRect(GetPixie(I).GetBoundsRect);
-          Size := 1.0;
+          Schaal := 1.0;
         end
         else
         begin
-          FThreeD.Project(P.GetLeft, P.GetTop, P.GetZ, PX, PY, Size);
-          RP.SetRect(Bounds(PX, PY, Round(GetPixie(I).GetWidth * Size),
-            Round(GetPixie(I).GetHeight * Size)));
+          FThreeD.Project(P.GetLeft, P.GetTop, P.GetZ, PX, PY, Schaal);
+          RP.SetRect(Bounds(PX, PY, Round(GetPixie(I).GetWidth * Schaal),
+            Round(GetPixie(I).GetHeight * Schaal)));
         end;
-        Hit := False;
+        Geraakt := False;
         for J := 0 to FDirtyRects.Count - 1 do
           if FDirtyRects[J].X <> -9999 then
             if RP.Intersects(TRectPos(TList(FDirtyRects)[J])) then
             begin
-              Hit := True;
+              Geraakt := True;
               Break;
             end;
-        if Hit then
-          P.Draw(SurfaceScreen.GetBackSurface, 0, 0, RP.GetRect, Size);
+        if Geraakt then
+          P.Draw(SurfaceScreen.GetBackSurface, 0, 0, RP.GetRect, Schaal);
       end;
     end;
     SurfaceScreen.Flip;
     FreeList(FDirtyRects);
-    Tmp := FDirtyRects;
+    Tijdelijk := FDirtyRects;
     FDirtyRects := FBackRects;
-    FBackRects := Tmp;
+    FBackRects := Tijdelijk;
   end;
 end;
 
-{ @0046DE00  redraws the changed areas directly on the window }
+{ @0046DE00  tekent de gewijzigde gebieden direct opnieuw op het venster }
 procedure TSpriteBox.GDIFlip;
 var
-  Wnd: HWND;
+  Venster: HWND;
   DC: HDC;
   I: Integer;
 begin
   if FDirtyRects.Count <> 0 then
   begin
     MergeRects(FDirtyRects);
-    Wnd := GetDrawWindow;
-    DC := GetDC(Wnd);
+    Venster := GetDrawWindow;
+    DC := GetDC(Venster);
     for I := 0 to FDirtyRects.Count - 1 do
       if FDirtyRects[I].X <> -9999 then
         DrawRegion(DC, FDirtyRects[I].GetRect, 0, 0);
-    ReleaseDC(Wnd, DC);
+    ReleaseDC(Venster, DC);
     FreeList(FDirtyRects);
   end;
 end;
@@ -559,18 +559,18 @@ begin
     end;
 end;
 
-{ @0046DF60  collects the changes of all pixies and redraws them }
+{ @0046DF60  verzamelt de wijzigingen van alle pixies en tekent ze opnieuw }
 procedure TSpriteBox.Flip;
 var
   P: TPoint;
-  Wnd: HWND;
+  Venster: HWND;
   I: Integer;
-  OldState, NewState: TPixieState;
+  OudeStaat, NieuweStaat: TPixieState;
   T: Integer;
 begin
   GetCursorPos(P);
-  Wnd := WindowFromPoint(P);
-  if (Wnd <> GetDrawWindow) and (FMousePixie <> nil) then
+  Venster := WindowFromPoint(P);
+  if (Venster <> GetDrawWindow) and (FMousePixie <> nil) then
   begin
     FMousePixie.MouseLeave;
     FMousePixie := nil;
@@ -579,9 +579,9 @@ begin
   begin
     for I := FPixies.Count - 1 downto 0 do
     begin
-      GetPixie(I).GetChange(OldState, NewState);
-      InvalidateState(OldState);
-      InvalidateState(NewState);
+      GetPixie(I).GetChange(OudeStaat, NieuweStaat);
+      InvalidateState(OudeStaat);
+      InvalidateState(NieuweStaat);
     end;
     T := GetTickCount;
     FFrameTime := Round(FFrameTime * 0.8 + (T - FLastTick) * 0.2);
@@ -601,12 +601,12 @@ end;
 { @0046E0B0 }
 procedure TSpriteBox.InvalidateRect(R: TRect);
 begin
-  if (R.Left = 0) and (R.Right = 0) then   { NOTE: Right, not Top }
+  if (R.Left = 0) and (R.Right = 0) then   { LET OP: Right, niet Top }
     R.Left := 1;
   InvalidateArea(R, -9999);
 end;
 
-{ @0046E0F0  Z = -9999: R is already in screen coordinates }
+{ @0046E0F0  Z = -9999: R staat al in schermcoordinaten }
 procedure TSpriteBox.InvalidateArea(R: TRect; Z: Integer);
 var
   PX, PY, W, H: Integer;
@@ -647,17 +647,17 @@ begin
   Source.DrawTo(DC, SrcRect, DestRect, False, False);
 end;
 
-{ @0046E294  draws background and pixies of R (window coordinates + offset)
-  through TempSurface, or recursively per pixie if TempSurface is too small }
-procedure TSpriteBox.DrawRegion(DC: HDC; R: TRect; OffsX, OffsY: Integer);
+{ @0046E294  tekent achtergrond en pixies van R (venstercoordinaten + verschuiving)
+  via TempSurface, of recursief per pixie als TempSurface te klein is }
+procedure TSpriteBox.DrawRegion(DC: HDC; R: TRect; VersX, VersY: Integer);
 var
-  UseTemp: Boolean;
-  SrcR, DestR, PR, Tmp: TRect;
-  Surf: TSurface;
+  GebruikTemp: Boolean;
+  BronR, DoelR, PR, Tijdelijk: TRect;
+  Vlak: TSurface;
   I: Integer;
   P: TPixie;
   PX, PY, W, H: Integer;
-  Size: Double;
+  Schaal: Double;
 begin
   Inc(DrawDepth);
   if DrawDepth > 5 then
@@ -673,38 +673,38 @@ begin
     TempSurface.Width := Screen.Width;
     TempSurface.Height := Screen.Height;
   end;
-  UseTemp := (TempSurface.Width >= R.Right - R.Left) and
+  GebruikTemp := (TempSurface.Width >= R.Right - R.Left) and
     (TempSurface.Height >= R.Bottom - R.Top);
   if RectWidth(R) > TempSurface.Width then
-    UseTemp := True;
+    GebruikTemp := True;
   if RectHeight(R) > TempSurface.Height then
-    UseTemp := True;
-  SrcR := Rect(R.Left - OffsX, R.Top - OffsY, R.Right - OffsX, R.Bottom - OffsY);
-  if UseTemp then
-    DestR := Rect(0, 0, R.Right - R.Left, R.Bottom - R.Top)
+    GebruikTemp := True;
+  BronR := Rect(R.Left - VersX, R.Top - VersY, R.Right - VersX, R.Bottom - VersY);
+  if GebruikTemp then
+    DoelR := Rect(0, 0, R.Right - R.Left, R.Bottom - R.Top)
   else
-    DestR := Rect(R.Left - OffsX, R.Top - OffsY, R.Right - OffsX, R.Bottom - OffsY);
-  Surf := TempSurface;
+    DoelR := Rect(R.Left - VersX, R.Top - VersY, R.Right - VersX, R.Bottom - VersY);
+  Vlak := TempSurface;
   if NoPicture then
   begin
-    if UseTemp then
-      Surf.FillRect(DestR, 0)
+    if GebruikTemp then
+      Vlak.FillRect(DoelR, 0)
     else
-      { NOTE: the destination Y is R.Right in the original }
+      { LET OP: de doel-Y is in het origineel R.Right }
       BitBlt(DC, R.Left, R.Right, R.Right - R.Left, R.Bottom - R.Top, DC, 0, 0, BLACKNESS);
   end
-  else if UseTemp then
+  else if GebruikTemp then
     case FHandleBackGround of
       hbUsePicture:
         begin
-          Surf.SetTransparentColor(clNoTransparent);
-          Surf.CopyFrom(FPicture, SrcR, DestR, False, False);
+          Vlak.SetTransparentColor(clNoTransparent);
+          Vlak.CopyFrom(FPicture, BronR, DoelR, False, False);
         end;
       hbUseColor: ;
       hbDontPaint: ;
     end
   else
-    PaintBackground(FPicture, DC, DestR, R);
+    PaintBackground(FPicture, DC, DoelR, R);
   for I := 0 to FPixies.Count - 1 do
   begin
     P := GetPixie(I);
@@ -713,35 +713,35 @@ begin
       if not FThreeD.Enabled then
       begin
         PR := GetPixie(I).GetBoundsRect;
-        Size := 1.0;
+        Schaal := 1.0;
         PX := P.GetLeft;
         PY := P.GetTop;
-        W := GetPixie(I).GetWidth;    { NOTE: W and H are not used here }
+        W := GetPixie(I).GetWidth;    { LET OP: W en H worden hier niet gebruikt }
         H := GetPixie(I).GetHeight;
       end
       else
       begin
-        FThreeD.Project(P.GetLeft, P.GetTop, P.GetZ, PX, PY, Size);
-        W := Round(GetPixie(I).GetWidth * Size);
-        H := Round(GetPixie(I).GetHeight * Size);
+        FThreeD.Project(P.GetLeft, P.GetTop, P.GetZ, PX, PY, Schaal);
+        W := Round(GetPixie(I).GetWidth * Schaal);
+        H := Round(GetPixie(I).GetHeight * Schaal);
         PR := Rect(PX, PY, PX + W, PY + H);
       end;
-      if IntersectRect(Tmp, PR, SrcR) then
-        if UseTemp then
-          P.Draw(Surf, PX + OffsX - R.Left, PY + OffsY - R.Top, DestR, Size)
+      if IntersectRect(Tijdelijk, PR, BronR) then
+        if GebruikTemp then
+          P.Draw(Vlak, PX + VersX - R.Left, PY + VersY - R.Top, DoelR, Schaal)
         else
-          DrawRegion(DC, PR, OffsX, OffsY);
+          DrawRegion(DC, PR, VersX, VersY);
     end;
   end;
-  if UseTemp then
+  if GebruikTemp then
   begin
-    Surf.SetTransparentColor(clNoTransparent);
-    PaintBackground(Surf, DC, DestR, R);
+    Vlak.SetTransparentColor(clNoTransparent);
+    PaintBackground(Vlak, DC, DoelR, R);
   end;
   Dec(DrawDepth);
 end;
 
-{ @0046E690  topmost visible pixie at (X, Y) }
+{ @0046E690  bovenste zichtbare pixie op (X, Y) }
 function TSpriteBox.FindPixie(X, Y: Integer): TPixie;
 var
   I: Integer;
@@ -778,16 +778,16 @@ end;
 { @0046E734 }
 procedure TSpriteBox.RemovePixie(Pixie: TPixie);
 var
-  OldState, NewState: TPixieState;
+  OudeStaat, NieuweStaat: TPixieState;
 begin
-  Pixie.GetChange(OldState, NewState);
+  Pixie.GetChange(OudeStaat, NieuweStaat);
   if Pixie = FMousePixie then
   begin
     FMousePixie.MouseLeave;
     FMousePixie := nil;
   end;
-  OldState.Visible := True;
-  InvalidateState(OldState);
+  OudeStaat.Visible := True;
+  InvalidateState(OudeStaat);
   FPixies.Remove(Pixie);
 end;
 
@@ -809,64 +809,64 @@ end;
 { @0046E7D0 }
 procedure TSpriteBox.UpdateZOrder(Pixie: TPixie);
 var
-  Index: Integer;
+  Nr: Integer;
 begin
-  Index := FPixies.IndexOf(Pixie);
-  if Index <> -1 then
-    UpdateZOrderAt(Index);
+  Nr := FPixies.IndexOf(Pixie);
+  if Nr <> -1 then
+    UpdateZOrderAt(Nr);
 end;
 
-{ @0046E7F0  -1/1: the pixie at Index must move up/down to keep Z descending }
-function TSpriteBox.ZOrderDirection(Index: Integer): Integer;
+{ @0046E7F0  -1/1: de pixie op Index moet omhoog/omlaag om Z aflopend te houden }
+function TSpriteBox.ZOrderDirection(Nr: Integer): Integer;
 begin
   Result := 0;
   if FPixies.Count <> 1 then
-    if (Index > 0) and (GetPixie(Index - 1).GetZ < GetPixie(Index).GetZ) then
+    if (Nr > 0) and (GetPixie(Nr - 1).GetZ < GetPixie(Nr).GetZ) then
       Result := -1
-    else if (Index < FPixies.Count - 1) and
-      (GetPixie(Index + 1).GetZ > GetPixie(Index).GetZ) then
+    else if (Nr < FPixies.Count - 1) and
+      (GetPixie(Nr + 1).GetZ > GetPixie(Nr).GetZ) then
       Result := 1;
 end;
 
 { @0046E870 }
-procedure TSpriteBox.UpdateZOrderAt(Index: Integer);
+procedure TSpriteBox.UpdateZOrderAt(Nr: Integer);
 var
   D: Integer;
 begin
   repeat
-    D := ZOrderDirection(Index);
+    D := ZOrderDirection(Nr);
     if D <> 0 then
     begin
-      FPixies.Exchange(Index, D + Index);
-      Inc(Index, D);
+      FPixies.Exchange(Nr, D + Nr);
+      Inc(Nr, D);
     end;
   until D = 0;
 end;
 
 { @0046E8A0 }
-procedure TSpriteBox.UpdatePalette(Background: Boolean);
+procedure TSpriteBox.UpdatePalette(Achtergrond: Boolean);
 var
-  Wnd: HWND;
+  Venster: HWND;
   DC: HDC;
-  Pal, OldPal: HPALETTE;
+  Palet, OudPalet: HPALETTE;
 begin
-  Wnd := GetDrawWindow;
-  DC := GetDC(Wnd);
+  Venster := GetDrawWindow;
+  DC := GetDC(Venster);
   if GetDeviceCaps(DC, RASTERCAPS) and RC_PALETTE = RC_PALETTE then
   begin
     if FPaletteImage <> nil then
-      Pal := FPaletteImage.GetPaletteHandle
+      Palet := FPaletteImage.GetPaletteHandle
     else
     begin
       if FPalette = 0 then
         FPalette := CreateHalftonePalette(DC);
-      Pal := FPalette;
+      Palet := FPalette;
     end;
-    OldPal := SelectPalette(DC, Pal, Background);
+    OudPalet := SelectPalette(DC, Palet, Achtergrond);
     RealizePalette(DC);
-    SelectPalette(DC, OldPal, False);
+    SelectPalette(DC, OudPalet, False);
   end;
-  ReleaseDC(Wnd, DC);
+  ReleaseDC(Venster, DC);
 end;
 
 { @0046E928 }
@@ -892,9 +892,9 @@ begin
 end;
 
 { @0046E95C }
-function TSpriteBoxList.GetSpriteBox(Index: Integer): TSpriteBox;
+function TSpriteBoxList.GetSpriteBox(Nr: Integer): TSpriteBox;
 begin
-  Result := TObject(Get(Index)) as TSpriteBox;
+  Result := TObject(Get(Nr)) as TSpriteBox;
 end;
 
 { @0046E97C }
@@ -907,7 +907,7 @@ begin
       GetSpriteBox(I).Flip;
 end;
 
-{ @0046E9B4  exit procedure }
+{ @0046E9B4  afsluitprocedure }
 procedure SpriteBoxExit;
 begin
   if TempSurface <> nil then
@@ -922,6 +922,6 @@ initialization
   ExitProc := @SpriteBoxExit;
   SpriteBoxes := TSpriteBoxList.Create;
 
-{ The finalization at @0046E9D8 is the empty compiler-generated stub. }
+{ De finalization op @0046E9D8 is de lege, door de compiler gegenereerde stub. }
 
 end.

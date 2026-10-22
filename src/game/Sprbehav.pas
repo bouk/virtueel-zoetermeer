@@ -1,14 +1,14 @@
 unit Sprbehav;
 
-{ Sprite behaviours that make a sprite act like a standard control: a push
-  button, check box, radio button, multi-line memo or static text, plus a
-  behaviour that switches the mouse cursor while the mouse is over a sprite.
-  TCtrlForm (Uctrl) uses ControlToBehaviour to replace the controls on a form
-  by sprites carrying these behaviours.
-  Decompiled from ROS.exe v1.1, code 0046FFC8-0047216C. }
+{ Spritegedragingen waarmee een sprite zich gedraagt als een standaardbesturing:
+  een drukknop, selectievakje, keuzerondje, meerregelig memo of statische tekst,
+  plus een gedrag dat de muiscursor wisselt zolang de muis boven een sprite staat.
+  TCtrlForm (Uctrl) gebruikt ControlToBehaviour om de besturingen op een formulier
+  te vervangen door sprites met deze gedragingen.
+  Gedecompileerd uit ROS.exe v1.1, code 0046FFC8-0047216C. }
 
 {$I zm.inc}
-{$R+}   { the original was compiled with range checking on (@BoundErr calls) }
+{$R+}   { het origineel is gecompileerd met bereikcontrole aan (@BoundErr-aanroepen) }
 
 interface
 
@@ -17,9 +17,9 @@ uses
   uSurface, uPixie, Sprframe, uSprite, uSpritebox;
 
 type
-  { Sets the screen cursor while the mouse is over the sprite and restores
-    the previous cursor when it leaves (unless it went to another sprite that
-    has a TBehavCursor too). }
+  { Zet de schermcursor zolang de muis boven de sprite staat en herstelt de
+    vorige cursor wanneer de muis weggaat (tenzij hij naar een andere sprite
+    gaat die ook een TBehavCursor heeft). }
   TBehavCursor = class(TBehaviour)
   private
     FOldCursor: TCursor;                    { +0x20 }
@@ -34,20 +34,21 @@ type
     property Inside: Boolean read FInside;
   end;
 
-  { Common base: a sprite with StateCount states that shows one of four frames
-    per state (hover, normal, pressed, pressed-but-mouse-outside) and fires
-    OnClick when the mouse is released over it. Optional sequences (animations)
-    can be played on mouse enter/leave/down/up instead of a frame change. }
+  { Gemeenschappelijke basis: een sprite met StateCount toestanden die per toestand
+    een van vier beelden toont (zweven, normaal, ingedrukt, ingedrukt met de muis
+    erbuiten) en OnClick afvuurt wanneer de muis erover wordt losgelaten. Optionele
+    sequenties (animaties) kunnen worden afgespeeld bij binnenkomst, verlaten,
+    indrukken of loslaten van de muis, in plaats van een beeldwisseling. }
   TBehavControl = class(TBehaviour)
   private
-    FFrames: TStringList;                   { +0x20  4 frame names per state }
+    FFrames: TStringList;                   { +0x20  4 beeldnamen per toestand }
     FPressed: Boolean;                      { +0x24 }
-    FSeqHover: string;                      { +0x28  looped while the mouse is over }
-    FSeqLeave: string;                      { +0x2C  played once when the mouse leaves }
-    FSeqEnter: string;                      { +0x30  played once when the mouse enters }
-    FSeqDown: string;                       { +0x34  played once on mouse down }
-    FSeqUp: string;                         { +0x38  played once on mouse up }
-    FEnterPlayed: Boolean;                  { +0x3C  FSeqEnter was started }
+    FSeqHover: string;                      { +0x28  herhaald zolang de muis erboven is }
+    FSeqLeave: string;                      { +0x2C  een keer afgespeeld wanneer de muis weggaat }
+    FSeqEnter: string;                      { +0x30  een keer afgespeeld wanneer de muis binnenkomt }
+    FSeqDown: string;                       { +0x34  een keer afgespeeld bij muis omlaag }
+    FSeqUp: string;                         { +0x38  een keer afgespeeld bij muis omhoog }
+    FEnterPlayed: Boolean;                  { +0x3C  FSeqEnter is gestart }
     FDown: Boolean;                         { +0x3D }
     FHover: Boolean;                        { +0x3E }
     FState: Integer;                        { +0x40 }
@@ -83,11 +84,11 @@ type
     property OnClick: TNotifyEvent read FOnClick write FOnClick;
   end;
 
-  { Two states: unchecked (0) and checked (1). }
+  { Twee toestanden: niet aangevinkt (0) en aangevinkt (1). }
   TBehavCheckBox = class(TBehavControl)
   private
-    FReserved50: Integer;                   { +0x50  never referenced }
-    FReserved54: Integer;                   { +0x54  never referenced }
+    FReserved50: Integer;                   { +0x50  wordt nooit gebruikt }
+    FReserved54: Integer;                   { +0x54  wordt nooit gebruikt }
     procedure SetChecked(Value: Boolean);
     function GetChecked: Boolean;
   public
@@ -96,11 +97,11 @@ type
     property Checked: Boolean read GetChecked write SetChecked;
   end;
 
-  { A check box that unchecks every other radio button behaviour in the
-    sprite box when it gets checked, and cannot be unchecked by clicking. }
+  { Een selectievakje dat bij het aanvinken alle andere keuzerondjegedragingen in de
+    spritebox uitvinkt, en dat niet door klikken kan worden uitgevinkt. }
   TBehavRadioButton = class(TBehavCheckBox)
   private
-    FGroup: string;                         { +0x58  name of the original parent control }
+    FGroup: string;                         { +0x58  naam van de oorspronkelijke bovenliggende besturing }
   protected
     procedure SetState(Value: Integer); override;
   public
@@ -111,20 +112,20 @@ type
     property Group: string read FGroup write FGroup;
   end;
 
-  { One state; frames Up/Down and optionally Over (mouse hover). }
+  { Een toestand; beelden Up/Down en optioneel Over (muis erboven). }
   TBehavButton = class(TBehavControl)
   public
     constructor Create(AUp, ADown: string); overload;
     constructor Create(AUp, ADown, AOver: string); overload;
   end;
 
-  { Draws the lines of a (hidden) TMemo on the sprite, with a TScrollBar on
-    the sprite box when the text does not fit. A '^' in the text toggles bold. }
+  { Tekent de regels van een (verborgen) TMemo op de sprite, met een TScrollBar op de
+    spritebox wanneer de tekst niet past. Een '^' in de tekst wisselt vet. }
   TBehavMemo = class(TBehavControl)
   private
     FMemo: TMemo;                           { +0x50 }
-    FReserved54: Integer;                   { +0x54  never referenced }
-    FReserved58: Integer;                   { +0x58  never referenced }
+    FReserved54: Integer;                   { +0x54  wordt nooit gebruikt }
+    FReserved58: Integer;                   { +0x58  wordt nooit gebruikt }
     FScrollBar: TScrollBar;                 { +0x5C }
     FOffset: TPoint;                        { +0x60 }
   public
@@ -140,7 +141,7 @@ type
     property Offset: TPoint read FOffset write FOffset;
   end;
 
-  { A text drawn by TBehavText. Align is 'l', 'r' or 'c'. }
+  { Een tekst die door TBehavText wordt getekend. Align is 'l', 'r' of 'c'. }
   TCaption = class(TObject)
   private
     FText: string;                          { +0x04 }
@@ -158,24 +159,24 @@ type
     property Align: Char read FAlign write FAlign;
   end;
 
-  { Draws a caption on the sprite after it is blitted. Captions can be set per
-    frame name (Captions); otherwise the Default caption is drawn. }
+  { Tekent een onderschrift op de sprite nadat deze is geblit. Onderschriften kunnen
+    per beeldnaam worden ingesteld (Captions); anders wordt het onderschrift Default getekend. }
   TBehavText = class(TBehaviour)
   private
-    FCaptions: TStringList;                 { +0x20  frame name -> TCaption, sorted }
+    FCaptions: TStringList;                 { +0x20  beeldnaam -> TCaption, gesorteerd }
     FDefault: TCaption;                     { +0x24 }
   public
     constructor Create(AFontName: string; ASize: Integer; AColor: TColor);
     destructor Destroy; override;
-    procedure SetCaption(FrameName, Text: string);
+    procedure SetCaption(Beeldnaam, Tekst: string);
     procedure AfterBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
       Where: TRect; Size: Real); override;
     property Captions: TStringList read FCaptions;
     property DefaultCaption: TCaption read FDefault;
   end;
 
-function AddTextBehaviour(Sprite: TSprite; Text: string; X, Y: Integer;
-  Font: TFont): TCaption;
+function AddTextBehaviour(Sprite: TSprite; Tekst: string; X, Y: Integer;
+  Lettertype: TFont): TCaption;
 procedure ControlToBehaviour(Sprite: TSprite; Control: TControl);
 
 implementation
@@ -191,7 +192,7 @@ var
   I: Integer;
 begin
   inherited Create;
-  FOnClick := OnClick;   { NOTE: assigns the event to itself (no-op in the original) }
+  FOnClick := OnClick;   { LET OP: wijst de gebeurtenis aan zichzelf toe (geen effect in het origineel) }
   FStateCount := AStateCount;
   FFrames := TStringList.Create;
   for I := 0 to High(Frames) do
@@ -294,7 +295,7 @@ end;
 { @004707E0 }
 procedure TBehavControl.FinishSequence(Sender: TObject; var RepeatCount: Integer);
 begin
-  { NOTE: FEnterPlayed is never reset }
+  { LET OP: FEnterPlayed wordt nooit teruggezet }
   if FEnterPlayed then
     if (Sprite.CurSequence.Name = FSeqEnter) and (FSeqHover <> '') then
       Sprite.PlaySequence(FSeqHover, -1);
@@ -313,19 +314,19 @@ end;
 { @00470860 }
 function TBehavControl.GetFrameName: string;
 var
-  Index: Integer;
+  Nr: Integer;
 begin
-  Index := FState * 4;
+  Nr := FState * 4;
   if FDown then
   begin
     if FHover then
-      Inc(Index, 2)
+      Inc(Nr, 2)
     else
-      Inc(Index, 3);
+      Inc(Nr, 3);
   end
   else if not FHover then
-    Inc(Index);
-  Result := FFrames[Index];
+    Inc(Nr);
+  Result := FFrames[Nr];
 end;
 
 { @0047089C }
@@ -391,22 +392,22 @@ end;
 { @00470B48 }
 procedure TBehavRadioButton.SetState(Value: Integer);
 var
-  Box: TSpriteBox;
-  Behaviours: TBehaviourList;
+  Vak: TSpriteBox;
+  Gedragingen: TBehaviourList;
   B: TBehaviour;
   I, J: Integer;
 begin
   inherited SetState(Value);
   if GetChecked then
   begin
-    { NOTE: FGroup is not used; every radio button in the sprite box is unchecked }
-    Box := Sprite.SpriteBox;
-    for I := 0 to Box.Count - 1 do
+    { LET OP: FGroup wordt niet gebruikt; elk keuzerondje in de spritebox wordt uitgeschakeld }
+    Vak := Sprite.SpriteBox;
+    for I := 0 to Vak.Count - 1 do
     begin
-      Behaviours := (Box.Items[I] as TSprite).Behaviours;
-      for J := 0 to Behaviours.Count - 1 do
+      Gedragingen := (Vak.Items[I] as TSprite).Behaviours;
+      for J := 0 to Gedragingen.Count - 1 do
       begin
-        B := Behaviours.Items[J];
+        B := Gedragingen.Items[J];
         if (B is TBehavRadioButton) and (B <> Self) then
           (B as TBehavRadioButton).SetChecked(False);
       end;
@@ -441,30 +442,30 @@ end;
 { @00470C9C }
 procedure TBehavCursor.MouseLeave(Sender: TObject);
 var
-  OtherInside: Boolean;
-  Box: TSpriteBox;
-  Behaviours: TBehaviourList;
+  AnderBinnen: Boolean;
+  Vak: TSpriteBox;
+  Gedragingen: TBehaviourList;
   B: TBehaviour;
   I, J: Integer;
 begin
   if Active then
   begin
     FInside := False;
-    OtherInside := False;
-    Box := Sprite.SpriteBox;
-    for I := 0 to Box.Count - 1 do
-      if Box.Items[I] is TSprite then
+    AnderBinnen := False;
+    Vak := Sprite.SpriteBox;
+    for I := 0 to Vak.Count - 1 do
+      if Vak.Items[I] is TSprite then
       begin
-        Behaviours := (Box.Items[I] as TSprite).Behaviours;
-        for J := 0 to Behaviours.Count - 1 do
+        Gedragingen := (Vak.Items[I] as TSprite).Behaviours;
+        for J := 0 to Gedragingen.Count - 1 do
         begin
-          B := Behaviours.Items[J];
+          B := Gedragingen.Items[J];
           if (B is TBehavCursor) and (B <> Self) then
             if (B as TBehavCursor).FInside then
-              OtherInside := True;
+              AnderBinnen := True;
         end;
       end;
-    if not OtherInside then
+    if not AnderBinnen then
       Screen.Cursor := FOldCursor;
   end;
 end;
@@ -521,21 +522,21 @@ end;
 { @004710C4 }
 destructor TBehavText.Destroy;
 begin
-  { NOTE: the TCaption objects in FCaptions (and their fonts) are not freed }
+  { LET OP: de TCaption-objecten in FCaptions (en hun lettertypen) worden niet vrijgegeven }
   FCaptions.Free;
   FDefault.Free;
   inherited Destroy;
 end;
 
 { @004710FC }
-procedure TBehavText.SetCaption(FrameName, Text: string);
+procedure TBehavText.SetCaption(Beeldnaam, Tekst: string);
 var
-  Index: Integer;
+  Nr: Integer;
 begin
-  if FCaptions.Find(FrameName, Index) then
-    (FCaptions.Objects[Index] as TCaption).FText := Text
+  if FCaptions.Find(Beeldnaam, Nr) then
+    (FCaptions.Objects[Nr] as TCaption).FText := Tekst
   else
-    FCaptions.AddObject(FrameName, TCaption.Create(Text, FDefault.FFont.Name,
+    FCaptions.AddObject(Beeldnaam, TCaption.Create(Tekst, FDefault.FFont.Name,
       FDefault.FFont.Size, FDefault.FFont.Color, FDefault.FLeft, FDefault.FTop,
       FDefault.FAlign));
 end;
@@ -545,29 +546,29 @@ procedure TBehavText.AfterBlit(Sender: TObject; Surface: TSurface; X, Y: Integer
   Where: TRect; Size: Real);
 var
   Spr: TSprite;
-  XPos: Integer;
-  OldStyle: TBrushStyle;
-  Index: Integer;
+  XPositie: Integer;
+  OudeStijl: TBrushStyle;
+  Nr: Integer;
   Cap: TCaption;
 begin
   Spr := Sender as TSprite;
-  Index := FCaptions.IndexOf(Spr.CurrentFrame);
-  if Index > -1 then
-    Cap := FCaptions.Objects[Index] as TCaption
+  Nr := FCaptions.IndexOf(Spr.CurrentFrame);
+  if Nr > -1 then
+    Cap := FCaptions.Objects[Nr] as TCaption
   else
     Cap := FDefault;
   if Cap.FText <> '' then
   begin
-    { NOTE: XPos stays undefined for an Align other than 'l', 'r', 'c' }
+    { LET OP: XPositie blijft ongedefinieerd bij een Align anders dan 'l', 'r', 'c' }
     case Cap.FAlign of
-      'l': XPos := X + Cap.FLeft;
-      'r': XPos := Spr.Width + X - Surface.TextWidth(Cap.FFont, Cap.FText) - Cap.FLeft;
-      'c': XPos := (Spr.Width - Surface.TextWidth(Cap.FFont, Cap.FText)) div 2 + X;
+      'l': XPositie := X + Cap.FLeft;
+      'r': XPositie := Spr.Width + X - Surface.TextWidth(Cap.FFont, Cap.FText) - Cap.FLeft;
+      'c': XPositie := (Spr.Width - Surface.TextWidth(Cap.FFont, Cap.FText)) div 2 + X;
     end;
-    OldStyle := Surface.Canvas.Brush.Style;
+    OudeStijl := Surface.Canvas.Brush.Style;
     Surface.Canvas.Brush.Style := bsClear;
-    Surface.TextOut(XPos, Y + Cap.FTop, Cap.FFont, Cap.FText);
-    Surface.Canvas.Brush.Style := OldStyle;
+    Surface.TextOut(XPositie, Y + Cap.FTop, Cap.FFont, Cap.FText);
+    Surface.Canvas.Brush.Style := OudeStijl;
   end;
 end;
 
@@ -636,17 +637,17 @@ end;
 procedure TBehavMemo.AfterBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
   Where: TRect; Size: Real);
 var
-  CurX, I, TopLine, LineHeight, MaxPos, LargeStep, VisibleLines: Integer;
-  TextSize: TSize;
+  HuidigeX, I, EersteRegel, RegelHoogte, MaxPositie, GroteStap, ZichtbareRegels: Integer;
+  TekstGrootte: TSize;
   DC: HDC;
-  OldFont: HGDIOBJ;
-  OldBrushStyle: TBrushStyle;
-  OldFontStyle: TFontStyles;
-  Line, Part: string;
-  Toggle: Boolean;
+  OudLettertype: HGDIOBJ;
+  OudeKwastStijl: TBrushStyle;
+  OudeLetterStijl: TFontStyles;
+  Regel, Deel: string;
+  Wissel: Boolean;
 
   { @00471578 }
-  procedure ToggleBold;
+  procedure VetWisselen;
   begin
     if fsBold in FMemo.Font.Style then
       FMemo.Font.Style := FMemo.Font.Style - [fsBold]
@@ -656,115 +657,116 @@ var
 
 begin
   DC := GetDC(FMemo.Handle);
-  OldFont := SelectObject(DC, FMemo.Font.Handle);
-  if GetTextExtentPoint(DC, 'jl', 2, TextSize) then
-    LineHeight := TextSize.cy
+  OudLettertype := SelectObject(DC, FMemo.Font.Handle);
+  if GetTextExtentPoint(DC, 'jl', 2, TekstGrootte) then
+    RegelHoogte := TekstGrootte.cy
   else
-    LineHeight := 8;
-  SelectObject(DC, OldFont);
+    RegelHoogte := 8;
+  SelectObject(DC, OudLettertype);
   ReleaseDC(FMemo.Handle, DC);
 
-  if FMemo.Lines.Count * LineHeight > Sprite.Height then
+  if FMemo.Lines.Count * RegelHoogte > Sprite.Height then
   begin
     FScrollBar.Visible := True;
     with FScrollBar do
     begin
-      MaxPos := ((FMemo.Lines.Count + 1) * LineHeight - Sprite.Height - 1) div LineHeight;
+      MaxPositie := ((FMemo.Lines.Count + 1) * RegelHoogte - Sprite.Height - 1) div RegelHoogte;
       Min := 0;
-      Max := MaxPos;
-      LargeStep := Sprite.Height div LineHeight - 1;
-      if LargeStep < 1 then
-        LargeStep := 1;
-      LargeChange := LargeStep;
+      Max := MaxPositie;
+      GroteStap := Sprite.Height div RegelHoogte - 1;
+      if GroteStap < 1 then
+        GroteStap := 1;
+      LargeChange := GroteStap;
       if Max < Position then
         Position := Max;
-      TopLine := Round((Position - Min) / (Max - Min) * MaxPos);
+      EersteRegel := Round((Position - Min) / (Max - Min) * MaxPositie);
     end;
-    VisibleLines := Sprite.Height div LineHeight;
+    ZichtbareRegels := Sprite.Height div RegelHoogte;
   end
   else
   begin
     FScrollBar.Visible := False;
-    TopLine := 0;
-    VisibleLines := FMemo.Lines.Count;
+    EersteRegel := 0;
+    ZichtbareRegels := FMemo.Lines.Count;
   end;
 
-  OldBrushStyle := Surface.Canvas.Brush.Style;
+  OudeKwastStijl := Surface.Canvas.Brush.Style;
   Surface.Canvas.Brush.Style := bsClear;
-  OldFontStyle := FMemo.Font.Style;
+  OudeLetterStijl := FMemo.Font.Style;
   if FMemo <> nil then
   begin
-    { bring the bold state up to date with the lines scrolled out of view }
-    for I := 0 to TopLine - 1 do
+    { werk de vetstatus bij voor de regels die buiten beeld zijn gescrold }
+    for I := 0 to EersteRegel - 1 do
       if Odd(CountChar(FMemo.Lines[I], '^')) then
-        ToggleBold;
-    for I := 0 to VisibleLines - 1 do
+        VetWisselen;
+    for I := 0 to ZichtbareRegels - 1 do
     begin
-      CurX := 0;
-      Line := FMemo.Lines[I + TopLine];
-      while Line <> '' do
+      HuidigeX := 0;
+      Regel := FMemo.Lines[I + EersteRegel];
+      while Regel <> '' do
       begin
-        if Pos('^', Line) > 0 then
+        if Pos('^', Regel) > 0 then
         begin
-          Part := SplitFirst(Line, '^');
-          Toggle := True;
+          Deel := SplitFirst(Regel, '^');
+          Wissel := True;
         end
         else
         begin
-          Part := Line;
-          Line := '';
-          Toggle := False;
+          Deel := Regel;
+          Regel := '';
+          Wissel := False;
         end;
-        Surface.TextOut(FOffset.X + Where.Left + X + CurX,
-          FOffset.Y + Where.Top + Y + I * LineHeight, FMemo.Font, Part);
+        Surface.TextOut(FOffset.X + Where.Left + X + HuidigeX,
+          FOffset.Y + Where.Top + Y + I * RegelHoogte, FMemo.Font, Deel);
         DC := GetDC(FMemo.Handle);
-        OldFont := SelectObject(DC, FMemo.Font.Handle);
-        Part := Part + #0;
-        if GetTextExtentPoint(DC, @Part[1], Length(Part) - 1, TextSize) then
-          Inc(CurX, TextSize.cx);
-        SelectObject(DC, OldFont);
+        OudLettertype := SelectObject(DC, FMemo.Font.Handle);
+        Deel := Deel + #0;
+        if GetTextExtentPoint(DC, @Deel[1], Length(Deel) - 1, TekstGrootte) then
+          Inc(HuidigeX, TekstGrootte.cx);
+        SelectObject(DC, OudLettertype);
         ReleaseDC(FMemo.Handle, DC);
-        if Toggle then
-          ToggleBold;
+        if Wissel then
+          VetWisselen;
       end;
     end;
   end;
-  FMemo.Font.Style := OldFontStyle;
-  Surface.Canvas.Brush.Style := OldBrushStyle;
+  FMemo.Font.Style := OudeLetterStijl;
+  Surface.Canvas.Brush.Style := OudeKwastStijl;
 end;
 
 { ------------------------------------------------------------------- routines }
 
-{ @00471A1C  Gives the sprite a TBehavText drawing Text at (X, Y) in Font. }
-function AddTextBehaviour(Sprite: TSprite; Text: string; X, Y: Integer;
-  Font: TFont): TCaption;
+{ @00471A1C  Geeft de sprite een TBehavText die Tekst op (X, Y) in Lettertype tekent. }
+function AddTextBehaviour(Sprite: TSprite; Tekst: string; X, Y: Integer;
+  Lettertype: TFont): TCaption;
 var
-  Behav: TBehavText;
+  Gedrag: TBehavText;
 begin
-  Behav := TBehavText.Create(Font.Name, Font.Size, Font.Color);
-  Sprite.AddBehaviour('CONTROL_BEHAV', Behav);
-  Behav.SetActive(True);
-  Result := Behav.FDefault;
+  Gedrag := TBehavText.Create(Lettertype.Name, Lettertype.Size, Lettertype.Color);
+  Sprite.AddBehaviour('CONTROL_BEHAV', Gedrag);
+  Gedrag.SetActive(True);
+  Result := Gedrag.FDefault;
   Result.FLeft := X;
   Result.FTop := Y;
-  Result.FText := Text;
+  Result.FText := Tekst;
 end;
 
-{ @00471D70  Gives Sprite the control behaviour that matches Control (a
-  TButton, TCheckBox, TMemo or TRadioButton) and copies its position. The
-  sprite's frames are found by their name suffix: _UP/_DN/_OR for a button,
-  _EM/_FL/_EG/_FG (empty/full, gedrukt = pressed) for check and radio boxes. }
+{ @00471D70  Geeft Sprite het besturingsgedrag dat bij Control past (een
+  TButton, TCheckBox, TMemo of TRadioButton) en kopieert de positie. De beelden
+  van de sprite worden gevonden op hun naamachtervoegsel: _UP/_DN/_OR voor een
+  knop, _EM/_FL/_EG/_FG (leeg/vol, gedrukt = ingedrukt) voor selectievakjes en
+  keuzerondjes. }
 procedure ControlToBehaviour(Sprite: TSprite; Control: TControl);
 var
-  Behav: TBehavControl;
+  Gedrag: TBehavControl;
 
   { @00471AE8 }
-  function FindFrame(Suffix: string): string;
+  function FindFrame(Achtervoegsel: string): string;
   var
     I: Integer;
   begin
     for I := 0 to Sprite.FrameList.Count - 1 do
-      if EndsWith(UpStr(Sprite.FrameList[I].Name), UpStr(Suffix)) then
+      if EndsWith(UpStr(Sprite.FrameList[I].Name), UpStr(Achtervoegsel)) then
       begin
         Result := Sprite.FrameList[I].Name;
         Exit;
@@ -772,79 +774,79 @@ var
     Result := '';
   end;
 
-  { @00471BBC  NOTE: does not use the parent frame (called without a static
-    link), but lies between FindFrame and ControlToBehaviour in the binary. }
-  procedure AddCaption(Sprite: TSprite; Alignment: TLeftRight; Caption: string;
-    Font: TFont);
+  { @00471BBC  LET OP: gebruikt de omsluitende routine niet (wordt aangeroepen zonder
+    statische link), maar staat in het binaire bestand tussen FindFrame en ControlToBehaviour. }
+  procedure AddCaption(Sprite: TSprite; Uitlijning: TLeftRight; Opschrift: string;
+    Lettertype: TFont);
   var
-    Behav: TBehavText;
+    Gedrag: TBehavText;
     Bmp: TBitmap;
     Cap: TCaption;
   begin
-    Behav := TBehavText.Create(Font.Name, Font.Size, Font.Color);
+    Gedrag := TBehavText.Create(Lettertype.Name, Lettertype.Size, Lettertype.Color);
     Bmp := TBitmap.Create;
     Bmp.Width := 10;
     Bmp.Height := 10;
-    Cap := Behav.FDefault;
-    Cap.FText := Caption;
-    Cap.FFont.Name := Font.Name;
-    Cap.FFont.Size := Font.Size;
-    Cap.FFont.Color := Font.Color;
+    Cap := Gedrag.FDefault;
+    Cap.FText := Opschrift;
+    Cap.FFont.Name := Lettertype.Name;
+    Cap.FFont.Size := Lettertype.Size;
+    Cap.FFont.Color := Lettertype.Color;
     Bmp.Canvas.Font.Assign(Cap.FFont);
-    if Alignment <> taLeftJustify then
+    if Uitlijning <> taLeftJustify then
     begin
       Cap.FAlign := 'l';
       Cap.FLeft := Sprite.Width + 2;
       Cap.FTop := 0;
-      Sprite.SetMarginRight(Bmp.Canvas.TextWidth(Caption) + 2);
+      Sprite.SetMarginRight(Bmp.Canvas.TextWidth(Opschrift) + 2);
     end
     else
     begin
       Cap.FAlign := 'r';
       Cap.FLeft := Sprite.Width + 2;
       Cap.FTop := 0;
-      Sprite.SetMarginLeft(Bmp.Canvas.TextWidth(Caption) + 2);
+      Sprite.SetMarginLeft(Bmp.Canvas.TextWidth(Opschrift) + 2);
     end;
     Bmp.Free;
-    Sprite.AddBehaviour('CAPTION', Behav);
+    Sprite.AddBehaviour('CAPTION', Gedrag);
     Sprite.GetBehaviour('CAPTION').SetActive(True);
   end;
 
 begin
   if Control is TButton then
   begin
-    Behav := TBehavButton.Create(FindFrame('_UP'), FindFrame('_DN'), FindFrame('_OR'));
-    Behav.OnClick := (Control as TButton).OnClick;
+    Gedrag := TBehavButton.Create(FindFrame('_UP'), FindFrame('_DN'), FindFrame('_OR'));
+    Gedrag.OnClick := (Control as TButton).OnClick;
   end
   else if Control is TCheckBox then
   begin
-    Behav := TBehavCheckBox.Create(FindFrame('_EM'), FindFrame('_FL'),
+    Gedrag := TBehavCheckBox.Create(FindFrame('_EM'), FindFrame('_FL'),
       FindFrame('_EG'), FindFrame('_FG'));
-    Behav.OnClick := (Control as TCheckBox).OnClick;
-    (Control as TCheckBox).OnClick := (Behav as TBehavCheckBox).CheckBoxClick;
+    Gedrag.OnClick := (Control as TCheckBox).OnClick;
+    (Control as TCheckBox).OnClick := (Gedrag as TBehavCheckBox).CheckBoxClick;
     AddCaption(Sprite, (Control as TCheckBox).Alignment,
       (Control as TCheckBox).Caption, (Control as TCheckBox).Font);
   end
   else if Control is TMemo then
   begin
-    Behav := TBehavMemo.Create(Control as TMemo);
+    Gedrag := TBehavMemo.Create(Control as TMemo);
     Sprite.FrameIndex := -1;
     Sprite.SetMarginRight(Control.Width - Sprite.Width);
     Sprite.SetMarginBottom(Control.Height - Sprite.Height);
   end
   else if Control is TRadioButton then
   begin
-    Behav := TBehavRadioButton.Create(FindFrame('_EM'), FindFrame('_FL'),
+    Gedrag := TBehavRadioButton.Create(FindFrame('_EM'), FindFrame('_FL'),
       FindFrame('_EG'), FindFrame('_FG'), Control.Parent.Name);
-    Behav.OnClick := (Control as TRadioButton).OnClick;
+    Gedrag.OnClick := (Control as TRadioButton).OnClick;
     AddCaption(Sprite, (Control as TRadioButton).Alignment,
       (Control as TRadioButton).Caption, (Control as TRadioButton).Font);
   end;
-  { NOTE: for any other control class Behav is left uninitialized }
+  { LET OP: voor elke andere besturingsklasse blijft Gedrag niet geinitialiseerd }
   Sprite.Left := Control.Left;
   Sprite.Top := Control.Top;
   Sprite.Visible := Control.Visible;
-  Sprite.AddBehaviour('CONTROL_BEHAV', Behav);
+  Sprite.AddBehaviour('CONTROL_BEHAV', Gedrag);
   Sprite.GetBehaviour('CONTROL_BEHAV').SetActive(True);
 end;
 

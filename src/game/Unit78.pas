@@ -1,24 +1,23 @@
 unit Unit78;
 
-{ Code-less unit; only its string literals (0x472E94-0x472F2B) and the
-  initialization/finalization stubs (0x472F2C-0x472F7B) survived the smart
-  linker. Decompiled from ROS.exe v1.1, code 00472E8C-00472F7B.
+{ Unit zonder code; alleen de stringliterals (0x472E94-0x472F2B) en de initialization/
+  finalization-stubs (0x472F2C-0x472F7B) overleefden de smart linker. Gedecompileerd uit
+  ROS.exe v1.1, code 00472E8C-00472F7B.
 
-  The only data is the typed constant below (DATA 00488E9C, 8 AnsiString
-  pointers); it is referenced by nothing but this unit's finalization
-  (FinalizeArray(@WavFiles, TypeInfo(string), 8)), i.e. no unit reads it.
+  De enige data is de getypte constante hieronder (DATA 00488E9C, 8 AnsiString-pointers); ze
+  wordt door niets anders gebruikt dan de finalization van deze unit
+  (FinalizeArray(@WavFiles, TypeInfo(string), 8)), dus geen enkele unit leest hem.
 
-  An identical array exists in Unit49 (code 00461B10, DATA 00488D20), so the
-  declaration is probably shared by two units (or an include file).
+  Een identiek array staat in Unit49 (code 00461B10, DATA 00488D20), dus de declaratie is
+  waarschijnlijk door twee units (of een include-bestand) gedeeld.
 
-  The real unit name is not recoverable with certainty. Init order 78 puts it
-  between Usett (77) and Uworld (79), i.e. it is first initialised as a
-  dependency of Uworld, and it must already be initialised before
-  uQuickDirectX (84). In the PACKAGEINFO unit list (compiler discovery
-  order) the only unassigned project-style name in that part of the list is
-  'uDebug' (listed after uQuickDirectX/ddraw/OLE2, before uTrein), which fits
-  that pattern; Unit49 would then be the other copy (uMessage?).
-  See the A4 report. }
+  De echte unitnaam is niet met zekerheid terug te halen. Initialisatievolgorde 78 plaatst hem
+  tussen Usett (77) en Uworld (79), dus hij wordt als afhankelijkheid van Uworld geinitialiseerd,
+  en hij moet al geinitialiseerd zijn voordat uQuickDirectX (84) dat doet. In de PACKAGEINFO-
+  unitlijst (volgorde waarin de compiler de units vond) is de enige niet-toegewezen, projectachtige
+  naam in dat deel van de lijst 'uDebug' (genoemd na uQuickDirectX/ddraw/OLE2, voor uTrein). Dat
+  past bij dit patroon; Unit49 zou dan het andere exemplaar zijn (uMessage?).
+  Zie het A4-rapport. }
 
 {$I zm.inc}
 

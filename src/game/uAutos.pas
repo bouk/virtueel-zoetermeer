@@ -1,13 +1,13 @@
 unit uAutos;
 
-{ The cars: TAutoSprite covers the city view and draws every car as a small white
-  square onto the view surface, moving along fixed paths (TSegmentList of
-  TSegment) per road piece: ordinary roads, motorways and the nine cells of a
-  'Klaver' (cloverleaf interchange). The number of cars per road follows the
-  traffic simulation of Uworld.
-  Decompiled from ROS.exe v1.1, code 00474EF0-004775DB (the literal pool of the
-  initialization section continues up to 004777F7, in the range that the unit map
-  attributes to uTransition). }
+{ De auto's: TAutoSprite verzorgt het stadszicht en tekent elke auto als een klein wit
+  vierkantje op het zichtoppervlak, rijdend langs vaste paden (TSegmentList van
+  TSegment) per wegstuk: gewone wegen, snelwegen en de negen cellen van een
+  'Klaver' (klaverbladkruising). Het aantal auto's per weg volgt de
+  verkeerssimulatie van Uworld.
+  Gedecompileerd uit ROS.exe v1.1, code 00474EF0-004775DB (de literal pool van de
+  initialisatiesectie loopt door tot 004777F7, in het bereik dat de unitkaart
+  toekent aan uTransition). }
 
 {$I zm.inc}
 
@@ -17,16 +17,16 @@ uses
   Windows, Classes, uSurface, uSprite, uSpritebox, Usett, Uworld, Uview;
 
 type
-  { VMT 00474F3C, instance size $158. }
+  { VMT 00474F3C, instantiegrootte $158. }
   TAutoSprite = class(TSprite)
   private
-    FReserved13C: Integer;           { +0x13C  not used }
+    FReserved13C: Integer;           { +0x13C  niet gebruikt }
     FWorld: TWorld;                  { +0x140 }
     FView: TView;                    { +0x144 }
     FSettings: TSettings;            { +0x148 }
-    FDrawn: Boolean;                 { +0x14C  set after the first Draw, never read }
-    FStartTick: Integer;             { +0x150  GetTickCount at the start of the current period }
-    FFase: Integer;                  { +0x154  period counter 0..77, selects the cars of a junction }
+    FDrawn: Boolean;                 { +0x14C  ingesteld na de eerste Draw, nooit gelezen }
+    FStartTick: Integer;             { +0x150  GetTickCount aan het begin van de huidige periode }
+    FFase: Integer;                  { +0x154  periodeteller 0..77, kiest de auto's van een kruispunt }
   public
     procedure Draw(Surface: TSurface; DX, DY: Integer; ClipRect: TRect;
       Scale: Double); override;                                        { +0x64 }
@@ -35,13 +35,13 @@ type
     property Settings: TSettings read FSettings;
   end;
 
-  { VMT 00475070, instance size $18. One straight piece of a car path, in world
-    pixels relative to the cell. }
+  { VMT 00475070, instantiegrootte $18. Eén recht stuk van een autopad, in wereld-
+    pixels ten opzichte van de cel. }
   TSegment = class(TObject)
   private
     FVan: TPoint;                    { +0x04 }
     FNaar: TPoint;                   { +0x0C }
-    FRichting: Char;                 { +0x14  index into AutoFrame }
+    FRichting: Char;                 { +0x14  index in AutoFrame }
   public
     constructor Create(P1, P2: TPoint; ARichting: Char);
     property Van: TPoint read FVan;
@@ -49,15 +49,15 @@ type
     property Richting: Char read FRichting;
   end;
 
-  { VMT 004750C8, instance size $10. }
+  { VMT 004750C8, instantiegrootte $10. }
   TSegmentList = class(TList)
   public
     function Add(Segment: TSegment): TSegment;
-    function GetItem(Index: Integer): TSegment;
-    property Items[Index: Integer]: TSegment read GetItem; default;
+    function GetItem(Nr: Integer): TSegment;
+    property Items[Nr: Integer]: TSegment read GetItem; default;
   end;
 
-function CreateAutos(SpriteBox: TSpriteBox; Template: TSprite; AWorld: TWorld;
+function CreateAutos(SpriteBox: TSpriteBox; Sjabloon: TSprite; AWorld: TWorld;
   AView: TView; ASettings: TSettings): TAutoSprite;
 
 implementation
@@ -66,38 +66,38 @@ uses
   SysUtils, Graphics, uTool, Uconst, SprBmp;
 
 const
-  { 00488EDC: number of bits set in 0..15 (number of connected road directions) }
+  { 00488EDC: aantal gezette bits in 0..15 (aantal aangesloten wegrichtingen) }
   BitCount: array[0..15] of Integer = (0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4);
 
 var
-  { 0048A990: car paths of an ordinary road, per TCell.Wegen bitmask }
+  { 0048A990: autopaden van een gewone weg, per TCell.Wegen-bitmasker }
   Heen: array[0..15] of TSegmentList;
   { 0048A9D0 }
   Terug: array[0..15] of TSegmentList;
-  { 0048AA10: car paths of a motorway }
+  { 0048AA10: autopaden van een snelweg }
   SnelHeen: array[0..15] of TSegmentList;
   { 0048AA50 }
   SnelTerug: array[0..15] of TSegmentList;
-  { 0048AA90: car paths on the cloverleaf: [lane 1..2, piece 1..9] }
+  { 0048AA90: autopaden op het klaverblad: [rijstrook 1..2, stuk 1..9] }
   KlaverHeen: array[0..8, 0..15] of TSegmentList;
-  { 0048ACD0: only pieces 1..4 }
+  { 0048ACD0: alleen stukken 1..4 }
   KlaverTerug: array[0..8, 0..15] of TSegmentList;
-  { 0048AF10: car frame ('auto<n>') per segment direction }
+  { 0048AF10: autoframe ('auto<n>') per segmentrichting }
   AutoFrame: array['A'..'R'] of Integer;
   { 0048AF58 }
   I: Integer;
-  { 0048AF5C: path points; 'A'..'L' for roads, 'a'..'l' reused for each cloverleaf piece }
+  { 0048AF5C: padpunten; 'A'..'L' voor wegen, 'a'..'l' hergebruikt voor elk klaverbladstuk }
   Punten: array['A'..'z'] of TPoint;
-  { NOTE: X1, Y1 and X2 were kept in registers (EDI, EBX, ESI) by the compiler;
-    only Y2 has a memory location (0048B12C). }
+  { LET OP: X1, Y1 en X2 werden door de compiler in registers gehouden (EDI, EBX, ESI);
+    alleen Y2 heeft een geheugenlocatie (0048B12C). }
   X1, Y1, X2, Y2: Integer;
   J: Integer;
 
 { @004750E8 }
-function CreateAutos(SpriteBox: TSpriteBox; Template: TSprite; AWorld: TWorld;
+function CreateAutos(SpriteBox: TSpriteBox; Sjabloon: TSprite; AWorld: TWorld;
   AView: TView; ASettings: TSettings): TAutoSprite;
 begin
-  Result := TAutoSprite.CreateCopy(Template);
+  Result := TAutoSprite.CreateCopy(Sjabloon);
   Result.FWorld := AWorld;
   AView.Autos := Result;
   Result.MarginRight := 792;
@@ -118,32 +118,32 @@ begin
     Result := 1;
 end;
 
-{ @0047519C  Position (X, Y) at fraction F of the path; returns the car frame name,
-  or '' when there is no path. }
-function SegmentPos(List: TSegmentList; var X, Y: Integer; F: Double): string;
+{ @0047519C  Positie (X, Y) op breukdeel F van het pad; geeft de autoframenaam terug,
+  of '' als er geen pad is. }
+function SegmentPos(Lijst: TSegmentList; var X, Y: Integer; F: Double): string;
 var
-  N, Index, AX1, AY1, AX2, AY2: Integer;
+  N, Nr, AX1, AY1, AX2, AY2: Integer;
 begin
   Result := '';
-  if (List <> nil) and (List.Count <> 0) then
+  if (Lijst <> nil) and (Lijst.Count <> 0) then
   begin
-    N := List.Count;
-    Index := Trunc(N * F);
-    if Index >= N then
-      Index := N - 1;
+    N := Lijst.Count;
+    Nr := Trunc(N * F);
+    if Nr >= N then
+      Nr := N - 1;
     Dec(N);
     if N > 0 then
       F := 1 - (1 - F);
-    AX1 := List[Index].FVan.X;
-    AY1 := List[Index].FVan.Y;
-    AX2 := List[Index].FNaar.X;
-    AY2 := List[Index].FNaar.Y;
-    F := (F - Index / List.Count) * List.Count;
+    AX1 := Lijst[Nr].FVan.X;
+    AY1 := Lijst[Nr].FVan.Y;
+    AX2 := Lijst[Nr].FNaar.X;
+    AY2 := Lijst[Nr].FNaar.Y;
+    F := (F - Nr / Lijst.Count) * Lijst.Count;
     X := Round(Interpolate(F, AX2, AX1));
     Y := Round(Interpolate(F, AY2, AY1));
-    { NOTE: the cloverleaf paths use the directions 'a'..'l', which lie outside
-      AutoFrame (the original reads Punten memory); the name is only tested for '' }
-    Result := 'auto' + IntToStr(AutoFrame[List[Index].FRichting]);
+    { LET OP: de klaverbladpaden gebruiken de richtingen 'a'..'l', die buiten
+      AutoFrame vallen (het origineel leest het Punten-geheugen); de naam wordt alleen op '' getest }
+    Result := 'auto' + IntToStr(AutoFrame[Lijst[Nr].FRichting]);
   end;
 end;
 
@@ -164,14 +164,14 @@ var
   Cell: TCell;
   I, Periode: Integer;
 
-  { @00475314  Plots one car (a white square) at (AX, AY) on Surface. }
+  { @00475314  Tekent één auto (een wit vierkantje) op (AX, AY) op Surface. }
   procedure PlotAuto(AX, AY: Integer);
   var
-    Size, I, J, SX, SY: Integer;
+    Grootte, I, J, SX, SY: Integer;
   begin
-    Size := Round(Zoom * 2);
-    for I := (-Size) div 2 to Size div 2 + Size mod 2 - 1 do
-      for J := (-Size) div 2 to Size div 2 + Size mod 2 - 1 do
+    Grootte := Round(Zoom * 2);
+    for I := (-Grootte) div 2 to Grootte div 2 + Grootte mod 2 - 1 do
+      for J := (-Grootte) div 2 to Grootte div 2 + Grootte mod 2 - 1 do
       begin
         SX := Left + AX + I - CurDX;
         SY := Top + AY + J - CurDY;
@@ -182,8 +182,8 @@ var
       end;
   end;
 
-  { @00475440  Draws the N cars of one path (both directions) of a cell. }
-  procedure DrawAutos(P: TPoint; N, Idx: Integer; F: Double; Kind, Lane, Mask: Integer;
+  { @00475440  Tekent de N auto's van één pad (beide richtingen) van een cel. }
+  procedure DrawAutos(P: TPoint; N, Idx: Integer; F: Double; Soort, Lane, Mask: Integer;
     Cell: TCell; OfsX, OfsY, Piece: Integer);
   var
     T, I, X, Y: Integer;
@@ -214,7 +214,7 @@ var
           S := SegmentPos(SnelHeen[Idx], X, Y, G)
         else if Cell.Contents = 'Klaver' then
         begin
-          { NOTE: both branches are the same }
+          { LET OP: beide takken zijn gelijk }
           if Piece < 5 then
             S := SegmentPos(KlaverHeen[Idx, Piece], X, Y, G)
           else
@@ -223,10 +223,10 @@ var
         else
           S := SegmentPos(Heen[Idx], X, Y, G);
         if S > '' then
-          if (Kind < 3) or
-             ((Kind = 3) and (((Lane in [1, 2]) and (FFase mod 2 = 0)) or
+          if (Soort < 3) or
+             ((Soort = 3) and (((Lane in [1, 2]) and (FFase mod 2 = 0)) or
                               ((Lane = 3) and (FFase mod 2 = 1)))) or
-             ((Kind = 4) and (((Lane in [4, 5]) and (FFase mod 3 = 0)) or
+             ((Soort = 4) and (((Lane in [4, 5]) and (FFase mod 3 = 0)) or
                               ((Lane in [2, 3]) and (FFase mod 3 = 1)) or
                               ((Lane in [1, 6]) and (FFase mod 3 = 2)))) then
             PlotAuto(P.X + Round((X + OfsX) * Zoom), P.Y + Round((Y + OfsY) * Zoom));
@@ -235,17 +235,17 @@ var
           S := SegmentPos(SnelTerug[Idx], X, Y, G)
         else if Cell.Contents = 'Klaver' then
         begin
-          { NOTE: for pieces 5..9 S keeps the value of the first direction }
+          { LET OP: voor stukken 5..9 behoudt S de waarde van de eerste richting }
           if Piece < 5 then
             S := SegmentPos(KlaverTerug[Idx, Piece], X, Y, G);
         end
         else
           S := SegmentPos(Terug[Idx], X, Y, G);
         if S > '' then
-          if (Kind < 3) or
-             ((Kind = 3) and (((Lane = 3) and (FFase mod 2 = 0)) or
+          if (Soort < 3) or
+             ((Soort = 3) and (((Lane = 3) and (FFase mod 2 = 0)) or
                               ((Lane in [1, 2]) and (FFase mod 2 = 1)))) or
-             ((Kind = 4) and (((Lane in [2, 3]) and (FFase mod 3 = 0)) or
+             ((Soort = 4) and (((Lane in [2, 3]) and (FFase mod 3 = 0)) or
                               ((Lane in [4, 5]) and (FFase mod 3 = 1)) or
                               ((Lane in [1, 6]) and (FFase mod 3 = 2)))) then
             PlotAuto(P.X + Round((X + OfsX) * Zoom), P.Y + Round((Y + OfsY) * Zoom));
@@ -284,7 +284,7 @@ begin
             Tijd := Cell.Reistijd / 1.5;
             Periode := 3000;
             Fase := (GetTickCount mod Periode) / Periode;
-            { a dead end next to a building: the cars turn into the building }
+            { een doodlopend stuk naast een gebouw: de auto's draaien het gebouw in }
             if BitCount[Mask] = 1 then
               for I := 0 to 3 do
               begin
@@ -302,7 +302,7 @@ begin
             end
             else if BitCount[Mask] > 2 then
             begin
-              { junction: one path per pair of connected directions }
+              { kruispunt: één pad per paar aangesloten richtingen }
               Som := 0;
               for I := 0 to 3 do
               begin
@@ -310,7 +310,7 @@ begin
                 if Buur <> nil then
                   Som := Som + RoundUp(Buur.DrukteFactor);
               end;
-              { NOTE: leaves the Y loop, skipping the rest of the column }
+              { LET OP: verlaat de Y-lus en slaat de rest van de kolom over }
               if Som = 0 then
                 Break;
               Lane := 0;
@@ -342,7 +342,7 @@ begin
           else if (Cell.Contents = 'Klaver') and (Cell.Hoofd = nil) and
             FSettings.KlaverbladAutosVisible then
           begin
-            { the main cell of a cloverleaf is its bottom corner; it covers 3x3 cells }
+            { de hoofdcel van een klaverblad is de onderste hoek; ze beslaat 3x3 cellen }
             K[1] := Verkeer(Cell.Buur(-1, 1));
             K[3] := Verkeer(Cell.Buur(1, -1));
             K[5] := Verkeer(Cell.Buur(-3, -1));
@@ -390,60 +390,60 @@ begin
 end;
 
 { @00476104 }
-function TSegmentList.GetItem(Index: Integer): TSegment;
+function TSegmentList.GetItem(Nr: Integer): TSegment;
 begin
-  Result := TObject(Get(Index)) as TSegment;
+  Result := TObject(Get(Nr)) as TSegment;
 end;
 
-{ @00476124  Ordinary road piece: Wegen bitmask Index, paths as point letters,
-  RHeen/RTerug give the direction of each segment. }
-procedure MaakWeg(Index: Integer; SHeen, STerug, RHeen, RTerug: string);
+{ @00476124  Gewoon wegstuk: Wegen-bitmasker Nr, paden als puntletters,
+  RHeen/RTerug geven de richting van elk segment. }
+procedure MaakWeg(Nr: Integer; SHeen, STerug, RHeen, RTerug: string);
 var
   I: Integer;
 begin
-  Heen[Index] := TSegmentList.Create;
+  Heen[Nr] := TSegmentList.Create;
   for I := 1 to Length(SHeen) - 1 do
-    Heen[Index].Add(TSegment.Create(Punten[SHeen[I]], Punten[SHeen[I + 1]], RHeen[I]));
-  Terug[Index] := TSegmentList.Create;
+    Heen[Nr].Add(TSegment.Create(Punten[SHeen[I]], Punten[SHeen[I + 1]], RHeen[I]));
+  Terug[Nr] := TSegmentList.Create;
   for I := 1 to Length(STerug) - 1 do
-    Terug[Index].Add(TSegment.Create(Punten[STerug[I]], Punten[STerug[I + 1]], RTerug[I]));
+    Terug[Nr].Add(TSegment.Create(Punten[STerug[I]], Punten[STerug[I + 1]], RTerug[I]));
 end;
 
-{ @00476274  Motorway piece. }
-procedure MaakSnelweg(Index: Integer; SHeen, STerug, RHeen, RTerug: string);
+{ @00476274  Snelwegstuk. }
+procedure MaakSnelweg(Nr: Integer; SHeen, STerug, RHeen, RTerug: string);
 var
   I: Integer;
 begin
-  SnelHeen[Index] := TSegmentList.Create;
+  SnelHeen[Nr] := TSegmentList.Create;
   for I := 1 to Length(SHeen) - 1 do
-    SnelHeen[Index].Add(TSegment.Create(Punten[SHeen[I]], Punten[SHeen[I + 1]], RHeen[I]));
-  SnelTerug[Index] := TSegmentList.Create;
+    SnelHeen[Nr].Add(TSegment.Create(Punten[SHeen[I]], Punten[SHeen[I + 1]], RHeen[I]));
+  SnelTerug[Nr] := TSegmentList.Create;
   for I := 1 to Length(STerug) - 1 do
-    SnelTerug[Index].Add(TSegment.Create(Punten[STerug[I]], Punten[STerug[I + 1]], RTerug[I]));
+    SnelTerug[Nr].Add(TSegment.Create(Punten[STerug[I]], Punten[STerug[I + 1]], RTerug[I]));
 end;
 
-{ @004763C4  Cloverleaf piece, one direction. }
-procedure MaakKlaver(Index, Piece: Integer; S, R: string);
+{ @004763C4  Klaverbladstuk, één richting. }
+procedure MaakKlaver(Nr, Piece: Integer; S, R: string);
 var
   I: Integer;
 begin
-  KlaverHeen[Index, Piece] := TSegmentList.Create;
+  KlaverHeen[Nr, Piece] := TSegmentList.Create;
   for I := 1 to Length(S) - 1 do
-    KlaverHeen[Index, Piece].Add(TSegment.Create(Punten[S[I]], Punten[S[I + 1]], R[I]));
+    KlaverHeen[Nr, Piece].Add(TSegment.Create(Punten[S[I]], Punten[S[I + 1]], R[I]));
 end;
 
-{ @004764A4  Cloverleaf piece, both directions. }
-procedure MaakKlaver2(Index, Piece: Integer; SHeen, STerug: string);
+{ @004764A4  Klaverbladstuk, beide richtingen. }
+procedure MaakKlaver2(Nr, Piece: Integer; SHeen, STerug: string);
 var
   I: Integer;
 begin
-  KlaverHeen[Index, Piece] := TSegmentList.Create;
+  KlaverHeen[Nr, Piece] := TSegmentList.Create;
   for I := 1 to Length(SHeen) - 1 do
-    KlaverHeen[Index, Piece].Add(TSegment.Create(Punten[SHeen[I]], Punten[SHeen[I + 1]],
+    KlaverHeen[Nr, Piece].Add(TSegment.Create(Punten[SHeen[I]], Punten[SHeen[I + 1]],
       SHeen[I]));
-  KlaverTerug[Index, Piece] := TSegmentList.Create;
+  KlaverTerug[Nr, Piece] := TSegmentList.Create;
   for I := 1 to Length(STerug) - 1 do
-    KlaverTerug[Index, Piece].Add(TSegment.Create(Punten[STerug[I]], Punten[STerug[I + 1]],
+    KlaverTerug[Nr, Piece].Add(TSegment.Create(Punten[STerug[I]], Punten[STerug[I + 1]],
       STerug[I]));
 end;
 
@@ -462,7 +462,7 @@ initialization
     end;
   end;
 
-  { the corner points of a road cell }
+  { de hoekpunten van een wegcel }
   X1 := -58;
   Y1 := -15;
   X2 := -30;
@@ -512,7 +512,7 @@ initialization
   MaakSnelweg(5, 'FC', 'GJ', 'FC', 'GJ');
   MaakSnelweg(6, 'LIDC', 'GK', 'LEEC', 'HH');
 
-  { the cloverleaf, piece by piece }
+  { het klaverblad, stuk voor stuk }
   Punten['a'] := Point(-58, -15);
   Punten['b'] := Point(5, 6);
   Punten['c'] := Point(67, 35);

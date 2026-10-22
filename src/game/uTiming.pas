@@ -1,15 +1,16 @@
 unit uTiming;
 
-{ High resolution "fast" timers for the sprite engine.
+{ Hoge-resolutie "snelle" timers voor de spriteengine.
 
-  Every TCustomFastTimer owns a hidden window (AllocateHWnd) and normally
-  ticks through WM_TIMER. While FastTimerLoop runs, the timers are instead
-  driven from a busy loop that also pumps messages, waits for the vertical
-  retrace and flips all sprite boxes. Multimedia timers (winmm) were planned:
-  the unit keeps a library handle and procedure variables for them, but they
-  are never loaded in this build (FUseMMTimer is never set).
+  Elke TCustomFastTimer heeft een eigen verborgen venster (AllocateHWnd) en tikt
+  normaal via WM_TIMER. Zolang FastTimerLoop loopt, worden de timers in plaats
+  daarvan aangestuurd vanuit een actieve lus die ook berichten verwerkt, wacht op
+  de verticale retrace en alle spriteboxen laat wisselen (flip). Multimediatimers
+  (winmm) waren gepland: de unit houdt er een bibliotheekhandle en procedure-
+  variabelen voor bij, maar ze worden in deze build nooit geladen (FUseMMTimer
+  wordt nooit gezet).
 
-  Decompiled from ROS.exe v1.1, code 0046F530-0046FF58. }
+  Gedecompileerd uit ROS.exe v1.1, code 0046F530-0046FF58. }
 
 {$I zm.inc}
 
@@ -19,7 +20,7 @@ uses
   Windows, Messages, Classes;
 
 type
-  { Result of TCustomFastTimer.GetTimerMode. }
+  { Resultaat van TCustomFastTimer.GetTimerMode. }
   TTimerMode = (tmWindowsTimer, tmMultimediaTimer, tmTimerLoop);
 
   TCustomFastTimer = class(TComponent)
@@ -27,25 +28,25 @@ type
     FAbout: string;                 { +0x24 }
     FEnabled: Boolean;              { +0x28 }
     FInterval: Integer;             { +0x2C }
-    FReserved30: Integer;           { +0x30  never referenced }
+    FReserved30: Integer;           { +0x30  wordt nooit gebruikt }
     FWindowHandle: HWND;            { +0x34  from AllocateHWnd }
-    FTimerWnd: HWND;                { +0x38  window used for SetTimer/DefWindowProc }
-    FReserved3C: Integer;           { +0x3C  never referenced }
+    FTimerWnd: HWND;                { +0x38  venster dat wordt gebruikt voor SetTimer/DefWindowProc }
+    FReserved3C: Integer;           { +0x3C  wordt nooit gebruikt }
     FOnTimer: TNotifyEvent;         { +0x40 }
     FOnSkipTimer: TNotifyEvent;     { +0x48 }
-    FUseMMTimer: Boolean;           { +0x50  never set }
+    FUseMMTimer: Boolean;           { +0x50  wordt nooit gezet }
     FMMTimerID: Integer;            { +0x54 }
     FID: Integer;                   { +0x58 }
-    FNextTime: Integer;             { +0x5C  time (ms) the next tick is due }
+    FNextTime: Integer;             { +0x5C  tijdstip (ms) waarop de volgende tik verschuldigd is }
     FLastTime: Integer;             { +0x60 }
     FPrevTime: Integer;             { +0x64 }
     FPriority: Integer;             { +0x68 }
-    FSyncRetrace: Boolean;          { +0x6C  round the interval to retrace periods }
+    FSyncRetrace: Boolean;          { +0x6C  rondt het interval af op retrace-perioden }
     FUpdated: Boolean;              { +0x6D }
     procedure WndProc(var Msg: TMessage);
     procedure UpdateTimer;
     function GetRealInterval: Integer;
-    procedure DoTimer(Event: TNotifyEvent);
+    procedure DoTimer(Gebeurtenis: TNotifyEvent);
   protected
     function GetAbout: string;
     procedure SetEnabled(Value: Boolean);
@@ -90,7 +91,7 @@ type
 {$J+}
 const
   NoMMTimers: Boolean = False;              { 00488E7C }
-  MaxLoopTime: Integer = 500;               { 00488E80  ms per pass of the timer loop }
+  MaxLoopTime: Integer = 500;               { 00488E80  ms per doorgang van de timerlus }
   IdleLoopTime: Integer = 0;                { 00488E84 }
   InTimerLoop: Boolean = False;             { 00488E88 }
   MaxMessageLoops: Integer = 1;             { 00488E8C }
@@ -102,9 +103,9 @@ var
   FastTimers: TFastTimerList;               { 0048A948 }
   RetraceTime: Integer;                     { 0048A94C }
   IsWinNT: Boolean;                         { 0048A950 }
-  MMSetEventProc: Pointer;                  { 0048A958  never assigned }
-  MMGetDevCapsProc: Pointer;                { 0048A95C  never assigned }
-  MMKillEventProc: TMMKillProc;             { 0048A960  never assigned }
+  MMSetEventProc: Pointer;                  { 0048A958  wordt nooit toegekend }
+  MMGetDevCapsProc: Pointer;                { 0048A95C  wordt nooit toegekend }
+  MMKillEventProc: TMMKillProc;             { 0048A960  wordt nooit toegekend }
   MMTimerUsers: Integer;                    { 0048A964 }
   WinMMLoaded: Boolean;                     { 0048A968 }
   WinMMHandle: THandle;                     { 0048A96C }
@@ -142,7 +143,7 @@ begin
     FreeWinMM;
 end;
 
-{ @0046F838  milliseconds since unit initialization, scaled by TimeScale }
+{ @0046F838  milliseconden sinds de initialisatie van de unit, geschaald door TimeScale }
 function GetTime: Integer;
 begin
   Result := Round((timeGetTime - StartTime) / TimeScale);
@@ -241,12 +242,12 @@ end;
 { @0046FAF4 }
 function TCustomFastTimer.GetRealInterval: Integer;
 var
-  Periods: Integer;
+  Periodes: Integer;
 begin
   if FSyncRetrace then
   begin
-    Periods := Round(FInterval / GetRetraceTime);
-    Result := IMax(GetRetraceTime, Periods * GetRetraceTime);
+    Periodes := Round(FInterval / GetRetraceTime);
+    Result := IMax(GetRetraceTime, Periodes * GetRetraceTime);
   end
   else
     Result := FInterval;
@@ -270,13 +271,13 @@ begin
 end;
 
 { @0046FB5C }
-procedure TCustomFastTimer.DoTimer(Event: TNotifyEvent);
+procedure TCustomFastTimer.DoTimer(Gebeurtenis: TNotifyEvent);
 begin
   FUpdated := False;
   FPrevTime := FLastTime;
   FLastTime := GetTime;
-  if Assigned(Event) then
-    Event(Self);
+  if Assigned(Gebeurtenis) then
+    Gebeurtenis(Self);
   try
     if not FUpdated then
       Inc(FNextTime, GetRealInterval);
@@ -322,31 +323,31 @@ begin
   Result := TObject(Get(Index)) as TCustomFastTimer;
 end;
 
-{ @0046FC38  the enabled timer that is most overdue, or nil }
+{ @0046FC38  de ingeschakelde timer die het meest achterloopt, of nil }
 function TFastTimerList.NextDue: TCustomFastTimer;
 var
   I: Integer;
-  Due: Integer;
+  Verval: Integer;
 begin
-  Due := GetTime;
+  Verval := GetTime;
   Result := nil;
   for I := 0 to Count - 1 do
-    if (GetTimer(I).FNextTime < Due) and GetTimer(I).FEnabled then
+    if (GetTimer(I).FNextTime < Verval) and GetTimer(I).FEnabled then
     begin
       Result := GetTimer(I);
-      Due := GetTimer(I).FNextTime;
+      Verval := GetTimer(I).FNextTime;
     end;
 end;
 
-{ @0046FCA4  runs all fast timers until the application quits. }
+{ @0046FCA4  voert alle snelle timers uit tot de applicatie wordt afgesloten. }
 procedure FastTimerLoop(OnIdle: TNotifyEvent);
 var
-  I, Loops: Integer;
+  I, Lussen: Integer;
   T: TCustomFastTimer;
-  Start, Elapsed: Integer;
-  Quit: Boolean;
+  Begintijd, Verstreken: Integer;
+  Stoppen: Boolean;
 begin
-  { NOTE: OnIdle is never used }
+  { LET OP: OnIdle wordt nooit gebruikt }
   if not InTimerLoop then
   begin
     for I := 0 to FastTimers.Count - 1 do
@@ -362,15 +363,15 @@ begin
     end;
     InTimerLoop := True;
     repeat
-      Start := GetTime;
-      Loops := 1;
-      Quit := False;
+      Begintijd := GetTime;
+      Lussen := 1;
+      Stoppen := False;
       repeat
-        Quit := Quit or ProcessMessage;
-        Inc(Loops);
-      until (Loops > MaxMessageLoops) or Quit;
+        Stoppen := Stoppen or ProcessMessage;
+        Inc(Lussen);
+      until (Lussen > MaxMessageLoops) or Stoppen;
       repeat
-        if not Quit then
+        if not Stoppen then
         begin
           T := FastTimers.NextDue;
           if T <> nil then
@@ -379,20 +380,20 @@ begin
             else
               T.Timer;
         end;
-        Elapsed := GetTime - Start;
-      until Quit or (Elapsed > MaxLoopTime) or ((T = nil) and (Elapsed > IdleLoopTime));
+        Verstreken := GetTime - Begintijd;
+      until Stoppen or (Verstreken > MaxLoopTime) or ((T = nil) and (Verstreken > IdleLoopTime));
       if not IsWinNT then
         repeat
         until (InPort($3DA) and 8) <> 0;
       SpriteBoxes.FlipAll;
-    until Quit;
+    until Stoppen;
     for I := 0 to FastTimers.Count - 1 do
       FastTimers.GetTimer(I).UpdateTimer;
     InTimerLoop := False;
   end;
 end;
 
-{ @0046FE10  waits for the start of the next vertical retrace (VGA status port) }
+{ @0046FE10  wacht op het begin van de volgende verticale retrace (VGA-statuspoort) }
 procedure WaitRetrace;
 begin
   repeat
@@ -412,28 +413,28 @@ end;
 { @0046FE40 }
 procedure MeasureRetrace;
 var
-  Start, I: Integer;
+  Begintijd, I: Integer;
 begin
   if IsWinNT then
     RetraceTime := 1
   else
   begin
     WaitRetrace;
-    Start := GetTime;
+    Begintijd := GetTime;
     for I := 1 to 10 do
       WaitRetrace;
-    RetraceTime := (GetTime - Start) div 10;
+    RetraceTime := (GetTime - Begintijd) div 10;
   end;
 end;
 
 { @0046FE8C }
 procedure CheckWinNT;
 var
-  Info: TOSVersionInfo;
+  Versie: TOSVersionInfo;
 begin
-  Info.dwOSVersionInfoSize := SizeOf(Info);
-  GetVersionEx(Info);
-  IsWinNT := Info.dwPlatformId = VER_PLATFORM_WIN32_NT;
+  Versie.dwOSVersionInfoSize := SizeOf(Versie);
+  GetVersionEx(Versie);
+  IsWinNT := Versie.dwPlatformId = VER_PLATFORM_WIN32_NT;
   if IsWinNT then
     SetMaxMessageLoops(1000);
 end;
@@ -452,6 +453,6 @@ initialization
   MMKillEventProc := nil;
   StartTime := timeGetTime;
 
-{ The finalization at @0046FEC8 is the empty compiler-generated stub. }
+{ De finalization bij @0046FEC8 is de lege, door de compiler gegenereerde stub. }
 
 end.
