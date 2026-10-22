@@ -38,8 +38,8 @@ type
     Value: Integer;        { +0x38 Value }
     Afstand: Integer;      { +0x3C Afstand }
     Wens: string;          { +0x40 Wens }
-    Extra1: Boolean;       { +0x44 never read; cleared only by AddContents }
-    Extra2: Boolean;       { +0x45 never read; cleared only by AddContents }
+    SpritesLoaded: Boolean;   { +0x44 set by TfrmMain.ReadSprites once the sprites are loaded }
+    KnopGemaakt: Boolean;     { +0x45 set by TfrmMain once the build button is created }
   end;
 
   { RTTI 00485BAC '.4' }
@@ -120,8 +120,8 @@ begin
   Info.Value := 0;
   Info.Afstand := 0;
   Info.Wens := '';
-  Info.Extra1 := False;
-  Info.Extra2 := False;
+  Info.SpritesLoaded := False;
+  Info.KnopGemaakt := False;
   { NOTE: Capaciteit, MaxSpeed and Hoofdrubriek are not set. }
   Inc(ContentsCount);
   SetLength(Contents, ContentsCount);
@@ -137,7 +137,7 @@ var
   S: string;
 begin
   { NOTE: the original's stack frame is zero-filled on entry, so the fields
-    that are never read from the file (Extra1/Extra2) start as False and keep
+    that are not read from the file (SpritesLoaded/KnopGemaakt) start as False and keep
     their value from line to line. }
   ContentsCount := 0;
   AssignFile(F, AddPath(AppPath, 'Objecten.csv'));

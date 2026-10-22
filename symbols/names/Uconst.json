@@ -48,8 +48,8 @@
       "0x18": ["Prijs", "Integer"], "0x1c": ["Onderhoud", "Integer"], "0x20": ["Capaciteit", "Integer"],
       "0x24": ["MaxSpeed", "Integer"], "0x28": ["GrondvlakX", "Integer"], "0x2c": ["GrondvlakY", "Integer"],
       "0x30": ["Hoofdrubriek", "string"], "0x34": ["BaseScore", "Integer"], "0x38": ["Value", "Integer"],
-      "0x3c": ["Afstand", "Integer"], "0x40": ["Wens", "string"], "0x44": ["Extra1", "Boolean"],
-      "0x45": ["Extra2", "Boolean"]
+      "0x3c": ["Afstand", "Integer"], "0x40": ["Wens", "string"], "0x44": ["SpritesLoaded", "Boolean"],
+      "0x45": ["KnopGemaakt", "Boolean"]
     }
   },
   "assumes": {

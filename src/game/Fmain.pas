@@ -446,7 +446,7 @@ begin
         L := 1
       else
         L := Contents[I].Level;
-      if not Contents[I].Extra1 and (L <= Level) then
+      if not Contents[I].SpritesLoaded and (L <= Level) then
       begin
         ShowLoading(Contents[I].Description);
         Sprite := TSprite.Create(Self);
@@ -512,7 +512,7 @@ begin
         if (Name <> 'AndereStad') and (Name <> 'Onbereikbaar') and
           (Knop.FrameList.Count = 0) then
           Fout('ReadSprites: No images found for knop sprite ' + Knop.Name);
-        Contents[I].Extra1 := True;   { sprites loaded }
+        Contents[I].SpritesLoaded := True;
       end;
     end;
   end;
@@ -528,7 +528,7 @@ var
   Sprite: TSprite;
 begin
   for I := 0 to ContentsCount - 3 do
-    if (Contents[I].Level <= Level) and not Contents[I].Extra2 and
+    if (Contents[I].Level <= Level) and not Contents[I].KnopGemaakt and
       not ComponentExists('KNOP' + IntToStr(I)) then
     begin
       Plek := StrToIntDef0(FPages.Values[Contents[I].Page]);
@@ -548,7 +548,7 @@ begin
       FPages.Values[Contents[I].Page] := IntStr(Plek + 1);
       Sprite.AddBehaviour('KNOP', Behav);
       Sprite.GetBehaviour('KNOP').Active := True;
-      Contents[I].Extra2 := True;   { button created }
+      Contents[I].KnopGemaakt := True;
     end;
   ShowPage(Contents[0].Page);
 end;
