@@ -80,7 +80,7 @@ Doel 1 komt eerst. Het levert broncode op die door de bouwwijze getrouw is. Doel
 - [x] De resultaten exporteren naar een symboolkaart: `symbols/ros.sym` (adres, grootte, unit, naam). *Gedaan: `symbols/ros-1.1.tsv`.*
 - [x] De symbolen importeren in Ghidra (een script in `tools/`) voor decompilatie. *Gedaan: `tools/ghidra/`, `tools/refresh.sh`; ook klassenstructuren.*
 - [x] `tools/units.py` bouwen. Die levert het adresbereik van elke projectunit uit de IDR-kaart en de PACKAGEINFO-volgorde. Dit meet ook hoeveel code van het project zelf is en hoeveel van Borland (verwacht: in de orde van 100–200 KB). *Gedaan: 34 projectunits, ~148 KB code.*
-- [ ] De exacte compilerbuild en schakelaars vastleggen. Kandidaten:
+- [x] De exacte compilerbuild en schakelaars vastleggen. *Gedaan uit het binary (`tools/schakelaars.py`, `docs/SCHAKELAARS.md`): Delphi 5 Professional (zeker), Update Pack 1 (waarschijnlijk: zes bibliotheekroutines wijken af van de IDR-kennisbank, drie ervan zijn bekende reparaties); alle zichtbare schakelaars zeker, met de dcc32-regel. Met Delphi 5 bevestigen probe-units de build.* Kandidaten:
   - Delphi 5 basis of Update Pack 1
   - `$O` optimalisatie, `$W` stackframes, `$R/$Q` bereik-/overloopcontroles, `$A` uitlijning, `$D/$L` debuginformatie (heeft geen invloed op het exe, wel op het `.map`)
   - `$I` I/O-controles, `$H` lange strings
@@ -104,17 +104,17 @@ orig/           (genegeerd) originele bestanden
 build/          (genegeerd) uitvoer
 ```
 
-- [ ] `make` (of `just`) draait `wine dcc32 -B -GD src/Ros.dpr` met de vastgepinde schakelaars. Dat levert `build/ROS.exe` en een gedetailleerd `.map` op.
-- [ ] `tools/diff.py` vergelijkt de sha256 van het hele bestand en sectie voor sectie. Het vergelijkt ook elke functie: het koppelt routines via `build/ROS.map` en `symbols/ros.sym`, en disassembleert beide met capstone. Verplaatste operanden worden genormaliseerd, zodat één verkeerde functie niet overal adresruis veroorzaakt.
-- [ ] `tools/progress.py` meldt het % van de bytes van projectunits dat matcht, per unit, en schrijft een voortgangsbadge of JSON.
-- [ ] **Bootstrap-strategie.** We kunnen geen werkend exe linken zolang niet elke unit bestaat, dus:
+- [x] *`tools/bouw-delphi.sh` (schakelaars uit `docs/SCHAKELAARS.md`); zonder Delphi 5 alleen droog getest.* `make` (of `just`) draait `wine dcc32 -B -GD src/Ros.dpr` met de vastgepinde schakelaars. Dat levert `build/ROS.exe` en een gedetailleerd `.map` op.
+- [x] *Gedaan, getest met het origineel tegen zichzelf, een gepatchte kopie en een gegenereerde `.map` (`tools/test_matchpipeline.py`, `docs/MATCHEN.md`).* `tools/diff.py` vergelijkt de sha256 van het hele bestand en sectie voor sectie. Het vergelijkt ook elke functie: het koppelt routines via `build/ROS.map` en `symbols/ros.sym`, en disassembleert beide met capstone. Verplaatste operanden worden genormaliseerd, zodat één verkeerde functie niet overal adresruis veroorzaakt.
+- [x] *Gedaan.* `tools/progress.py` meldt het % van de bytes van projectunits dat matcht, per unit, en schrijft een voortgangsbadge of JSON.
+- [x] *Generator gedaan: `tools/maak-stubs.py` (uitvoer alleen onder `build/`); alle 732 routineblokken assembleren terug tot de originele bytes. Wat dcc32 nog vraagt (methoden in de klassen, `RET`-staarten) staat in `docs/MATCHEN.md`.* **Bootstrap-strategie.** We kunnen geen werkend exe linken zolang niet elke unit bestaat, dus:
   1. Elke nog niet gedecompileerde routine begint als een `asm … end`-blok dat de originele bytes bevat (`db`-directives). De ingebouwde assembler van Delphi accepteert dat.
   2. Relocaties worden symbolische verwijzingen, die uit `.reloc` worden hersteld.
   3. Dit levert vanaf dag één een matchende build op.
   4. Routines worden één voor één door echte Pascal vervangen, en de build moet matchend blijven.
 
   Dit is de standaardaanpak "split + incrementele decompilatie", aangepast voor Delphi.
-- [ ] CI: een GitHub Actions- of Nix-check die bouwt en de hash controleert. Dit hangt af van de beschikbaarheid van de toolchain voor CI, wat door de Delphi-licentie misschien alleen lokaal kan.
+- [x] *Gedaan voor de equivalentiemodus: `nix flake check` bouwt native, web en macOS (crosscompilatie) en vergelijkt alle testscripts met toestanden van het origineel (`tests/verwacht/`); `.github/workflows/ci.yml`. De hashcontrole volgt met Delphi 5.* CI: een GitHub Actions- of Nix-check die bouwt en de hash controleert. Dit hangt af van de beschikbaarheid van de toolchain voor CI, wat door de Delphi-licentie misschien alleen lokaal kan.
 
 ## Fase 3: Decompileren, unit voor unit
 
@@ -146,7 +146,7 @@ Portabiliteitskwesties om op te lossen:
 - **Pascal-semantiek die tussen Delphi 5 en FPC verschilt.** Dit zijn 32-bits `Integer`/pointergrootte-aannames, `string` = AnsiString, recordpakking en setgroottes. Controleer die op 64-bit aarch64.
 
 Stappen:
-- [x] FPC (en eventueel SDL3) aan de flake toevoegen. Een cross-target `nix build .#ros-macos` (aarch64-darwin) maken. *Gedaan: `nix build .#zoetermeer` voor Linux en macOS (ook aarch64-darwin); op macOS zelf nog niet getest.*
+- [x] FPC (en eventueel SDL3) aan de flake toevoegen. Een cross-target `nix build .#ros-macos` (aarch64-darwin) maken. *Gedaan: `nix build .#zoetermeer` voor Linux en macOS (ook aarch64-darwin). `checks.x86_64-linux.macos-compileert` crosscompileert en linkt een arm64-Mach-O op Linux; draaien op een echte Mac is nog niet getest.*
 - [x] `{$IFDEF FPC}` / `{$IFDEF PORTABLE}`-naden. De Delphi 5-matchbuild moet ongewijzigd blijven compileren. *Gedaan: naden gemarkeerd met `PORT:`.*
 - [x] macOS-platformlaag: SDL3 (venster, invoer, audio via een winmm-vervanging, timer), of een native Cocoa-laag als dat de voorkeur heeft. *Gedaan: SDL3-backend; geluid is stil.*
 - [x] Verpakken als `.app`-bundel met de gegevensbestanden. *Gedaan in `nix/zoetermeer.nix`.*
