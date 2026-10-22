@@ -5,7 +5,7 @@ unit ZMRandom;
   Random is a Mersenne Twister.
 
   Game units that call Random/Randomize list this unit last in their uses clause under
-  {$IFDEF FPC}, which makes these declarations shadow the System ones.
+  an IFDEF FPC, which makes these declarations shadow the System ones.
 
   Taken from ROS.exe: System.@RandInt (00402B98) and System.Randomize (00402924).
   ZM_RANDSEED=<n> in the environment makes Randomize use a fixed seed (differential tests). }
