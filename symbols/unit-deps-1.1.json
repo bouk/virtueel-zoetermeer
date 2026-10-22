@@ -1,0 +1,159 @@
+{
+ "uTool": [
+  "uLog",
+  "uString"
+ ],
+ "uLog": [
+  "uTool"
+ ],
+ "Unit49": [
+  "SprBmp"
+ ],
+ "SprBmp": [
+  "fShow",
+  "uSurface",
+  "uTool"
+ ],
+ "uSurface": [
+  "SprBmp"
+ ],
+ "Sprframe": [
+  "uString",
+  "uSurface"
+ ],
+ "uResizeScreen": [
+  "uTool"
+ ],
+ "uTextBalloon": [
+  "uPixie",
+  "uSpritebox",
+  "uString",
+  "uTool"
+ ],
+ "uSprite": [
+  "Sprframe",
+  "uPixie",
+  "uSequence",
+  "uSpritebox",
+  "uString",
+  "uTiming"
+ ],
+ "uGoblin": [
+  "uPixie",
+  "uSpritebox",
+  "uSurface"
+ ],
+ "uSpritebox": [
+  "uGoblin",
+  "uPixie",
+  "uSprite",
+  "uSurface",
+  "uTextBalloon",
+  "uTiming",
+  "uTool"
+ ],
+ "uSequence": [
+  "Sprframe",
+  "uSprite"
+ ],
+ "uTiming": [
+  "uLog",
+  "uSequence",
+  "uSpritebox",
+  "uTool"
+ ],
+ "Sprbehav": [
+  "Sprframe",
+  "uPixie",
+  "uSprite",
+  "uSpritebox",
+  "uString"
+ ],
+ "Usett": [
+  "uString"
+ ],
+ "Unit78": [
+  "Uview"
+ ],
+ "Uview": [
+  "Sprframe",
+  "Uconst",
+  "Uworld",
+  "uSprite",
+  "uSpritebox",
+  "uString",
+  "uSurface",
+  "uTool"
+ ],
+ "uAutos": [
+  "Uconst",
+  "Uworld",
+  "uSprite",
+  "uTool",
+  "uTransition"
+ ],
+ "uQuickDirectX": [
+  "uString"
+ ],
+ "Uctrl": [
+  "Sprbehav",
+  "uSprite",
+  "uSpritebox",
+  "uString",
+  "uTool"
+ ],
+ "uTrein": [
+  "Uconst",
+  "Uworld",
+  "uSprite",
+  "uString",
+  "uTool"
+ ],
+ "Fmain": [
+  "Sprbehav",
+  "Sprframe",
+  "Uconst",
+  "Uctrl",
+  "Usett",
+  "Uview",
+  "Uworld",
+  "fBack",
+  "fReport",
+  "uAutos",
+  "uQuickDirectX",
+  "uResizeScreen",
+  "uSprite",
+  "uSpritebox",
+  "uString",
+  "uSurface",
+  "uTiming",
+  "uTool",
+  "uTrein"
+ ],
+ "fReport": [
+  "Fmain"
+ ],
+ "Uworld": [
+  "Fmain",
+  "Uconst",
+  "Usett",
+  "Uview",
+  "uString",
+  "uTool"
+ ],
+ "Uconst": [
+  "uString",
+  "uTool"
+ ],
+ "fBack": [
+  "Fmain"
+ ],
+ "Ros": [
+  "Fmain"
+ ],
+ "uString": [],
+ "fShow": [],
+ "uPixie": [],
+ "cEditCtr": [],
+ "uTransition": []
+}

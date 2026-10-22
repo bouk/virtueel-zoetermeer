@@ -13,6 +13,7 @@
       python = pkgs.python3.withPackages (ps: with ps; [
         pefile    # PE header / section / resource parsing
         capstone  # x86 disassembly for diff tooling
+        unicorn   # emulating original routines for differential tests
         lief      # PE rewriting / layout inspection
       ]);
     in
@@ -37,6 +38,14 @@
 
           # Running the Windows toolchain (Delphi 5 dcc32.exe) and the game itself
           wineWow64Packages.stable
+          xvfb-run     # headless X for running the original under Wine
+          xdotool      # scripted input for differential tests
+          imagemagick  # screenshots (import) and image diffs
+
+          # Portable rebuild (Free Pascal) and its platform layer
+          fpc
+          sdl3
+          pkg-config
 
           # Scripting: splitting, symbol maps, byte-for-byte diffing
           python

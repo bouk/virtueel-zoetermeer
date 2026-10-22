@@ -14,7 +14,12 @@ import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressSet;
 import ghidra.program.model.listing.Function;
+import ghidra.program.model.listing.CodeUnitFormat;
+import ghidra.program.model.listing.CodeUnitFormatOptions;
+import ghidra.program.model.listing.Data;
 import ghidra.program.model.listing.Instruction;
+import ghidra.program.model.symbol.Reference;
+import ghidra.program.model.symbol.Symbol;
 
 public class ExportDecomp extends GhidraScript {
     @Override
@@ -23,6 +28,8 @@ public class ExportDecomp extends GhidraScript {
         Path outdir = Path.of(args[1]);
         Files.createDirectories(outdir);
 
+        CodeUnitFormat fmt = new CodeUnitFormat(new CodeUnitFormatOptions(
+            CodeUnitFormatOptions.ShowBlockName.NEVER, CodeUnitFormatOptions.ShowNamespace.ALWAYS));
         DecompInterface di = new DecompInterface();
         DecompileOptions opts = new DecompileOptions();
         di.setOptions(opts);
@@ -47,7 +54,16 @@ public class ExportDecomp extends GhidraScript {
                     }
                     s.printf("%n%s:  ; %s%n", fn.getName(true), fn.getEntryPoint());
                     for (Instruction ins : currentProgram.getListing().getInstructions(fn.getBody(), true)) {
-                        s.printf("  %s  %s%n", ins.getAddress(), ins);
+                        String label = "";
+                        Symbol sym = currentProgram.getSymbolTable().getPrimarySymbol(ins.getAddress());
+                        if (sym != null && !ins.getAddress().equals(fn.getEntryPoint())) label = sym.getName() + ":";
+                        StringBuilder refs = new StringBuilder();
+                        for (Reference ref : ins.getReferencesFrom()) {
+                            Data d = getDataAt(ref.getToAddress());
+                            if (d != null && d.hasStringValue()) refs.append(" ; \"").append(d.getValue()).append('"');
+                        }
+                        if (!label.isEmpty()) s.printf("%s%n", label);
+                        s.printf("  %s  %s%s%n", ins.getAddress(), fmt.getRepresentationString(ins), refs);
                     }
                 }
             }

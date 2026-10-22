@@ -287,6 +287,7 @@
 00408290	v	SysUtils	VMT_EIntfCastError
 004082ec	v	SysUtils	VMT_EWin32Error
 00408344	v	SysUtils	VMT_ESafecallException
+00408360	s	SysUtils	1
 004083d4	v	SysUtils	VMT_TMultiReadExclusiveWriteSynchronizer
 0040840c	f	SysUtils	sysutils.DivMod
 00408428	f	SysUtils	sysutils.ConvertErrorFmt
@@ -305,7 +306,9 @@
 00408764	f	SysUtils	sysutils.AdjustLineBreaks
 00408830	f	SysUtils	sysutils.IsValidIdent
 00408894	f	SysUtils	sysutils.IntToStr
+004088c0	s	SysUtils	2
 004088c4	f	SysUtils	sysutils.IntToStr
+004088f4	s	SysUtils	2
 004088f8	f	SysUtils	sysutils.StrToInt
 00408934	f	SysUtils	sysutils.StrToIntDef
 0040894c	f	SysUtils	sysutils.FileOpen
@@ -318,8 +321,11 @@
 00408b10	f	SysUtils	sysutils.AnsiLastChar
 00408b40	f	SysUtils	sysutils.LastDelimiter
 00408b90	f	SysUtils	sysutils.ExtractFilePath
+00408bc0	s	SysUtils	2
 00408bc4	f	SysUtils	sysutils.ExtractFileName
+00408bf8	s	SysUtils	2
 00408bfc	f	SysUtils	sysutils.ExtractFileExt
+00408c40	s	SysUtils	3
 00408c44	f	SysUtils	sysutils.BackfillGetDiskFreeSpaceEx
 00408cb8	f	SysUtils	sysutils.StrLen
 00408cd0	f	SysUtils	sysutils.StrEnd
@@ -362,7 +368,10 @@
 004099bc	f	SysUtils	sysutils.GetDate
 004099f4	f	SysUtils	sysutils.GetTime
 00409a34	f	SysUtils	sysutils.ConvertEraString
+00409b9c	s	SysUtils	2
 00409ba0	f	SysUtils	sysutils.ConvertYearString
+00409c94	s	SysUtils	2
+00409ca0	s	SysUtils	4
 00409ca8	f	SysUtils	sysutils.AppendFormat
 0040a41c	f	SysUtils	sysutils.DateTimeToString
 0040a4a8	f	SysUtils	sysutils.DateTimeToStr
@@ -375,7 +384,11 @@
 0040a6c0	f	SysUtils	sysutils.GetEraYearOffset
 0040a714	f	SysUtils	sysutils.EraToYear
 0040a770	f	SysUtils	sysutils.ScanDate
+0040aa9c	s	SysUtils	1
+0040aaa8	s	SysUtils	3
 0040aaac	f	SysUtils	sysutils.ScanTime
+0040ac90	s	SysUtils	2
+0040ac9c	s	SysUtils	2
 0040ad40	f	SysUtils	sysutils.StrToDateTime
 0040ae04	f	SysUtils	sysutils.SysErrorMessage
 0040ae50	f	SysUtils	sysutils.GetLocaleStr
@@ -385,7 +398,13 @@
 0040b024	f	SysUtils	sysutils.EnumEraNames
 0040b060	f	SysUtils	sysutils.EnumEraYearOffsets
 0040b0d8	f	SysUtils	sysutils.GetEraNamesAndYearOffsets
+0040b184	s	SysUtils	1
 0040b188	f	SysUtils	sysutils.TranslateDateFormat
+0040b360	s	SysUtils	1
+0040b370	s	SysUtils	3
+0040b384	s	SysUtils	4
+0040b398	s	SysUtils	2
+0040b3a4	s	SysUtils	1
 0040b3a8	f	SysUtils	sysutils.ExceptObject
 0040b3c0	f	SysUtils	sysutils.ExceptAddr
 0040b3d8	f	SysUtils	sysutils.ConvertAddr
@@ -405,6 +424,7 @@
 0040b964	f	SysUtils	sysutils.MapException
 0040b9e4	f	SysUtils	sysutils.GetExceptionClass
 0040b9f8	f	SysUtils	sysutils.CreateAVObject
+0040bcb0	s	SysUtils	13
 0040bcc0	f	SysUtils	sysutils.ExceptHandler
 0040bcd0	f	SysUtils	sysutils.InitExceptions
 0040bd9c	f	SysUtils	sysutils.DoneExceptions
@@ -426,6 +446,17 @@
 0040c2c8	f	SysUtils	sysutils.AnsiStrScan
 0040c308	f	SysUtils	sysutils.InitSysLocale
 0040c3c0	f	SysUtils	sysutils.GetFormatSettings
+0040c6a0	s	SysUtils	1
+0040c6ac	s	SysUtils	6
+0040c6bc	s	SysUtils	12
+0040c6d4	s	SysUtils	2
+0040c6e0	s	SysUtils	2
+0040c6ec	s	SysUtils	1
+0040c6f8	s	SysUtils	2
+0040c704	s	SysUtils	5
+0040c714	s	SysUtils	5
+0040c724	s	SysUtils	3
+0040c730	s	SysUtils	6
 0040c738	f	SysUtils	sysutils.RaiseLastWin32Error
 0040c7d0	f	SysUtils	sysutils.Win32Check
 0040c7e0	f	SysUtils	sysutils.CallTerminateProcs
@@ -444,12 +475,16 @@
 0040d4f4	f	SysUtils	sysutils.TextToFloat
 0040d5f8	f	SysUtils	sysutils.Finalization
 0040d738	f	SysUtils	sysutils.SysUtils
+0040d7b4	s	Unit3	2
 0040d7b8	f	Unit3	Unit3.Finalization
 0040d7e8	f	Unit3	Unit3.Initialization
 0040d7f8	f	Unit4	Unit4.Finalization
 0040d828	f	Unit4	Unit4.Initialization
 0040dc18	f	Unit7	Unit7.Finalization
 0040dc48	f	Unit7	Unit7.Initialization
+0040dc58	s	TypInfo	5
+0040dc68	s	TypInfo	4
+0040dc78	s	TypInfo	1
 0040dc7c	f	TypInfo	TypInfo.GetTypeData
 0040dc88	f	TypInfo	TypInfo.GetEnumNameValue
 0040dcd4	f	TypInfo	TypInfo.GetEnumValue
@@ -524,7 +559,7 @@
 0040fd5c	f	Classes	TList.Add
 0040fd90	f	Classes	TList.Clear
 0040fda8	f	Classes	TList.Delete
-0040fe0c	f	Classes	TList.Virtual0C
+0040fe0c	f	Classes	TList.Error
 0040fe44	f	Classes	TList.Error
 0040fe98	f	Classes	TList.Exchange
 0040fee8	f	Classes	TList.Expand
@@ -536,7 +571,7 @@
 00410048	f	Classes	TList.Remove
 00410068	f	Classes	TList.SetCapacity
 004100a4	f	Classes	TList.SetCount
-00410114	f	Classes	TList.Virtual04
+00410114	f	Classes	TList.Notify
 00410118	f	Classes	TThreadList.Create
 0041016c	f	Classes	TThreadList.Destroy
 004101c4	f	Classes	TThreadList.UnlockList
@@ -553,9 +588,11 @@
 00410494	f	Classes	TPersistent.Destroy
 004104c0	f	Classes	TPersistent.Assign
 004104d4	f	Classes	TPersistent.AssignError
-004105a4	f	Classes	TPersistent.Virtual00
-004105ac	f	Classes	TPersistent.Virtual04
+004105a0	s	Classes	3
+004105a4	f	Classes	TPersistent.AssignTo
+004105ac	f	Classes	TPersistent.DefineProperties
 004105b0	f	Classes	TPersistent.GetNamePath
+0041065c	s	Classes	1
 00410660	f	Classes	TPersistent.DynamicFFFF
 00410664	f	Classes	TCollection.Add
 00410670	f	Classes	TCollection.Clear
@@ -567,33 +604,36 @@
 00410878	f	Classes	TStrings.BeginUpdate
 00410890	f	Classes	Classes.DoWrite
 004108e8	f	Classes	TStrings.DefineProperties
+0041092c	s	Classes	7
 00410934	f	Classes	TStrings.EndUpdate
 00410948	f	Classes	TStrings.Equals
 00410a2c	f	Classes	TStrings.Error
 00410a84	f	Classes	TStrings.Exchange
-00410b6c	f	Classes	TStrings.Virtual10
-00410b74	f	Classes	TStrings.Virtual18
+00410b6c	f	Classes	TStrings.GetCapacity
+00410b74	f	Classes	TStrings.GetObject
 00410b78	f	Classes	TStrings.GetText
 00410bcc	f	Classes	TStrings.GetTextStr
 00410cb4	f	Classes	TStrings.GetValue
 00410d40	f	Classes	TStrings.IndexOf
 00410dc0	f	Classes	TStrings.IndexOfName
+00410e80	s	Classes	1
 00410e84	f	Classes	TStrings.IndexOfObject
 00410eb8	f	Classes	TStrings.InsertObject
 00410ee8	f	Classes	TStrings.LoadFromFile
 00410f3c	f	Classes	TStrings.LoadFromStream
 00410fe8	f	Classes	TStrings.Move
 00411098	f	Classes	TStrings.Put
-004110c8	f	Classes	TStrings.Virtual24
+004110c8	f	Classes	TStrings.PutObject
 004110cc	f	Classes	TStrings.ReadData
 0041117c	f	Classes	TStrings.SaveToFile
 004111d4	f	Classes	TStrings.SaveToStream
-00411230	f	Classes	TStrings.Virtual28
+00411230	f	Classes	TStrings.SetCapacity
 00411234	f	Classes	TStrings.SetStringsAdapter
 00411268	f	Classes	TStrings.SetText
 004112b8	f	Classes	TStrings.SetTextStr
-00411378	f	Classes	TStrings.Virtual30
+00411378	f	Classes	TStrings.SetUpdateState
 0041137c	f	Classes	TStrings.SetValue
+0041141c	s	Classes	1
 00411420	f	Classes	TStrings.WriteData
 004114a4	f	Classes	TStringList.Destroy
 00411500	f	Classes	TStringList.Add
@@ -605,8 +645,8 @@
 00411684	f	Classes	TStringList.ExchangeItems
 004116a8	f	Classes	TStringList.Find
 00411710	f	Classes	TStringList.Get
-00411744	f	Classes	TStringList.Virtual10
-00411748	f	Classes	TStringList.Virtual14
+00411744	f	Classes	TStringList.GetCapacity
+00411748	f	Classes	TStringList.GetCount
 0041174c	f	Classes	TStringList.GetObject
 00411774	f	Classes	TStringList.Grow
 004117a8	f	Classes	TStringList.IndexOf
@@ -624,13 +664,13 @@
 00411a5c	f	Classes	TStream.GetPosition
 00411a6c	f	Classes	TStream.SetPosition
 00411a78	f	Classes	TStream.GetSize
-00411aac	f	Classes	TStream.Virtual00
+00411aac	f	Classes	TStream.SetSize
 00411ab0	f	Classes	TStream.ReadBuffer
 00411ae8	f	Classes	TStream.WriteBuffer
 00411b20	f	Classes	TStream.CopyFrom
 00411bd4	f	Classes	TStream.ReadComponent
-00411c34	f	Classes	THandleStream.Virtual04
-00411c44	f	Classes	THandleStream.Virtual08
+00411c34	f	Classes	THandleStream.Read
+00411c44	f	Classes	THandleStream.Write
 00411c54	f	Classes	THandleStream.Seek
 00411c60	f	Classes	THandleStream.SetSize
 00411c80	f	Classes	TFileStream.Create
@@ -648,14 +688,15 @@
 00411fc0	f	Classes	Classes.Error
 00412030	f	Classes	TResourceStream.Initialize
 0041209c	f	Classes	TResourceStream.Destroy
-004120d4	f	Classes	TResourceStream.Virtual08
+004120d4	f	Classes	TResourceStream.Write
 004120ec	f	Classes	TFiler.Create
 00412134	f	Classes	TFiler.Destroy
-0041215c	f	Classes	TFiler.Virtual00
+0041215c	f	Classes	TFiler.SetRoot
 004121ac	v	Classes	VMT_TPropFixup
 004121d4	f	Classes	TPropFixup.Create
 0041222c	f	Classes	TPropFixup.MakeGlobalReference
 00412274	f	Classes	Classes.FindNestedComponent
+00412334	s	Classes	5
 0041233c	f	Classes	Classes.AddFinished
 00412374	f	Classes	Classes.AddNotFinished
 004123bc	f	Classes	Classes.GlobalFixupReferences
@@ -695,6 +736,10 @@
 00413364	f	Classes	TReader.ReadCurrency
 004133b0	f	Classes	TReader.ReadDate
 004133f0	f	Classes	TReader.ReadIdent
+004134bc	s	Classes	5
+004134cc	s	Classes	4
+004134dc	s	Classes	3
+004134e8	s	Classes	4
 004134f0	f	Classes	TReader.ReadInteger
 0041355c	f	Classes	TReader.ReadInt64
 004135b0	f	Classes	TReader.ReadPrefix
@@ -706,6 +751,7 @@
 00413968	f	Classes	Classes.ReadVariantProp
 00413b60	f	Classes	TReader.ReadPropValue
 00413df8	f	Classes	Classes.FindUniqueName
+00413e60	s	Classes	5
 00413e68	f	Classes	TReader.ReadRootComponent
 0041410c	f	Classes	TReader.ReadSet
 004141c8	f	Classes	TReader.ReadSignature
@@ -750,6 +796,8 @@
 00414c88	f	Classes	TComponent.RemoveFreeNotification
 00414ca4	f	Classes	TComponent.Notification
 00414d00	f	Classes	TComponent.DefineProperties
+00414d74	s	Classes	4
+00414d84	s	Classes	3
 00414d88	f	Classes	TComponent.DynamicFFF2
 00414d8c	f	Classes	TComponent.DynamicFFFD
 00414d94	f	Classes	TComponent.DynamicFFFC
@@ -762,8 +810,8 @@
 00414dc0	f	Classes	TComponent.Updating
 00414dcc	f	Classes	TComponent.Updated
 00414dd8	f	Classes	TComponent.Loaded
-00414de4	f	Classes	TComponent.Virtual14
-00414dec	f	Classes	TComponent.Virtual24
+00414de4	f	Classes	TComponent.ReadState
+00414dec	f	Classes	TComponent.WriteState
 00414df4	f	Classes	TComponent.ValidateRename
 00414e74	f	Classes	TComponent.ValidateContainer
 00414e88	f	Classes	TComponent.DynamicFFF5
@@ -778,22 +826,22 @@
 004150a4	f	Classes	TComponent.ExecuteAction
 004150cc	f	Classes	TComponent.UpdateAction
 004150f4	f	Classes	TComponent.SafeCallException
-0041510c	f	Classes	TComponent.Virtual1C
+0041510c	f	Classes	TComponent.UpdateRegistry
 00415114	f	Classes	TComponent.QueryInterface
 00415154	f	Classes	TBasicActionLink.Create
-00415198	f	Classes	TBasicActionLink.Virtual00
+00415198	f	Classes	TBasicActionLink.AssignClient
 0041519c	f	Classes	TBasicActionLink.Destroy
 004151d0	f	Classes	TBasicActionLink.Change
 004151e8	f	Classes	TBasicActionLink.Execute
 004151f8	f	Classes	TBasicActionLink.SetAction
-00415224	f	Classes	TBasicActionLink.Virtual08
-00415228	f	Classes	TBasicActionLink.Virtual10
+00415224	f	Classes	TBasicActionLink.IsOnExecuteLinked
+00415228	f	Classes	TBasicActionLink.SetOnExecute
 00415230	f	Classes	TBasicActionLink.Update
 0041523c	f	Classes	TBasicAction.Create
 00415280	f	Classes	TBasicAction.Destroy
-004152cc	f	Classes	TBasicAction.Virtual38
-004152d0	f	Classes	TBasicAction.Virtual40
-004152d4	f	Classes	TBasicAction.Virtual3C
+004152cc	f	Classes	TBasicAction.HandlesTarget
+004152d0	f	Classes	TBasicAction.ExecuteTarget
+004152d4	f	Classes	TBasicAction.UpdateTarget
 004152d8	f	Classes	TBasicAction.Execute
 004152f4	f	Classes	TBasicAction.Update
 00415310	f	Classes	TBasicAction.SetOnExecute
@@ -809,22 +857,31 @@
 004155f0	f	Classes	TStreamAdapter.CopyTo
 004157d8	f	Classes	TStreamAdapter.Commit
 004157e4	f	Classes	TStreamAdapter.Revert
-004157f0	f	Classes	TStreamAdapter.Virtual1C
-004157fc	f	Classes	TStreamAdapter.Virtual20
+004157f0	f	Classes	TStreamAdapter.LockRegion
+004157fc	f	Classes	TStreamAdapter.UnlockRegion
 00415808	f	Classes	TStreamAdapter.Stat
 00415888	f	Classes	TStreamAdapter.Clone
 004158a0	f	Classes	Classes.FreeIntConstList
 00415914	f	Classes	Classes.Finalization
 004159cc	f	Classes	Classes.Classes
 00415a40	f	MultiMon	multimon.InitAnApi
+00415b18	s	MultiMon	15
 00415b28	f	MultiMon	multimon._GetSystemMetrics
+00415b9c	s	MultiMon	16
 00415bb0	f	MultiMon	multimon.xMonitorFromRect
+00415c30	s	MultiMon	15
 00415c40	f	MultiMon	multimon.xMonitorFromWindow
+00415cc4	s	MultiMon	17
 00415cd8	f	MultiMon	multimon.xMonitorFromPoint
+00415d5c	s	MultiMon	16
 00415d70	f	MultiMon	multimon.xGetMonitorInfoA
+00415e30	s	MultiMon	15
 00415e48	f	MultiMon	multimon.xGetMonitorInfoW
+00415f08	s	MultiMon	15
 00415f20	f	MultiMon	multimon.xGetMonitorInfo
+00415fe0	s	MultiMon	14
 00415ff8	f	MultiMon	multimon.xEnumDisplayMonitors
+00416114	s	MultiMon	19
 00416128	f	MultiMon	multimon.InitMultiMonStubs
 00416194	f	MultiMon	multimon.Finalization
 004161c4	f	MultiMon	multimon.MultiMon
@@ -855,9 +912,69 @@
 00417344	f	Graphics	TResourceManager.AssignResource
 004173b0	f	Graphics	Graphics.ClearColor
 0041741c	f	Graphics	Graphics.PaletteChanged
+004174d0	s	Graphics	7
+004174e0	s	Graphics	8
+004174f4	s	Graphics	7
+00417504	s	Graphics	7
+00417514	s	Graphics	6
+00417524	s	Graphics	8
+00417538	s	Graphics	6
+00417548	s	Graphics	6
+00417558	s	Graphics	8
+0041756c	s	Graphics	5
+0041757c	s	Graphics	6
+0041758c	s	Graphics	8
+004175a0	s	Graphics	6
+004175b0	s	Graphics	9
+004175c4	s	Graphics	6
+004175d4	s	Graphics	7
+004175e4	s	Graphics	11
+004175f8	s	Graphics	12
+00417610	s	Graphics	15
+00417628	s	Graphics	17
+00417644	s	Graphics	6
+00417654	s	Graphics	8
+00417668	s	Graphics	13
+00417680	s	Graphics	10
+00417694	s	Graphics	12
+004176ac	s	Graphics	13
+004176c4	s	Graphics	14
+004176dc	s	Graphics	16
+004176f8	s	Graphics	14
+00417710	s	Graphics	11
+00417724	s	Graphics	15
+0041773c	s	Graphics	9
+00417750	s	Graphics	11
+00417764	s	Graphics	10
+00417778	s	Graphics	9
+0041778c	s	Graphics	21
+004177ac	s	Graphics	14
+004177c4	s	Graphics	12
+004177dc	s	Graphics	9
+004177f0	s	Graphics	10
+00417804	s	Graphics	8
+00417818	s	Graphics	6
 00417820	f	Graphics	Graphics.ColorToRGB
 00417850	f	Graphics	TGraphicsObject.Changed
+0041788c	s	Graphics	12
+004178a4	s	Graphics	15
+004178bc	s	Graphics	14
+004178d4	s	Graphics	11
+004178e8	s	Graphics	16
+00417904	s	Graphics	15
+0041791c	s	Graphics	13
+00417934	s	Graphics	14
+0041794c	s	Graphics	19
+00417968	s	Graphics	13
+00417980	s	Graphics	15
+00417998	s	Graphics	14
+004179b0	s	Graphics	14
+004179c8	s	Graphics	14
+004179e0	s	Graphics	15
+004179f8	s	Graphics	12
 00417a0c	f	Graphics	Menus._NF__565
+00417a10	s	Graphics	18
+00417a2c	s	Graphics	11
 00417a58	f	Graphics	Graphics.GetFontData
 00417b0c	f	Graphics	TFont.Create
 00417b60	f	Graphics	TFont.Destroy
@@ -866,6 +983,7 @@
 00417c78	f	Graphics	TFont.GetData
 00417ce0	f	Graphics	TFont.SetColor
 00417cf4	f	Graphics	TFont.GetHandle
+00417e94	s	Graphics	7
 00417e9c	f	Graphics	TFont.SetHandle
 00417ec0	f	Graphics	TFont.GetHeight
 00417ec8	f	Graphics	TFont.SetHeight
@@ -926,7 +1044,7 @@
 00418d28	f	Graphics	TCanvas.SetPixel
 00418d94	f	Graphics	TCanvas.GetHandle
 00418db4	f	Graphics	TCanvas.DeselectHandles
-00418e10	f	Graphics	TCanvas.Virtual14
+00418e10	f	Graphics	TCanvas.CreateHandle
 00418e14	f	Graphics	TCanvas.SetHandle
 00418e68	f	Graphics	TCanvas.RequiredState
 00418edc	f	Graphics	TCanvas.Changing
@@ -968,18 +1086,23 @@
 0041a344	f	Graphics	TGraphic.Changed
 0041a35c	f	Graphics	Graphics.DoWrite
 0041a3b4	f	Graphics	TGraphic.DefineProperties
+0041a3f8	s	Graphics	4
 0041a400	f	Graphics	TGraphic.Equals
-0041a544	f	Graphics	TGraphic.Virtual24
-0041a548	f	Graphics	TGraphic.Virtual28
+0041a544	f	Graphics	TGraphic.GetPalette
+0041a548	f	Graphics	TGraphic.GetTransparent
 0041a54c	f	Graphics	TGraphic.LoadFromFile
 0041a5a0	f	Graphics	TGraphic.Progress
 0041a5c8	f	Graphics	TGraphic.ReadData
 0041a5d4	f	Graphics	TGraphic.SaveToFile
-0041a62c	f	Graphics	TGraphic.Virtual38
+0041a62c	f	Graphics	TGraphic.SetPalette
 0041a630	f	Graphics	TGraphic.SetTransparent
 0041a640	f	Graphics	TGraphic.WriteData
 0041a6c4	v	Graphics	VMT_TFileFormatsList
 0041a6e8	f	Graphics	TFileFormatsList.Create
+0041a7f4	s	Graphics	3
+0041a800	s	Graphics	3
+0041a80c	s	Graphics	3
+0041a818	s	Graphics	3
 0041a81c	f	Graphics	TFileFormatsList.Destroy
 0041a868	f	Graphics	TFileFormatsList.Add
 0041a8fc	f	Graphics	TFileFormatsList.FindClassName
@@ -1003,10 +1126,11 @@
 0041b014	f	Graphics	TPicture.WriteData
 0041b070	f	Graphics	Graphics.DoWrite
 0041b0ec	f	Graphics	TPicture.DefineProperties
+0041b130	s	Graphics	4
 0041b138	f	Graphics	TPicture.GetWidth
 0041b150	f	Graphics	TPicture.GetHeight
 0041b168	f	Graphics	TMetafileImage.Destroy
-0041b1a4	f	Graphics	TMetafileImage.Virtual00
+0041b1a4	f	Graphics	TMetafileImage.FreeHandle
 0041b1a8	f	Graphics	TMetafile.Create
 0041b1f0	f	Graphics	TMetafile.Destroy
 0041b220	f	Graphics	TMetafile.Assign
@@ -1021,11 +1145,12 @@
 0041b58c	f	Graphics	TMetafile.ReadEMFStream
 0041b65c	f	Graphics	TMetafile.ReadWMFStream
 0041b7dc	f	Graphics	TMetafile.SaveToFile
+0041b860	s	Graphics	4
 0041b868	f	Graphics	TMetafile.SaveToStream
 0041b884	f	Graphics	TMetafile.SetHeight
 0041b8f8	f	Graphics	TMetafile.SetMMHeight
 0041b934	f	Graphics	TMetafile.SetMMWidth
-0041b970	f	Graphics	TMetafile.Virtual3C
+0041b970	f	Graphics	TMetafile.SetTransparent
 0041b974	f	Graphics	TMetafile.SetWidth
 0041b9e8	f	Graphics	TMetafile.TestEMF
 0041ba48	f	Graphics	TMetafile.UniqueImage
@@ -1069,7 +1194,7 @@
 0041d284	f	Graphics	TBitmap.GetPixelFormat
 0041d308	f	Graphics	TBitmap.GetScanline
 0041d370	f	Graphics	TBitmap.GetTransparentColor
-0041d3b8	f	Graphics	TBitmap.Virtual2C
+0041d3b8	f	Graphics	TBitmap.GetWidth
 0041d3c0	f	Graphics	TBitmap.DIBNeeded
 0041d434	f	Graphics	TBitmap.FreeContext
 0041d444	f	Graphics	TBitmap.HandleNeeded
@@ -1107,11 +1232,11 @@
 0041e9f8	f	Graphics	TIcon.NewImage
 0041ea6c	f	Graphics	TIcon.SetHandle
 0041ea84	f	Graphics	TIcon.SetHeight
-0041ea9c	f	Graphics	TIcon.Virtual3C
+0041ea9c	f	Graphics	TIcon.SetTransparent
 0041eaa0	f	Graphics	TIcon.SetWidth
 0041eab8	f	Graphics	TIcon.SaveToStream
-0041eae4	f	Graphics	TIcon.Virtual58
-0041eaf8	f	Graphics	TIcon.Virtual5C
+0041eae4	f	Graphics	TIcon.LoadFromClipboardFormat
+0041eaf8	f	Graphics	TIcon.SaveToClipboardFormat
 0041eb0c	f	Graphics	Graphics.InitScreenLogPixels
 0041eb44	f	Graphics	Graphics.GetDefFontCharSet
 0041eb88	f	Graphics	Graphics.InitDefFontData
@@ -1174,6 +1299,7 @@
 00424cbc	f	StdCtrls	TCustomLabel.Create
 00424d28	f	StdCtrls	TCustomLabel.GetLabelText
 00424d3c	f	StdCtrls	TCustomLabel.DoDrawText
+00424ea8	s	StdCtrls	1
 00424eac	f	StdCtrls	TCustomLabel.Paint
 00424fb0	f	StdCtrls	TCustomLabel.Loaded
 00424fc8	f	StdCtrls	TCustomLabel.AdjustBounds
@@ -1228,6 +1354,7 @@
 00425c38	f	StdCtrls	TMemoStrings.Get
 00425c7c	f	StdCtrls	TMemoStrings.Put
 00425cf0	f	StdCtrls	TMemoStrings.Insert
+00425df4	s	StdCtrls	2
 00425dfc	f	StdCtrls	TMemoStrings.Delete
 00425e8c	f	StdCtrls	TMemoStrings.Clear
 00425e9c	f	StdCtrls	TMemoStrings.SetUpdateState
@@ -1255,7 +1382,7 @@
 00426468	f	StdCtrls	TComboBoxStrings.Insert
 004264e8	f	StdCtrls	TComboBoxStrings.Delete
 00426508	f	StdCtrls	TComboBoxStrings.Clear
-00426578	f	StdCtrls	TComboBoxStrings.Virtual30
+00426578	f	StdCtrls	TComboBoxStrings.SetUpdateState
 004265ac	f	StdCtrls	TComboBoxStrings.IndexOf
 004265d4	f	StdCtrls	TCustomComboBox.Create
 004266d0	f	StdCtrls	TCustomComboBox.Destroy
@@ -1283,7 +1410,7 @@
 00426bd0	f	StdCtrls	TCustomComboBox.CMParentColorChanged
 00426bf8	f	StdCtrls	TCustomComboBox.EditWndProc
 00426cf0	f	StdCtrls	TCustomComboBox.ListWndProc
-00426d14	f	StdCtrls	TCustomComboBox.VirtualBC
+00426d14	f	StdCtrls	TCustomComboBox.GetComboControl
 00426d1c	f	StdCtrls	TCustomComboBox.ComboWndProc
 00426ff8	f	StdCtrls	TCustomComboBox.WndProc
 00427144	f	StdCtrls	TCustomComboBox.AdjustDropDown
@@ -1302,9 +1429,9 @@
 004276d4	f	StdCtrls	TButtonControl.Create
 00427728	f	StdCtrls	TButtonControl.ActionChange
 00427770	f	StdCtrls	TButtonControl.DynamicFFDE
-00427778	f	StdCtrls	TButtonControl.VirtualB4
+00427778	f	StdCtrls	TButtonControl.GetChecked
 0042777c	f	StdCtrls	TButtonControl.IsCheckedStored
-0042779c	f	StdCtrls	TButtonControl.VirtualB8
+0042779c	f	StdCtrls	TButtonControl.SetChecked
 004277a0	f	StdCtrls	TButtonControl.WndProc
 00427818	f	StdCtrls	TButton.Create
 0042787c	f	StdCtrls	TButton.Click
@@ -1333,7 +1460,7 @@
 00427cf8	f	StdCtrls	TCustomCheckBox.CMDialogChar
 00427d94	f	StdCtrls	TCustomCheckBox.CNCommand
 00427da4	f	StdCtrls	TRadioButton.Create
-00427e04	f	StdCtrls	TRadioButton.VirtualB4
+00427e04	f	StdCtrls	TRadioButton.GetChecked
 00427e0c	f	StdCtrls	TRadioButton.DynamicFFCF
 00427e38	f	StdCtrls	TRadioButton.SetAlignment
 00427e4c	f	StdCtrls	StdCtrls.TurnSiblingsOff
@@ -1353,7 +1480,7 @@
 00428348	f	StdCtrls	TListBoxStrings.Delete
 00428364	f	StdCtrls	TListBoxStrings.Exchange
 004284a0	f	StdCtrls	TListBoxStrings.Clear
-004284b0	f	StdCtrls	TListBoxStrings.Virtual30
+004284b0	f	StdCtrls	TListBoxStrings.SetUpdateState
 004284e4	f	StdCtrls	TListBoxStrings.IndexOf
 0042850c	f	StdCtrls	TListBoxStrings.Move
 00428604	f	StdCtrls	TCustomListBox.Create
@@ -1465,22 +1592,22 @@
 0042a7e0	f	ActnList	TCustomActionList.IsShortCut
 0042a840	f	ActnList	TCustomActionList.ExecuteAction
 0042a860	f	ActnList	TCustomActionList.UpdateAction
-0042a880	f	ActnList	TActionLink.Virtual20
-0042a894	f	ActnList	TActionLink.Virtual24
-0042a8a8	f	ActnList	TActionLink.Virtual28
-0042a8bc	f	ActnList	TActionLink.Virtual2C
-0042a8d0	f	ActnList	TActionLink.Virtual30
-0042a8e4	f	ActnList	TActionLink.Virtual34
-0042a8f8	f	ActnList	TActionLink.Virtual38
-0042a90c	f	ActnList	TActionLink.Virtual3C
-0042a920	f	ActnList	TActionLink.Virtual40
-0042a924	f	ActnList	TActionLink.Virtual44
-0042a928	f	ActnList	TActionLink.Virtual48
-0042a92c	f	ActnList	TActionLink.Virtual4C
-0042a930	f	ActnList	TActionLink.Virtual50
-0042a934	f	ActnList	TActionLink.Virtual54
-0042a938	f	ActnList	TActionLink.Virtual58
-0042a93c	f	ActnList	TActionLink.Virtual5C
+0042a880	f	ActnList	TActionLink.IsCaptionLinked
+0042a894	f	ActnList	TActionLink.IsCheckedLinked
+0042a8a8	f	ActnList	TActionLink.IsEnabledLinked
+0042a8bc	f	ActnList	TActionLink.IsHelpContextLinked
+0042a8d0	f	ActnList	TActionLink.IsHintLinked
+0042a8e4	f	ActnList	TActionLink.IsImageIndexLinked
+0042a8f8	f	ActnList	TActionLink.IsShortCutLinked
+0042a90c	f	ActnList	TActionLink.IsVisibleLinked
+0042a920	f	ActnList	TActionLink.SetCaption
+0042a924	f	ActnList	TActionLink.SetChecked
+0042a928	f	ActnList	TActionLink.SetEnabled
+0042a92c	f	ActnList	TActionLink.SetHelpContext
+0042a930	f	ActnList	TActionLink.SetHint
+0042a934	f	ActnList	TActionLink.SetImageIndex
+0042a938	f	ActnList	TActionLink.SetShortCut
+0042a93c	f	ActnList	TActionLink.SetVisible
 0042a940	f	ActnList	TCustomAction.Create
 0042a988	f	ActnList	TCustomAction.Destroy
 0042a9c0	f	ActnList	TCustomAction.AssignTo
@@ -1572,7 +1699,7 @@
 0042e838	f	Forms	TScrollingWinControl.ScrollInView
 0042e98c	f	Forms	TScrollingWinControl.ScaleScrollBars
 0042ea30	f	Forms	TScrollingWinControl.ChangeScale
-0042ea54	f	Forms	TScrollingWinControl.VirtualBC
+0042ea54	f	Forms	TScrollingWinControl.Resizing
 0042ea58	f	Forms	TScrollingWinControl.WMSize
 0042eb34	f	Forms	TScrollingWinControl.WMHScroll
 0042eb58	f	Forms	TScrollingWinControl.WMVScroll
@@ -1594,10 +1721,14 @@
 0042f2f8	f	Forms	TCustomForm.Notification
 0042f404	f	Forms	TCustomForm.ReadState
 0042f614	f	Forms	TCustomForm.DefineProperties
+0042f684	s	Forms	13
+0042f69c	s	Forms	10
 0042f6ac	f	Forms	Menus._NF__565
+0042f6b0	s	Forms	18
 0042f6c4	f	Forms	TCustomForm.ReadIgnoreFontProperty
 0042f6e4	f	Forms	TCustomForm.ReadTextHeight
 0042f734	f	Forms	TCustomForm.GetTextHeight
+0042f754	s	Forms	1
 0042f758	f	Forms	TCustomForm.DynamicFFEE
 0042f75c	f	Forms	TCustomForm.ChangeScale
 0042f7dc	f	Forms	TCustomForm.IconChanged
@@ -1616,7 +1747,7 @@
 0042fb10	f	Forms	TCustomForm.SetClientHeight
 0042fb40	f	Forms	TCustomForm.SetVisible
 0042fb84	f	Forms	TCustomForm.VisibleChanging
-0042fbe8	f	Forms	TCustomForm.VirtualDC
+0042fbe8	f	Forms	TCustomForm.WantChildKey
 0042fbec	f	Forms	TCustomForm.SetParent
 0042fc24	f	Forms	TCustomForm.ValidateRename
 0042fc64	f	Forms	TCustomForm.WndProc
@@ -1805,6 +1936,7 @@
 0043505c	f	Forms	Forms.Default
 00435098	f	Forms	Forms.DrawAppIcon
 004350e4	f	Forms	TApplication.WndProc
+0043575c	s	Forms	12
 00435780	f	Forms	TApplication.GetIconHandle
 0043579c	f	Forms	TApplication.Minimize
 0043583c	f	Forms	TApplication.Restore
@@ -1827,6 +1959,7 @@
 00435ef4	f	Forms	TApplication.HandleException
 00435f84	f	Forms	TApplication.MessageBox
 004360dc	f	Forms	TApplication.ShowException
+004361b0	s	Forms	1
 004361b4	f	Forms	TApplication.InvokeHelp
 004362e0	f	Forms	TApplication.HelpContext
 004362f4	f	Forms	TApplication.SetShowHint
@@ -1897,6 +2030,7 @@
 004382c8	f	ImgList	TCustomImageList.Equal
 004383b8	f	ImgList	ImgList.DoWrite
 00438414	f	ImgList	TCustomImageList.DefineProperties
+00438464	s	ImgList	6
 0043846c	f	ImgList	TCustomImageList.ReadD2Stream
 004386fc	f	ImgList	TCustomImageList.ReadD3Stream
 00438780	f	ImgList	TCustomImageList.ReadData
@@ -1914,13 +2048,16 @@
 00439460	v	Menus	VMT_TPopupMenu
 00439704	v	Menus	VMT_TPopupList
 00439770	v	Menus	VMT_TMenuItemStack
+00439794	s	Menus	36
 004397bc	f	Menus	Menus.FindPopupControl
 004397f4	f	Menus	Menus.Error
 00439814	f	Menus	Menus.ShortCut
 0043984c	f	Menus	Menus.GetSpecialName
 004398a0	f	Menus	Menus.ShortCutToText
+00439aa0	s	Menus	1
 00439aa4	f	Menus	Menus.CompareFront
 00439b00	f	Menus	Menus.TextToShortCut
+00439bf4	s	Menus	1
 00439bf8	f	Menus	Menus.UniqueCommand
 00439c18	f	Menus	Menus.Iterate
 00439c78	f	Menus	Menus.IterateMenus
@@ -1946,6 +2083,8 @@
 0043a080	f	Menus	TMenuItem.Create
 0043a0fc	f	Menus	TMenuItem.Destroy
 0043a1b0	f	Menus	TMenuItem.AppendTo
+0043a424	s	Menus	1
+0043a430	s	Menus	1
 0043a434	f	Menus	Menus.AddIn
 0043a450	f	Menus	TMenuItem.PopulateMenu
 0043a4c0	f	Menus	TMenuItem.ReadShortCutText
@@ -1955,14 +2094,20 @@
 0043a5fc	f	Menus	TMenuItem.VerifyGroupIndex
 0043a65c	f	Menus	TMenuItem.GetHandle
 0043a6a8	f	Menus	TMenuItem.DefineProperties
+0043a6dc	s	Menus	12
 0043a6ec	f	Menus	TMenuItem.DoDrawText
+0043a8ec	s	Menus	1
+0043a8f8	s	Menus	1
 0043a900	f	Menus	TMenuItem.DrawItem
 0043a944	f	Menus	Menus.NormalDraw
+0043b1bc	s	Menus	1
 0043b1c4	f	Menus	Menus.BiDiDraw
+0043ba64	s	Menus	1
 0043ba6c	f	Menus	TMenuItem.AdvancedDrawItem
 0043bb84	f	Menus	TMenuItem.GetImageList
 0043bbb4	f	Menus	Menus.GetMenuSize
 0043bc00	f	Menus	TMenuItem.MeasureItem
+0043bdfc	s	Menus	1
 0043be00	f	Menus	TMenuItem.DynamicFFF2
 0043be04	f	Menus	TMenuItem.SetBreak
 0043be14	f	Menus	TMenuItem.SetCaption
@@ -2019,9 +2164,16 @@
 0043c8b4	f	Menus	Menus.IfHotkeyAvailable
 0043c8e4	f	Menus	Menus.CopyToBest
 0043c968	f	Menus	Menus.InsertHotkeyFarEastFormat
+0043caa0	s	Menus	3
+0043caac	s	Menus	1
+0043cab8	s	Menus	1
+0043cac4	s	Menus	1
 0043cac8	f	Menus	TMenuItem.InternalRethinkHotkeys
+0043cf54	s	Menus	1
+0043cf60	s	Menus	1
 0043cf64	f	Menus	TMenuItem.SetAutoHotkeys
 0043cf74	f	Menus	TMenuItem.IsLine
+0043cf94	s	Menus	1
 0043cf98	f	Menus	TMenuItem.InternalRethinkLines
 0043d0d4	f	Menus	TMenuItem.SetAutoLineReduction
 0043d0e4	f	Menus	TMenuItem.GetAutoHotkeys
@@ -2083,7 +2235,7 @@
 0043e5c0	f	Menus	TPopupMenu.SetHelpContext
 0043e5c8	f	Menus	TPopupMenu.SetBiDiModeFromPopupControl
 0043e610	f	Menus	TPopupMenu.UseRightToLeftAlignment
-0043e65c	f	Menus	TPopupMenu.Virtual40
+0043e65c	f	Menus	TPopupMenu.Popup
 0043e730	f	Menus	TMenuItemStack.ClearItem
 0043e76c	f	Menus	Menus.DrawMenuItem
 0043e860	f	Menus	Menus.StripHotkey
@@ -2115,8 +2267,32 @@
 00440974	f	Controls	Controls.InitWndProc
 00440a2c	f	Controls	Controls.FindControl
 00440a48	f	Controls	Controls.SendAppMessage
+00440a78	s	Controls	9
+00440a8c	s	Controls	7
+00440a9c	s	Controls	7
+00440aac	s	Controls	7
+00440abc	s	Controls	10
+00440ad0	s	Controls	8
+00440ae4	s	Controls	10
+00440af8	s	Controls	8
+00440b0c	s	Controls	9
+00440b20	s	Controls	11
+00440b34	s	Controls	6
+00440b44	s	Controls	8
+00440b58	s	Controls	8
+00440b6c	s	Controls	8
+00440b80	s	Controls	11
+00440b94	s	Controls	9
+00440ba8	s	Controls	4
+00440bb8	s	Controls	10
+00440bcc	s	Controls	6
+00440bdc	s	Controls	11
+00440bf0	s	Controls	9
+00440c04	s	Controls	6
 00440c2c	f	Controls	Controls.GetShortHint
+00440c6c	s	Controls	1
 00440c70	f	Controls	Controls.GetLongHint
+00440cb0	s	Controls	1
 00440cb4	f	Controls	Controls.GetCaptureControl
 00440cdc	f	Controls	Controls.SetCaptureControl
 00440d6c	v	Controls	VMT_TSiteList
@@ -2127,23 +2303,23 @@
 00440e74	f	Controls	TSiteList.GetTopSite
 00440ed8	f	Controls	TDragObject.Assign
 00440f18	f	Controls	TDragObject.Capture
-00440f30	f	Controls	TDragObject.Virtual00
+00440f30	f	Controls	TDragObject.Finished
 00440f38	f	Controls	TDragObject.GetName
 00440f60	f	Controls	TDragObject.ReleaseCapture
 00440f74	f	Controls	TDragObject.MouseMsg
-00441064	f	Controls	TDragObject.Virtual08
+00441064	f	Controls	TDragObject.GetDragImages
 00441068	f	Controls	TDragObject.GetDragCursor
-00441080	f	Controls	TDragObject.Virtual14
-00441084	f	Controls	TDragObject.Virtual18
-0044108c	f	Controls	TDragObject.Virtual1C
+00441080	f	Controls	TDragObject.HideDragImage
+00441084	f	Controls	TDragObject.Instance
+0044108c	f	Controls	TDragObject.ShowDragImage
 00441090	f	Controls	TBaseDragControlObject.Create
 004410b4	f	Controls	TBaseDragControlObject.Assign
 004410e0	f	Controls	TBaseDragControlObject.EndDrag
 00441104	f	Controls	TBaseDragControlObject.Finished
 00441138	f	Controls	TDragControlObject.GetDragCursor
 00441150	f	Controls	TDragControlObject.GetDragImages
-0044115c	f	Controls	TDragControlObject.Virtual14
-0044117c	f	Controls	TDragControlObject.Virtual1C
+0044115c	f	Controls	TDragControlObject.HideDragImage
+0044117c	f	Controls	TDragControlObject.ShowDragImage
 0044119c	f	Controls	TDragDockObject.Create
 00441200	f	Controls	TDragDockObject.Destroy
 00441230	f	Controls	TDragDockObject.Assign
@@ -2153,7 +2329,7 @@
 00441358	f	Controls	TDragDockObject.DrawDragDockImage
 0044136c	f	Controls	TDragDockObject.EraseDragDockImage
 00441380	f	Controls	TDragDockObject.GetDragCursor
-0044138c	f	Controls	TDragDockObject.Virtual34
+0044138c	f	Controls	TDragDockObject.GetFrameWidth
 00441394	f	Controls	Controls.IsBeforeTargetWindow
 00441400	f	Controls	Controls.ValidDockTarget
 00441598	f	Controls	Controls.IsSiteChildOfClient
@@ -2189,6 +2365,7 @@
 0044271c	f	Controls	TSizeConstraints.Change
 00442730	f	Controls	TControlActionLink.AssignClient
 0044274c	f	Controls	TControlActionLink.DoShowHint
+0044282c	s	Controls	7
 00442834	f	Controls	TControlActionLink.IsCaptionLinked
 004428a8	f	Controls	TControlActionLink.IsEnabledLinked
 004428dc	f	Controls	TControlActionLink.IsHintLinked
@@ -2201,8 +2378,8 @@
 004429ec	f	Controls	TControlActionLink.SetOnExecute
 00442a18	f	Controls	TControl.Create
 00442ae8	f	Controls	TControl.Destroy
-00442ba0	f	Controls	TControl.Virtual48
-00442ba4	f	Controls	TControl.Virtual4C
+00442ba0	f	Controls	TControl.GetDragImages
+00442ba4	f	Controls	TControl.GetEnabled
 00442ba8	f	Controls	TControl.DynamicFFDC
 00442bac	f	Controls	TControl.HasParent
 00442bb4	f	Controls	TControl.DynamicFFF3
@@ -2212,7 +2389,7 @@
 00442c6c	f	Controls	TControl.SetAnchors
 00442c8c	f	Controls	TControl.SetAction
 00442d08	f	Controls	TControl.IsAnchorsStored
-00442d20	f	Controls	TControl.Virtual58
+00442d20	f	Controls	TControl.SetDragMode
 00442d24	f	Controls	TControl.RequestAlign
 00442d34	f	Controls	TControl.Resize
 00442d54	f	Controls	TControl.ReadState
@@ -2300,7 +2477,7 @@
 00444378	f	Controls	TControl.ManualDock
 00444560	f	Controls	TControl.ManualFloat
 00444600	f	Controls	TControl.DoConstraintsChange
-0044460c	f	Controls	TControl.Virtual34
+0044460c	f	Controls	TControl.CanAutoSize
 00444610	f	Controls	TControl.CanResize
 00444640	f	Controls	TControl.DoCanAutoSize
 004446ac	f	Controls	TControl.DoCanResize
@@ -2316,6 +2493,7 @@
 00444a60	f	Controls	TControl.WriteIsControl
 00444a6c	f	Controls	Controls.DoWrite
 00444a9c	f	Controls	TControl.DefineProperties
+00444ae0	s	Controls	9
 00444aec	f	Controls	TControl.Click
 00444b58	f	Controls	TControl.DblClick
 00444b78	f	Controls	TControl.MouseDown
@@ -2368,7 +2546,7 @@
 004455ec	f	Controls	Controls.MinVar
 00445628	f	Controls	TControl.GetDockEdge
 004456d8	f	Controls	TControl.GetFloating
-00445704	f	Controls	TControl.Virtual54
+00445704	f	Controls	TControl.GetFloatingDockSiteClass
 0044570c	f	Controls	TControl.AdjustSize
 00445728	f	Controls	TControl.DrawTextBiDiModeFlags
 00445768	f	Controls	TControl.DrawTextBiDiModeFlagsReadingOnly
@@ -2383,7 +2561,7 @@
 00445a9c	f	Controls	TWinControl.Destroy
 00445b70	f	Controls	TWinControl.FixupTabList
 00445c44	f	Controls	TWinControl.ReadState
-00445cbc	f	Controls	TWinControl.Virtual84
+00445cbc	f	Controls	TWinControl.AdjustClientRect
 00445cc0	f	Controls	Controls.InsertBefore
 00445d20	f	Controls	Controls.DoPosition
 004460bc	f	Controls	Controls.DoAlign
@@ -2569,7 +2747,7 @@
 00449e38	f	Controls	TWinControl.SelectNext
 00449e64	f	Controls	TWinControl.GetChildren
 00449eac	f	Controls	TWinControl.SetChildOrder
-00449eec	f	Controls	TWinControl.Virtual30
+00449eec	f	Controls	TWinControl.CanResize
 00449ef4	f	Controls	Controls.DoCalcConstraints
 00449f74	f	Controls	TWinControl.CalcConstraints
 0044a350	f	Controls	TWinControl.ConstrainedResize
@@ -2584,7 +2762,7 @@
 0044a96c	f	Controls	TGraphicControl.Create
 0044a9c8	f	Controls	TGraphicControl.Destroy
 0044aa08	f	Controls	TGraphicControl.WMPaint
-0044aab0	f	Controls	TGraphicControl.Virtual84
+0044aab0	f	Controls	TGraphicControl.Paint
 0044aab4	f	Controls	THintWindow.Create
 0044ab1c	f	Controls	THintWindow.CreateParams
 0044ab58	f	Controls	THintWindow.WMNCHitTest
@@ -2612,7 +2790,7 @@
 0044b2d4	f	Controls	TCustomControl.Destroy
 0044b304	f	Controls	TCustomControl.WMPaint
 0044b324	f	Controls	TCustomControl.PaintWindow
-0044b3d0	f	Controls	TCustomControl.VirtualB4
+0044b3d0	f	Controls	TCustomControl.Paint
 0044b3d4	f	Controls	TDockZone.Create
 0044b3f8	f	Controls	TDockZone.GetChildCount
 0044b49c	f	Controls	TDockZone.GetTopLeft
@@ -2727,7 +2905,7 @@
 0044fafc	f	Dialogs	TCommonDialog.MessageHook
 0044fb24	f	Dialogs	TCommonDialog.DefaultHandler
 0044fb5c	f	Dialogs	TCommonDialog.MainWndProc
-0044fba8	f	Dialogs	TCommonDialog.Virtual30
+0044fba8	f	Dialogs	TCommonDialog.WndProc
 0044fbb0	f	Dialogs	TCommonDialog.WMDestroy
 0044fbcc	f	Dialogs	TCommonDialog.WMInitDialog
 0044fbe4	f	Dialogs	TCommonDialog.WMNCDestroy
@@ -2745,23 +2923,40 @@
 0044ff98	f	Dialogs	TOpenDialog.DoTypeChange
 0044ffb8	f	Dialogs	TOpenDialog.ReadFileEditStyle
 0044fff4	f	Dialogs	TOpenDialog.DefineProperties
+00450028	s	Dialogs	13
 00450038	f	Dialogs	Dialogs.AllocFilterStr
+00450084	s	Dialogs	1
 00450088	f	Dialogs	TOpenDialog.DoExecute
 004502b4	f	Dialogs	Dialogs.ExtractFileName
 004502fc	f	Dialogs	Dialogs.ExtractFileNames
+004503f8	s	Dialogs	1
 004503fc	f	Dialogs	TOpenDialog.GetFileNames
 004504b4	f	Dialogs	TOpenDialog.GetStaticRect
 00450508	f	Dialogs	TOpenDialog.GetFileName
 00450560	f	Dialogs	TOpenDialog.GetFilterIndex
 00450570	f	Dialogs	TOpenDialog.SetInitialDir
-004505c8	f	Dialogs	TOpenDialog.Virtual3C
+004505c4	s	Dialogs	1
+004505c8	f	Dialogs	TOpenDialog.Execute
 004505e0	f	Dialogs	TOpenDialog.DoIncludeItem
 004505fc	f	Dialogs	TSaveDialog.Execute
 0045061c	f	Dialogs	Dialogs.GetAveCharSize
 004506bc	v	Dialogs	VMT_TMessageForm
 004507d4	f	Dialogs	TMessageForm.CreateNew
 0045084c	f	Dialogs	TMessageForm.HelpButtonClick
+0045086c	s	Dialogs	3
+00450878	s	Dialogs	2
+00450884	s	Dialogs	2
+00450890	s	Dialogs	6
+004508a0	s	Dialogs	5
+004508b0	s	Dialogs	5
+004508c0	s	Dialogs	6
+004508d0	s	Dialogs	3
+004508dc	s	Dialogs	7
+004508ec	s	Dialogs	8
+00450900	s	Dialogs	4
 00450908	f	Dialogs	Dialogs.CreateMessageDialog
+00450e60	s	Dialogs	5
+00450e70	s	Dialogs	7
 00450e78	f	Dialogs	Dialogs.MessageDlgPos
 00450e9c	f	Dialogs	Dialogs.MessageDlgPosHelp
 00450f50	f	Dialogs	Dialogs.ShowMessage
@@ -2806,7 +3001,7 @@
 00452488	f	Mask	TCustomMaskEdit.SetCursor
 004526f4	f	Mask	TCustomMaskEdit.CheckCursor
 00452734	f	Mask	TCustomMaskEdit.Clear
-0045273c	f	Mask	TCustomMaskEdit.VirtualD4
+0045273c	f	Mask	TCustomMaskEdit.EditCanModify
 00452740	f	Mask	TCustomMaskEdit.Reset
 00452768	f	Mask	TCustomMaskEdit.CharKeys
 00452940	f	Mask	TCustomMaskEdit.ArrowKeys
@@ -2828,6 +3023,7 @@
 004532e4	f	Mask	Mask.IsKatakana
 00453300	f	Mask	Mask.TestChar
 004533e0	f	Mask	TCustomMaskEdit.DoInputChar
+004536ac	s	Mask	1
 004536b0	f	Mask	TCustomMaskEdit.Validate
 00453764	f	Mask	TCustomMaskEdit.DeleteSelection
 004537fc	f	Mask	TCustomMaskEdit.InputString
@@ -2903,11 +3099,13 @@
 0045642c	f	Grids	grids.DoColWidths
 00456470	f	Grids	grids.DoRowHeights
 004564b4	f	Grids	TCustomGrid.DefineProperties
+00456538	s	Grids	9
+0045654c	s	Grids	10
 00456558	f	Grids	TCustomGrid.MoveColumn
 0045662c	f	Grids	TCustomGrid.DynamicFFAE
 00456630	f	Grids	TCustomGrid.MoveRow
 004566b4	f	Grids	TCustomGrid.DynamicFFAD
-004566b8	f	Grids	TCustomGrid.VirtualC8
+004566b8	f	Grids	TCustomGrid.SelectCell
 004566bc	f	Grids	TCustomGrid.DynamicFFAC
 004566c0	f	Grids	TCustomGrid.Sizing
 00456718	f	Grids	TCustomGrid.TopLeftChanged
@@ -2952,6 +3150,7 @@
 004583b0	f	Grids	grids.PageDown
 00458404	f	Grids	grids.CalcScrollBar
 0045853c	f	Grids	grids.ModifyPixelScrollBar
+004586e4	s	Grids	1
 004586e8	f	Grids	TCustomGrid.ModifyScrollBar
 004588d0	f	Grids	TCustomGrid.MoveAdjust
 00458904	f	Grids	TCustomGrid.MoveAnchor
@@ -3082,20 +3281,22 @@
 0045bd78	f	Grids	grids.StoreItem
 0045bda0	f	Grids	TStringSparseList.WriteData
 0045bddc	f	Grids	TStringSparseList.DefineProperties
+0045be04	s	Grids	4
 0045be0c	f	Grids	TStringSparseList.Get
-0045be3c	f	Grids	TStringSparseList.Virtual14
+0045be3c	f	Grids	TStringSparseList.GetCount
 0045be44	f	Grids	TStringSparseList.GetObject
 0045be64	f	Grids	TStringSparseList.Put
 0045becc	f	Grids	TStringSparseList.PutObject
 0045bf0c	f	Grids	TStringSparseList.Changed
 0045bf20	f	Grids	TStringSparseList.Delete
-0045bf50	f	Grids	TStringSparseList.Virtual48
+0045bf50	f	Grids	TStringSparseList.Exchange
 0045bf5c	f	Grids	TStringSparseList.Insert
 0045bf94	f	Grids	TStringSparseList.Clear
 0045bfb8	f	Grids	TStringGridStrings.Create
 0045c000	f	Grids	TStringGridStrings.Assign
 0045c0f8	f	Grids	TStringGridStrings.CalcXY
 0045c138	f	Grids	TStringGridStrings.Add
+0045c1dc	s	Grids	1
 0045c1e0	f	Grids	grids.BlankStr
 0045c20c	f	Grids	TStringGridStrings.Clear
 0045c280	f	Grids	TStringGridStrings.Delete
@@ -3103,9 +3304,9 @@
 0045c308	f	Grids	TStringGridStrings.GetCount
 0045c32c	f	Grids	TStringGridStrings.GetObject
 0045c360	f	Grids	TStringGridStrings.Insert
-0045c3ac	f	Grids	TStringGridStrings.Virtual20
-0045c3dc	f	Grids	TStringGridStrings.Virtual24
-0045c40c	f	Grids	TStringGridStrings.Virtual30
+0045c3ac	f	Grids	TStringGridStrings.Put
+0045c3dc	f	Grids	TStringGridStrings.PutObject
+0045c40c	f	Grids	TStringGridStrings.SetUpdateState
 0045c418	f	Grids	TStringGrid.Create
 0045c460	f	Grids	TStringGrid.Destroy
 0045c4f4	f	Grids	grids.MoveColData
@@ -3129,16 +3330,19 @@
 0045cb34	v	IniFiles	VMT_TIniFile
 0045cb90	f	IniFiles	TCustomIniFile.Create
 0045cbcc	f	IniFiles	TCustomIniFile.ReadInteger
+0045cc8c	s	IniFiles	1
 0045cc90	f	IniFiles	TCustomIniFile.WriteInteger
 0045ccec	f	IniFiles	TCustomIniFile.ReadBool
-0045cd18	f	IniFiles	TCustomIniFile.Virtual18
-0045cdd0	f	IniFiles	TCustomIniFile.Virtual1C
-0045ce88	f	IniFiles	TCustomIniFile.Virtual20
-0045cf40	f	IniFiles	TCustomIniFile.Virtual24
-0045cff8	f	IniFiles	TCustomIniFile.Virtual28
-0045d058	f	IniFiles	TCustomIniFile.Virtual2C
+0045cd18	f	IniFiles	TCustomIniFile.ReadDate
+0045cdd0	f	IniFiles	TCustomIniFile.ReadDateTime
+0045ce88	f	IniFiles	TCustomIniFile.ReadFloat
+0045cf40	f	IniFiles	TCustomIniFile.ReadTime
+0045cff8	f	IniFiles	TCustomIniFile.WriteDate
+0045d058	f	IniFiles	TCustomIniFile.WriteDateTime
 0045d0b8	f	IniFiles	TCustomIniFile.WriteFloat
-0045d11c	f	IniFiles	TCustomIniFile.Virtual34
+0045d11c	f	IniFiles	TCustomIniFile.WriteTime
+0045d184	s	IniFiles	1
+0045d190	s	IniFiles	1
 0045d194	f	IniFiles	TCustomIniFile.WriteBool
 0045d1b0	f	IniFiles	TIniFile.ReadString
 0045d210	f	IniFiles	TIniFile.WriteString
@@ -3152,8 +3356,21 @@
 0045d690	f	IniFiles	IniFiles.IniFiles
 0045d698	f	Unit39	Unit39.Finalization
 0045d6c8	f	Unit39	Unit39.Initialization
+0045d6d8	s	Unit40	1
+0045d6e4	s	Unit40	1
 0045d6e8	f	Unit40	Unit40.Finalization
 0045d730	f	Unit40	Unit40.Initialization
+0045d740	s	Unit41	6
+0045d750	s	Unit41	4
+0045d760	s	Unit41	8
+0045d774	s	Unit41	7
+0045d784	s	Unit41	7
+0045d794	s	Unit41	8
+0045d7a8	s	Unit41	5
+0045d7b8	s	Unit41	4
+0045d7c8	s	Unit41	5
+0045d7d8	s	Unit41	9
+0045d7ec	s	Unit41	10
 0045d7f8	f	Unit41	Unit41.Finalization
 0045d87c	f	Unit41	Unit41.Initialization
 0045d88c	f	Unit42	Unit42.Finalization
@@ -3218,22 +3435,46 @@
 0045f92c	f	Buttons	buttons.Buttons
 0045f954	f	Unit44	Unit44.Finalization
 0045f984	f	Unit44	Unit44.Initialization
+0045fe70	s	uString	1
+00460300	s	uString	1
+004603b4	s	uString	1
+00460454	s	uString	1
+004606c0	s	uString	1
+00460978	s	uString	1
 0046097c	f	uString	uString.Finalization
 004609ac	f	uString	uString.Initialization
 00460a00	v	uTool	VMT_TPos
 00460a54	v	uTool	VMT_TPosList
 00460abc	v	uTool	VMT_TRectPos
 00460b14	v	uTool	VMT_TRectPosList
+00460be0	s	uTool	6
+00460bf0	s	uTool	7
+00460c00	s	uTool	7
+00460c10	s	uTool	8
+00460c24	s	uTool	9
+00460c38	s	uTool	7
+00460c48	s	uTool	8
 004614d0	f	uTool	uTool.Finalization
 0046152c	f	uTool	uTool.Initialization
+004615e4	s	uLog	1
 00461670	f	uLog	uLog.Finalization
 004616a0	f	uLog	uLog.Initialization
 004616f4	v	fShow	VMT_TformDebugShow
 00461914	f	fShow	TformDebugShow.PaintBox1Paint
+004619d4	s	fShow	7
+004619e4	s	fShow	9
 004619f0	f	fShow	TformDebugShow.OKBtnKeyPress
 004619fc	f	fShow	TformDebugShow.FormResize
 00461ad8	f	fShow	fShow.Finalization
 00461b08	f	fShow	fShow.Initialization
+00461b18	s	Unit49	9
+00461b2c	s	Unit49	9
+00461b40	s	Unit49	11
+00461b54	s	Unit49	10
+00461b68	s	Unit49	9
+00461b7c	s	Unit49	9
+00461b90	s	Unit49	9
+00461ba4	s	Unit49	9
 00461bb0	f	Unit49	Unit49.Finalization
 00461bf8	f	Unit49	Unit49.Initialization
 00461c4c	v	SprBmp	VMT_TBmpSurface
@@ -3256,8 +3497,9 @@
 00462548	f	SprBmp	TBmpSurface.Virtual9C
 00462588	f	SprBmp	TBmpSurface.Virtual94
 004626c0	f	SprBmp	TBmpSurface.VirtualA0
+004627b4	s	SprBmp	30
 00462980	f	SprBmp	TBmpSurface.VirtualA4
-00462a94	f	SprBmp	TBmpSurface.Virtual08
+00462a94	f	SprBmp	TBmpSurface.Assign
 00462b20	f	SprBmp	TBmpSurface.Virtual50
 00462bd4	f	SprBmp	TBmpSurface.Virtual54
 00462bf0	f	SprBmp	TBmpSurface.VirtualA8
@@ -3269,7 +3511,7 @@
 004631a4	f	SprBmp	SprBmp.Finalization
 004631d4	f	SprBmp	SprBmp.Initialization
 00463280	v	uSurface	VMT_TSurface
-00463370	f	uSurface	TSurface.Virtual0C
+00463370	f	uSurface	TSurface.Create
 004633b0	f	uSurface	TSurface.Virtual60
 004633ec	f	uSurface	TSurface.Virtual84
 004633f0	f	uSurface	TSurface.Virtual14
@@ -3306,16 +3548,23 @@
 00463d10	v	Sprframe	VMT_TFrame
 00463d9c	v	Sprframe	VMT_TPersistentList
 00463e34	v	Sprframe	VMT_TFrameList
+00463fd0	s	Sprframe	49
+00464088	s	Sprframe	49
 004640bc	f	Sprframe	TFrame.Destroy
-004640f8	f	Sprframe	TFrame.Virtual08
-004641dc	f	Sprframe	TFrame.Virtual10
-00464274	f	Sprframe	TFrame.Virtual0C
+004640f8	f	Sprframe	TFrame.Assign
+004641dc	f	Sprframe	TFrame.Notification
+00464274	f	Sprframe	TFrame.Loaded
+004643ec	s	Sprframe	28
+00464414	s	Sprframe	40
 0046450c	f	Sprframe	TPersistentList.Destroy
 00464540	f	Sprframe	TPersistentList.Virtual0C
 004645d0	f	Sprframe	TFrameList.Destroy
 00464854	f	Sprframe	TFrameList.Virtual0C
-00464940	f	Sprframe	TFrameList.Virtual08
-00464c28	f	Sprframe	TFrameList.Virtual04
+00464940	f	Sprframe	TFrameList.Assign
+00464c28	f	Sprframe	TFrameList.DefineProperties
+00464c5c	s	Sprframe	4
+00464d7c	s	Sprframe	1
+00464ecc	s	Sprframe	3
 00464ed0	f	Sprframe	Sprframe.Finalization
 00464f00	f	Sprframe	Sprframe.Initialization
 00464f64	v	uResizeScreen	VMT_TScrnMode
@@ -3327,7 +3576,7 @@
 004653b0	f	Unit56	Unit56.Finalization
 004653e0	f	Unit56	Unit56.Initialization
 00465434	v	uTextBalloon	VMT_TTextBalloon
-00465654	f	uTextBalloon	TTextBalloon.Virtual2C
+00465654	f	uTextBalloon	TTextBalloon.Create
 004656f0	f	uTextBalloon	TTextBalloon.Destroy
 0046572c	f	uTextBalloon	TTextBalloon.SetFont
 00465750	f	uTextBalloon	TTextBalloon.Virtual5C
@@ -3341,6 +3590,8 @@
 00465c84	f	uTextBalloon	TTextBalloon.SetSideColor
 00465c90	f	uTextBalloon	TTextBalloon.SetBackGroundColor
 0046663c	f	uTextBalloon	TTextBalloon.Virtual64
+00466a4c	s	uTextBalloon	1
+00466ddc	s	uTextBalloon	1
 00466de8	f	uTextBalloon	TTextBalloon.Virtual68
 00466f1c	f	uTextBalloon	TTextBalloon.Virtual34
 00466f28	f	uTextBalloon	TTextBalloon.Virtual38
@@ -3366,6 +3617,8 @@
 00467320	v	ComCtrls	VMT_TCustomTabControl
 004674b0	v	ComCtrls	VMT_TTabControl
 00467d48	v	ComCtrls	VMT_TConversion
+00467d8c	s	ComCtrls	3
+00467d98	s	ComCtrls	3
 00467d9c	f	ComCtrls	comctrls.InitCommonControl
 00467dc8	f	ComCtrls	comctrls.SetComCtlStyle
 00467e5c	v	ComCtrls	VMT_TTabStrings
@@ -3381,7 +3634,7 @@
 0046847c	f	ComCtrls	TCustomTabControl.Create
 0046853c	f	ComCtrls	TCustomTabControl.Destroy
 00468590	f	ComCtrls	TCustomTabControl.CanChange
-004685b8	f	ComCtrls	TCustomTabControl.VirtualB4
+004685b8	f	ComCtrls	TCustomTabControl.CanShowTab
 004685bc	f	ComCtrls	TCustomTabControl.DynamicFFB5
 004685dc	f	ComCtrls	TCustomTabControl.CreateParams
 004686e0	f	ComCtrls	TCustomTabControl.CreateWnd
@@ -3426,19 +3679,24 @@
 00469290	v	cEditCtr	VMT_TComment
 004693b8	f	cEditCtr	TComment.SetCaption
 00469404	f	cEditCtr	TComment.GetCaption
-00469418	f	cEditCtr	TComment.Virtual2C
+00469418	f	cEditCtr	TComment.Create
+004694c4	s	cEditCtr	5
 004694cc	f	cEditCtr	cEditCtr.Finalization
 004694fc	f	cEditCtr	cEditCtr.Initialization
 00469534	f	Unit70	Unit70.Finalization
 00469564	f	Unit70	Unit70.Initialization
+00469574	s	uSprite	10
+00469588	s	uSprite	3
 004695d8	v	uSprite	VMT_ESprite
 004697f8	v	uSprite	VMT_TSprite
 00469c3c	v	uSprite	VMT_TSpriteList
 00469ca4	v	uSprite	VMT_TBehaviour
 00469d50	v	uSprite	VMT_TBehaviourList
-00469d70	f	uSprite	TSprite.Virtual2C
+00469d70	f	uSprite	TSprite.Create
+00469ec4	s	uSprite	4
 00469ecc	f	uSprite	TSprite.VirtualB4
 0046a150	f	uSprite	TSprite.Destroy
+0046a5c8	s	uSprite	1
 0046a5ec	f	uSprite	TSprite.Virtual94
 0046a60c	f	uSprite	TSprite.Virtual98
 0046a69c	f	uSprite	TSprite.Virtual9C
@@ -3456,6 +3714,7 @@
 0046b2d0	f	uSprite	TSprite.Virtual90
 0046b2ec	f	uSprite	TSprite.VirtualB0
 0046b5a4	f	uSprite	TSprite.GetAbout
+0046b5c0	s	uSprite	4
 0046b688	f	uSprite	TSprite.Virtual30
 0046b710	f	uSprite	TSprite.SetMirrorX
 0046b724	f	uSprite	TSprite.SetMirrorY
@@ -3478,6 +3737,7 @@
 0046bd24	f	uSprite	TSprite.GetCurrentFrame
 0046bd58	f	uSprite	TSprite.SetCurrentFrame
 0046be60	f	uSprite	TSprite.SetFrameIndex
+0046bf68	s	uSprite	36
 0046c018	f	uSprite	TSprite.SetPriority
 0046c024	f	uSprite	TSprite.GetPriority
 0046c1e4	f	uSprite	TBehaviour.Destroy
@@ -3498,7 +3758,7 @@
 0046c42c	f	uSprite	uSprite.Finalization
 0046c470	f	uSprite	uSprite.Initialization
 0046c4c4	v	uGoblin	VMT_TGoblin
-0046c5bc	f	uGoblin	TGoblin.Virtual2C
+0046c5bc	f	uGoblin	TGoblin.Create
 0046c600	f	uGoblin	TGoblin.Destroy
 0046c638	f	uGoblin	TGoblin.Virtual74
 0046c674	f	uGoblin	TGoblin.SetSpriteBox
@@ -3513,16 +3773,17 @@
 0046ca60	v	uSpritebox	VMT_TThreeD
 0046cb84	v	uSpritebox	VMT_TSpriteBox
 0046d188	v	uSpritebox	VMT_TSpriteBoxList
-0046d1a8	f	uSpritebox	TSpriteBox.Virtual2C
+0046d1a8	f	uSpritebox	TSpriteBox.Create
+0046d2b8	s	uSpritebox	24
 0046d2d4	f	uSpritebox	TSpriteBox.Destroy
 0046d44c	f	uSpritebox	TSpriteBox.Dynamic0014
 0046d460	f	uSpritebox	TSpriteBox.Dynamic0402
 0046d4bc	f	uSpritebox	TSpriteBox.SetAutoSize
-0046d564	f	uSpritebox	TThreeD.Virtual08
+0046d564	f	uSpritebox	TThreeD.Assign
 0046d5b8	f	uSpritebox	TSpriteBox.DynamicFFDA
 0046d620	f	uSpritebox	TSpriteBox.DynamicFFD9
 0046d6a8	f	uSpritebox	TSpriteBox.DynamicFFD8
-0046d714	f	uSpritebox	TSpriteBox.VirtualB4
+0046d714	f	uSpritebox	TSpriteBox.Paint
 0046d858	f	uSpritebox	TSpriteBox.SetAutoFlip
 0046d914	f	uSpritebox	TSpriteBox.VirtualC0
 0046db0c	f	uSpritebox	TSpriteBox.VirtualC4
@@ -3538,20 +3799,27 @@
 0046ea90	v	uSequence	VMT_TFrameRef
 0046eb1c	v	uSequence	VMT_TSequence
 0046ebac	v	uSequence	VMT_TSequenceList
-0046ede0	f	uSequence	TFrameRef.Virtual04
-0046ee1c	f	uSequence	TFrameRef.Virtual08
-0046eef4	f	uSequence	TSequence.Virtual08
-0046f128	f	uSequence	TSequence.Virtual04
-0046f1a0	f	uSequence	TSequenceList.Virtual08
-0046f41c	f	uSequence	TSequenceList.Virtual04
+0046ed84	s	uSequence	4
+0046ede0	f	uSequence	TFrameRef.DefineProperties
+0046ee14	s	uSequence	4
+0046ee1c	f	uSequence	TFrameRef.Assign
+0046eef4	f	uSequence	TSequence.Assign
+0046f128	f	uSequence	TSequence.DefineProperties
+0046f15c	s	uSequence	4
+0046f1a0	f	uSequence	TSequenceList.Assign
+0046f41c	f	uSequence	TSequenceList.DefineProperties
+0046f450	s	uSequence	4
 0046f4f8	f	uSequence	uSequence.Finalization
 0046f528	f	uSequence	uSequence.Initialization
 0046f57c	v	uTiming	VMT_TCustomFastTimer
 0046f654	v	uTiming	VMT_TFastTimer
 0046f7d4	v	uTiming	VMT_TFastTimerList
-0046f874	f	uTiming	TCustomFastTimer.Virtual2C
+0046f874	f	uTiming	TCustomFastTimer.Create
+0046f924	s	uTiming	3
 0046f928	f	uTiming	TCustomFastTimer.Destroy
+0046faa4	s	uTiming	28
 0046fac4	f	uTiming	TFastTimer.GetAbout
+0046fae0	s	uTiming	3
 0046fae4	f	uTiming	TFastTimer.SetEnabled
 0046fb34	f	uTiming	TFastTimer.SetInterval
 0046fb44	f	uTiming	TFastTimer.SetOnTimer
@@ -3588,26 +3856,123 @@
 00471438	f	Sprbehav	TBehavMemo.Virtual34
 004714d8	f	Sprbehav	TBehavMemo.Virtual08
 004715e8	f	Sprbehav	TBehavMemo.Virtual0C
+00471a0c	s	Sprbehav	1
+00471a18	s	Sprbehav	1
+00471ad8	s	Sprbehav	13
+00471d68	s	Sprbehav	7
+004720d0	s	Sprbehav	3
+004720dc	s	Sprbehav	3
+004720e8	s	Sprbehav	3
+004720f4	s	Sprbehav	3
+00472100	s	Sprbehav	3
+0047210c	s	Sprbehav	3
+00472118	s	Sprbehav	3
+00472124	s	Sprbehav	13
 00472134	f	Sprbehav	Sprbehav.Finalization
 00472164	f	Sprbehav	Sprbehav.Initialization
 004721b8	v	Usett	VMT_TTask
 0047223c	v	Usett	VMT_TSettings
 004722d4	v	Usett	VMT_TStatus
+004723a4	s	Usett	18
 004723b8	f	Usett	TSettings.Destroy
+00472448	s	Usett	9
+0047245c	s	Usett	7
+00472510	s	Usett	1
+00472a40	s	Usett	5
+00472a50	s	Usett	10
+00472a64	s	Usett	7
+00472a74	s	Usett	1
+00472a80	s	Usett	2
+00472a8c	s	Usett	1
+00472a98	s	Usett	19
+00472ab4	s	Usett	8
+00472ac8	s	Usett	11
+00472adc	s	Usett	20
+00472afc	s	Usett	9
+00472b10	s	Usett	9
+00472b24	s	Usett	8
+00472b38	s	Usett	17
+00472b54	s	Usett	19
+00472b70	s	Usett	12
+00472b88	s	Usett	30
+00472bb0	s	Usett	31
+00472bd8	s	Usett	28
+00472c00	s	Usett	31
+00472c28	s	Usett	22
+00472c48	s	Usett	9
+00472c5c	s	Usett	5
+00472c6c	s	Usett	5
+00472c7c	s	Usett	11
+00472c90	s	Usett	6
+00472ca0	s	Usett	8
+00472cb4	s	Usett	6
+00472cc4	s	Usett	7
+00472cd4	s	Usett	9
+00472ce8	s	Usett	8
+00472cfc	s	Usett	13
+00472d18	s	Usett	4
+00472d28	s	Usett	6
+00472d38	s	Usett	4
+00472d48	s	Usett	7
+00472d58	s	Usett	12
+00472d70	s	Usett	9
+00472d84	s	Usett	11
+00472d98	s	Usett	9
 00472e54	f	Usett	Usett.Finalization
 00472e84	f	Usett	Usett.Initialization
+00472e94	s	Unit78	9
+00472ea8	s	Unit78	9
+00472ebc	s	Unit78	11
+00472ed0	s	Unit78	10
+00472ee4	s	Unit78	9
+00472ef8	s	Unit78	9
+00472f0c	s	Unit78	9
+00472f20	s	Unit78	9
 00472f2c	f	Unit78	Unit78.Finalization
 00472f74	f	Unit78	Unit78.Initialization
 00472fc8	v	Uview	VMT_TViewSprite
 00473110	v	Uview	VMT_TViewSpriteList
 0047317c	v	Uview	VMT_TView
+00473450	s	Uview	16
+0047346c	s	Uview	6
+0047347c	s	Uview	5
+0047348c	s	Uview	8
 00473498	f	Uview	TView.Destroy
+00473980	s	Uview	6
+00473f74	s	Uview	10
+00473f88	s	Uview	12
+00473fa0	s	Uview	5
+00473fb0	s	Uview	1
+00473fbc	s	Uview	2
+00473fc8	s	Uview	3
+00473fd4	s	Uview	4
+00473fe4	s	Uview	1
+00473ff0	s	Uview	10
+00474004	s	Uview	7
+00474014	s	Uview	6
+00474024	s	Uview	22
+00474044	s	Uview	32
+00474070	s	Uview	11
+00474084	s	Uview	11
+00474098	s	Uview	15
 004740a8	f	Uview	TView.Virtual68
+0047441c	s	Uview	1
 00474420	f	Uview	TView.Virtual64
 004749bc	f	Uview	TView.Virtual60
 004749c4	f	Uview	TView.Virtual5C
 004749cc	f	Uview	TView.Virtual40
 004749d4	f	Uview	TView.Virtual44
+00474d70	s	Uview	12
+00474d88	s	Uview	7
+00474d98	s	Uview	32
+00474dc4	s	Uview	36
+00474df4	s	Uview	4
+00474e04	s	Uview	1
+00474e10	s	Uview	5
+00474e20	s	Uview	8
+00474e34	s	Uview	2
+00474e40	s	Uview	32
+00474e6c	s	Uview	11
 00474e78	f	Uview	TView.Virtual4C
 00474e80	f	Uview	TView.Virtual54
 00474eb8	f	Uview	Uview.Finalization
@@ -3615,49 +3980,312 @@
 00474f3c	v	uAutos	VMT_TAutoSprite
 00475070	v	uAutos	VMT_TSegment
 004750c8	v	uAutos	VMT_TSegmentList
+0047530c	s	uAutos	4
+00475900	s	uAutos	1
+0047590c	s	uAutos	6
 00475934	f	uAutos	TAutoSprite.Virtual64
+00476078	s	uAutos	1
+00476090	s	uAutos	6
 00476604	f	uAutos	uAutos.Finalization
 00476634	f	uAutos	uAutos.Initialization
+004775e4	s	uTransition	4
+004775f4	s	uTransition	3
+00477600	s	uTransition	4
+00477610	s	uTransition	3
+0047761c	s	uTransition	4
+0047762c	s	uTransition	3
+00477638	s	uTransition	4
+00477648	s	uTransition	3
+00477654	s	uTransition	3
+00477660	s	uTransition	4
+00477670	s	uTransition	4
+00477680	s	uTransition	3
+0047768c	s	uTransition	4
+0047769c	s	uTransition	3
+004776a8	s	uTransition	4
+004776b8	s	uTransition	3
+004776c4	s	uTransition	2
+004776d0	s	uTransition	2
+004776dc	s	uTransition	2
+004776e8	s	uTransition	2
+004776f4	s	uTransition	4
+00477704	s	uTransition	2
+00477710	s	uTransition	2
+0047771c	s	uTransition	4
+0047772c	s	uTransition	2
+00477738	s	uTransition	2
+00477744	s	uTransition	2
+00477750	s	uTransition	4
+00477760	s	uTransition	2
+0047776c	s	uTransition	4
+0047777c	s	uTransition	2
+00477788	s	uTransition	2
+00477794	s	uTransition	2
+004777a0	s	uTransition	2
+004777ac	s	uTransition	2
+004777b8	s	uTransition	2
+004777c4	s	uTransition	2
+004777d0	s	uTransition	6
+004777e0	s	uTransition	6
+004777f0	s	uTransition	7
 004777f8	f	uTransition	uTransition.Finalization
 00477828	f	uTransition	uTransition.Initialization
 00477838	f	ddraw	ddraw.Finalization
 00477868	f	ddraw	ddraw.Initialization
+00477aa0	s	uQuickDirectX	25
+00477ac4	s	uQuickDirectX	35
+00477af0	s	uQuickDirectX	24
+00477b14	s	uQuickDirectX	16
+00477b30	s	uQuickDirectX	15
+00477b48	s	uQuickDirectX	14
+00477b60	s	uQuickDirectX	14
+00477b78	s	uQuickDirectX	13
+00477b90	s	uQuickDirectX	13
+00477ba8	s	uQuickDirectX	40
+00477bdc	s	uQuickDirectX	23
 00477c1c	f	uQuickDirectX	uQuickDirectX.Finalization
 00477c58	f	uQuickDirectX	uQuickDirectX.Initialization
+00477c8c	s	Uctrl	3
+00477c98	s	Uctrl	3
+00477ca4	s	Uctrl	4
+00477cb4	s	Uctrl	3
+00477cc0	s	Uctrl	4
+00477cd0	s	Uctrl	3
+00477cdc	s	Uctrl	3
+00477ce8	s	Uctrl	6
+00477cf8	s	Uctrl	2
+00477d04	s	Uctrl	3
+00477d10	s	Uctrl	4
 00477d64	v	Uctrl	VMT_TCtrlForm
+00477fd4	s	Uctrl	12
+00478328	s	Uctrl	13
 00478338	f	Uctrl	Uctrl.Finalization
 00478408	f	Uctrl	Uctrl.Initialization
+00478424	s	uTrein	145
+004784c0	s	uTrein	107
+00478534	s	uTrein	106
+004785a8	s	uTrein	134
+00478638	s	uTrein	134
+004786c8	s	uTrein	93
+00478730	s	uTrein	93
+00478798	s	uTrein	135
 0047886c	v	uTrein	VMT_TTrein
+00478b18	s	uTrein	1
+00478b28	s	uTrein	1
+0047908c	s	uTrein	1
+004790b0	s	uTrein	1
+004790bc	s	uTrein	6
+004790cc	s	uTrein	1
+004790d8	s	uTrein	1
+004790e4	s	uTrein	7
+004790f4	s	uTrein	12
 00479484	f	uTrein	uTrein.Finalization
 00479508	f	uTrein	uTrein.Initialization
 0047955c	v	Fmain	VMT_TfrmMain
 00479f50	f	Fmain	TfrmMain.Dynamic0014
 00479f54	f	Fmain	TfrmMain.FormCreate
+0047a6dc	s	Fmain	10
+0047a6f0	s	Fmain	7
+0047a700	s	Fmain	20
+0047a7e8	s	Fmain	4
+0047a7f8	s	Fmain	3
+0047a804	s	Fmain	1
+0047a810	s	Fmain	8
+0047a824	s	Fmain	1
+0047a830	s	Fmain	17
+0047a84c	s	Fmain	12
+0047a864	s	Fmain	18
+0047a880	s	Fmain	16
+0047a89c	s	Fmain	5
+0047a8ac	s	Fmain	5
+0047a8bc	s	Fmain	5
+0047a8cc	s	Fmain	4
+0047a8dc	s	Fmain	6
+0047a8ec	s	Fmain	6
+0047a8fc	s	Fmain	6
 0047a904	f	Fmain	TfrmMain.sbStageStarted
+0047aaa4	s	Fmain	5
+0047aac0	s	Fmain	9
+0047ac44	s	Fmain	1
+0047b308	s	Fmain	6
+0047b318	s	Fmain	5
+0047b328	s	Fmain	5
+0047b338	s	Fmain	5
+0047b348	s	Fmain	5
+0047b358	s	Fmain	3
+0047b364	s	Fmain	5
+0047b374	s	Fmain	4
+0047b384	s	Fmain	12
+0047b39c	s	Fmain	2
+0047b3a8	s	Fmain	1
+0047b3b4	s	Fmain	2
+0047b3c0	s	Fmain	3
+0047b3cc	s	Fmain	1
+0047b3d8	s	Fmain	3
+0047b3e4	s	Fmain	3
+0047b3f0	s	Fmain	49
+0047b42c	s	Fmain	10
+0047b440	s	Fmain	45
+0047b720	s	Fmain	4
+0047b730	s	Fmain	3
+0047b73c	s	Fmain	3
+0047b748	s	Fmain	3
+0047b754	s	Fmain	2
+0047b760	s	Fmain	22
+0047b848	s	Fmain	1
 0047b84c	f	Fmain	TfrmMain.FormDestroy
+0047ba34	s	Fmain	3
+0047ba40	s	Fmain	2
+0047ba4c	s	Fmain	31
+0047ba74	s	Fmain	32
+0047baa0	s	Fmain	11
 0047baac	f	Fmain	TfrmMain.butPlaceSomethingClick
 0047bb08	f	Fmain	TfrmMain.sbStageMouseDown
 0047bcf4	f	Fmain	TfrmMain.sbStageMouseMove
+0047beb0	s	Fmain	13
+0047bec8	s	Fmain	2
+0047bed4	s	Fmain	6
+0047c100	s	Fmain	2
+0047c10c	s	Fmain	13
+0047c32c	s	Fmain	1
+0047c338	s	Fmain	32
+0047c364	s	Fmain	2
+0047c63c	s	Fmain	9
+0047c650	s	Fmain	6
+0047c660	s	Fmain	7
+0047c670	s	Fmain	109
+0047c6e8	s	Fmain	11
+0047c6fc	s	Fmain	9
+0047c710	s	Fmain	5
+0047c720	s	Fmain	5
+0047c730	s	Fmain	1
+0047c73c	s	Fmain	1
+0047c748	s	Fmain	28
+0047c770	s	Fmain	11
 0047c77c	f	Fmain	TfrmMain.butStartClick
+0047c864	s	Fmain	9
+0047c878	s	Fmain	7
+0047c888	s	Fmain	5
+0047c898	s	Fmain	1
 0047c89c	f	Fmain	TfrmMain.butCancelClick
+0047c958	s	Fmain	9
+0047c96c	s	Fmain	7
+0047c97c	s	Fmain	5
+0047c98c	s	Fmain	25
+0047cb90	s	Fmain	3
+0047cb9c	s	Fmain	1
+0047cdb8	s	Fmain	7
+0047d0e4	s	Fmain	5
+0047d0f4	s	Fmain	4
+0047d104	s	Fmain	7
+0047d114	s	Fmain	10
+0047d128	s	Fmain	3
+0047d134	s	Fmain	6
+0047d144	s	Fmain	13
+0047d15c	s	Fmain	6
+0047d1f8	s	Fmain	7
+0047d208	s	Fmain	2
 0047d20c	f	Fmain	TfrmMain.butReadyClick
+0047d238	s	Fmain	9
 0047d244	f	Fmain	TfrmMain.spriteHintAfterBlit
+0047d4b4	s	Fmain	5
+0047d4c4	s	Fmain	2
+0047d4d0	s	Fmain	1
+0047d774	s	Fmain	5
+0047d784	s	Fmain	2
+0047d790	s	Fmain	1
+0047da0c	s	Fmain	5
+0047da1c	s	Fmain	10
+0047da30	s	Fmain	12
+0047da48	s	Fmain	20
+0047da68	s	Fmain	13
+0047da80	s	Fmain	5
+0047db94	s	Fmain	4
+0047dba4	s	Fmain	2
+0047dbb0	s	Fmain	5
 0047dc4c	f	Fmain	TfrmMain.sbStageKeyDown
 0047dc88	f	Fmain	TfrmMain.sbStageKeyPress
 0047dd1c	f	Fmain	TfrmMain.FormClose
 0047deac	f	Fmain	TfrmMain.butStopClick
+0047dec8	s	Fmain	25
 0047dee4	f	Fmain	TfrmMain.timerMeeuwTimer
+0047df68	s	Fmain	5
 0047df70	f	Fmain	TfrmMain.spriteMeeuwFinishSequence
+0047e208	s	Fmain	4
+0047e218	s	Fmain	5
+0047e228	s	Fmain	8
+0047e23c	s	Fmain	10
+0047e250	s	Fmain	8
 0047e25c	f	Fmain	TfrmMain.tabClick
 0047e2e8	f	Fmain	TfrmMain.timerKlachtenTimer
 0047e370	f	Fmain	TfrmMain.Label1Click
 0047e378	f	Fmain	TfrmMain.butJaClick
 0047e38c	f	Fmain	TfrmMain.butNeeClick
 0047e394	f	Fmain	TfrmMain.butLoadClick
+0047e6ec	s	Fmain	21
+0047e70c	s	Fmain	21
+0047e72c	s	Fmain	1
+0047e738	s	Fmain	5
+0047e748	s	Fmain	4
+0047e758	s	Fmain	41
+0047e794	s	Fmain	6
+0047e7a4	s	Fmain	13
+0047e7bc	s	Fmain	6
+0047e7cc	s	Fmain	1
+0047e7dc	s	Fmain	1
 0047e7e0	f	Fmain	TfrmMain.butSaveClick
+0047e984	s	Fmain	6
+0047e994	s	Fmain	5
+0047e9a4	s	Fmain	8
+0047e9b8	s	Fmain	1
+0047e9c4	s	Fmain	5
 0047e9cc	f	Fmain	TfrmMain.FormCloseQuery
 0047ea08	f	Fmain	TfrmMain.timerMainTimer
+0047ebb4	s	Fmain	2
+0047ef24	s	Fmain	45
+0047ef5c	s	Fmain	31
+0047ef88	s	Fmain	6
+0047ef98	s	Fmain	72
+0047efec	s	Fmain	65
+0047f038	s	Fmain	66
+0047f084	s	Fmain	42
+0047f0b8	s	Fmain	63
+0047f100	s	Fmain	49
+0047f13c	s	Fmain	21
+0047f160	s	Fmain	69
+0047f1b0	s	Fmain	69
+0047f200	s	Fmain	62
+0047f248	s	Fmain	69
+0047f298	s	Fmain	42
+0047f2cc	s	Fmain	65
+0047f318	s	Fmain	66
+0047f364	s	Fmain	64
+0047f3b0	s	Fmain	41
+0047f3e4	s	Fmain	60
+0047f42c	s	Fmain	32
+0047f458	s	Fmain	52
+0047f498	s	Fmain	7
+0047f4a8	s	Fmain	77
+0047f500	s	Fmain	66
+0047f54c	s	Fmain	70
+0047f59c	s	Fmain	67
+0047f5e8	s	Fmain	69
+0047f638	s	Fmain	67
+0047f684	s	Fmain	24
+0047f6a8	s	Fmain	48
+0047f6e4	s	Fmain	69
+0047f734	s	Fmain	25
+0047f758	s	Fmain	22
+0047f778	s	Fmain	31
+0047f7a0	s	Fmain	35
+0047f7cc	s	Fmain	34
+0047f7f8	s	Fmain	31
+0047f820	s	Fmain	28
+0047f848	s	Fmain	32
+0047f874	s	Fmain	37
+0047f8a4	s	Fmain	34
 0047f8c8	f	Fmain	TfrmMain.timerRecalcTimer
+0047f968	s	Fmain	8
 0047f974	f	Fmain	TfrmMain.butZoomuitClick
 0047f9d4	f	Fmain	TfrmMain.butZoominClick
 0047fa34	f	Fmain	TfrmMain.butScrollupClick
@@ -3680,10 +4308,173 @@
 00480378	v	Uworld	VMT_TWijk
 004803dc	v	Uworld	VMT_TWorld
 0048043c	f	Uworld	TCell.Destroy
+0048049c	s	Uworld	12
+0048051c	s	Uworld	15
+004805b8	s	Uworld	6
+0048066c	s	Uworld	6
+0048067c	s	Uworld	4
+004806fc	s	Uworld	8
+00480710	s	Uworld	10
+00480724	s	Uworld	8
+00480738	s	Uworld	7
+00480748	s	Uworld	5
+00480758	s	Uworld	10
+00480bd4	s	Uworld	5
+00480be4	s	Uworld	12
+00480bfc	s	Uworld	4
+00480c0c	s	Uworld	6
+00480c1c	s	Uworld	1
+00480ef0	s	Uworld	6
+00480f00	s	Uworld	5
+00480f10	s	Uworld	1
+00481010	s	Uworld	6
+00481104	s	Uworld	6
+00481a0c	s	Uworld	5
+00481a1c	s	Uworld	1
+00481a28	s	Uworld	8
+00481a3c	s	Uworld	10
+00481a50	s	Uworld	8
+00481a64	s	Uworld	7
+00481a74	s	Uworld	4
+00481a84	s	Uworld	7
+00481a94	s	Uworld	2
+00481aa0	s	Uworld	2
+00481aac	s	Uworld	6
+00481abc	s	Uworld	1
+00481bf4	s	Uworld	4
+00481c04	s	Uworld	6
+00481d48	s	Uworld	12
+00481d60	s	Uworld	33
+00481d8c	s	Uworld	5
+00481d9c	s	Uworld	1
+00481da8	s	Uworld	10
+00481dbc	s	Uworld	11
+00481dd0	s	Uworld	16
+00481dec	s	Uworld	96
+004829d8	s	Uworld	20
+004829f8	s	Uworld	35
+00482a24	s	Uworld	8
+00482a38	s	Uworld	61
+00482a80	s	Uworld	5
+00482a90	s	Uworld	12
+00482aa8	s	Uworld	33
+00482ad4	s	Uworld	14
+00482aec	s	Uworld	18
+00482b08	s	Uworld	12
+00482b20	s	Uworld	7
+00482b30	s	Uworld	7
+00482b40	s	Uworld	2
+00482b4c	s	Uworld	7
+00482b5c	s	Uworld	7
+00482b6c	s	Uworld	2
+00482b78	s	Uworld	7
+00482b88	s	Uworld	7
+00482b98	s	Uworld	7
+00482ba8	s	Uworld	114
+00482c24	s	Uworld	130
+00482cb0	s	Uworld	27
 00482dbc	f	Uworld	TWijk.Destroy
+004834d4	s	Uworld	4
+004834e4	s	Uworld	10
+004834f8	s	Uworld	14
+00483510	s	Uworld	9
+00483524	s	Uworld	20
+00483544	s	Uworld	9
+00483558	s	Uworld	9
+0048356c	s	Uworld	9
+00483580	s	Uworld	9
+00483594	s	Uworld	10
+004835a8	s	Uworld	10
 004835b4	f	Uworld	TWorld.Destroy
+004838b4	s	Uworld	6
+00483a5c	s	Uworld	12
+00483a74	s	Uworld	5
+0048402c	s	Uworld	39
+0048405c	s	Uworld	8
+00484070	s	Uworld	10
+00484084	s	Uworld	8
+00484098	s	Uworld	7
+004840a8	s	Uworld	5
+0048460c	s	Uworld	53
+004848a4	s	Uworld	25
+004848c8	s	Uworld	22
+0048496c	s	Uworld	1
+00484a2c	s	Uworld	2
+00484a38	s	Uworld	3
+004850cc	s	Uworld	10
+004850e0	s	Uworld	3
+004850fc	s	Uworld	11
+00485118	s	Uworld	18
+00485134	s	Uworld	8
+00485148	s	Uworld	22
+00485168	s	Uworld	1
+00485174	s	Uworld	10
+00485188	s	Uworld	20
+004851a8	s	Uworld	5
+004851b8	s	Uworld	5
+004851c8	s	Uworld	25
+004851ec	s	Uworld	18
+00485208	s	Uworld	14
+00485220	s	Uworld	10
+00485234	s	Uworld	6
+004854a8	s	Uworld	67
+004854f4	s	Uworld	31
+00485520	s	Uworld	33
+00485550	s	Uworld	50
+00485590	s	Uworld	13
+004855a8	s	Uworld	1
+00485708	s	Uworld	5
+00485718	s	Uworld	12
+00485730	s	Uworld	1
+004859e8	s	Uworld	1
+004859f4	s	Uworld	6
 004859fc	f	Uworld	Uworld.Finalization
 00485a2c	f	Uworld	Uworld.Initialization
+00485a80	s	Uconst	9
+00485a94	s	Uconst	5
+00485aa4	s	Uconst	10
+00485ab8	s	Uconst	7
+00485ac8	s	Uconst	10
+00485adc	s	Uconst	4
+00485aec	s	Uconst	8
+00485b00	s	Uconst	11
+00485b14	s	Uconst	11
+00485b28	s	Uconst	5
+00485b38	s	Uconst	8
+00485b4c	s	Uconst	4
+00485b5c	s	Uconst	5
+00485b6c	s	Uconst	4
+00485b7c	s	Uconst	5
+00485b8c	s	Uconst	10
+00485ba0	s	Uconst	4
+0048611c	s	Uconst	12
+00486134	s	Uconst	1
+00486140	s	Uconst	1
+0048614c	s	Uconst	11
+00486160	s	Uconst	10
+00486174	s	Uconst	14
+0048618c	s	Uconst	12
+0048623c	s	Uconst	4
+0048624c	s	Uconst	7
+0048625c	s	Uconst	7
+0048626c	s	Uconst	1
+0048634c	s	Uconst	7
+0048635c	s	Uconst	7
+0048636c	s	Uconst	5
+0048637c	s	Uconst	3
+00486388	s	Uconst	1
+004864ac	s	Uconst	5
+0048662c	s	Uconst	12
+00486644	s	Uconst	7
+004866bc	s	Uconst	10
+00486764	s	Uconst	8
+00486778	s	Uconst	10
+0048678c	s	Uconst	8
+004867a0	s	Uconst	7
+004867b0	s	Uconst	5
+00486a48	s	Uconst	24
+00486a6c	s	Uconst	10
+00486bd4	s	Uconst	1
 00486be4	f	Uconst	Uconst.Finalization
 00486c64	f	Uconst	Uconst.Initialization
 00486cb8	v	fBack	VMT_TfrmBlack
@@ -3693,3 +4484,738 @@
 00486ea4	f	fBack	TfrmBlack.FormCreate
 00486f2c	f	fBack	fBack.Finalization
 00486f5c	f	fBack	fBack.Initialization
+004872b8	s	Ros	19
+00488000	d		Default8087CW
+00488008	d		DebugHook
+0048800c	d		JITEnable
+00488010	d		NoErrMsg
+00488014	d		LibModuleList
+00488018	d		ModuleUnloadList
+0048801c	d		MemoryManager
+00488020	d		MemoryManager
+00488024	d		MemoryManager
+00488028	d		cwChop
+0048802c	d		runErrMsg
+0048803c	d		runErrMsg
+00488048	d		runErrMsg
+0048804c	d		errCaption
+00488054	d		dig
+004880a8	d		Module
+004880ac	d		Module
+004880b8	d		Module
+004880c0	d		EmptyStr
+004880c4	d		Win32Platform
+004880c8	d		Win32MajorVersion
+004880cc	d		Win32MinorVersion
+004880d0	d		Win32BuildNumber
+004880d4	d		Win32CSDVersion
+004880d8	d		TwoDigitYearCenturyWindow
+004880dc	d		MonthDays
+0048810c	d		LeadBytes
+0048812c	d		HexDisplayPrefix
+00488130	d		GetDiskFreeSpaceEx
+00488134	d		ExitProcList
+00488138	d		AccessMode
+00488144	d		ShareMode
+00488158	d		FormatErrorStrs
+0048815c	d		FormatErrorStrs
+00488160	d		FMSecsPerDay
+00488164	d		IMSecsPerDay
+00488168	d		Format
+0048816c	d		DefShortMonthNames
+00488170	d		DefShortMonthNames
+00488174	d		DefShortMonthNames
+00488178	d		DefShortMonthNames
+0048817c	d		DefShortMonthNames
+00488180	d		DefShortMonthNames
+00488184	d		DefShortMonthNames
+00488188	d		DefShortMonthNames
+0048818c	d		DefShortMonthNames
+00488190	d		DefShortMonthNames
+00488194	d		DefShortMonthNames
+00488198	d		DefShortMonthNames
+0048819c	d		DefLongMonthNames
+004881a0	d		DefLongMonthNames
+004881a4	d		DefLongMonthNames
+004881a8	d		DefLongMonthNames
+004881ac	d		DefLongMonthNames
+004881b0	d		DefLongMonthNames
+004881b4	d		DefLongMonthNames
+004881b8	d		DefLongMonthNames
+004881bc	d		DefLongMonthNames
+004881c0	d		DefLongMonthNames
+004881c4	d		DefLongMonthNames
+004881c8	d		DefLongMonthNames
+004881cc	d		DefShortDayNames
+004881d0	d		DefShortDayNames
+004881d4	d		DefShortDayNames
+004881d8	d		DefShortDayNames
+004881dc	d		DefShortDayNames
+004881e0	d		DefShortDayNames
+004881e4	d		DefShortDayNames
+004881e8	d		DefLongDayNames
+004881ec	d		DefLongDayNames
+004881f0	d		DefLongDayNames
+004881f4	d		DefLongDayNames
+004881f8	d		DefLongDayNames
+004881fc	d		DefLongDayNames
+00488200	d		DefLongDayNames
+00488204	d		ErrorMap
+00488208	d		ErrorMap
+00488210	d		ErrorMap
+00488218	d		ErrorMap
+00488220	d		ErrorMap
+00488224	d		ExceptMap
+00488228	d		ErrorMap
+00488230	d		ErrorMap
+00488238	d		ErrorMap
+0048823c	d		ExceptMap
+00488240	d		ExceptMap
+00488248	d		ExceptMap
+00488250	d		ExceptMap
+00488258	d		ExceptMap
+00488260	d		ExceptMap
+00488268	d		ExceptMap
+00488270	d		ExceptMap
+00488278	d		ExceptMap
+00488280	d		ExceptMap
+00488288	d		ExceptMap
+00488290	d		ExceptMap
+00488298	d		ExceptMap
+004882a0	d		ExceptMap
+004882a8	d		ExceptMap
+004882b0	d		ExceptMap
+004882b8	d		ExceptMap
+004882c0	d		ExceptMap
+004882c8	d		ExceptMap
+004882d0	d		ExceptMap
+004882d8	d		ExceptMap
+004882e0	d		ExceptMap
+004882e8	d		ExceptMap
+004882ec	d		TerminateProcList
+004882f0	d		BooleanIdents
+004882f8	d		DotSep
+004882fc	d		C10000
+00488300	d		FilerSignature
+00488304	d		NilMethod
+0048830c	d		ValTtoVarT
+0048835c	d		DefFontData
+00488360	d		DefFontData
+00488366	d		DefFontData
+00488367	d		DefFontData
+00488388	d		DDBsOnly
+0048838c	d		Colors
+004884dc	d		FontCharsets
+0048856c	d		DefPenData
+0048857c	d		PenStyles
+0048858c	d		DefBrushData
+0048859c	d		PenModes
+004885bc	d		ClipboardFormats
+004885c0	d		FileFormats
+004885c4	d		BitmapCanvasList
+004885cb	d		BitCounts
+004885d8	d		Pal16
+0048861c	d		BorderStyles
+00488624	d		Alignments
+0048862c	d		WordWraps
+00488630	d		WordWraps
+00488634	d		Passwords
+0048863c	d		ReadOnlys
+00488644	d		CharCases
+00488650	d		HideSelections
+00488658	d		OEMConverts
+00488660	d		Empty
+00488664	d		Alignments
+0048867c	d		ScrollBar
+0048868c	d		WordWraps
+00488694	d		ComboBoxStyles
+004886a8	d		CharCases
+004886b4	d		Sorts
+004886bc	d		ButtonStyles
+004886c4	d		Alignments
+004886d4	d		Alignments
+004886e4	d		Styles
+004886f0	d		Sorteds
+004886f8	d		MultiSelects
+00488700	d		ExtendSelects
+00488708	d		IntegralHeights
+00488710	d		MultiColumns
+00488718	d		TabStops
+00488720	d		CSHREDRAW
+00488728	d		Kinds
+00488730	d		HintWindowClass
+00488734	d		FocusMessages
+00488738	d		FocusCount
+0048873c	d		TaskActiveWindow
+00488740	d		TaskFirstWindow
+00488744	d		TaskFirstTopMost
+00488748	d		TaskWindowList
+0048874c	d		BlockCode
+00488750	d		UtilWindowClass
+00488760	d		UtilWindowClass
+00488774	d		UtilWindowClass
+00488778	d		SysConsts
+00488780	d		SysConsts
+00488788	d		Props
+0048878c	d		Props
+00488790	d		Props
+00488794	d		Props
+00488798	d		Props
+004887b0	d		Styles
+004887bc	d		BorderStyles
+004887c4	d		ShowCommands
+004887cc	d		ShowCommands
+004887dc	d		ShowCommands
+004887e8	d		CursorMap
+004887ec	d		MenuKeyCaps
+00488820	d		MenuKeyCaps
+0048883c	d		WindowClass
+0048884c	d		WindowClass
+00488860	d		WindowClass
+00488864	d		AppVisible
+00488868	d		ShowFlags
+0048886c	d		Mask
+00488874	d		DrawingStyles
+00488880	d		MenuKeyCaps
+00488884	d		Images
+0048888c	d		ValidMenuHotkeys
+00488890	d		cMenuAutoFlagToItem
+00488894	d		cItemAutoFlagToMenu
+00488898	d		cBooleanToItemAutoFlag
+0048889c	d		cItemAutoFlagToBoolean
+004888a0	d		MenuKeyCaps
+004888a4	d		MenuKeyCaps
+004888a8	d		MenuKeyCaps
+004888ac	d		MenuKeyCaps
+004888b0	d		MenuKeyCaps
+004888b4	d		MenuKeyCaps
+004888b8	d		MenuKeyCaps
+004888bc	d		MenuKeyCaps
+004888c0	d		MenuKeyCaps
+004888c4	d		MenuKeyCaps
+004888c8	d		MenuKeyCaps
+004888cc	d		MenuKeyCaps
+004888d0	d		MenuKeyCaps
+004888d4	d		MenuKeyCaps
+004888d8	d		MenuKeyCaps
+004888dc	d		MenuKeyCaps
+004888e0	d		MenuKeyCaps
+004888e4	d		MenuKeyCaps
+004888e8	d		Checks
+004888f0	d		Enables
+004888f8	d		Breaks
+00488904	d		Separators
+0048890c	d		IBreaks
+00488918	d		IChecks
+00488920	d		IDefaults
+00488928	d		IEnables
+00488930	d		IRadios
+00488938	d		ISeparators
+00488940	d		IRTL
+00488948	d		IOwnerDraw
+00488950	d		Alignments
+00488958	d		EdgeStyle
+00488960	d		Alignments
+00488978	d		CreationControl
+0048897c	d		DefaultDockTreeClass
+00488980	d		AnchorAlign
+00488988	d		Cursors
+00488a38	d		CaptureControl
+00488a3c	d		ShowFlags
+00488a40	d		WindowPos
+00488a44	d		InnerStyles
+00488a54	d		OuterStyles
+00488a64	d		EdgeStyles
+00488a74	d		Ctl3DStyles
+00488a7c	d		OrientArray
+00488a84	d		MakeLast
+00488a8c	d		TreeStreamEndFlag
+00488a90	d		SizeCursors
+00488a98	d		IMM32DLL
+00488aa4	d		ForceCurrentDirectory
+00488aa8	d		CreationControl
+00488aac	d		WndProcPtrAtom
+00488ab0	d		OpenOptions
+00488b00	d		Captions
+00488b04	d		Captions
+00488b08	d		Captions
+00488b0c	d		Captions
+00488b14	d		IconIDs
+00488b28	d		ButtonNames
+00488b54	d		ButtonCaptions
+00488b58	d		ButtonCaptions
+00488b5c	d		ButtonCaptions
+00488b60	d		ButtonCaptions
+00488b64	d		ButtonCaptions
+00488b68	d		ButtonCaptions
+00488b6c	d		ButtonCaptions
+00488b70	d		ButtonCaptions
+00488b74	d		ButtonCaptions
+00488b78	d		ButtonCaptions
+00488b7c	d		ButtonCaptions
+00488b80	d		ModalResults
+00488bac	d		DefaultBlank
+00488bb0	d		MaskFieldSeparator
+00488bb4	d		MaskNoSave
+00488bb8	d		ArrowKey
+00488bbc	d		SPAIndexMask
+00488bc0	d		SPASecShift
+00488bc4	d		Values
+00488c18	d		BitBtnResNames
+00488c44	d		BitBtnCaptions
+00488c48	d		BitBtnCaptions
+00488c4c	d		BitBtnCaptions
+00488c50	d		BitBtnCaptions
+00488c54	d		BitBtnCaptions
+00488c58	d		BitBtnCaptions
+00488c5c	d		BitBtnCaptions
+00488c60	d		BitBtnCaptions
+00488c64	d		BitBtnCaptions
+00488c68	d		BitBtnCaptions
+00488c6c	d		BitBtnCaptions
+00488c70	d		BitBtnModalResults
+00488c9c	d		GlyphCache
+00488e0c	d		RTFConversionFormat
+00488e18	d		TextConversionFormat
+00488e20	d		PTR_RTFConversionFormat
+00488e24	d		RTL
+00488e2c	d		RTL
+00488e34	d		RTL
+00488e3c	d		AlignStyles
+00488e5c	d		TabStyles
+00488e68	d		RRStyles
+00489304	d		SShortMonthNameApr
+00489308	d		SDispatchError
+0048930c	d		STooManyOpenFiles
+00489310	d		SLongMonthNameFeb
+00489314	d		SLongMonthNameOct
+00489318	d		SLongDayNameWed
+0048931c	d		SMsgDlgNoToAll
+00489320	d		PTR_TimeSeparator
+00489324	d		PTR_IsLibrary
+00489328	d		SShortMonthNameAug
+0048932c	d		SmkcShift
+00489334	d		SRetryButton
+00489338	d		PTR_AbstractErrorProc
+00489340	d		SExternalException
+00489344	d		SMsgDlgHelp
+00489348	d		SLongDayNameFri
+0048934c	d		PTR_ExitProc
+00489350	d		PTR_ErrorProc
+00489354	d		SInvalidDateTime
+00489358	d		PTR_Null
+0048935c	d		SOKButton
+00489364	d		PTR_FlatSB_GetScrollInfo
+00489368	d		SmkcDel
+0048936c	d		SLongDayNameSun
+00489370	d		sTabFailSetObject
+00489374	d		SWin32Error
+00489378	d		SInvalidTabPosition
+0048937c	d		SmkcDown
+00489380	d		SShortMonthNameMay
+00489384	d		SMDIChildNotVisible
+00489388	d		SDockZoneNotFound
+0048938c	d		SInvalidStringGridOp
+00489390	d		SCannotOpenClipboard
+00489394	d		SMaskErr
+00489398	d		SmkcCtrl
+0048939c	d		SMsgDlgConfirm
+004893a0	d		SFixedColTooBig
+004893a4	d		SOutOfResources
+004893a8	d		SIgnoreButton
+004893ac	d		SVBitmaps
+004893b0	d		SVIcons
+004893b4	d		SVEnhMetafiles
+004893b8	d		SDiskFull
+004893bc	d		SWindowClass
+004893c8	d		PTR_FindGlobalComponent
+004893cc	d		SInvalidFloat
+004893d4	d		SGroupIndexTooLow
+004893dc	d		SLongDayNameMon
+004893e0	d		SShortDayNameThu
+004893e4	d		SLongDayNameTue
+004893e8	d		SReplaceImage
+004893ec	d		PTR_ExceptionClass
+004893f0	d		SmkcAlt
+004893f4	d		SInvalidClipFmt
+004893f8	d		SInOutError
+004893fc	d		PTR_DateSeparator
+00489400	d		SExceptTitle
+00489408	d		SOutOfMemory
+0048940c	d		SShortMonthNameSep
+00489410	d		SInvalidInput
+00489414	d		SInvalidFormat
+00489418	d		SAbstractError
+0048941c	d		SDuplicateMenus
+00489420	d		SInsertLineError
+00489424	d		SDuplicateString
+00489428	d		SmkcEnd
+00489430	d		SChangeIconSize
+00489434	d		SInvalidImageSize
+00489438	d		SAbortButton
+0048943c	d		SmkcEsc
+00489440	d		SLongMonthNameJul
+00489444	d		SImageIndexError
+00489448	d		PTR_Output
+0048944c	d		SmkcTab
+00489450	d		SLongMonthNameNov
+00489454	d		SInvalidPixelFormat
+00489458	d		SVarNotArray
+0048945c	d		SUnkWin32Error
+00489460	d		PTR_GetMonitorInfo
+00489468	d		PTR_ExceptClsProc
+0048946c	d		PTR_MainInstance
+00489470	d		SAncestorNotFound
+00489478	d		Win32MajorVersion
+0048947c	d		SmkcUp
+00489480	d		SLongMonthNameMar
+00489484	d		SPropertyOutOfRange
+00489488	d		PTR_ExceptProc
+0048948c	d		PTR_GetSystemMetrics
+00489490	d		PTR_ExceptObjProc
+00489494	d		SmkcBkSp
+00489498	d		SDockTreeRemoveError
+0048949c	d		DotSep
+004894a0	d		SInvalidInteger
+004894a4	d		SNoCanvasHandle
+004894a8	d		SMsgDlgCancel
+004894ac	d		SLongMonthNameDec
+004894b0	d		SStackOverflow
+004894b8	d		SControlC
+004894bc	d		SImageWriteFail
+004894c0	d		SShortDayNameSat
+004894c4	d		SFileNotFound
+004894c8	d		SIntOverflow
+004894cc	d		SMsgDlgNo
+004894d0	d		SArgumentMissing
+004894d4	d		SMenuIndexError
+004894d8	d		SDuplicateItem
+004894dc	d		SVarArrayCreate
+004894e4	d		SAllButton
+004894e8	d		SLongMonthNameJan
+004894ec	d		SSortedListError
+004894f0	d		SListCountError
+004894f4	d		SIntfCastError
+004894f8	d		PTR_FlatSB_GetScrollPos
+004894fc	d		SInvalidImage
+00489500	d		PTR_NewStyleControls
+00489504	d		SmkcRight
+00489508	d		SAssignError
+00489510	d		SMsgDlgWarning
+00489514	d		SCloseButton
+00489518	d		PTR_MonitorFromWindow
+0048951c	d		SResNotFound
+00489520	d		SDockedCtlNeedsName
+00489524	d		SCannotShowModal
+00489528	d		SLongMonthNameJun
+0048952c	d		SInvalidVarOp
+00489530	d		SInvalidName
+00489534	d		STooManyDeleted
+00489538	d		SLongMonthNameApr
+00489548	d		SYesButton
+0048954c	d		SLongMonthNameAug
+00489550	d		SMsgDlgRetry
+00489554	d		SInvalidTabStyle
+00489558	d		SWriteError
+0048955c	d		sTabFailRetrieve
+00489560	d		PTR_EnumDisplayMonitors
+00489564	d		SVMetafiles
+00489568	d		SMsgDlgOK
+0048956c	d		SInvalidVarCast
+00489570	d		SShortMonthNameFeb
+00489574	d		SShortMonthNameOct
+00489578	d		SShortDayNameWed
+0048957c	d		SListCapacityError
+00489580	d		SEndOfFile
+00489584	d		sTabFailGetObject
+00489588	d		SOverflow
+0048958c	d		SGridTooLarge
+00489590	d		SLongMonthNameMay
+00489594	d		SMsgDlgYesToAll
+00489598	d		PTR_CmdShow
+0048959c	d		SDuplicateName
+004895a0	d		SInvalidPointer
+004895a4	d		SShortDayNameFri
+004895a8	d		SUnderflow
+004895ac	d		sTabFailDelete
+004895b0	d		SMsgDlgIgnore
+004895b4	d		SWindowDCError
+004895bc	d		SShortDayNameSun
+004895c0	d		SHelpButton
+004895c4	d		PTR_FlatSB_SetScrollInfo
+004895cc	d		PTR_AssertErrorProc
+004895d0	d		SSafecallException
+004895d4	d		PTR_Application
+004895d8	d		sTabFailClear
+004895dc	d		SWriteAccess
+004895e0	d		SFixedRowTooBig
+004895e4	d		SUnknownClipboardFormat
+004895e8	d		SInvalidImageList
+004895ec	d		SDuplicateClass
+004895f0	d		SLongDayNameThu
+004895f4	d		SIndexOutOfRange
+004895f8	d		SScrollBarRange
+00489600	d		SAccessDenied
+00489604	d		SCannotDragForm
+00489608	d		SAssertionFailed
+00489610	d		SParentRequired
+00489614	d		SControlParentSetToSelf
+00489618	d		SReadOnlyProperty
+0048961c	d		Win32MinorVersion
+00489620	d		SImageReadFail
+00489624	d		SLongMonthNameSep
+00489628	d		SShortDayNameMon
+0048962c	d		SMsgDlgAbort
+00489630	d		SDockZoneHasNoCtl
+00489634	d		SInvalidMemoSize
+00489638	d		PTR_IsConsole
+0048963c	d		SShortDayNameTue
+00489640	d		SVarArrayBounds
+00489644	d		SScanLine
+00489648	d		SListIndexError
+0048964c	d		SModuleAccessViolation
+00489650	d		SIniFileWriteError
+00489654	d		SFCreateError
+00489658	d		sTabMustBeMultiLine
+0048965c	d		sTabFailSet
+00489660	d		HeapAllocFlags
+00489664	d		SmkcIns
+00489668	d		SmkcPgUp
+0048966c	d		SFOpenError
+00489670	d		SShortMonthNameJul
+00489678	d		SNoMDIForm
+0048967c	d		SAssertError
+00489680	d		SShortMonthNameNov
+00489684	d		SMsgDlgInformation
+0048968c	d		SInvalidPropertyPath
+00489690	d		SCannotFocus
+00489694	d		SMenuNotFound
+00489698	d		SLongDayNameSat
+004896a0	d		SMsgDlgAll
+004896a4	d		SClassNotFound
+004896a8	d		SmkcPgDn
+004896ac	d		SShortMonthNameMar
+004896b0	d		SAccessViolation
+004896b4	d		SReadError
+004896b8	d		SInvalidFilename
+004896bc	d		SPrivilege
+004896c0	d		SPropertyException
+004896c4	d		SRangeError
+004896c8	d		SMsgDlgError
+004896cc	d		SDivByZero
+004896d0	d		SShortMonthNameDec
+004896d4	d		SMaskEditErr
+004896d8	d		SMemoryStreamError
+004896dc	d		SmkcHome
+004896e0	d		SmkcLeft
+004896e4	d		SInvalidOp
+004896e8	d		SCancelButton
+004896ec	d		PTR_Mouse
+004896f0	d		SmkcEnter
+004896fc	d		SShortMonthNameJan
+00489700	d		PTR_DecimalSeparator
+00489704	d		SNoButton
+0048970c	d		SMsgDlgYes
+00489710	d		PTR_FlatSB_SetScrollPos
+00489714	d		SException
+00489718	d		PTR_GlobalNameSpace
+0048971c	d		SInvalidCast
+00489720	d		PTR_Screen
+00489724	d		SmkcSpace
+00489728	d		SZeroDivide
+0048972c	d		LeadBytes
+00489730	d		SMenuReinserted
+00489734	d		SVisibleChanged
+00489738	d		Win32Platform
+0048973c	d		PTR_SysLocale
+00489740	d		SReadAccess
+00489744	d		SShortMonthNameJun
+0048a000	d		ExceptProc
+0048a004	d		ErrorProc
+0048a008	d		ExceptClsProc
+0048a00c	d		ExceptObjProc
+0048a010	d		ExceptionClass
+0048a014	d		AssertErrorProc
+0048a018	d		AbstractErrorProc
+0048a01c	d		MainInstance
+0048a020	d		MainThreadID
+0048a024	d		IsLibrary
+0048a028	d		CmdShow
+0048a02c	d		CmdLine
+0048a030	d		ExitCode
+0048a034	d		ExitProc
+0048a038	d		ErrorAddr
+0048a03c	d		RandSeed
+0048a040	d		IsConsole
+0048a041	d		IsMultiThread
+0048a042	d		FileMode
+0048a043	d		Test8086
+0048a044	d		Test8087
+0048a048	d		Input
+0048a214	d		Output
+0048a3e0	d		ClearAnyProc
+0048a3e4	d		ChangeAnyProc
+0048a3e8	d		RefAnyProc
+0048a3ec	d		Unassigned
+0048a3fc	d		Null
+0048a40c	d		EmptyParam
+0048a414	d		EmptyParam
+0048a41c	d		AllocMemCount
+0048a420	d		AllocMemSize
+0048a428	d		initialized
+0048a42c	d		heapErrorCode
+0048a430	d		heapLock
+0048a448	d		blockDescBlockList
+0048a44c	d		blockDescFreeList
+0048a450	d		spaceRoot
+0048a460	d		decommittedRoot
+0048a470	d		avail
+0048a474	d		avail
+0048a47c	d		rover
+0048a480	d		remBytes
+0048a484	d		curAlloc
+0048a488	d		smallTab
+0048a48c	d		committedRoot
+0048a49c	d		InitContext
+0048a4a0	d		InitContext
+0048a4a4	d		InitContext
+0048a4a8	d		InitContext
+0048a4ac	d		InitContext
+0048a4b0	d		InitContext
+0048a4b4	d		InitContext
+0048a4c8	d		ModuleIsLib
+0048a4c9	d		ModuleIsCpp
+0048a4cc	d		TlsIndex
+0048a4d4	d		HInstance
+0048a4dc	d		TlsBuffer
+0048a4e8	d		CurrencyString
+0048a4ec	d		CurrencyFormat
+0048a4ed	d		NegCurrFormat
+0048a4ee	d		ThousandSeparator
+0048a4ef	d		DecimalSeparator
+0048a4f0	d		CurrencyDecimals
+0048a4f1	d		DateSeparator
+0048a4f4	d		ShortDateFormat
+0048a4f8	d		LongDateFormat
+0048a4fc	d		TimeSeparator
+0048a500	d		TimeAMString
+0048a504	d		TimePMString
+0048a508	d		ShortTimeFormat
+0048a50c	d		ShortMonthNames
+0048a510	d		ShortMonthNames
+0048a53c	d		LongMonthNames
+0048a540	d		LongMonthNames
+0048a56c	d		ShortDayNames
+0048a570	d		ShortDayNames
+0048a588	d		LongDayNames
+0048a58c	d		LongDayNames
+0048a5a8	d		SysLocale
+0048a5ac	d		SysLocale
+0048a5ae	d		SysLocale
+0048a5b0	d		SysLocale
+0048a5b4	d		EraNames
+0048a5cc	d		EraYearOffsets
+0048a5d0	d		EraYearOffsets
+0048a5ec	d		ListSeparator
+0048a5f4	d		OutOfMemory
+0048a5f8	d		InvalidPointer
+0048a5fc	d		FLanguages
+0048a610	d		GlobalNameSpace
+0048a614	d		FindGlobalComponent
+0048a61c	d		ClassList
+0048a620	d		ClassAliasList
+0048a624	d		IntConstList
+0048a628	d		GlobalFixupList
+0048a62c	d		ThreadLock
+0048a644	d		ThreadWindow
+0048a648	d		GetSystemMetrics
+0048a64c	d		MonitorFromWindow
+0048a650	d		MonitorFromRect
+0048a654	d		MonitorFromPoint
+0048a658	d		GetMonitorInfoA
+0048a65c	d		GetMonitorInfoW
+0048a660	d		GetMonitorInfo
+0048a664	d		EnumDisplayMonitors
+0048a66c	d		User32Dll
+0048a670	d		InitApis
+0048a671	d		InitApis
+0048a672	d		InitApis
+0048a673	d		InitApis
+0048a674	d		InitApis
+0048a675	d		InitApis
+0048a676	d		InitApis
+0048a677	d		InitApis
+0048a678	d		MMAvailable
+0048a67c	d		SystemPalette16
+0048a684	d		ScreenLogPixels
+0048a688	d		StockPen
+0048a68c	d		StockBrush
+0048a690	d		StockFont
+0048a694	d		StockIcon
+0048a698	d		BitmapImageLock
+0048a6b0	d		CounterLock
+0048a6c8	d		FontManager
+0048a6cc	d		PenManager
+0048a6d0	d		BrushManager
+0048a6d4	d		CanvasList
+0048a6d8	d		PatternManager
+0048a6fc	d		FlatSB_EnableScrollBar
+0048a700	d		FlatSB_ShowScrollBar
+0048a704	d		FlatSB_GetScrollRange
+0048a708	d		FlatSB_GetScrollInfo
+0048a70c	d		FlatSB_GetScrollPos
+0048a710	d		FlatSB_SetScrollPos
+0048a714	d		FlatSB_SetScrollInfo
+0048a718	d		FlatSB_SetScrollRange
+0048a720	d		_FlatSB_GetScrollProp
+0048a724	d		_FlatSB_SetScrollProp
+0048a728	d		_InitializeFlatSB
+0048a72c	d		_UninitializeFlatSB
+0048a734	d		CF_PICTURE
+0048a736	d		CF_COMPONENT
+0048a73c	d		FClipboard
+0048a748	d		Application
+0048a74c	d		Screen
+0048a754	d		InstBlockList
+0048a758	d		InstFreeList
+0048a75c	d		HintThreadID
+0048a760	d		HintDoneEvent
+0048a764	d		HintHook
+0048a768	d		HintThread
+0048a770	d		PopupList
+0048a774	d		ShortCutItems
+0048a77c	d		CommandPool
+0048a780	d		Mouse
+0048a784	d		NewStyleControls
+0048a78c	d		WindowAtom
+0048a78e	d		ControlAtom
+0048a790	d		DragControl
+0048a794	d		DragObject
+0048a798	d		DragFreeObject
+0048a79c	d		DragCapture
+0048a7a0	d		DragStartPos
+0048a7a4	d		DragStartPos
+0048a7a8	d		DragSaveCursor
+0048a7ac	d		DragThreshold
+0048a7b0	d		ActiveDrag
+0048a7b4	d		DragImageList
+0048a7b8	d		DockSiteList
+0048a7bc	d		QualifyingSites
+0048a7c0	d		CanvasList
+0048a7c4	d		_WINNLSEnableIME
+0048a7c8	d		_ImmGetContext
+0048a7cc	d		_ImmReleaseContext
+0048a7d0	d		_ImmGetConversionStatus
+0048a7d4	d		_ImmSetConversionStatus
+0048a7d8	d		_ImmSetOpenStatus
+0048a7dc	d		_ImmSetCompositionWindow
+0048a7e0	d		_ImmSetCompositionFont
+0048a7e4	d		_ImmGetCompositionString
+0048a7e8	d		_ImmIsIME
+0048a7ec	d		_ImmNotifyIME
+0048a814	d		HelpMsg
+0048a818	d		FindMsg
+0048a81c	d		ButtonWidths
+0048a868	d		BitBtnGlyphs
+0048a91c	d		ShellModule
+0048a920	d		FRichEditModule

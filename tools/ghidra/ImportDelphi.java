@@ -19,7 +19,14 @@ public class ImportDelphi extends GhidraScript {
             String[] f = line.split("\t");
             Address a = toAddr(Long.parseLong(f[0], 16));
             String name = f[3].replace(' ', '_');
-            if (f[1].equals("f")) {
+            if (f[1].equals("s")) {
+                try {
+                    clearListing(a, a.add(Integer.parseInt(f[3])));
+                    createAsciiString(a, Integer.parseInt(f[3]) + 1);
+                } catch (Exception e) {
+                    println("string at " + a + ": " + e.getMessage());
+                }
+            } else if (f[1].equals("f")) {
                 disassemble(a);
                 Function fn = getFunctionAt(a);
                 if (fn == null) fn = createFunction(a, name);
