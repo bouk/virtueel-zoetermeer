@@ -169,12 +169,12 @@ function DrawButtonFace(Canvas: TCanvas; const Client: TRect; BevelWidth: Intege
   Style: TButtonStyle; IsRounded, IsDown, IsFocused: Boolean): TRect;
 begin
   Result := Client;
-  ZMDrawButtonFace(Canvas, Result, IsDown, False, IsFocused);
+  ZMTekenKnopvlak(Canvas, Result, IsDown, False, IsFocused);
   InflateRect(Result, -2, -2);
 end;
 
 { Tekent het glyph van een standaard knopsoort, 16x16, op X, Y. }
-procedure DrawKindGlyph(Tekenvlak: TCanvas; Soort: TBitBtnKind; X, Y: Integer; Ingeschakeld: Boolean);
+procedure TekenSoortGlyph(Tekenvlak: TCanvas; Soort: TBitBtnKind; X, Y: Integer; Ingeschakeld: Boolean);
 var
   I: Integer;
   C: TColor;
@@ -222,7 +222,7 @@ begin
     end;
 end;
 
-procedure DrawGlyphAndText(Tekenvlak: TCanvas; R: TRect; Glyph: TBitmap; Aantalglyphs: Integer;
+procedure TekenGlyphEnTekst(Tekenvlak: TCanvas; R: TRect; Glyph: TBitmap; Aantalglyphs: Integer;
   Soort: TBitBtnKind; const Titel: string; Indeling: TButtonLayout; Marge, Afstand: Integer;
   Ingeschakeld, Omlaag: Boolean);
 var
@@ -289,7 +289,7 @@ begin
     OffsetRect(TR, 1, 1);
   end;
   if Voorraad then
-    DrawKindGlyph(Tekenvlak, Soort, X, Y, Ingeschakeld)
+    TekenSoortGlyph(Tekenvlak, Soort, X, Y, Ingeschakeld)
   else if Heeftglyph then
   begin
     Idx := 0;
@@ -313,7 +313,7 @@ begin
   if Ingeschakeld then
     DrawText(Tekenvlak.Handle, PChar(Titel), Length(Titel), TR, DT_CENTER or DT_VCENTER or DT_SINGLELINE)
   else
-    ZMDrawDisabledText(Tekenvlak, TR, Titel, DT_CENTER or DT_VCENTER or DT_SINGLELINE);
+    ZMTekenUitgeschakeldeTekst(Tekenvlak, TR, Titel, DT_CENTER or DT_VCENTER or DT_SINGLELINE);
 end;
 
 { ---------------------------------------------------------------- TBitBtn }
@@ -444,10 +444,10 @@ begin
   begin
     R := ClientRect;
     Omlaag := FPressed and FMouseInside;
-    ZMDrawButtonFace(C, R, Omlaag, Default or Focused, Focused);
+    ZMTekenKnopvlak(C, R, Omlaag, Default or Focused, Focused);
     C.Font := Font;
     InflateRect(R, -2, -2);
-    DrawGlyphAndText(C, R, FGlyph, FNumGlyphs, FKind, Caption, FLayout, FMargin, FSpacing,
+    TekenGlyphEnTekst(C, R, FGlyph, FNumGlyphs, FKind, Caption, FLayout, FMargin, FSpacing,
       Enabled, Omlaag);
     if Focused then
     begin
@@ -501,14 +501,14 @@ begin
   R := ClientRect;
   Canvas.Font := Font;
   if not FFlat or FMouseInControl or Omlaag then
-    ZMDrawButtonFace(Canvas, R, Omlaag, False, False)
+    ZMTekenKnopvlak(Canvas, R, Omlaag, False, False)
   else if not FTransparent then
   begin
     Canvas.Brush.Color := Color;
     Canvas.FillRect(R);
   end;
   InflateRect(R, -2, -2);
-  DrawGlyphAndText(Canvas, R, FGlyph, FNumGlyphs, bkCustom, Caption, FLayout, FMargin, FSpacing,
+  TekenGlyphEnTekst(Canvas, R, FGlyph, FNumGlyphs, bkCustom, Caption, FLayout, FMargin, FSpacing,
     Enabled, Omlaag);
 end;
 

@@ -17,10 +17,10 @@ const
   StackGrootte = 4 * 1024 * 1024;
 
 var
-  AsyncifyStack: array[0..StackGrootte - 1] of Byte;
+  AsyncifyStapel: array[0..StackGrootte - 1] of Byte;
 
-procedure zm_set_async_buffer(Geheugen: Pointer; Grootte: Integer); external 'zm' name 'set_async_buffer';
+procedure zm_zet_async_buffer(Geheugen: Pointer; Grootte: Integer); external 'zm' name 'set_async_buffer';
 
 initialization
-  zm_set_async_buffer(@AsyncifyStack[0], SizeOf(AsyncifyStack));
+  zm_zet_async_buffer(@AsyncifyStapel[0], SizeOf(AsyncifyStapel));
 end.

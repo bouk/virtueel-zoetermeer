@@ -41,7 +41,7 @@ begin
   RandSeed := ((Uur * 60 + Minuut) * 60 + Seconde) * 1000 + Milliseconde;
 end;
 
-function NextSeed: Longword;
+function VolgendZaad: Longword;
 begin
   {$PUSH}{$Q-}{$R-}
   RandSeed := Longint(Longword(RandSeed) * $08088405 + 1);
@@ -52,7 +52,7 @@ end;
 function Random(Bereik: Integer): Integer;
 begin
   { MUL: ongetekend 32x32 -> 64, hoge helft }
-  Result := Integer((QWord(NextSeed) * QWord(Longword(Bereik))) shr 32);
+  Result := Integer((QWord(VolgendZaad) * QWord(Longword(Bereik))) shr 32);
 end;
 
 end.

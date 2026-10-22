@@ -169,12 +169,12 @@ uses Math, ZMData;
 
 function DirectoryExists(const Name: string): Boolean;
 begin
-  Result := SysUtils.DirectoryExists(ZMResolvePath(Name));
+  Result := SysUtils.DirectoryExists(ZMOplosPad(Name));
 end;
 
 function ForceDirectories(Dir: string): Boolean;
 begin
-  Result := SysUtils.ForceDirectories(ZMResolvePath(Dir));
+  Result := SysUtils.ForceDirectories(ZMOplosPad(Dir));
 end;
 
 function MinimizeName(const Filename: TFileName; Canvas: TCanvas; MaxLen: Integer): TFileName;
@@ -484,7 +484,7 @@ begin
     L := TDirectoryListBox.Create(F);
     L.Parent := F;
     L.SetBounds(8, 8, 284, 200);
-    if Directory <> '' then L.Directory := ZMResolvePath(Directory);
+    if Directory <> '' then L.Directory := ZMOplosPad(Directory);
     B := TButton.Create(F);
     B.Parent := F;
     B.Caption := 'OK';

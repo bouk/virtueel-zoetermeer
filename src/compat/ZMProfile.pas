@@ -12,17 +12,17 @@ unit ZMProfile;
   (na de laatste sleutel van de sectie) of verwijderd. Commentaar, lege regels,
   volgorde en regeleinden (CRLF of LF) van de rest van het bestand blijven precies
   zoals ze waren. Een nieuwe sectie komt achteraan het bestand. Er wordt geschreven
-  naar ZMWritePath (de overlay van ZMData), nooit in de datamap. }
+  naar ZMSchrijfPad (de overlay van ZMData), nooit in de datamap. }
 
 {$MODE DELPHI}{$H+}
 
 interface
 
-function ZMGetPrivateProfileString(SectieNaam, SleutelNaam, Standaard: PAnsiChar;
+function ZMLeesPrivateProfileString(SectieNaam, SleutelNaam, Standaard: PAnsiChar;
   Resultaat: PAnsiChar; Grootte: LongWord; Bestandsnaam: PAnsiChar): LongWord;
-function ZMWritePrivateProfileString(SectieNaam, SleutelNaam, NieuweWaarde,
+function ZMSchrijfPrivateProfileString(SectieNaam, SleutelNaam, NieuweWaarde,
   Bestandsnaam: PAnsiChar): Boolean;
-function ZMGetPrivateProfileInt(SectieNaam, SleutelNaam: PAnsiChar; Standaardgetal: Integer;
+function ZMLeesPrivateProfileGetal(SectieNaam, SleutelNaam: PAnsiChar; Standaardgetal: Integer;
   Bestandsnaam: PAnsiChar): LongWord;
 
 implementation
@@ -58,7 +58,7 @@ begin
   inherited Destroy;
 end;
 
-function FileSizeOf(const Pad: string): Int64;
+function BestandsGrootte(const Pad: string): Int64;
 var
   Zoekrecord: TSearchRec;
 begin
@@ -70,12 +70,12 @@ begin
   end;
 end;
 
-function ResolveName(Bestandsnaam: PAnsiChar): string;
+function OplosNaam(Bestandsnaam: PAnsiChar): string;
 begin
-  Result := ZMResolvePath(StrPas(Bestandsnaam));
+  Result := ZMOplosPad(StrPas(Bestandsnaam));
 end;
 
-procedure SplitLines(const Gegevens: string; Profiel: TProfileFile);
+procedure SplitsRegels(const Gegevens: string; Profiel: TProfileFile);
 var
   Index, Startpositie: Integer;
   Regel: string;
@@ -103,7 +103,7 @@ begin
   end;
 end;
 
-function ReadWhole(const Pad: string; out Inhoud: string): Boolean;
+function LeesHeel(const Pad: string; out Inhoud: string): Boolean;
 var
   Stroom: TFileStream;
 begin
@@ -126,8 +126,8 @@ begin
 end;
 
 { Het bestand uit de cache, of opnieuw ingelezen als het op schijf veranderd is.
-  Een ontbrekend bestand geeft een leeg TProfileFile (Exists = False). }
-function Load(const Pad: string; out Bestaat: Boolean): TProfileFile;
+  Een ontbrekend bestand geeft een leeg TProfileFile (IsAanwezig = False). }
+function Laad(const Pad: string; out Bestaat: Boolean): TProfileFile;
 var
   Index: Integer;
   Leeftijd: LongInt;
@@ -142,7 +142,7 @@ begin
   end;
   Bestaat := FileExists(Pad);
   Leeftijd := FileAge(Pad);
-  Grootte := FileSizeOf(Pad);
+  Grootte := BestandsGrootte(Pad);
   Index := Cache.IndexOf(Pad);
   if Index >= 0 then
   begin
@@ -154,11 +154,11 @@ begin
   Result.Path := Pad;
   Result.Stamp := Leeftijd;
   Result.Size := Grootte;
-  if Bestaat and ReadWhole(Pad, Gegevens) then SplitLines(Gegevens, Result);
+  if Bestaat and LeesHeel(Pad, Gegevens) then SplitsRegels(Gegevens, Result);
   Cache.AddObject(Pad, Result);
 end;
 
-procedure Forget(const Pad: string);
+procedure Vergeet(const Pad: string);
 var
   Index: Integer;
 begin
@@ -170,48 +170,48 @@ end;
 { ---------------------------------------------------------------- regels ontleden }
 
 const
-  Blanks = [' ', #9];
+  Witruimte = [' ', #9];
 
-function TrimBlanks(const Tekst: string): string;
+function VerwijderWitruimte(const Tekst: string): string;
 var
   Eerste, Laatste: Integer;
 begin
   Eerste := 1;
   Laatste := Length(Tekst);
-  while (Eerste <= Laatste) and (Tekst[Eerste] in Blanks) do Inc(Eerste);
-  while (Laatste >= Eerste) and (Tekst[Laatste] in Blanks) do Dec(Laatste);
+  while (Eerste <= Laatste) and (Tekst[Eerste] in Witruimte) do Inc(Eerste);
+  while (Laatste >= Eerste) and (Tekst[Laatste] in Witruimte) do Dec(Laatste);
   Result := Copy(Tekst, Eerste, Laatste - Eerste + 1);
 end;
 
 { True als de regel een sectiekop is; Name krijgt de naam tussen de haken. }
-function IsSection(const Regel: string; out Naam: string): Boolean;
+function IsSectie(const Regel: string; out Naam: string): Boolean;
 var
   Tekst: string;
   Positie: Integer;
 begin
-  Tekst := TrimBlanks(Regel);
+  Tekst := VerwijderWitruimte(Regel);
   Result := (Tekst <> '') and (Tekst[1] = '[');
   if not Result then Exit;
   Positie := Pos(']', Tekst);
   if Positie = 0 then Positie := Length(Tekst) + 1;
-  Naam := TrimBlanks(Copy(Tekst, 2, Positie - 2));
+  Naam := VerwijderWitruimte(Copy(Tekst, 2, Positie - 2));
 end;
 
 { True als de regel een sleutel is (geen sectie, commentaar of lege regel). }
-function IsKey(const Regel: string; out Naam, Waarde: string; out HeeftWaarde: Boolean): Boolean;
+function IsSleutel(const Regel: string; out Naam, Waarde: string; out HeeftWaarde: Boolean): Boolean;
 var
   Tekst: string;
   Positie: Integer;
 begin
-  Tekst := TrimBlanks(Regel);
+  Tekst := VerwijderWitruimte(Regel);
   Result := (Tekst <> '') and (Tekst[1] <> '[') and (Tekst[1] <> ';');
   if not Result then Exit;
   Positie := Pos('=', Tekst);
   HeeftWaarde := Positie > 0;
   if HeeftWaarde then
   begin
-    Naam := TrimBlanks(Copy(Tekst, 1, Positie - 1));
-    Waarde := TrimBlanks(Copy(Tekst, Positie + 1, MaxInt));
+    Naam := VerwijderWitruimte(Copy(Tekst, 1, Positie - 1));
+    Waarde := VerwijderWitruimte(Copy(Tekst, Positie + 1, MaxInt));
   end
   else
   begin
@@ -220,7 +220,7 @@ begin
   end;
 end;
 
-function Unquote(const Tekst: string): string;
+function ZonderAanhalingen(const Tekst: string): string;
 begin
   if (Length(Tekst) >= 2) and (Tekst[1] in ['"', '''']) and (Tekst[Length(Tekst)] = Tekst[1]) then
     Result := Copy(Tekst, 2, Length(Tekst) - 2)
@@ -229,42 +229,42 @@ begin
 end;
 
 { Index van de eerste sectiekop met deze naam vanaf regel From, of -1. }
-function FindSection(Profiel: TProfileFile; const Sectie: string; Vanaf: Integer): Integer;
+function ZoekSectie(Profiel: TProfileFile; const Sectie: string; Vanaf: Integer): Integer;
 var
   Index: Integer;
   Naam: string;
 begin
   for Index := Vanaf to Profiel.Lines.Count - 1 do
-    if IsSection(Profiel.Lines[Index], Naam) and SameText(Naam, Sectie) then Exit(Index);
+    if IsSectie(Profiel.Lines[Index], Naam) and SameText(Naam, Sectie) then Exit(Index);
   Result := -1;
 end;
 
 { Eerste regel na de sectie die op regel Head begint (de volgende kop of het einde). }
-function SectionEnd(Profiel: TProfileFile; Kop: Integer): Integer;
+function SectieEinde(Profiel: TProfileFile; Kop: Integer): Integer;
 var
   Naam: string;
 begin
   Result := Kop + 1;
-  while (Result < Profiel.Lines.Count) and not IsSection(Profiel.Lines[Result], Naam) do Inc(Result);
+  while (Result < Profiel.Lines.Count) and not IsSectie(Profiel.Lines[Result], Naam) do Inc(Result);
 end;
 
 { Regelnummer van de sleutel in (een van de secties met naam) Section, of -1. }
-function FindKey(Profiel: TProfileFile; const Sectie, Sleutel: string): Integer;
+function ZoekSleutel(Profiel: TProfileFile; const Sectie, Sleutel: string): Integer;
 var
   Kop, Index: Integer;
   Naam, Waarde: string;
   HeeftWaarde: Boolean;
 begin
-  Kop := FindSection(Profiel, Sectie, 0);
+  Kop := ZoekSectie(Profiel, Sectie, 0);
   while Kop >= 0 do
   begin
     Index := Kop + 1;
-    while (Index < Profiel.Lines.Count) and not IsSection(Profiel.Lines[Index], Naam) do
+    while (Index < Profiel.Lines.Count) and not IsSectie(Profiel.Lines[Index], Naam) do
     begin
-      if IsKey(Profiel.Lines[Index], Naam, Waarde, HeeftWaarde) and SameText(Naam, Sleutel) then Exit(Index);
+      if IsSleutel(Profiel.Lines[Index], Naam, Waarde, HeeftWaarde) and SameText(Naam, Sleutel) then Exit(Index);
       Inc(Index);
     end;
-    Kop := FindSection(Profiel, Sectie, Index);
+    Kop := ZoekSectie(Profiel, Sectie, Index);
   end;
   Result := -1;
 end;
@@ -274,7 +274,7 @@ end;
 { Kopieert een lijst van namen (elk afgesloten met #0, plus een extra #0) naar de
   buffer, met de afkapregels van Windows: past de lijst niet, dan eindigt de buffer op
   twee nullen en is het resultaat nSize - 2. }
-function CopyList(Namen: TStringList; Buffer: PAnsiChar; Grootte: LongWord): LongWord;
+function KopieerLijst(Namen: TStringList; Buffer: PAnsiChar; Grootte: LongWord): LongWord;
 var
   Index, Teller: Integer;
   Positie: LongWord;
@@ -307,7 +307,7 @@ begin
   Result := Positie;
 end;
 
-function CopyValue(const Tekst: string; Buffer: PAnsiChar; Grootte: LongWord): LongWord;
+function KopieerWaarde(const Tekst: string; Buffer: PAnsiChar; Grootte: LongWord): LongWord;
 begin
   Result := 0;
   if Grootte = 0 then Exit;
@@ -322,7 +322,7 @@ begin
   Result := Length(Tekst);
 end;
 
-function ZMGetPrivateProfileString(SectieNaam, SleutelNaam, Standaard: PAnsiChar;
+function ZMLeesPrivateProfileString(SectieNaam, SleutelNaam, Standaard: PAnsiChar;
   Resultaat: PAnsiChar; Grootte: LongWord; Bestandsnaam: PAnsiChar): LongWord;
 var
   Profiel: TProfileFile;
@@ -336,16 +336,16 @@ begin
   { Windows haalt spaties achteraan de standaardwaarde weg }
   if Standaard <> nil then Standaardtekst := StrPas(Standaard) else Standaardtekst := '';
   while (Standaardtekst <> '') and (Standaardtekst[Length(Standaardtekst)] = ' ') do SetLength(Standaardtekst, Length(Standaardtekst) - 1);
-  if Bestandsnaam = nil then Exit(CopyValue(Standaardtekst, Resultaat, Grootte));
-  Profiel := Load(ResolveName(Bestandsnaam), Bestaat);
+  if Bestandsnaam = nil then Exit(KopieerWaarde(Standaardtekst, Resultaat, Grootte));
+  Profiel := Laad(OplosNaam(Bestandsnaam), Bestaat);
   if SectieNaam = nil then
   begin
     { alle sectienamen }
     Namen := TStringList.Create;
     try
       for Index := 0 to Profiel.Lines.Count - 1 do
-        if IsSection(Profiel.Lines[Index], Naam) then Namen.Add(Naam);
-      Result := CopyList(Namen, Resultaat, Grootte);
+        if IsSectie(Profiel.Lines[Index], Naam) then Namen.Add(Naam);
+      Result := KopieerLijst(Namen, Resultaat, Grootte);
     finally
       Namen.Free;
     end;
@@ -356,31 +356,31 @@ begin
     { alle sleutels van de sectie }
     Namen := TStringList.Create;
     try
-      Kop := FindSection(Profiel, StrPas(SectieNaam), 0);
+      Kop := ZoekSectie(Profiel, StrPas(SectieNaam), 0);
       while Kop >= 0 do
       begin
         Index := Kop + 1;
-        while (Index < Profiel.Lines.Count) and not IsSection(Profiel.Lines[Index], Naam) do
+        while (Index < Profiel.Lines.Count) and not IsSectie(Profiel.Lines[Index], Naam) do
         begin
-          if IsKey(Profiel.Lines[Index], Naam, Waarde, HeeftWaarde) then Namen.Add(Naam);
+          if IsSleutel(Profiel.Lines[Index], Naam, Waarde, HeeftWaarde) then Namen.Add(Naam);
           Inc(Index);
         end;
-        Kop := FindSection(Profiel, StrPas(SectieNaam), Index);
+        Kop := ZoekSectie(Profiel, StrPas(SectieNaam), Index);
       end;
-      Result := CopyList(Namen, Resultaat, Grootte);
+      Result := KopieerLijst(Namen, Resultaat, Grootte);
     finally
       Namen.Free;
     end;
     Exit;
   end;
-  Index := FindKey(Profiel, StrPas(SectieNaam), StrPas(SleutelNaam));
-  if (Index >= 0) and IsKey(Profiel.Lines[Index], Naam, Waarde, HeeftWaarde) and HeeftWaarde then
-    Result := CopyValue(Unquote(Waarde), Resultaat, Grootte)
+  Index := ZoekSleutel(Profiel, StrPas(SectieNaam), StrPas(SleutelNaam));
+  if (Index >= 0) and IsSleutel(Profiel.Lines[Index], Naam, Waarde, HeeftWaarde) and HeeftWaarde then
+    Result := KopieerWaarde(ZonderAanhalingen(Waarde), Resultaat, Grootte)
   else
-    Result := CopyValue(Standaardtekst, Resultaat, Grootte);
+    Result := KopieerWaarde(Standaardtekst, Resultaat, Grootte);
 end;
 
-function ZMGetPrivateProfileInt(SectieNaam, SleutelNaam: PAnsiChar; Standaardgetal: Integer;
+function ZMLeesPrivateProfileGetal(SectieNaam, SleutelNaam: PAnsiChar; Standaardgetal: Integer;
   Bestandsnaam: PAnsiChar): LongWord;
 var
   Buffer: array[0..255] of AnsiChar;
@@ -389,8 +389,8 @@ var
   Negatief: Boolean;
 begin
   { zoals Windows: de cijfers aan het begin tellen, de rest wordt genegeerd }
-  ZMGetPrivateProfileString(SectieNaam, SleutelNaam, '', Buffer, SizeOf(Buffer), Bestandsnaam);
-  Tekst := TrimBlanks(StrPas(Buffer));
+  ZMLeesPrivateProfileString(SectieNaam, SleutelNaam, '', Buffer, SizeOf(Buffer), Bestandsnaam);
+  Tekst := VerwijderWitruimte(StrPas(Buffer));
   if Tekst = '' then Exit(LongWord(Standaardgetal));
   Index := 1;
   Negatief := False;
@@ -411,7 +411,7 @@ end;
 
 { ---------------------------------------------------------------- schrijven }
 
-function Save(Profiel: TProfileFile; const LeesPad: string): Boolean;
+function Bewaar(Profiel: TProfileFile; const LeesPad: string): Boolean;
 var
   Doel, Gegevens: string;
   Index: Integer;
@@ -424,7 +424,7 @@ begin
     Gegevens := Gegevens + Profiel.Lines[Index];
     if (Index < Profiel.Lines.Count - 1) or Profiel.FinalEOL then Gegevens := Gegevens + Profiel.EOL;
   end;
-  Doel := ZMWritePath(LeesPad);
+  Doel := ZMSchrijfPad(LeesPad);
   try
     Stroom := TFileStream.Create(Doel, fmCreate);
     try
@@ -436,11 +436,11 @@ begin
   except
     Result := False;
   end;
-  Forget(LeesPad);
-  Forget(Doel);
+  Vergeet(LeesPad);
+  Vergeet(Doel);
 end;
 
-function ZMWritePrivateProfileString(SectieNaam, SleutelNaam, NieuweWaarde,
+function ZMSchrijfPrivateProfileString(SectieNaam, SleutelNaam, NieuweWaarde,
   Bestandsnaam: PAnsiChar): Boolean;
 var
   Profiel: TProfileFile;
@@ -457,26 +457,26 @@ begin
   end;
   Result := False;
   if (SectieNaam = nil) or (Bestandsnaam = nil) then Exit;
-  Pad := ResolveName(Bestandsnaam);
-  Profiel := Load(Pad, Bestaat);
+  Pad := OplosNaam(Bestandsnaam);
+  Profiel := Laad(Pad, Bestaat);
   Sectie := StrPas(SectieNaam);
   Gewijzigd := False;
   if SleutelNaam = nil then
   begin
     { hele sectie verwijderen (kop en alle regels tot de volgende kop) }
-    Kop := FindSection(Profiel, Sectie, 0);
+    Kop := ZoekSectie(Profiel, Sectie, 0);
     while Kop >= 0 do
     begin
-      Einde := SectionEnd(Profiel, Kop);
+      Einde := SectieEinde(Profiel, Kop);
       for Index := Einde - 1 downto Kop do Profiel.Lines.Delete(Index);
       Gewijzigd := True;
-      Kop := FindSection(Profiel, Sectie, Kop);
+      Kop := ZoekSectie(Profiel, Sectie, Kop);
     end;
   end
   else if NieuweWaarde = nil then
   begin
     { sleutel verwijderen }
-    Index := FindKey(Profiel, Sectie, StrPas(SleutelNaam));
+    Index := ZoekSleutel(Profiel, Sectie, StrPas(SleutelNaam));
     if Index >= 0 then
     begin
       Profiel.Lines.Delete(Index);
@@ -485,7 +485,7 @@ begin
   end
   else
   begin
-    Index := FindKey(Profiel, Sectie, StrPas(SleutelNaam));
+    Index := ZoekSleutel(Profiel, Sectie, StrPas(SleutelNaam));
     if Index >= 0 then
     begin
       { bestaande regel: alles tot en met het '=' (en de witruimte erna) blijft
@@ -494,11 +494,11 @@ begin
       Kop := Pos('=', Naam);
       if Kop > 0 then
       begin
-        while (Kop < Length(Naam)) and (Naam[Kop + 1] in Blanks) do Inc(Kop);
+        while (Kop < Length(Naam)) and (Naam[Kop + 1] in Witruimte) do Inc(Kop);
         Nieuweregel := Copy(Naam, 1, Kop) + StrPas(NieuweWaarde);
       end
       else
-        Nieuweregel := TrimBlanks(Naam) + '=' + StrPas(NieuweWaarde);
+        Nieuweregel := VerwijderWitruimte(Naam) + '=' + StrPas(NieuweWaarde);
       if Nieuweregel <> Profiel.Lines[Index] then
       begin
         Profiel.Lines[Index] := Nieuweregel;
@@ -508,15 +508,15 @@ begin
     else
     begin
       Nieuweregel := StrPas(SleutelNaam) + '=' + StrPas(NieuweWaarde);
-      Kop := FindSection(Profiel, Sectie, 0);
+      Kop := ZoekSectie(Profiel, Sectie, 0);
       if Kop >= 0 then
       begin
         { na de laatste sleutel (of de kop) van de sectie invoegen, voor de lege
           regels en het commentaar waarmee de volgende sectie begint }
-        Einde := SectionEnd(Profiel, Kop);
+        Einde := SectieEinde(Profiel, Kop);
         Laatste := Kop;
         for Index := Kop + 1 to Einde - 1 do
-          if IsKey(Profiel.Lines[Index], Naam, Waarde, HeeftWaarde) then Laatste := Index;
+          if IsSleutel(Profiel.Lines[Index], Naam, Waarde, HeeftWaarde) then Laatste := Index;
         Profiel.Lines.Insert(Laatste + 1, Nieuweregel);
       end
       else
@@ -529,7 +529,7 @@ begin
   end;
   if not Gewijzigd then Exit(True);
   if not Bestaat then Profiel.FinalEOL := True;
-  Result := Save(Profiel, Pad);
+  Result := Bewaar(Profiel, Pad);
 end;
 
 finalization

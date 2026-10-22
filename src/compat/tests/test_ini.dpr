@@ -70,9 +70,9 @@ begin
   Fails := 0;
   { het pad zoals het spel het maakt: map van ParamStr(0) + '\Test.ini' }
   Path := ExtractFilePath(Windows.ParamStr(0)) + '\Test.ini';
-  DataFile := ZMDataDir + 'Test.ini';
-  SaveFile := ZMSaveDir + 'Test.ini';
-  Check(ZMSaveDir <> '', 'ZM_SAVE moet een overlay opleveren');
+  DataFile := ZMDataMap + 'Test.ini';
+  SaveFile := ZMBewaarMap + 'Test.ini';
+  Check(ZMBewaarMap <> '', 'ZM_SAVE moet een overlay opleveren');
   CheckEq(ReadFile(DataFile), Origineel, 'datamap voor de test');
 
   Ini := TIniFile.Create(Path);
@@ -145,7 +145,7 @@ begin
   CheckEq(ReadFile(DataFile), Origineel, 'de datamap mag niet veranderen (2)');
 
   { lezen via de datamap zelf geeft ook de overlaykopie }
-  CheckEq(ReadFile(ZMResolvePath(ZMDataDir + 'test.INI')), Verwacht, 'ZMResolvePath kiest de overlay');
+  CheckEq(ReadFile(ZMOplosPad(ZMDataMap + 'test.INI')), Verwacht, 'ZMResolvePath kiest de overlay');
 
   if Fails = 0 then WriteLn('test_ini: alles goed') else WriteLn('test_ini: ', Fails, ' fouten');
   if Fails > 0 then Halt(1);

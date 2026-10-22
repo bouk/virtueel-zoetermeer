@@ -32,7 +32,7 @@ begin
   Fails := 0;
   OutFile := ParamStr(1);
   if OutFile = '' then OutFile := 'test_bitmap.png';
-  Name := ZMResolvePath(ZMDataDir + 'images/8bits/K-Sloop_up.bmp');
+  Name := ZMOplosPad(ZMDataMap + 'images/8bits/K-Sloop_up.bmp');
   Bmp := TBitmap.Create;
   Bmp.LoadFromFile(Name);
   Check(Bmp.PixelFormat = pf8bit, 'de sprite moet als pf8bit worden geladen');
@@ -90,7 +90,7 @@ begin
   finally
     ReleaseDC(F.Handle, DC);
   end;
-  ZMPresent(True);
-  ZMSaveScreenshot(OutFile);
+  ZMPresenteer(True);
+  ZMBewaarSchermafdruk(OutFile);
   if Fails = 0 then WriteLn('OK test_bitmap -> ', OutFile) else Halt(1);
 end.

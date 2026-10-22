@@ -450,7 +450,7 @@ begin
   if ShortCut and scAlt <> 0 then Include(Shift, ssAlt);
 end;
 
-function KeyName(Toets: Word): string;
+function ToetsNaam(Toets: Word): string;
 begin
   case Toets of
     VK_BACK: Result := 'BkSp';
@@ -479,7 +479,7 @@ function ShortCutToText(ShortCut: TShortCut): string;
 var
   Naam: string;
 begin
-  Naam := KeyName(ShortCut and $FF);
+  Naam := ToetsNaam(ShortCut and $FF);
   if Naam = '' then Exit('');
   Result := '';
   if ShortCut and scShift <> 0 then Result := Result + 'Shift+';
@@ -504,7 +504,7 @@ begin
   Result := 0;
   if Text = '' then Exit;
   for K := 8 to 255 do
-    if AnsiSameText(Text, KeyName(K)) then Exit(Schakel or K);
+    if AnsiSameText(Text, ToetsNaam(K)) then Exit(Schakel or K);
 end;
 
 function NewMenu(Owner: TComponent; const AName: string; const Items: array of TMenuItem): TMainMenu;

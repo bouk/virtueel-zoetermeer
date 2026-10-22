@@ -17,7 +17,7 @@ unit ZMHarness;
     wait <ms> | move <x> <y> | click <x> <y> [right] | key <naam> | seed <n> |
     dump <naam> | sprites <naam> | shot <naam> | stop
 
-  Het harnas draait vanuit ZMIdleHook (bij elke ronde van de berichtenlus, ook binnen modale
+  Het harnas draait vanuit ZMInactiefHaak (bij elke ronde van de berichtenlus, ook binnen modale
   lussen) en geeft invoer door via ZMWin, alsof die van de backend kwam. }
 
 {$MODE DELPHI}{$H+}
@@ -315,7 +315,7 @@ begin
     A := Acties[Volgende];
     Inc(Volgende);
     case A.Soort of
-      asBeweeg: ZMInjectMouse(A.X, A.Y, 0, False);
+      asBeweeg: ZMInjecteerMuis(A.X, A.Y, 0, False);
       asDruk:
         begin
           { een 'seed' geldt vlak voor de volgende muisklik (zie docs/DIFFTEST.md) }
@@ -324,15 +324,15 @@ begin
             ZMRandom.RandSeed := OpenstaandeSeed;
             OpenstaandeSeed := GeenSeed;
           end;
-          ZMInjectMouse(A.X, A.Y, A.Knop, True);
+          ZMInjecteerMuis(A.X, A.Y, A.Knop, True);
         end;
-      asLos: ZMInjectMouse(A.X, A.Y, A.Knop, False);
-      asToets: ZMInjectKey(A.X, A.Y <> 0);
-      asTeken: ZMInjectChar(A.Arg[1]);
+      asLos: ZMInjecteerMuis(A.X, A.Y, A.Knop, False);
+      asToets: ZMInjecteerToets(A.X, A.Y <> 0);
+      asTeken: ZMInjecteerKarakter(A.Arg[1]);
       asSeed: OpenstaandeSeed := A.X;
       asDump: SchrijfBestand(UitPad(A.Arg + '.state'), Toestand);
       asSprites: SchrijfBestand(UitPad(A.Arg + '.sprites'), SpritesTekst);
-      asFoto: ZMSaveScreenshot(UitPad(A.Arg + '.png'));
+      asFoto: ZMBewaarSchermafdruk(UitPad(A.Arg + '.png'));
       asBevestig: SchrijfBestand(UitPad('bevestigd'), IntToStr(A.X) + #10);
       asStop: Halt(0);
     end;
@@ -347,12 +347,12 @@ initialization
   begin
     ForceDirectories(UitMap);
     LeesScript(GetEnvironmentVariable('ZM_TESTSCRIPT'));
-    ZMIdleHook := Tik;
+    ZMInactiefHaak := Tik;
   end
   else if GetEnvironmentVariable('ZM_BESTURING') <> '' then
   begin
     ForceDirectories(UitMap);
     BesturingsBestand := GetEnvironmentVariable('ZM_BESTURING');
-    ZMIdleHook := Tik;
+    ZMInactiefHaak := Tik;
   end;
 end.

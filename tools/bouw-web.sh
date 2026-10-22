@@ -10,7 +10,7 @@ uit="$root/build/web"
 tmp="$root/build/wasm"
 mkdir -p "$uit" "$tmp"
 
-fpc-wasm -Mdelphi -O2 -dZM_NO_SDL3 \
+fpc-wasm -Mdelphi -O2 -B -dZM_NO_SDL3 \
   -Fi"$root/src" -Fu"$root/src/game" -Fu"$root/src/compat" -Fu"$root/src/web" \
   -FU"$tmp" -FE"$tmp" -vewn "$root/src/web/RosWeb.dpr"
 

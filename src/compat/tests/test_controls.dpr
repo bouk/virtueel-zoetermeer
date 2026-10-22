@@ -16,7 +16,7 @@ type
     Btn: TButton;
     BitBtn: TBitBtn;
     Memo: TMemo;
-    Edit: TEdit;
+    Bewerk: TEdit;
     Check: TCheckBox;
     Radio1, Radio2: TRadioButton;
     List: TListBox;
@@ -106,10 +106,10 @@ begin
     BitBtn.Parent := F;
     BitBtn.SetBounds(116, 70, 87, 27);
     BitBtn.Kind := bkOK;
-    Edit := TEdit.Create(F);
-    Edit.Parent := F;
-    Edit.SetBounds(16, 108, 187, 21);
-    Edit.Text := 'Bewerkingstekst';
+    Bewerk := TEdit.Create(F);
+    Bewerk.Parent := F;
+    Bewerk.SetBounds(16, 108, 187, 21);
+    Bewerk.Text := 'Bewerkingstekst';
     Check := TCheckBox.Create(F);
     Check.Parent := F;
     Check.SetBounds(16, 138, 120, 17);
@@ -162,11 +162,11 @@ begin
     Paint.OnPaint := PaintPaint;
   end;
   F.Show;
-  ZMMainWindow := F.Handle;   { ZMInjectMouse-coördinaten zijn relatief aan dit venster }
+  ZMHoofdVenster := F.Handle;   { ZMInjecteerMuis-coördinaten zijn relatief aan dit venster }
   Application.ProcessMessages;
   { klik op de knop via de berichtenwachtrij }
-  ZMInjectMouse(60, 82, 1, True);
-  ZMInjectMouse(60, 82, 1, False);
+  ZMInjecteerMuis(60, 82, 1, True);
+  ZMInjecteerMuis(60, 82, 1, False);
   for I := 1 to 5 do Application.ProcessMessages;
   if F.Clicks <> 1 then
   begin
@@ -174,7 +174,7 @@ begin
     Halt(1);
   end;
   for I := 1 to 3 do Application.ProcessMessages;
-  ZMPresent(True);
-  ZMSaveScreenshot(OutFile);
+  ZMPresenteer(True);
+  ZMBewaarSchermafdruk(OutFile);
   WriteLn('OK test_controls -> ', OutFile);
 end.

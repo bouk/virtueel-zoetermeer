@@ -15,35 +15,35 @@ interface
 uses Windows;
 
 type
-  PZMGlyph = ^TZMGlyph;
-  TZMGlyph = record
-    Adv: SmallInt;       { voortgangsbreedte }
+  PZMTekenbeeld = ^TZMTekenbeeld;
+  TZMTekenbeeld = record
+    Voortgang: SmallInt;       { voortgangsbreedte }
     W, H: SmallInt;      { bitmapgrootte }
-    XOff, YOff: SmallInt; { positie van de bitmap ten opzichte van de linkerbovenhoek van de cel }
+    XVerschuiving, YVerschuiving: SmallInt; { positie van de bitmap ten opzichte van de linkerbovenhoek van de cel }
     Data: PByte;         { rijen van ((W+7) div 8) bytes, MSB = meest linkse pixel }
   end;
 
-  TZMGlyphs = array[0..255] of TZMGlyph;
-  PZMGlyphs = ^TZMGlyphs;
+  TZMTekenbeelden = array[0..255] of TZMTekenbeeld;
+  PZMTekenbeelden = ^TZMTekenbeelden;
 
-  PZMFace = ^TZMFace;
-  TZMFace = record
-    Family: string;      { 'sans', 'serif', 'mono', 'system' }
-    Bold, Italic: Boolean;
-    EmPx: Integer;       { gevraagde em-grootte in pixels (= -lfHeight) }
-    Height: Integer;     { celhoogte = Ascent + Descent }
-    Ascent, Descent: Integer;
-    IntLeading: Integer; { Height - EmPx }
-    AvgWidth, MaxWidth: Integer;
-    Gray: Boolean;       { gasp: anti-alias bij deze grootte }
-    Glyphs: TZMGlyphs;     { 1 bpp, gehinte mono-voortgangsbreedtes }
-    AAGlyphs: TZMGlyphs;   { 1 byte per pixel, grijsniveau 0..16 }
+  PZMGezicht = ^TZMGezicht;
+  TZMGezicht = record
+    Lettertypefamilie: string;      { 'sans', 'serif', 'mono', 'system' }
+    Vetgedrukt, Schuin: Boolean;
+    EmPixels: Integer;       { gevraagde em-grootte in pixels (= -lfHeight) }
+    Height: Integer;     { celhoogte = Opstijging + Afdaling }
+    Opstijging, Afdaling: Integer;
+    InterneInterlinie: Integer; { Height - EmPixels }
+    GemiddeldeBreedte, MaxWidth: Integer;
+    Grijstint: Boolean;       { gasp: anti-alias bij deze grootte }
+    Tekenbeelden: TZMTekenbeelden;     { 1 bpp, gehinte mono-voortgangsbreedtes }
+    AATekenbeelden: TZMTekenbeelden;   { 1 byte per pixel, grijsniveau 0..16 }
   end;
 
 { Zoekt het lettertype dat het best bij een LOGFONT past (Windows-lettertypekoppeling, vereenvoudigd). }
-function ZMFindFace(const Lettertype: TLogFont): PZMFace;
-function ZMFaceCount: Integer;
-function ZMFaceByIndex(Nummer: Integer): PZMFace;
+function ZMZoekGezicht(const Lettertype: TLogFont): PZMGezicht;
+function ZMGezichtAantal: Integer;
+function ZMGezichtOpNummer(Nummer: Integer): PZMGezicht;
 
 implementation
 
@@ -55,33 +55,33 @@ var
   FontData: array of Byte;
 
 type
-  TFaceArray = array of TZMFace;
+  TFaceArray = array of TZMGezicht;
 
 var
   Faces: TFaceArray;
   Loaded: Boolean = False;
 
-procedure LoadFaces;
+procedure LaadGezichten;
 var
   Teller, Glyph, Positie, Aantal: Integer;
-  Gezicht: ^TZMFace;
+  Gezicht: ^TZMGezicht;
   LengteUit: LongWord;
   function LeesW: Integer;
   begin
     Result := SmallInt(FontData[Positie] or (FontData[Positie + 1] shl 8));
     Inc(Positie, 2);
   end;
-  procedure LeesGlyphs(var Glyphen: array of TZMGlyph; Antialias: Boolean);
+  procedure LeesGlyphs(var Glyphen: array of TZMTekenbeeld; Antialias: Boolean);
   var
     Glyphnr: Integer;
   begin
     for Glyphnr := 0 to 255 do
     begin
-      Glyphen[Glyphnr].Adv := LeesW;
+      Glyphen[Glyphnr].Voortgang := LeesW;
       Glyphen[Glyphnr].W := LeesW;
       Glyphen[Glyphnr].H := LeesW;
-      Glyphen[Glyphnr].XOff := LeesW;
-      Glyphen[Glyphnr].YOff := LeesW;
+      Glyphen[Glyphnr].XVerschuiving := LeesW;
+      Glyphen[Glyphnr].YVerschuiving := LeesW;
       if Antialias then Aantal := Glyphen[Glyphnr].W * Glyphen[Glyphnr].H
       else Aantal := ((Glyphen[Glyphnr].W + 7) div 8) * Glyphen[Glyphnr].H;
       if Aantal > 0 then Glyphen[Glyphnr].Data := @FontData[Positie] else Glyphen[Glyphnr].Data := nil;
@@ -99,37 +99,37 @@ begin
   for Teller := 0 to ZMFontFaceCount - 1 do
   begin
     Gezicht := @Faces[Teller];
-    Gezicht^.Family := ZMFontFaceInfo[Teller].Family;
-    Gezicht^.Bold := ZMFontFaceInfo[Teller].Bold;
-    Gezicht^.Italic := ZMFontFaceInfo[Teller].Italic;
-    Positie := ZMFontFaceInfo[Teller].Offset;
-    Gezicht^.EmPx := LeesW;
-    Gezicht^.Ascent := LeesW;
-    Gezicht^.Descent := LeesW;
-    Gezicht^.Height := Gezicht^.Ascent + Gezicht^.Descent;
-    Gezicht^.IntLeading := Gezicht^.Height - Gezicht^.EmPx;
-    if Gezicht^.IntLeading < 0 then Gezicht^.IntLeading := 0;
-    Gezicht^.AvgWidth := LeesW;
+    Gezicht^.Lettertypefamilie := ZMFontFaceInfo[Teller].Lettertypefamilie;
+    Gezicht^.Vetgedrukt := ZMFontFaceInfo[Teller].Vetgedrukt;
+    Gezicht^.Schuin := ZMFontFaceInfo[Teller].Schuin;
+    Positie := ZMFontFaceInfo[Teller].BronPositie;
+    Gezicht^.EmPixels := LeesW;
+    Gezicht^.Opstijging := LeesW;
+    Gezicht^.Afdaling := LeesW;
+    Gezicht^.Height := Gezicht^.Opstijging + Gezicht^.Afdaling;
+    Gezicht^.InterneInterlinie := Gezicht^.Height - Gezicht^.EmPixels;
+    if Gezicht^.InterneInterlinie < 0 then Gezicht^.InterneInterlinie := 0;
+    Gezicht^.GemiddeldeBreedte := LeesW;
     Gezicht^.MaxWidth := LeesW;
-    Gezicht^.Gray := LeesW <> 0;
-    LeesGlyphs(Gezicht^.Glyphs, False);
-    LeesGlyphs(Gezicht^.AAGlyphs, True);
+    Gezicht^.Grijstint := LeesW <> 0;
+    LeesGlyphs(Gezicht^.Tekenbeelden, False);
+    LeesGlyphs(Gezicht^.AATekenbeelden, True);
   end;
 end;
 
-function ZMFaceCount: Integer;
+function ZMGezichtAantal: Integer;
 begin
-  if not Loaded then LoadFaces;
+  if not Loaded then LaadGezichten;
   Result := Length(Faces);
 end;
 
-function ZMFaceByIndex(Nummer: Integer): PZMFace;
+function ZMGezichtOpNummer(Nummer: Integer): PZMGezicht;
 begin
-  if not Loaded then LoadFaces;
+  if not Loaded then LaadGezichten;
   Result := @Faces[Nummer];
 end;
 
-function FamilyOf(const Naam: string; Spatiering: Byte): string;
+function FamilieVan(const Naam: string; Spatiering: Byte): string;
 var
   Kleinnaam: string;
 begin
@@ -148,15 +148,15 @@ begin
     Result := 'sans';
 end;
 
-function ZMFindFace(const Lettertype: TLogFont): PZMFace;
+function ZMZoekGezicht(const Lettertype: TLogFont): PZMGezicht;
 var
   Familie: string;
   Vet, Cursief: Boolean;
   Emgrootte, Teller, Punten, Beste, Verschil: Integer;
-  Gezicht: ^TZMFace;
+  Gezicht: ^TZMGezicht;
 begin
-  if not Loaded then LoadFaces;
-  Familie := FamilyOf(StrPas(Lettertype.lfFaceName), Lettertype.lfPitchAndFamily);
+  if not Loaded then LaadGezichten;
+  Familie := FamilieVan(StrPas(Lettertype.lfFaceName), Lettertype.lfPitchAndFamily);
   Vet := Lettertype.lfWeight >= 600;
   Cursief := Lettertype.lfItalic <> 0;
   Emgrootte := Lettertype.lfHeight;
@@ -176,17 +176,17 @@ begin
   begin
     Gezicht := @Faces[Teller];
     Punten := 0;
-    if Gezicht^.Family <> Familie then
+    if Gezicht^.Lettertypefamilie <> Familie then
     begin
-      if (Familie = 'system') and (Gezicht^.Family = 'sans') then Inc(Punten, 500)
+      if (Familie = 'system') and (Gezicht^.Lettertypefamilie = 'sans') then Inc(Punten, 500)
       else if Familie = 'system' then Inc(Punten, 100000)
       else Inc(Punten, 100000);
     end;
-    if Gezicht^.Bold <> Vet then Inc(Punten, 2000);
-    if Gezicht^.Italic <> Cursief then Inc(Punten, 1000);
-    Verschil := Abs(Gezicht^.EmPx - Emgrootte);
+    if Gezicht^.Vetgedrukt <> Vet then Inc(Punten, 2000);
+    if Gezicht^.Schuin <> Cursief then Inc(Punten, 1000);
+    Verschil := Abs(Gezicht^.EmPixels - Emgrootte);
     Inc(Punten, Verschil * 100);
-    if Gezicht^.EmPx > Emgrootte then Inc(Punten, 10);  { bij gelijke score de kleinere voorkeur, zodat tekst past }
+    if Gezicht^.EmPixels > Emgrootte then Inc(Punten, 10);  { bij gelijke score de kleinere voorkeur, zodat tekst past }
     if Punten < Beste then
     begin
       Beste := Punten;

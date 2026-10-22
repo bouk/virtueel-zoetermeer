@@ -20,21 +20,21 @@ uses
   ZMPlatform;
 
 { imports (uit web/zoetermeer.js) }
-procedure zm_present(Beeldpunten: Pointer; Breedte, Hoogte, Regellengte: Integer); external 'zm' name 'present';
-function zm_poll_event(Geheugen: Pointer): Integer; external 'zm' name 'poll_event';
-procedure zm_wait(WachtMs: Integer); external 'zm' name 'wait';
-procedure zm_delay(Milliseconden: Integer); external 'zm' name 'delay';
-function zm_ticks: Double; external 'zm' name 'ticks';
-procedure zm_set_title(Titel: PAnsiChar); external 'zm' name 'set_title';
-procedure zm_set_cursor(Vorm: Integer); external 'zm' name 'set_cursor';
-procedure zm_beep; external 'zm' name 'beep';
+procedure zm_toon(Beeldpunten: Pointer; Breedte, Hoogte, Regellengte: Integer); external 'zm' name 'present';
+function zm_peil_gebeurtenis(Geheugen: Pointer): Integer; external 'zm' name 'poll_event';
+procedure zm_wacht(WachtMs: Integer); external 'zm' name 'wait';
+procedure zm_pauzeer(Milliseconden: Integer); external 'zm' name 'delay';
+function zm_tikken: Double; external 'zm' name 'ticks';
+procedure zm_zet_titel(Titel: PAnsiChar); external 'zm' name 'set_title';
+procedure zm_zet_cursor(Vorm: Integer); external 'zm' name 'set_cursor';
+procedure zm_piep; external 'zm' name 'beep';
 procedure zm_open(Breedte, Hoogte: Integer); external 'zm' name 'open';
 
 type
   { Indeling gedeeld met poll_event in web/zoetermeer.js: 12 Int32-velden, gevolgd door
     maximaal 15 bytes Windows-1252-tekst. }
-  TRawEvent = packed record
-    Kind, X, Y, Button, Key, ScanCode, Repeated, Wheel, Shift, Ctrl, Alt, TextLen: Longint;
+  TRuweGebeurtenis = packed record
+    Kind, X, Y, Button, Key, Toetsnummer, Herhaald, Wiel, Shift, Ctrl, Alt, TekstLengte: Longint;
     Text: array[0..15] of AnsiChar;
   end;
 
@@ -43,15 +43,15 @@ type
     function Name: string; override;
     function Open(const Title: string; W, H: Integer): Boolean; override;
     procedure Resize(W, H: Integer); override;
-    procedure Present(Pixels: Pointer; W, H, Stride: Integer); override;
-    function PollEvent(out E: TZMEvent): Boolean; override;
-    procedure WaitEvent(TimeoutMs: Integer); override;
-    function Ticks: LongWord; override;
-    function PerfCounter: Int64; override;
-    function PerfFrequency: Int64; override;
-    procedure Delay(Ms: Integer); override;
+    procedure Toon(Pixels: Pointer; W, H, Rijbytes: Integer); override;
+    function PeilGebeurtenis(out E: TZMGebeurtenis): Boolean; override;
+    procedure WachtOpGebeurtenis(TimeoutMs: Integer); override;
+    function KloktijdMs: LongWord; override;
+    function PrestatieTeller: Int64; override;
+    function PrestatieFrequentie: Int64; override;
+    procedure Pauzeer(Ms: Integer); override;
     procedure SetTitle(const S: string); override;
-    procedure SetCursor(Shape: TZMCursorShape); override;
+    procedure SetCursor(Shape: TZMCursorvorm); override;
     procedure Beep; override;
   end;
 
@@ -72,32 +72,32 @@ begin
   zm_open(W, H);
 end;
 
-procedure TZMWasmBackend.Present(Pixels: Pointer; W, H, Stride: Integer);
+procedure TZMWasmBackend.Toon(Pixels: Pointer; W, H, Rijbytes: Integer);
 begin
-  zm_present(Pixels, W, H, Stride);
+  zm_toon(Pixels, W, H, Rijbytes);
 end;
 
-function TZMWasmBackend.PollEvent(out E: TZMEvent): Boolean;
+function TZMWasmBackend.PeilGebeurtenis(out E: TZMGebeurtenis): Boolean;
 var
-  R: TRawEvent;
+  R: TRuweGebeurtenis;
   Aantal: Integer;
 begin
   FillChar(E, SizeOf(E), 0);
-  Result := zm_poll_event(@R) <> 0;
+  Result := zm_peil_gebeurtenis(@R) <> 0;
   if not Result then
     Exit;
-  E.Kind := TZMEventKind(R.Kind);
+  E.Kind := TZMGebeurtenisSoort(R.Kind);
   E.X := R.X;
   E.Y := R.Y;
   E.Button := R.Button;
   E.Key := R.Key;
-  E.ScanCode := R.ScanCode;
-  E.Repeated := R.Repeated <> 0;
-  E.Wheel := R.Wheel;
+  E.Toetsnummer := R.Toetsnummer;
+  E.Herhaald := R.Herhaald <> 0;
+  E.Wiel := R.Wiel;
   E.Shift := R.Shift <> 0;
   E.Ctrl := R.Ctrl <> 0;
   E.Alt := R.Alt <> 0;
-  Aantal := R.TextLen;
+  Aantal := R.TekstLengte;
   if Aantal > 15 then
     Aantal := 15;
   SetLength(E.Text, Aantal);
@@ -105,29 +105,29 @@ begin
     Move(R.Text[0], E.Text[1], Aantal);
 end;
 
-procedure TZMWasmBackend.WaitEvent(TimeoutMs: Integer);
+procedure TZMWasmBackend.WachtOpGebeurtenis(TimeoutMs: Integer);
 begin
-  zm_wait(TimeoutMs);
+  zm_wacht(TimeoutMs);
 end;
 
-function TZMWasmBackend.Ticks: LongWord;
+function TZMWasmBackend.KloktijdMs: LongWord;
 begin
-  Result := LongWord(Trunc(zm_ticks));
+  Result := LongWord(Trunc(zm_tikken));
 end;
 
-function TZMWasmBackend.PerfCounter: Int64;
+function TZMWasmBackend.PrestatieTeller: Int64;
 begin
-  Result := Trunc(zm_ticks * 1000.0);   { microseconds }
+  Result := Trunc(zm_tikken * 1000.0);   { microseconds }
 end;
 
-function TZMWasmBackend.PerfFrequency: Int64;
+function TZMWasmBackend.PrestatieFrequentie: Int64;
 begin
   Result := 1000000;
 end;
 
-procedure TZMWasmBackend.Delay(Ms: Integer);
+procedure TZMWasmBackend.Pauzeer(Ms: Integer);
 begin
-  zm_delay(Ms);
+  zm_pauzeer(Ms);
 end;
 
 procedure TZMWasmBackend.SetTitle(const S: string);
@@ -135,19 +135,19 @@ var
   Tekst: AnsiString;
 begin
   Tekst := S + #0;
-  zm_set_title(PAnsiChar(Tekst));
+  zm_zet_titel(PAnsiChar(Tekst));
 end;
 
-procedure TZMWasmBackend.SetCursor(Shape: TZMCursorShape);
+procedure TZMWasmBackend.SetCursor(Shape: TZMCursorvorm);
 begin
-  zm_set_cursor(Ord(Shape));
+  zm_zet_cursor(Ord(Shape));
 end;
 
 procedure TZMWasmBackend.Beep;
 begin
-  zm_beep;
+  zm_piep;
 end;
 
 initialization
-  ZMRegisterBackend(TZMWasmBackend.Create, 10);
+  ZMRegistreerBackend(TZMWasmBackend.Create, 10);
 end.

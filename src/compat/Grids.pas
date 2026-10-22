@@ -728,7 +728,7 @@ begin
       end;
       DrawCell(C, R, Rc, Staat);
       if FDefaultDrawing and (gdFixed in Staat) then
-        ZMFrame3D(Canvas, Rect(Rc.Left, Rc.Top, Rc.Right + 1, Rc.Bottom + 1), clBtnHighlight, clBtnShadow);
+        ZMKader3D(Canvas, Rect(Rc.Left, Rc.Top, Rc.Right + 1, Rc.Bottom + 1), clBtnHighlight, clBtnShadow);
       if gdFocused in Staat then Canvas.DrawFocusRect(Rc);
       { rasterlijnen }
       if FGridLineWidth > 0 then

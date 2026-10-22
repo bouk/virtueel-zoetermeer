@@ -328,25 +328,25 @@ end;
 { ---------------------------------------------------------------- bestandsdialoog }
 
 type
-  TFileDlgForm = class(TForm)
+  TBestandsDialoogForm = class(TForm)
   public
-    Dlg: TOpenDialog;
+    Dialoog: TOpenDialog;
     Dir: string;
-    LblDir: TLabel;
+    LblMap: TLabel;
     List: TListBox;
-    Edit: TEdit;
+    Bewerk: TEdit;
     Types: TComboBox;
-    BtnOK, BtnCancel: TButton;
-    Masks: TStringList;
+    KnopOK, KnopAnnuleren: TButton;
+    Maskerlijst: TStringList;
     procedure Fill;
-    procedure ListClick(Sender: TObject);
-    procedure ListDblClick(Sender: TObject);
-    procedure TypesChange(Sender: TObject);
-    procedure OKClick(Sender: TObject);
-    function CurrentMasks: TStringList;
+    procedure LijstKlik(Sender: TObject);
+    procedure LijstDubbelKlik(Sender: TObject);
+    procedure TypenWijzigen(Sender: TObject);
+    procedure OKKlik(Sender: TObject);
+    function HuidigeMaskers: TStringList;
   end;
 
-function MatchMask(const Naam, Masker: string): Boolean;
+function PasMasker(const Naam, Masker: string): Boolean;
 var
   N, M: string;
   function Passend(NI, MI: Integer): Boolean;
@@ -381,7 +381,7 @@ begin
   Result := Passend(1, 1);
 end;
 
-function TFileDlgForm.CurrentMasks: TStringList;
+function TBestandsDialoogForm.HuidigeMaskers: TStringList;
 var
   Delen: TStringList;
   I, Idx: Integer;
@@ -392,7 +392,7 @@ begin
   try
     Delen.Delimiter := '|';
     Delen.StrictDelimiter := True;
-    Delen.DelimitedText := Dlg.Filter;
+    Delen.DelimitedText := Dialoog.Filter;
     Idx := Types.ItemIndex;
     if Idx < 0 then Idx := 0;
     if 2 * Idx + 1 < Delen.Count then S := Delen[2 * Idx + 1] else S := '*.*';
@@ -405,7 +405,7 @@ begin
   end;
 end;
 
-procedure TFileDlgForm.Fill;
+procedure TBestandsDialoogForm.Fill;
 var
   SR: TSearchRec;
   Mappen, Bestanden: TStringList;
@@ -415,7 +415,7 @@ var
 begin
   Mappen := TStringList.Create;
   Bestanden := TStringList.Create;
-  M := CurrentMasks;
+  M := HuidigeMaskers;
   try
     Mappen.Sorted := True;
     Bestanden.Sorted := True;
@@ -432,7 +432,7 @@ begin
         begin
           Ok := False;
           for I := 0 to M.Count - 1 do
-            if MatchMask(SR.Name, M[I]) then Ok := True;
+            if PasMasker(SR.Name, M[I]) then Ok := True;
           if Ok then Bestanden.Add(SR.Name);
         end;
       until FindNext(SR) <> 0;
@@ -448,7 +448,7 @@ begin
     finally
       List.Items.EndUpdate;
     end;
-    LblDir.Caption := Dir;
+    LblMap.Caption := Dir;
   finally
     Mappen.Free;
     Bestanden.Free;
@@ -456,16 +456,16 @@ begin
   end;
 end;
 
-procedure TFileDlgForm.ListClick(Sender: TObject);
+procedure TBestandsDialoogForm.LijstKlik(Sender: TObject);
 var
   S: string;
 begin
   if List.ItemIndex < 0 then Exit;
   S := List.Items[List.ItemIndex];
-  if (S <> '') and (S[1] <> '[') then Edit.Text := S;
+  if (S <> '') and (S[1] <> '[') then Bewerk.Text := S;
 end;
 
-procedure TFileDlgForm.ListDblClick(Sender: TObject);
+procedure TBestandsDialoogForm.LijstDubbelKlik(Sender: TObject);
 var
   S: string;
 begin
@@ -483,46 +483,46 @@ begin
   end
   else
   begin
-    Edit.Text := S;
-    OKClick(nil);
+    Bewerk.Text := S;
+    OKKlik(nil);
   end;
 end;
 
-procedure TFileDlgForm.TypesChange(Sender: TObject);
+procedure TBestandsDialoogForm.TypenWijzigen(Sender: TObject);
 begin
   Fill;
 end;
 
-procedure TFileDlgForm.OKClick(Sender: TObject);
+procedure TBestandsDialoogForm.OKKlik(Sender: TObject);
 var
   S: string;
 begin
-  S := Trim(Edit.Text);
+  S := Trim(Bewerk.Text);
   if S = '' then Exit;
   if (Pos('*', S) > 0) or (Pos('?', S) > 0) then
   begin
     Fill;
     Exit;
   end;
-  if (Dlg.DefaultExt <> '') and (ExtractFileExt(S) = '') then
-    S := S + '.' + Dlg.DefaultExt;
+  if (Dialoog.DefaultExt <> '') and (ExtractFileExt(S) = '') then
+    S := S + '.' + Dialoog.DefaultExt;
   if (S[1] <> PathDelim) then S := IncludeTrailingPathDelimiter(Dir) + S;
   if DirectoryExists(S) then
   begin
     Dir := S;
-    Edit.Text := '';
+    Bewerk.Text := '';
     Fill;
     Exit;
   end;
-  if (ofFileMustExist in Dlg.Options) and not FileExists(S) then
+  if (ofFileMustExist in Dialoog.Options) and not FileExists(S) then
   begin
     MessageDlg(ExtractFileName(S) + #13#10 + 'Bestand niet gevonden.', mtWarning, [mbOK], 0);
     Exit;
   end;
-  if Dlg.FIsSave and (ofOverwritePrompt in Dlg.Options) and FileExists(S) then
+  if Dialoog.FIsSave and (ofOverwritePrompt in Dialoog.Options) and FileExists(S) then
     if MessageDlg(ExtractFileName(S) + ' bestaat al.' + #13#10 + 'Wilt u het vervangen?',
       mtWarning, [mbYes, mbNo], 0) <> mrYes then Exit;
-  Dlg.FFileName := S;
+  Dialoog.FFileName := S;
   ModalResult := mrOk;
 end;
 
@@ -574,16 +574,16 @@ end;
 
 function TOpenDialog.DoExecute: Boolean;
 var
-  F: TFileDlgForm;
+  F: TBestandsDialoogForm;
   Delen: TStringList;
   I: Integer;
   L: TLabel;
   Start: string;
 begin
   Result := False;
-  F := TFileDlgForm.CreateNew(Application);
+  F := TBestandsDialoogForm.CreateNew(Application);
   try
-    F.Dlg := Self;
+    F.Dialoog := Self;
     F.BorderStyle := bsDialog;
     if FTitle <> '' then F.Caption := FTitle
     else if FIsSave then F.Caption := 'Opslaan als'
@@ -595,34 +595,34 @@ begin
     F.ClientHeight := 300;
     { startmap }
     Start := '';
-    if FFileName <> '' then Start := ExtractFilePath(ZMResolvePath(FFileName));
-    if (Start = '') and (FInitialDir <> '') then Start := ZMResolvePath(FInitialDir);
+    if FFileName <> '' then Start := ExtractFilePath(ZMOplosPad(FFileName));
+    if (Start = '') and (FInitialDir <> '') then Start := ZMOplosPad(FInitialDir);
     { Zonder beginmap (of als die in de datamap ligt, zoals de spelmap op Windows)
       begint de dialoog in de overlay, waar bewaarde spellen staan. }
-    if (Start <> '') and (ZMSaveDir <> '') and
-      ZMInDataDir(IncludeTrailingPathDelimiter(ExpandFileName(Start)) + 'x') then
-      Start := ZMSaveDir;
-    if (Start = '') and (ZMSaveDir <> '') then Start := ZMSaveDir;
+    if (Start <> '') and (ZMBewaarMap <> '') and
+      ZMInDataMap(IncludeTrailingPathDelimiter(ExpandFileName(Start)) + 'x') then
+      Start := ZMBewaarMap;
+    if (Start = '') and (ZMBewaarMap <> '') then Start := ZMBewaarMap;
     if (Start = '') or not DirectoryExists(Start) then Start := GetCurrentDir;
     F.Dir := ExcludeTrailingPathDelimiter(ExpandFileName(Start));
     if F.Dir = '' then F.Dir := PathDelim;
-    F.LblDir := TLabel.Create(F);
-    F.LblDir.Parent := F;
-    F.LblDir.AutoSize := False;
-    F.LblDir.SetBounds(8, 8, 404, 16);
+    F.LblMap := TLabel.Create(F);
+    F.LblMap.Parent := F;
+    F.LblMap.AutoSize := False;
+    F.LblMap.SetBounds(8, 8, 404, 16);
     F.List := TListBox.Create(F);
     F.List.Parent := F;
     F.List.SetBounds(8, 28, 404, 180);
-    F.List.OnClick := F.ListClick;
-    F.List.OnDblClick := F.ListDblClick;
+    F.List.OnClick := F.LijstKlik;
+    F.List.OnDblClick := F.LijstDubbelKlik;
     L := TLabel.Create(F);
     L.Parent := F;
     L.Caption := '&Bestandsnaam:';
     L.SetBounds(8, 220, 80, 16);
-    F.Edit := TEdit.Create(F);
-    F.Edit.Parent := F;
-    F.Edit.SetBounds(96, 216, 228, 21);
-    F.Edit.Text := ExtractFileName(FFileName);
+    F.Bewerk := TEdit.Create(F);
+    F.Bewerk.Parent := F;
+    F.Bewerk.SetBounds(96, 216, 228, 21);
+    F.Bewerk.Text := ExtractFileName(FFileName);
     L := TLabel.Create(F);
     L.Parent := F;
     L.Caption := 'Bestands&type:';
@@ -647,27 +647,27 @@ begin
     end;
     if F.Types.Items.Count = 0 then F.Types.Items.Add('Alle bestanden (*.*)');
     F.Types.ItemIndex := Max(0, Min(FFilterIndex - 1, F.Types.Items.Count - 1));
-    F.Types.OnChange := F.TypesChange;
-    F.BtnOK := TButton.Create(F);
-    F.BtnOK.Parent := F;
-    if FIsSave then F.BtnOK.Caption := '&Opslaan' else F.BtnOK.Caption := '&Openen';
-    F.BtnOK.Default := True;
-    F.BtnOK.SetBounds(336, 214, 75, 25);
-    F.BtnOK.OnClick := F.OKClick;
-    F.BtnCancel := TButton.Create(F);
-    F.BtnCancel.Parent := F;
-    F.BtnCancel.Caption := 'Annuleren';
-    F.BtnCancel.Cancel := True;
-    F.BtnCancel.ModalResult := mrCancel;
-    F.BtnCancel.SetBounds(336, 244, 75, 25);
+    F.Types.OnChange := F.TypenWijzigen;
+    F.KnopOK := TButton.Create(F);
+    F.KnopOK.Parent := F;
+    if FIsSave then F.KnopOK.Caption := '&Opslaan' else F.KnopOK.Caption := '&Openen';
+    F.KnopOK.Default := True;
+    F.KnopOK.SetBounds(336, 214, 75, 25);
+    F.KnopOK.OnClick := F.OKKlik;
+    F.KnopAnnuleren := TButton.Create(F);
+    F.KnopAnnuleren.Parent := F;
+    F.KnopAnnuleren.Caption := 'Annuleren';
+    F.KnopAnnuleren.Cancel := True;
+    F.KnopAnnuleren.ModalResult := mrCancel;
+    F.KnopAnnuleren.SetBounds(336, 244, 75, 25);
     F.Fill;
-    F.ActiveControl := F.Edit;
+    F.ActiveControl := F.Bewerk;
     DoShow;
     if F.ShowModal = mrOk then
     begin
       FFilterIndex := F.Types.ItemIndex + 1;
       { opslaan in de datamap wordt opslaan in de overlay }
-      if FIsSave then FFileName := ZMWritePath(FFileName);
+      if FIsSave then FFileName := ZMSchrijfPad(FFileName);
       FFiles.Clear;
       FFiles.Add(FFileName);
       Result := DoCanClose;

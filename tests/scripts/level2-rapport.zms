@@ -1,0 +1,93 @@
+# Nagespeeld uit de playthrough (fase 6): level 1 en 2 bouwen, rondes afsluiten.
+# In level 2 crashte het rapport (TApplication.DoMouseIdle op een vrijgegeven besturingselement).
+wait 15000
+shot foto-2
+dump stap1
+seed 1001
+click 429 405
+wait 1500
+shot foto-5
+dump stap2
+seed 1002
+click 429 405
+wait 1500
+shot foto-8
+seed 1003
+click 922 257
+wait 1500
+seed 1004
+click 400 400
+wait 1500
+wait 500
+shot foto-12
+seed 1005
+click 993 320
+wait 1500
+seed 1006
+click 520 330
+wait 1500
+wait 500
+shot foto-16
+dump stap3
+seed 1007
+click 922 320
+wait 1500
+seed 1008
+click 180 318
+wait 1500
+wait 500
+shot foto-21
+seed 1009
+click 920 727
+wait 1500
+wait 800
+shot foto-24
+seed 1010
+click 252 155
+wait 1500
+wait 300
+shot foto-27
+seed 1011
+click 205 155
+wait 1500
+seed 1012
+click 634 602
+wait 1500
+wait 500
+shot foto-31
+dump stap4
+seed 1013
+click 429 405
+wait 1500
+wait 300
+shot foto-35
+dump stap5
+shot foto-37
+dump stap6
+seed 1014
+click 922 390
+wait 1500
+seed 1015
+click 480 440
+wait 1500
+wait 500
+shot foto-42
+seed 1016
+click 987 637
+wait 1500
+wait 300
+shot foto-45
+seed 1017
+click 922 257
+wait 1500
+seed 1018
+click 640 500
+wait 1500
+wait 500
+shot foto-49
+dump stap7
+seed 1019
+click 920 727
+wait 1500
+dump eind
+shot eind

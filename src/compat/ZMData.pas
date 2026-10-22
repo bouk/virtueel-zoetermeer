@@ -12,7 +12,7 @@ unit ZMData;
   v1.1 en het exe kunnen in verschillende mappen staan).
 
   Paden in Windows-schrijfwijze (backslashes, elke letterkast) worden door
-  ZMResolvePath opgelost tegen het echte bestandssysteem. }
+  ZMOplosPad opgelost tegen het echte bestandssysteem. }
 
 {$MODE DELPHI}{$H+}
 
@@ -20,9 +20,9 @@ interface
 
 uses Windows;
 
-function ZMDataDir: string;          { met afsluitend scheidingsteken }
-function ZMExeFile: string;          { volledig pad van het originele ROS.exe ('' als het niet gevonden is) }
-function ZMExeName: string;          { wat ParamStr(0)/Application.ExeName teruggeven (zie ZMShadowDir) }
+function ZMDataMap: string;          { met afsluitend scheidingsteken }
+function ZMExeBestand: string;          { volledig pad van het originele ROS.exe ('' als het niet gevonden is) }
+function ZMExeNaam: string;          { wat ParamStr(0)/Application.ExeName teruggeven (zie ZMSchaduwMap) }
 { De "schaduw"-map laat de Windows-achtige paden van het spel werken via de gewone RTL
   (TIniFile, AssignFile, FindFirst, TStrings.LoadFromFile). Het spel bouwt paden als
   ExtractFilePath(ParamStr(0)) + '\' + 'images\8bits\x.bmp'. ParamStr(0) geeft
@@ -31,8 +31,8 @@ function ZMExeName: string;          { wat ParamStr(0)/Application.ExeName terug
   met precies die namen (in meerdere letterkasten) naar de datafiles van de gebruiker, en
   mappen met de naam '\images\8bits\' voor FindFirst. Hij staat in
   $XDG_CACHE_HOME/zoetermeer (overschrijven met ZM_SHADOW). }
-function ZMShadowDir: string;
-function ZMResolvePath(const Pad: string): string;
+function ZMSchaduwMap: string;
+function ZMOplosPad(const Pad: string): string;
 
 { Schrijfbare overlay. Het spel schrijft nooit in de datamap (die kan een alleen-lezen
   Nix-store-pad zijn). Bestanden die het spel aanmaakt of wijzigt (de highscore in
@@ -41,24 +41,24 @@ function ZMResolvePath(const Pad: string): string;
     op macOS ~/Library/Application Support/Virtueel Zoetermeer.
   Bij het lezen wint de kopie in de overlay van het origineel: de schaduwmap verwijst
   naar de overlaykopie zodra die bestaat.
-  ZMSaveDir geeft de map met afsluitend scheidingsteken ('' als er geen overlay is,
+  ZMBewaarMap geeft de map met afsluitend scheidingsteken ('' als er geen overlay is,
   zoals in de webversie, die zelf voor opslag zorgt).
-  ZMWritePath geeft voor een pad dat het spel wil schrijven het pad dat echt
+  ZMSchrijfPad geeft voor een pad dat het spel wil schrijven het pad dat echt
   beschreven moet worden: voor bestanden uit de datamap (of de schaduwmap) is dat de
   overlaykopie. Een bestaand origineel wordt eerst gekopieerd (copy-on-write), zodat
   bewerkingen ter plekke (WritePrivateProfileString) op de echte inhoud werken. Paden
   buiten de datamap blijven ongewijzigd. }
-function ZMSaveDir: string;
-function ZMWritePath(const Pad: string): string;
-{ True als Path in de datamap of de schaduwmap ligt (dan schrijft ZMWritePath elders) }
-function ZMInDataDir(const Pad: string): Boolean;
-function ZMFileExists(const Pad: string): Boolean;
+function ZMBewaarMap: string;
+function ZMSchrijfPad(const Pad: string): string;
+{ True als Path in de datamap of de schaduwmap ligt (dan schrijft ZMSchrijfPad elders) }
+function ZMInDataMap(const Pad: string): Boolean;
+function ZMBestandBestaat(const Pad: string): Boolean;
 
 { PE-resources van het originele ROS.exe }
-function ZMFindExeResource(Naam, Hulpbronsoort: PAnsiChar): HRSRC;
-function ZMExeResourceData(Hulpbron: HRSRC): Pointer;
-function ZMExeResourceSize(Hulpbron: HRSRC): DWORD;
-function ZMLoadExeResource(const Naam: string; Hulpbronsoort: PtrUInt; out Gegevens: Pointer; out Grootte: Integer): Boolean;
+function ZMZoekExeHulpbron(Naam, Hulpbronsoort: PAnsiChar): HRSRC;
+function ZMExeHulpbronGegevens(Hulpbron: HRSRC): Pointer;
+function ZMExeHulpbronGrootte(Hulpbron: HRSRC): DWORD;
+function ZMLaadExeHulpbron(const Naam: string; Hulpbronsoort: PtrUInt; out Gegevens: Pointer; out Grootte: Integer): Boolean;
 
 implementation
 
@@ -71,7 +71,7 @@ var
   ExeImage: array of Byte;
   ExeLoaded: Boolean = False;
 
-function OptionValue(const Naam: string): string;
+function OptieWaarde(const Naam: string): string;
 var
   Index: Integer;
   Tekst: string;
@@ -88,7 +88,7 @@ begin
 end;
 
 { zoekt één map-item hoofdletterongevoelig op }
-function FindEntry(const Map, Naam: string): string;
+function ZoekItem(const Map, Naam: string): string;
 var
   Zoekrecord: TSearchRec;
 begin
@@ -110,17 +110,17 @@ begin
   end;
 end;
 
-function ResolveRaw(const Pad: string): string; forward;
+function OplosRuw(const Pad: string): string; forward;
 
-function OverlayCopy(const Pad: string): string; forward;
+function OverlayKopie(const Pad: string): string; forward;
 
-function ZMResolvePath(const Pad: string): string;
+function ZMOplosPad(const Pad: string): string;
 begin
-  Result := ResolveRaw(Pad);
-  Result := OverlayCopy(Result);
+  Result := OplosRuw(Pad);
+  Result := OverlayKopie(Result);
 end;
 
-function ResolveRaw(const Pad: string): string;
+function OplosRuw(const Pad: string): string;
 var
   Genormaliseerd, Deel, Huidig, Gevonden: string;
   Index, Startpositie: Integer;
@@ -132,7 +132,7 @@ begin
     if Genormaliseerd[Index] = '\' then Genormaliseerd[Index] := '/';
   { stationsletters (C:/...) worden naar de datamap omgezet }
   if (Length(Genormaliseerd) >= 2) and (Genormaliseerd[2] = ':') then
-    Genormaliseerd := ZMDataDir + Copy(Genormaliseerd, 4, MaxInt);
+    Genormaliseerd := ZMDataMap + Copy(Genormaliseerd, 4, MaxInt);
   if FileExists(Genormaliseerd) or DirectoryExists(Genormaliseerd) then Exit(Genormaliseerd);
   Absoluut := (Genormaliseerd <> '') and (Genormaliseerd[1] = '/');
   if Absoluut then Huidig := '/' else Huidig := '.';
@@ -146,7 +146,7 @@ begin
     while (Index <= Length(Genormaliseerd)) and (Genormaliseerd[Index] <> '/') do Inc(Index);
     Deel := Copy(Genormaliseerd, Startpositie, Index - Startpositie);
     if Deel = '' then Break;
-    Gevonden := FindEntry(Huidig, Deel);
+    Gevonden := ZoekItem(Huidig, Deel);
     if Gevonden = '' then Gevonden := Deel;  { bestaat (nog) niet: houd de schrijfwijze aan }
     if (Result <> '') and (Result[Length(Result)] <> '/') then Result := Result + '/';
     Result := Result + Gevonden;
@@ -158,18 +158,18 @@ begin
   if Result = '' then Result := Genormaliseerd;
 end;
 
-function ZMFileExists(const Pad: string): Boolean;
+function ZMBestandBestaat(const Pad: string): Boolean;
 begin
-  Result := FileExists(ZMResolvePath(Pad));
+  Result := FileExists(ZMOplosPad(Pad));
 end;
 
-function DirHasGame(const Map: string): Boolean;
+function MapHeeftSpel(const Map: string): Boolean;
 begin
   Result := (Map <> '') and DirectoryExists(Map) and
-    ((FindEntry(Map, 'ROS.exe') <> '') or (FindEntry(Map, 'images') <> ''));
+    ((ZoekItem(Map, 'ROS.exe') <> '') or (ZoekItem(Map, 'images') <> ''));
 end;
 
-procedure Locate;
+procedure ZoekDatamap;
 var
   Kandidaten: array[0..3] of string;
   Index: Integer;
@@ -177,48 +177,48 @@ var
 begin
   if Located then Exit;
   Located := True;
-  Kandidaten[0] := OptionValue('data');
+  Kandidaten[0] := OptieWaarde('data');
   Kandidaten[1] := GetEnvironmentVariable('ZM_DATA');
   Kandidaten[2] := GetCurrentDir;
   Kandidaten[3] := ExtractFilePath(ExpandFileName(System.ParamStr(0)));
   GDataDir := '';
   for Index := 0 to High(Kandidaten) do
-    if DirHasGame(Kandidaten[Index]) then
+    if MapHeeftSpel(Kandidaten[Index]) then
     begin
       GDataDir := IncludeTrailingPathDelimiter(ExpandFileName(Kandidaten[Index]));
       Break;
     end;
   if GDataDir = '' then
     GDataDir := IncludeTrailingPathDelimiter(GetCurrentDir);
-  ExeOptie := OptionValue('exe');
+  ExeOptie := OptieWaarde('exe');
   if ExeOptie = '' then ExeOptie := GetEnvironmentVariable('ZM_EXE');
   if (ExeOptie <> '') and FileExists(ExeOptie) then
     GExeFile := ExpandFileName(ExeOptie)
   else
   begin
-    Gevonden := FindEntry(GDataDir, 'ROS.exe');
+    Gevonden := ZoekItem(GDataDir, 'ROS.exe');
     if Gevonden <> '' then GExeFile := GDataDir + Gevonden;
   end;
 end;
 
-function ZMDataDir: string;
+function ZMDataMap: string;
 begin
-  Locate;
+  ZoekDatamap;
   Result := GDataDir;
 end;
 
-function ZMExeFile: string;
+function ZMExeBestand: string;
 begin
-  Locate;
+  ZoekDatamap;
   Result := GExeFile;
 end;
 
 var
-  GShadow: string = '';
+  GSchaduw: string = '';
 
 {$IFDEF UNIX}
 { Maplijst met letterlijke namen (FindFirst zou '\' als scheidingsteken zien). }
-function ListDir(const Map: string; out Namen: TStringList; out IsMap: TList): Boolean;
+function LijstMap(const Map: string; out Namen: TStringList; out IsMap: TList): Boolean;
 var
   Mapgreep: PDir;
   Vermelding: PDirent;
@@ -245,7 +245,7 @@ begin
 end;
 
 { verwijdert de symlinks van een vorige run (bestanden die het spel schreef, blijven) }
-procedure ClearLinks(const Map: string);
+procedure WisLinks(const Map: string);
 var
   Namen: TStringList;
   IsMap: TList;
@@ -253,7 +253,7 @@ var
   Pad: string;
   Informatie: Stat;
 begin
-  ListDir(Map, Namen, IsMap);
+  LijstMap(Map, Namen, IsMap);
   try
     for Index := 0 to Namen.Count - 1 do
     begin
@@ -261,7 +261,7 @@ begin
       if (FpLStat(PChar(Pad), Informatie) = 0) and fpS_ISLNK(Informatie.st_mode) then
         FpUnlink(PChar(Pad))
       else if IsMap[Index] <> nil then
-        ClearLinks(Pad);
+        WisLinks(Pad);
     end;
   finally
     Namen.Free;
@@ -269,14 +269,14 @@ begin
   end;
 end;
 
-function Exists(const Pad: string): Boolean;
+function IsAanwezig(const Pad: string): Boolean;
 var
   Informatie: Stat;
 begin
   Result := FpLStat(PChar(Pad), Informatie) = 0;
 end;
 
-procedure LinkVariants(const Doel, LinkMap, Voorvoegsel, Naam: string; Forceren: Boolean = False);
+procedure LinkVarianten(const Doel, LinkMap, Voorvoegsel, Naam: string; Forceren: Boolean = False);
 var
   Varianten: array[0..3] of string;
   Index: Integer;
@@ -293,11 +293,11 @@ begin
     { Force: een bestaande link vervangen (overlaykopie in plaats van origineel) }
     if Forceren and (FpLStat(PChar(Link), Informatie) = 0) and fpS_ISLNK(Informatie.st_mode) then
       FpUnlink(PChar(Link));
-    if not Exists(Link) then FpSymlink(PChar(Doel), PChar(Link));
+    if not IsAanwezig(Link) then FpSymlink(PChar(Doel), PChar(Link));
   end;
 end;
 
-procedure ShadowTree(const BronMap, Relatief: string);
+procedure SchaduwBoom(const BronMap, Relatief: string);
 var
   Namen: TStringList;
   IsMap: TList;
@@ -310,23 +310,23 @@ begin
     naam op schijf, omdat FindFirst('<schaduw>/\images\8bits\*.bmp') de hoofdmap van de
     schaduw doorzoekt en elk bestand precies één keer moet teruggeven. Ook gewone
     (zonder backslash) links naar de items in de hoofdmap worden aangemaakt. }
-  Wortel := ExcludeTrailingPathDelimiter(GShadow);
-  ListDir(BronMap, Namen, IsMap);
+  Wortel := ExcludeTrailingPathDelimiter(GSchaduw);
+  LijstMap(BronMap, Namen, IsMap);
   try
     for Index := 0 to Namen.Count - 1 do
     begin
       Onderdeel := BronMap + '/' + Namen[Index];
       if IsMap[Index] <> nil then
       begin
-        if Relatief = '\' then LinkVariants(Onderdeel, Wortel, '', Namen[Index]);
-        ShadowTree(Onderdeel, Relatief + Namen[Index] + '\');
+        if Relatief = '\' then LinkVarianten(Onderdeel, Wortel, '', Namen[Index]);
+        SchaduwBoom(Onderdeel, Relatief + Namen[Index] + '\');
       end
       else if Relatief = '\' then
       begin
-        LinkVariants(Onderdeel, Wortel, Relatief, Namen[Index]);
-        LinkVariants(Onderdeel, Wortel, '', Namen[Index]);
+        LinkVarianten(Onderdeel, Wortel, Relatief, Namen[Index]);
+        LinkVarianten(Onderdeel, Wortel, '', Namen[Index]);
       end
-      else if not Exists(Wortel + '/' + Relatief + Namen[Index]) then
+      else if not IsAanwezig(Wortel + '/' + Relatief + Namen[Index]) then
         FpSymlink(PChar(Onderdeel), PChar(Wortel + '/' + Relatief + Namen[Index]));
     end;
   finally
@@ -339,16 +339,16 @@ end;
 { ---------------------------------------------------------------- overlay }
 
 var
-  GSave: string = '';
-  GSaveKnown: Boolean = False;
+  GBewaar: string = '';
+  GBewaarBekend: Boolean = False;
 
-function ZMSaveDir: string;
+function ZMBewaarMap: string;
 var
   Mapnaam: string;
 begin
-  if GSaveKnown then Exit(GSave);
-  GSaveKnown := True;
-  GSave := '';
+  if GBewaarBekend then Exit(GBewaar);
+  GBewaarBekend := True;
+  GBewaar := '';
 {$IFDEF UNIX}
   Mapnaam := GetEnvironmentVariable('ZM_SAVE');
   if Mapnaam = '' then
@@ -363,12 +363,12 @@ begin
 {$ENDIF}
   end;
   Mapnaam := ExpandFileName(Mapnaam);
-  if ForceDirectories(Mapnaam) then GSave := IncludeTrailingPathDelimiter(Mapnaam);
+  if ForceDirectories(Mapnaam) then GBewaar := IncludeTrailingPathDelimiter(Mapnaam);
 {$ENDIF}
-  Result := GSave;
+  Result := GBewaar;
 end;
 
-function StartsWith(const Tekst, Voorvoegsel: string): Boolean;
+function HeeftVoorvoegsel(const Tekst, Voorvoegsel: string): Boolean;
 begin
   Result := (Voorvoegsel <> '') and (Copy(Tekst, 1, Length(Voorvoegsel)) = Voorvoegsel);
 end;
@@ -376,17 +376,17 @@ end;
 { Het pad van Path relatief aan de datamap, met '/' als scheidingsteken; '' als Path
   niet in de datamap of de schaduwmap ligt. In de schaduwmap zijn backslashes gewone
   tekens in de naam: '<schaduw>/\images\8bits\x.bmp' wordt 'images/8bits/x.bmp'. }
-function DataRelative(const Pad: string): string;
+function DataRelatief(const Pad: string): string;
 var
   Index: Integer;
   Volledig: string;
 begin
   Result := '';
   Volledig := ExpandFileName(Pad);
-  if StartsWith(Volledig, ZMShadowDir) then
-    Result := Copy(Volledig, Length(ZMShadowDir) + 1, MaxInt)
-  else if StartsWith(Volledig, ZMDataDir) then
-    Result := Copy(Volledig, Length(ZMDataDir) + 1, MaxInt)
+  if HeeftVoorvoegsel(Volledig, ZMSchaduwMap) then
+    Result := Copy(Volledig, Length(ZMSchaduwMap) + 1, MaxInt)
+  else if HeeftVoorvoegsel(Volledig, ZMDataMap) then
+    Result := Copy(Volledig, Length(ZMDataMap) + 1, MaxInt)
   else
     Exit;
   for Index := 1 to Length(Result) do
@@ -395,18 +395,18 @@ begin
 end;
 
 { Laat de schaduwnamen van het databestand Rel naar Target wijzen. }
-procedure LinkShadow(const Relatief, Doel: string);
+procedure LinkSchaduw(const Relatief, Doel: string);
 {$IFDEF UNIX}
 var
   Wortel, WinRelatief: string;
   Index: Integer;
   Informatie: Stat;
 begin
-  Wortel := ExcludeTrailingPathDelimiter(ZMShadowDir);
+  Wortel := ExcludeTrailingPathDelimiter(ZMSchaduwMap);
   if Pos('/', Relatief) = 0 then
   begin
-    LinkVariants(Doel, Wortel, '\', Relatief, True);
-    LinkVariants(Doel, Wortel, '', Relatief, True);
+    LinkVarianten(Doel, Wortel, '\', Relatief, True);
+    LinkVarianten(Doel, Wortel, '', Relatief, True);
   end
   else
   begin
@@ -415,7 +415,7 @@ begin
       if WinRelatief[Index] = '/' then WinRelatief[Index] := '\';
     if (FpLStat(PChar(Wortel + '/' + WinRelatief), Informatie) = 0) and fpS_ISLNK(Informatie.st_mode) then
       FpUnlink(PChar(Wortel + '/' + WinRelatief));
-    if not Exists(Wortel + '/' + WinRelatief) then
+    if not IsAanwezig(Wortel + '/' + WinRelatief) then
       FpSymlink(PChar(Doel), PChar(Wortel + '/' + WinRelatief));
   end;
 end;
@@ -426,19 +426,19 @@ end;
 
 {$IFDEF UNIX}
 { Alle bestanden in de overlay krijgen schaduwnamen (lezen gaat voor op het origineel). }
-procedure OverlayTree(const Map, Relatief: string);
+procedure OverlayBoom(const Map, Relatief: string);
 var
   Namen: TStringList;
   IsMap: TList;
   Index: Integer;
 begin
-  ListDir(Map, Namen, IsMap);
+  LijstMap(Map, Namen, IsMap);
   try
     for Index := 0 to Namen.Count - 1 do
       if IsMap[Index] <> nil then
-        OverlayTree(Map + '/' + Namen[Index], Relatief + Namen[Index] + '/')
+        OverlayBoom(Map + '/' + Namen[Index], Relatief + Namen[Index] + '/')
       else
-        LinkShadow(Relatief + Namen[Index], Map + '/' + Namen[Index]);
+        LinkSchaduw(Relatief + Namen[Index], Map + '/' + Namen[Index]);
   finally
     Namen.Free;
     IsMap.Free;
@@ -447,18 +447,18 @@ end;
 {$ENDIF}
 
 { Voor een bestaand pad in de datamap: de overlaykopie als die er is. }
-function OverlayCopy(const Pad: string): string;
+function OverlayKopie(const Pad: string): string;
 var
   Relatief, Overlaypad: string;
 begin
   Result := Pad;
-  if (ZMSaveDir = '') or not StartsWith(Pad, ZMDataDir) then Exit;
-  Relatief := Copy(Pad, Length(ZMDataDir) + 1, MaxInt);
-  Overlaypad := ResolveRaw(ZMSaveDir + Relatief);
+  if (ZMBewaarMap = '') or not HeeftVoorvoegsel(Pad, ZMDataMap) then Exit;
+  Relatief := Copy(Pad, Length(ZMDataMap) + 1, MaxInt);
+  Overlaypad := OplosRuw(ZMBewaarMap + Relatief);
   if FileExists(Overlaypad) then Result := Overlaypad;
 end;
 
-function CopyFileContents(const Bron, Doel: string): Boolean;
+function KopieerBestandsinhoud(const Bron, Doel: string): Boolean;
 var
   Bronstroom, Doelstroom: TFileStream;
 begin
@@ -481,43 +481,43 @@ begin
   end;
 end;
 
-function ZMInDataDir(const Pad: string): Boolean;
+function ZMInDataMap(const Pad: string): Boolean;
 begin
-  Result := DataRelative(Pad) <> '';
+  Result := DataRelatief(Pad) <> '';
 end;
 
-function ZMWritePath(const Pad: string): string;
+function ZMSchrijfPad(const Pad: string): string;
 var
   Relatief, Bron, Doel: string;
 begin
   Result := Pad;
-  if ZMSaveDir = '' then Exit;
-  if StartsWith(ExpandFileName(Pad), ZMSaveDir) then Exit;
-  Relatief := DataRelative(Pad);
+  if ZMBewaarMap = '' then Exit;
+  if HeeftVoorvoegsel(ExpandFileName(Pad), ZMBewaarMap) then Exit;
+  Relatief := DataRelatief(Pad);
   if Relatief = '' then Exit;
   { de schrijfwijze van het origineel aanhouden (ZoetermeerLevels.Ini, niet .ini) }
-  Bron := ResolveRaw(ZMDataDir + Relatief);
-  if FileExists(Bron) and StartsWith(Bron, ZMDataDir) then
-    Relatief := Copy(Bron, Length(ZMDataDir) + 1, MaxInt)
+  Bron := OplosRuw(ZMDataMap + Relatief);
+  if FileExists(Bron) and HeeftVoorvoegsel(Bron, ZMDataMap) then
+    Relatief := Copy(Bron, Length(ZMDataMap) + 1, MaxInt)
   else
     Bron := '';
-  Doel := ResolveRaw(ZMSaveDir + Relatief);
+  Doel := OplosRuw(ZMBewaarMap + Relatief);
   if not FileExists(Doel) then
   begin
     ForceDirectories(ExtractFileDir(Doel));
-    if Bron <> '' then CopyFileContents(Bron, Doel);
+    if Bron <> '' then KopieerBestandsinhoud(Bron, Doel);
   end;
-  LinkShadow(Relatief, Doel);
+  LinkSchaduw(Relatief, Doel);
   Result := Doel;
 end;
 
 {$IFDEF UNIX}
 var
-  GShadowOwned: Boolean = False;
+  GSchaduwEigen: Boolean = False;
 
 { Verwijdert een schaduwmap: symlinks en (lege of door het spel gevulde) gewone
   bestanden; symlinks naar mappen worden nooit gevolgd. }
-procedure RemoveTree(const Map: string);
+procedure VerwijderBoom(const Map: string);
 var
   Namen: TStringList;
   IsMap: TList;
@@ -525,7 +525,7 @@ var
   Pad: string;
   Informatie: Stat;
 begin
-  if not ListDir(Map, Namen, IsMap) then
+  if not LijstMap(Map, Namen, IsMap) then
   begin
     Namen.Free;
     IsMap.Free;
@@ -536,7 +536,7 @@ begin
     begin
       Pad := Map + '/' + Namen[Index];
       if (FpLStat(PChar(Pad), Informatie) = 0) and fpS_ISDIR(Informatie.st_mode) then
-        RemoveTree(Pad)
+        VerwijderBoom(Pad)
       else
         FpUnlink(PChar(Pad));
     end;
@@ -549,7 +549,7 @@ end;
 
 { Ruimt in Root de schaduwmappen op van processen die niet meer bestaan, en de
   losse symlinks van oudere versies (die één gedeelde map gebruikten). }
-procedure CleanStale(const Wortel: string);
+procedure RuimOudeOp(const Wortel: string);
 var
   Namen: TStringList;
   IsMap: TList;
@@ -557,7 +557,7 @@ var
   Pad: string;
   Informatie: Stat;
 begin
-  ListDir(Wortel, Namen, IsMap);
+  LijstMap(Wortel, Namen, IsMap);
   try
     for Index := 0 to Namen.Count - 1 do
     begin
@@ -567,7 +567,7 @@ begin
         FpUnlink(PChar(Pad))
       else if fpS_ISDIR(Informatie.st_mode) and TryStrToInt(Namen[Index], Procesnr) and (Procesnr > 0) and
         (FpKill(Procesnr, 0) <> 0) and (fpGetErrno = ESysESRCH) then
-        RemoveTree(Pad);
+        VerwijderBoom(Pad);
     end;
   finally
     Namen.Free;
@@ -576,15 +576,15 @@ begin
 end;
 {$ENDIF}
 
-function ZMShadowDir: string;
+function ZMSchaduwMap: string;
 var
   Basis: string;
   Hashwaarde: LongWord;
   Index: Integer;
   Mapnaam: string;
 begin
-  if GShadow <> '' then Exit(GShadow);
-  Mapnaam := ExcludeTrailingPathDelimiter(ZMDataDir);
+  if GSchaduw <> '' then Exit(GSchaduw);
+  Mapnaam := ExcludeTrailingPathDelimiter(ZMDataMap);
   Basis := GetEnvironmentVariable('ZM_SHADOW');
   if Basis = '' then
   begin
@@ -600,30 +600,30 @@ begin
       hier opgeruimd, de eigen map bij het afsluiten. }
     Basis := ExpandFileName(Basis);
     ForceDirectories(Basis);
-    CleanStale(Basis);
+    RuimOudeOp(Basis);
     Basis := Basis + PathDelim + IntToStr(FpGetPid);
-    GShadowOwned := True;
+    GSchaduwEigen := True;
 {$ENDIF}
   end;
   Basis := ExpandFileName(Basis);
   ForceDirectories(Basis);
-  GShadow := IncludeTrailingPathDelimiter(Basis);
+  GSchaduw := IncludeTrailingPathDelimiter(Basis);
 {$IFDEF UNIX}
-  ClearLinks(Basis);
-  ShadowTree(Mapnaam, '\');
-  if ZMExeFile <> '' then
-    LinkVariants(ZMExeFile, Basis, '', 'ROS.exe');
-  if ZMSaveDir <> '' then OverlayTree(ExcludeTrailingPathDelimiter(ZMSaveDir), '');
+  WisLinks(Basis);
+  SchaduwBoom(Mapnaam, '\');
+  if ZMExeBestand <> '' then
+    LinkVarianten(ZMExeBestand, Basis, '', 'ROS.exe');
+  if ZMBewaarMap <> '' then OverlayBoom(ExcludeTrailingPathDelimiter(ZMBewaarMap), '');
 {$ENDIF}
-  Result := GShadow;
+  Result := GSchaduw;
 end;
 
-function ZMExeName: string;
+function ZMExeNaam: string;
 begin
 {$IFDEF UNIX}
-  Result := ZMShadowDir + 'ROS.exe';
+  Result := ZMSchaduwMap + 'ROS.exe';
 {$ELSE}
-  Locate;
+  ZoekDatamap;
   Result := GDataDir + 'ROS.exe';
 {$ENDIF}
 end;
@@ -631,22 +631,22 @@ end;
 { ---------------------------------------------------------------- PE-resources }
 
 type
-  TResEntry = record
-    Offset, Size: LongWord;  { bestandsoffset en grootte van de data }
+  THulpbronVermelding = record
+    BronPositie, Size: LongWord;  { bestandsoffset en grootte van de data }
   end;
 
 var
-  ResEntries: array of TResEntry;
+  HulpbronVermeldingen: array of THulpbronVermelding;
 
-procedure LoadExe;
+procedure LaadExe;
 var
   Bestandstroom: TFileStream;
 begin
   if ExeLoaded then Exit;
   ExeLoaded := True;
-  if ZMExeFile = '' then Exit;
+  if ZMExeBestand = '' then Exit;
   try
-    Bestandstroom := TFileStream.Create(ZMExeFile, fmOpenRead or fmShareDenyNone);
+    Bestandstroom := TFileStream.Create(ZMExeBestand, fmOpenRead or fmShareDenyNone);
     try
       SetLength(ExeImage, Bestandstroom.Size);
       if Bestandstroom.Size > 0 then Bestandstroom.ReadBuffer(ExeImage[0], Bestandstroom.Size);
@@ -658,13 +658,13 @@ begin
   end;
 end;
 
-function RdW(Verschuiving: LongWord): Word;
+function LeesWoord(Verschuiving: LongWord): Word;
 begin
   if Verschuiving + 2 > LongWord(Length(ExeImage)) then Exit(0);
   Result := ExeImage[Verschuiving] or (ExeImage[Verschuiving + 1] shl 8);
 end;
 
-function RdD(Verschuiving: LongWord): LongWord;
+function LeesDwoord(Verschuiving: LongWord): LongWord;
 begin
   if Verschuiving + 4 > LongWord(Length(ExeImage)) then Exit(0);
   Result := ExeImage[Verschuiving] or (LongWord(ExeImage[Verschuiving + 1]) shl 8) or
@@ -677,7 +677,7 @@ begin
 end;
 
 { Zoekt een resource: geeft de bestandsoffset/grootte via de out-parameters. }
-function FindRes(const Naam: string; NaamId: PtrUInt; Soortnaam: string; SoortId: PtrUInt;
+function ZoekHulpbron(const Naam: string; NaamId: PtrUInt; Soortnaam: string; SoortId: PtrUInt;
   out Bestandsoffset, Grootte: LongWord): Boolean;
 var
   PeKop, SectieTabel, AantalSecties, Index, HulpbronRVA, HulpbronRuw, HulpbronVGrootte: LongWord;
@@ -693,9 +693,9 @@ var
     Lengte, Teller: Integer;
   begin
     Result := '';
-    Lengte := RdW(HulpbronRuw + Verschuiving);
+    Lengte := LeesWoord(HulpbronRuw + Verschuiving);
     for Teller := 0 to Lengte - 1 do
-      Result := Result + Chr(RdW(HulpbronRuw + Verschuiving + 2 + LongWord(Teller) * 2) and $FF);
+      Result := Result + Chr(LeesWoord(HulpbronRuw + Verschuiving + 2 + LongWord(Teller) * 2) and $FF);
   end;
 
   { zoekt in een map op naam of id; geeft de OffsetToData van het item }
@@ -705,13 +705,13 @@ var
     NaamVeld, DataVeld: LongWord;
   begin
     Result := False;
-    AantalNaam := RdW(HulpbronRuw + MapVerschuiving + 12);
-    AantalId := RdW(HulpbronRuw + MapVerschuiving + 14);
+    AantalNaam := LeesWoord(HulpbronRuw + MapVerschuiving + 12);
+    AantalId := LeesWoord(HulpbronRuw + MapVerschuiving + 14);
     for Teller := 0 to AantalNaam + AantalId - 1 do
     begin
       Vermelding := HulpbronRuw + MapVerschuiving + 16 + Teller * 8;
-      NaamVeld := RdD(Vermelding);
-      DataVeld := RdD(Vermelding + 4);
+      NaamVeld := LeesDwoord(Vermelding);
+      DataVeld := LeesDwoord(Vermelding + 4);
       if NaamVeld and $80000000 <> 0 then
       begin
         if (GezochteNaam <> '') and SameText(MapNaam(NaamVeld and $7FFFFFFF), GezochteNaam) then
@@ -734,23 +734,23 @@ begin
   Result := False;
   Bestandsoffset := 0;
   Grootte := 0;
-  LoadExe;
+  LaadExe;
   if Length(ExeImage) < $100 then Exit;
-  if RdW(0) <> $5A4D then Exit;
-  PeKop := RdD($3C);
-  if RdD(PeKop) <> $00004550 then Exit;
-  AantalSecties := RdW(PeKop + 6);
-  OptGrootte := RdW(PeKop + 20);
+  if LeesWoord(0) <> $5A4D then Exit;
+  PeKop := LeesDwoord($3C);
+  if LeesDwoord(PeKop) <> $00004550 then Exit;
+  AantalSecties := LeesWoord(PeKop + 6);
+  OptGrootte := LeesWoord(PeKop + 20);
   SectieTabel := PeKop + 24 + OptGrootte;
-  HulpbronRVA := RdD(PeKop + 24 + 112);   { datadirectory 2 (resources), PE32 }
+  HulpbronRVA := LeesDwoord(PeKop + 24 + 112);   { datadirectory 2 (resources), PE32 }
   HulpbronRuw := 0;
   HulpbronVGrootte := 0;
   for Index := 0 to AantalSecties - 1 do
-    if (HulpbronRVA >= RdD(SectieTabel + Index * 40 + 12)) and
-      (HulpbronRVA < RdD(SectieTabel + Index * 40 + 12) + Max(RdD(SectieTabel + Index * 40 + 8), RdD(SectieTabel + Index * 40 + 16))) then
+    if (HulpbronRVA >= LeesDwoord(SectieTabel + Index * 40 + 12)) and
+      (HulpbronRVA < LeesDwoord(SectieTabel + Index * 40 + 12) + Max(LeesDwoord(SectieTabel + Index * 40 + 8), LeesDwoord(SectieTabel + Index * 40 + 16))) then
     begin
-      HulpbronRuw := RdD(SectieTabel + Index * 40 + 20) + (HulpbronRVA - RdD(SectieTabel + Index * 40 + 12));
-      HulpbronVGrootte := RdD(SectieTabel + Index * 40 + 8);
+      HulpbronRuw := LeesDwoord(SectieTabel + Index * 40 + 20) + (HulpbronRVA - LeesDwoord(SectieTabel + Index * 40 + 12));
+      HulpbronVGrootte := LeesDwoord(SectieTabel + Index * 40 + 8);
       HulpbronRVA := HulpbronRVA;  { sectie-relatieve basis is al toegepast }
       Break;
     end;
@@ -760,12 +760,12 @@ begin
   if not Opzoeken(Niveau1 and $7FFFFFFF, Naam, NaamId, Niveau2) or (Niveau2 and $80000000 = 0) then Exit;
   if not Opzoeken(Niveau2 and $7FFFFFFF, '', 0, Niveau3) or (Niveau3 and $80000000 <> 0) then Exit;
   DataVermelding := HulpbronRuw + Niveau3;
-  Bestandsoffset := RvaNaarVerschuiving(RdD(DataVermelding));
-  Grootte := RdD(DataVermelding + 4);
+  Bestandsoffset := RvaNaarVerschuiving(LeesDwoord(DataVermelding));
+  Grootte := LeesDwoord(DataVermelding + 4);
   Result := (Bestandsoffset + Grootte <= LongWord(Length(ExeImage)));
 end;
 
-function ResKey(Invoer: PAnsiChar; out Naam: string; out Nummer: PtrUInt): Boolean;
+function HulpbronSleutel(Invoer: PAnsiChar; out Naam: string; out Nummer: PtrUInt): Boolean;
 begin
   if PtrUInt(Invoer) < $10000 then
   begin
@@ -785,47 +785,47 @@ begin
   Result := True;
 end;
 
-function ZMFindExeResource(Naam, Hulpbronsoort: PAnsiChar): HRSRC;
+function ZMZoekExeHulpbron(Naam, Hulpbronsoort: PAnsiChar): HRSRC;
 var
   NaamTekst, SoortTekst: string;
   NaamNummer, SoortNummer: PtrUInt;
   Verschuiving, Grootte: LongWord;
 begin
   Result := 0;
-  ResKey(Naam, NaamTekst, NaamNummer);
-  ResKey(Hulpbronsoort, SoortTekst, SoortNummer);
-  if not FindRes(NaamTekst, NaamNummer, SoortTekst, SoortNummer, Verschuiving, Grootte) then Exit;
-  SetLength(ResEntries, Length(ResEntries) + 1);
-  ResEntries[High(ResEntries)].Offset := Verschuiving;
-  ResEntries[High(ResEntries)].Size := Grootte;
-  Result := $7000 + High(ResEntries);
+  HulpbronSleutel(Naam, NaamTekst, NaamNummer);
+  HulpbronSleutel(Hulpbronsoort, SoortTekst, SoortNummer);
+  if not ZoekHulpbron(NaamTekst, NaamNummer, SoortTekst, SoortNummer, Verschuiving, Grootte) then Exit;
+  SetLength(HulpbronVermeldingen, Length(HulpbronVermeldingen) + 1);
+  HulpbronVermeldingen[High(HulpbronVermeldingen)].BronPositie := Verschuiving;
+  HulpbronVermeldingen[High(HulpbronVermeldingen)].Size := Grootte;
+  Result := $7000 + High(HulpbronVermeldingen);
 end;
 
-function ZMExeResourceData(Hulpbron: HRSRC): Pointer;
+function ZMExeHulpbronGegevens(Hulpbron: HRSRC): Pointer;
 var
   Index: Integer;
 begin
   Index := Integer(Hulpbron) - $7000;
-  if (Index < 0) or (Index > High(ResEntries)) then Exit(nil);
-  Result := @ExeImage[ResEntries[Index].Offset];
+  if (Index < 0) or (Index > High(HulpbronVermeldingen)) then Exit(nil);
+  Result := @ExeImage[HulpbronVermeldingen[Index].BronPositie];
 end;
 
-function ZMExeResourceSize(Hulpbron: HRSRC): DWORD;
+function ZMExeHulpbronGrootte(Hulpbron: HRSRC): DWORD;
 var
   Index: Integer;
 begin
   Index := Integer(Hulpbron) - $7000;
-  if (Index < 0) or (Index > High(ResEntries)) then Exit(0);
-  Result := ResEntries[Index].Size;
+  if (Index < 0) or (Index > High(HulpbronVermeldingen)) then Exit(0);
+  Result := HulpbronVermeldingen[Index].Size;
 end;
 
-function ZMLoadExeResource(const Naam: string; Hulpbronsoort: PtrUInt; out Gegevens: Pointer; out Grootte: Integer): Boolean;
+function ZMLaadExeHulpbron(const Naam: string; Hulpbronsoort: PtrUInt; out Gegevens: Pointer; out Grootte: Integer): Boolean;
 var
   Verschuiving, Lengte: LongWord;
 begin
   Gegevens := nil;
   Grootte := 0;
-  Result := FindRes(Naam, 0, '', Hulpbronsoort, Verschuiving, Lengte);
+  Result := ZoekHulpbron(Naam, 0, '', Hulpbronsoort, Verschuiving, Lengte);
   if Result then
   begin
     Gegevens := @ExeImage[Verschuiving];
@@ -835,7 +835,7 @@ end;
 
 {$IFDEF UNIX}
 finalization
-  if GShadowOwned and (GShadow <> '') then
-    RemoveTree(ExcludeTrailingPathDelimiter(GShadow));
+  if GSchaduwEigen and (GSchaduw <> '') then
+    VerwijderBoom(ExcludeTrailingPathDelimiter(GSchaduw));
 {$ENDIF}
 end.

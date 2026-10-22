@@ -61,7 +61,7 @@ uses ZMWin;
 
 function timeGetTime: DWORD; stdcall;
 begin
-  Result := ZMTicks;
+  Result := ZMTikken;
 end;
 
 function timeBeginPeriod(uPeriod: UINT): MMRESULT; stdcall;
@@ -85,12 +85,12 @@ end;
 function timeSetEvent(uDelay, uResolution: UINT; lpFunction: TFNTimeCallBack;
   dwUser: DWORD_PTR; uFlags: UINT): MMRESULT; stdcall;
 begin
-  Result := ZMAddMMTimer(uDelay, @lpFunction, dwUser, uFlags and TIME_PERIODIC <> 0);
+  Result := ZMVoegMMTimerToe(uDelay, @lpFunction, dwUser, uFlags and TIME_PERIODIC <> 0);
 end;
 
 function timeKillEvent(uID: UINT): MMRESULT; stdcall;
 begin
-  if ZMKillMMTimer(uID) then Result := TIMERR_NOERROR else Result := MMSYSERR_ERROR;
+  if ZMVerwijderMMTimer(uID) then Result := TIMERR_NOERROR else Result := MMSYSERR_ERROR;
 end;
 
 function PlaySound(pszSound: PAnsiChar; hmod: HMODULE; fdwSound: DWORD): BOOL; stdcall;

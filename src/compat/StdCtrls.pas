@@ -943,22 +943,22 @@ implementation
 uses Math, ZMWin, ZMGdi;
 
 const
-  SB_TIMER_ID = 77;
+  SB_TIMERNUMMER = 77;
 
 { ---------------------------------------------------------------- hulproutines }
 
-procedure PrepareCanvasFont(C: TCanvas; Besturing: TControl; Alettertype: TFont);
+procedure BereidTekenvlakLetterVoor(C: TCanvas; Besturing: TControl; Alettertype: TFont);
 begin
   C.Font := Alettertype;
 end;
 
-function ParentFormOf(C: TControl): TWinControl;
+function OuderFormulierVan(C: TControl): TWinControl;
 begin
   while (C <> nil) and (C.Parent <> nil) do C := C.Parent;
   if C is TWinControl then Result := TWinControl(C) else Result := nil;
 end;
 
-function IsAccelChar(VK: Word; const Tekenreeks: string): Boolean;
+function IsAccelTeken(VK: Word; const Tekenreeks: string): Boolean;
 var
   I: Integer;
 begin
@@ -969,13 +969,13 @@ begin
 end;
 
 var
-  GEditCanvas: TCanvas = nil;
-  GEditDC: HDC = 0;
+  GBewerkTekenvlak: TCanvas = nil;
+  GBewerkDC: HDC = 0;
 
-function EditCanvas: TCanvas;
+function BewerkTekenvlak: TCanvas;
 begin
-  if GEditCanvas = nil then GEditCanvas := TCanvas.Create;
-  Result := GEditCanvas;
+  if GBewerkTekenvlak = nil then GBewerkTekenvlak := TCanvas.Create;
+  Result := GBewerkTekenvlak;
 end;
 
 { ---------------------------------------------------------------- TCustomGroupBox }
@@ -1215,7 +1215,7 @@ end;
 procedure TCustomLabel.CMDialogChar(var Message: TCMDialogChar);
 begin
   if (FFocusControl <> nil) and Enabled and ShowAccelChar and
-    IsAccelChar(Message.CharCode, Caption) then
+    IsAccelTeken(Message.CharCode, Caption) then
     with FFocusControl do
       if CanFocus then
       begin
@@ -1523,7 +1523,7 @@ begin
   W := 1 - FScrollX;
   for I := 1 to Length(S) do
   begin
-    CW := EditCanvas.TextWidth(S[I]);
+    CW := BewerkTekenvlak.TextWidth(S[I]);
     if X < W + CW div 2 then Exit(I - 1);
     Inc(W, CW);
   end;
@@ -1540,7 +1540,7 @@ begin
   S := Text;
   if FPasswordChar <> #0 then S := StringOfChar(FPasswordChar, Length(S));
   R := ClientRect;
-  with EditCanvas do
+  with BewerkTekenvlak do
   begin
     Brush.Style := bsSolid;
     if Enabled then Brush.Color := Color else Brush.Color := clBtnFace;
@@ -1582,25 +1582,25 @@ end;
 
 procedure TCustomEdit.Canvas_Font;
 begin
-  if GEditCanvas = nil then GEditCanvas := TCanvas.Create;
-  if GEditCanvas.HandleAllocated then Exit;
-  if GEditDC = 0 then GEditDC := CreateCompatibleDC(0);
-  GEditCanvas.Handle := GEditDC;
-  GEditCanvas.Font := Font;
+  if GBewerkTekenvlak = nil then GBewerkTekenvlak := TCanvas.Create;
+  if GBewerkTekenvlak.HandleAllocated then Exit;
+  if GBewerkDC = 0 then GBewerkDC := CreateCompatibleDC(0);
+  GBewerkTekenvlak.Handle := GBewerkDC;
+  GBewerkTekenvlak.Font := Font;
 end;
 
 procedure TCustomEdit.PaintWindow(DC: HDC);
 var
   Oud: HDC;
 begin
-  if GEditCanvas = nil then GEditCanvas := TCanvas.Create;
+  if GBewerkTekenvlak = nil then GBewerkTekenvlak := TCanvas.Create;
   Oud := 0;
-  if GEditCanvas.HandleAllocated then Oud := GEditCanvas.Handle;
-  GEditCanvas.Handle := DC;
+  if GBewerkTekenvlak.HandleAllocated then Oud := GBewerkTekenvlak.Handle;
+  GBewerkTekenvlak.Handle := DC;
   try
     Paint;
   finally
-    GEditCanvas.Handle := Oud;
+    GBewerkTekenvlak.Handle := Oud;
   end;
 end;
 
@@ -1699,17 +1699,17 @@ begin
   inherited MouseUp(Button, Shift, X, Y);
 end;
 
-{ ---------------------------------------------------------------- TMemoStrings }
+{ ---------------------------------------------------------------- TMemoTeksten }
 
 type
   { De regels van een memo. Net als het bewerkingsveld van Windows zijn de strings die via
     Lines[]/Lines.Count zichtbaar zijn de weergaveregels: met WordWrap aan wordt een lange
     tekstregel gesplitst waar de memo hem afbreekt. Text/SetText gebruiken de echte tekst. }
-  TMemoStrings = class(TStrings)
+  TMemoTeksten = class(TStrings)
   private
-    FMemo: TCustomMemo;
-    FRaw: TStringList;
-    function Wrapped: Boolean;
+    FTekstvak: TCustomMemo;
+    FRuw: TStringList;
+    function Omgebroken: Boolean;
   protected
     function Get(Index: Integer): string; override;
     function GetCount: Integer; override;
@@ -1727,115 +1727,115 @@ type
     procedure Insert(Index: Integer; const S: string); override;
   end;
 
-constructor TMemoStrings.Create(AMemo: TCustomMemo);
+constructor TMemoTeksten.Create(AMemo: TCustomMemo);
 begin
   inherited Create;
-  FMemo := AMemo;
-  FRaw := TStringList.Create;
+  FTekstvak := AMemo;
+  FRuw := TStringList.Create;
 end;
 
-destructor TMemoStrings.Destroy;
+destructor TMemoTeksten.Destroy;
 begin
-  FRaw.Free;
+  FRuw.Free;
   inherited Destroy;
 end;
 
-function TMemoStrings.Wrapped: Boolean;
+function TMemoTeksten.Omgebroken: Boolean;
 begin
-  Result := FMemo.FWordWrap and not (FMemo.FScrollBars in [ssHorizontal, ssBoth]);
+  Result := FTekstvak.FWordWrap and not (FTekstvak.FScrollBars in [ssHorizontal, ssBoth]);
 end;
 
-function TMemoStrings.GetCount: Integer;
+function TMemoTeksten.GetCount: Integer;
 begin
-  if Wrapped then
+  if Omgebroken then
   begin
-    if not FMemo.FDispValid then FMemo.BuildDisplay;
-    if FRaw.Count = 0 then Result := 0 else Result := Length(FMemo.FDisp);
+    if not FTekstvak.FDispValid then FTekstvak.BuildDisplay;
+    if FRuw.Count = 0 then Result := 0 else Result := Length(FTekstvak.FDisp);
   end
   else
-    Result := FRaw.Count;
+    Result := FRuw.Count;
 end;
 
-function TMemoStrings.Get(Index: Integer): string;
+function TMemoTeksten.Get(Index: Integer): string;
 begin
-  if Wrapped then
+  if Omgebroken then
   begin
-    if not FMemo.FDispValid then FMemo.BuildDisplay;
+    if not FTekstvak.FDispValid then FTekstvak.BuildDisplay;
     if (Index < 0) or (Index >= GetCount) then Error('Lijstindex (%d) buiten bereik', Index);
-    with FMemo.FDisp[Index] do Result := Copy(FRaw[Line], Start, Len);
+    with FTekstvak.FDisp[Index] do Result := Copy(FRuw[Line], Start, Len);
   end
   else
-    Result := FRaw[Index];
+    Result := FRuw[Index];
 end;
 
-function TMemoStrings.GetObject(Index: Integer): TObject;
+function TMemoTeksten.GetObject(Index: Integer): TObject;
 begin
   Result := nil;
 end;
 
-procedure TMemoStrings.PutObject(Index: Integer; AObject: TObject);
+procedure TMemoTeksten.PutObject(Index: Integer; AObject: TObject);
 begin
 end;
 
-procedure TMemoStrings.Put(Index: Integer; const S: string);
+procedure TMemoTeksten.Put(Index: Integer; const S: string);
 begin
-  if Wrapped then
+  if Omgebroken then
   begin
-    if not FMemo.FDispValid then FMemo.BuildDisplay;
-    with FMemo.FDisp[Index] do
-      FRaw[Line] := Copy(FRaw[Line], 1, Start - 1) + S + Copy(FRaw[Line], Start + Len, MaxInt);
+    if not FTekstvak.FDispValid then FTekstvak.BuildDisplay;
+    with FTekstvak.FDisp[Index] do
+      FRuw[Line] := Copy(FRuw[Line], 1, Start - 1) + S + Copy(FRuw[Line], Start + Len, MaxInt);
   end
   else
-    FRaw[Index] := S;
+    FRuw[Index] := S;
 end;
 
-procedure TMemoStrings.Insert(Index: Integer; const S: string);
+procedure TMemoTeksten.Insert(Index: Integer; const S: string);
 begin
-  if Wrapped and (Index < GetCount) then
+  if Omgebroken and (Index < GetCount) then
   begin
-    if not FMemo.FDispValid then FMemo.BuildDisplay;
-    FRaw.Insert(FMemo.FDisp[Index].Line, S);
+    if not FTekstvak.FDispValid then FTekstvak.BuildDisplay;
+    FRuw.Insert(FTekstvak.FDisp[Index].Line, S);
   end
   else
-    FRaw.Insert(FRaw.Count, S);
+    FRuw.Insert(FRuw.Count, S);
 end;
 
-procedure TMemoStrings.Delete(Index: Integer);
+procedure TMemoTeksten.Delete(Index: Integer);
 begin
-  if Wrapped then
+  if Omgebroken then
   begin
-    if not FMemo.FDispValid then FMemo.BuildDisplay;
-    FRaw.Delete(FMemo.FDisp[Index].Line);
+    if not FTekstvak.FDispValid then FTekstvak.BuildDisplay;
+    FRuw.Delete(FTekstvak.FDisp[Index].Line);
   end
   else
-    FRaw.Delete(Index);
+    FRuw.Delete(Index);
 end;
 
-procedure TMemoStrings.Clear;
+procedure TMemoTeksten.Clear;
 begin
-  FRaw.Clear;
+  FRuw.Clear;
 end;
 
-function TMemoStrings.GetTextStr: string;
+function TMemoTeksten.GetTextStr: string;
 var
   I: Integer;
 begin
   Result := '';
-  for I := 0 to FRaw.Count - 1 do
+  for I := 0 to FRuw.Count - 1 do
   begin
     if I > 0 then Result := Result + #13#10;
-    Result := Result + FRaw[I];
+    Result := Result + FRuw[I];
   end;
 end;
 
-procedure TMemoStrings.SetTextStr(const Value: string);
+procedure TMemoTeksten.SetTextStr(const Value: string);
 begin
-  FRaw.Text := Value;
+  FRuw.Text := Value;
 end;
 
-procedure TMemoStrings.SetUpdateState(Updating: Boolean);
+procedure TMemoTeksten.SetUpdateState(Updating: Boolean);
 begin
-  if Updating then FRaw.BeginUpdate else FRaw.EndUpdate;
+  if Updating then FRuw.BeginUpdate else FRuw.EndUpdate;
 end;
 
 { ---------------------------------------------------------------- TCustomMemo }
@@ -1848,14 +1848,14 @@ begin
   AutoSize := False;
   FWordWrap := True;
   FWantReturns := True;
-  FLines := TMemoStrings.Create(Self);
-  TMemoStrings(FLines).FRaw.OnChange := LinesChanged;
+  FLines := TMemoTeksten.Create(Self);
+  TMemoTeksten(FLines).FRuw.OnChange := LinesChanged;
   ControlStyle := ControlStyle - [csFixedHeight];
 end;
 
 destructor TCustomMemo.Destroy;
 begin
-  TMemoStrings(FLines).FRaw.OnChange := nil;
+  TMemoTeksten(FLines).FRuw.OnChange := nil;
   FLines.Free;
   inherited Destroy;
 end;
@@ -1876,7 +1876,7 @@ end;
 procedure TCustomMemo.LinesChanged(Sender: TObject);
 begin
   FDispValid := False;
-  if FSelStart > Length(TMemoStrings(FLines).GetTextStr) then FSelStart := 0;
+  if FSelStart > Length(TMemoTeksten(FLines).GetTextStr) then FSelStart := 0;
   Invalidate;
   if not FCreating then Change;
 end;
@@ -1890,7 +1890,7 @@ begin
     case Msg of
       WM_GETTEXT:
         begin
-          S := TMemoStrings(FLines).GetTextStr;
+          S := TMemoTeksten(FLines).GetTextStr;
           if WParam > 0 then
           begin
             P := PChar(LParam);
@@ -1899,7 +1899,7 @@ begin
           end;
         end;
       WM_GETTEXTLENGTH:
-        Result := Length(TMemoStrings(FLines).GetTextStr);
+        Result := Length(TMemoTeksten(FLines).GetTextStr);
       WM_SETTEXT:
         begin
           if LParam = 0 then S := '' else S := StrPas(PChar(LParam));
@@ -1974,7 +1974,7 @@ var
 begin
   R := ClientRect;
   if FScrollBars in [ssVertical, ssBoth] then
-    Result := Rect(R.Right - ZMScrollBarSize, R.Top, R.Right, R.Bottom)
+    Result := Rect(R.Right - ZMSchuifbalkGrootte, R.Top, R.Right, R.Bottom)
   else
     Result := Rect(0, 0, 0, 0);
 end;
@@ -1989,12 +1989,12 @@ var
   Regelhoogte, Gemb, M, CW: Integer;
 begin
   Result := ClientRect;
-  if FScrollBars in [ssVertical, ssBoth] then Dec(Result.Right, ZMScrollBarSize);
-  if FScrollBars in [ssHorizontal, ssBoth] then Dec(Result.Bottom, ZMScrollBarSize);
+  if FScrollBars in [ssVertical, ssBoth] then Dec(Result.Right, ZMSchuifbalkGrootte);
+  if FScrollBars in [ssHorizontal, ssBoth] then Dec(Result.Bottom, ZMSchuifbalkGrootte);
   CW := Result.Right - Result.Left;
-  if GEditCanvas = nil then GEditCanvas := TCanvas.Create;
-  GEditCanvas.Font := Font;
-  Regelhoogte := GEditCanvas.TextHeight('Ag');
+  if GBewerkTekenvlak = nil then GBewerkTekenvlak := TCanvas.Create;
+  GBewerkTekenvlak.Font := Font;
+  Regelhoogte := GBewerkTekenvlak.TextHeight('Ag');
   if FBorderStyle = bsSingle then
     if NewStyleControls and Ctl3D then
     begin
@@ -2010,9 +2010,9 @@ begin
       if Result.Bottom - Result.Top >= Regelhoogte + 4 then InflateRect(Result, 0, -2);
     end;
   M := 0;
-  if not IsBitmapFontName(Font.Name) then
+  if not IsBitmapLetterNaam(Font.Name) then
   begin
-    Gemb := (GEditCanvas.TextWidth('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    Gemb := (GBewerkTekenvlak.TextWidth('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
       div 26 + 1) div 2;
     M := Gemb div 2;
     if CW < 2 * M + 2 * Gemb then M := 0;
@@ -2042,23 +2042,23 @@ var
 begin
   FDispValid := True;
   SetLength(FDisp, 0);
-  if GEditCanvas = nil then GEditCanvas := TCanvas.Create;
+  if GBewerkTekenvlak = nil then GBewerkTekenvlak := TCanvas.Create;
   Canvas_Font;
   FW := TextRectM.Right - TextRectM.Left;
-  GEditCanvas.Font := Font;
+  GBewerkTekenvlak.Font := Font;
   Tekenbreedte := 0;
-  if GetTextMetrics(GEditCanvas.Handle, TM) then Tekenbreedte := TM.tmAveCharWidth;
+  if GetTextMetrics(GBewerkTekenvlak.Handle, TM) then Tekenbreedte := TM.tmAveCharWidth;
   N := 0;
-  for I := 0 to TMemoStrings(FLines).FRaw.Count - 1 do
+  for I := 0 to TMemoTeksten(FLines).FRuw.Count - 1 do
   begin
-    S := TMemoStrings(FLines).FRaw[I];
+    S := TMemoTeksten(FLines).FRuw[I];
     Regelstart := 1;
     repeat
       Rest := Copy(S, Regelstart, MaxInt);
       Lengte := Length(Rest);
       if FWordWrap and (FScrollBars in [ssNone, ssVertical]) and (Lengte > 0) then
       begin
-        W := GEditCanvas.TextWidth(Rest);
+        W := GBewerkTekenvlak.TextWidth(Rest);
         if (W > FW) and (FW > Tekenbreedte) then
         begin
           Vorige := Lengte - 1;
@@ -2073,16 +2073,16 @@ begin
             while (Idx > 0) and not Zachteafbreking(Rest, Idx + 1) do Dec(Idx);
             if Idx < 0 then Idx := 0;
             Vorige := Idx;
-            if Vorige > 0 then W := GEditCanvas.TextWidth(Copy(Rest, 1, Vorige));
+            if Vorige > 0 then W := GBewerkTekenvlak.TextWidth(Copy(Rest, 1, Vorige));
             Volgende := Vorige - 1;
           until (Vorige = 0) or (W <= FW);
           if Vorige = 0 then
           begin
             { geen woordgrens: tekens van het eind afhalen tot het past }
-            W := GEditCanvas.TextWidth(Rest);
+            W := GBewerkTekenvlak.TextWidth(Rest);
             Vorige := Lengte - 1;
             repeat
-              Dec(W, GEditCanvas.TextWidth(Rest[Vorige + 1]));
+              Dec(W, GBewerkTekenvlak.TextWidth(Rest[Vorige + 1]));
               Dec(Vorige);
             until (Vorige <= 0) or (W <= FW);
             if Vorige <= 0 then Vorige := 1;
@@ -2107,10 +2107,10 @@ function TCustomMemo.VisibleLines: Integer;
 var
   H: Integer;
 begin
-  if GEditCanvas = nil then GEditCanvas := TCanvas.Create;
+  if GBewerkTekenvlak = nil then GBewerkTekenvlak := TCanvas.Create;
   Canvas_Font;
-  GEditCanvas.Font := Font;
-  H := GEditCanvas.TextHeight('Ag');
+  GBewerkTekenvlak.Font := Font;
+  H := GBewerkTekenvlak.TextHeight('Ag');
   if H <= 0 then H := 13;
   Result := Max(1, (ClientHeight) div H);
 end;
@@ -2132,18 +2132,18 @@ var
   I, Totaal: Integer;
 begin
   Totaal := 0;
-  for I := 0 to TMemoStrings(FLines).FRaw.Count - 1 do
+  for I := 0 to TMemoTeksten(FLines).FRuw.Count - 1 do
   begin
-    if Pos <= Totaal + Length(TMemoStrings(FLines).FRaw[I]) then
+    if Pos <= Totaal + Length(TMemoTeksten(FLines).FRuw[I]) then
     begin
       L := I;
       C := Pos - Totaal;
       Exit;
     end;
-    Inc(Totaal, Length(TMemoStrings(FLines).FRaw[I]) + 2);
+    Inc(Totaal, Length(TMemoTeksten(FLines).FRuw[I]) + 2);
   end;
-  L := Max(0, TMemoStrings(FLines).FRaw.Count - 1);
-  if TMemoStrings(FLines).FRaw.Count > 0 then C := Length(TMemoStrings(FLines).FRaw[L]) else C := 0;
+  L := Max(0, TMemoTeksten(FLines).FRuw.Count - 1);
+  if TMemoTeksten(FLines).FRuw.Count > 0 then C := Length(TMemoTeksten(FLines).FRuw[L]) else C := 0;
 end;
 
 function TCustomMemo.LineColToPos(L, C: Integer): Integer;
@@ -2151,7 +2151,7 @@ var
   I: Integer;
 begin
   Result := 0;
-  for I := 0 to Min(L, TMemoStrings(FLines).FRaw.Count) - 1 do Inc(Result, Length(TMemoStrings(FLines).FRaw[I]) + 2);
+  for I := 0 to Min(L, TMemoTeksten(FLines).FRuw.Count) - 1 do Inc(Result, Length(TMemoTeksten(FLines).FRuw[I]) + 2);
   Inc(Result, C);
 end;
 
@@ -2176,7 +2176,7 @@ var
 begin
   if not FDispValid then BuildDisplay;
   R := ClientRect;
-  with GEditCanvas do
+  with GBewerkTekenvlak do
   begin
     Font := Self.Font;
     Brush.Style := bsSolid;
@@ -2192,8 +2192,8 @@ begin
     for I := FTopLine to High(FDisp) do
     begin
       if Y >= TR.Bottom then Break;
-      S := Copy(TMemoStrings(FLines).FRaw[FDisp[I].Line], FDisp[I].Start, FDisp[I].Len);
-      if FDisp[I].Line >= TMemoStrings(FLines).FRaw.Count then S := '';
+      S := Copy(TMemoTeksten(FLines).FRuw[FDisp[I].Line], FDisp[I].Start, FDisp[I].Len);
+      if FDisp[I].Line >= TMemoTeksten(FLines).FRuw.Count then S := '';
       case FAlignment of
         taRightJustify: X := TR.Right - TextWidth(S);
         taCenter: X := TR.Left + (TR.Right - TR.Left - TextWidth(S)) div 2;
@@ -2214,7 +2214,7 @@ begin
       Inc(Y, H);
     end;
     if FScrollBars in [ssVertical, ssBoth] then
-      ZMDrawScrollBar(GEditCanvas, SBRect, True, 0, Max(0, Length(FDisp) - 1), FTopLine,
+      ZMTekenSchuifbalk(GBewerkTekenvlak, SBRect, True, 0, Max(0, Length(FDisp) - 1), FTopLine,
         VisibleLines, FSBPressed, Enabled and (Length(FDisp) > VisibleLines));
   end;
 end;
@@ -2231,10 +2231,10 @@ end;
 
 procedure TCustomMemo.WMTimer(var Message: TWMTimer);
 begin
-  if (Message.TimerID = SB_TIMER_ID) and (FSBPressed in [spLineUp, spLineDown, spPageUp, spPageDown]) then
+  if (Message.TimerID = SB_TIMERNUMMER) and (FSBPressed in [spLineUp, spLineDown, spPageUp, spPageDown]) then
   begin
     DoSBPart(FSBPressed);
-    SetTimer(Handle, SB_TIMER_ID, 50, nil);
+    SetTimer(Handle, SB_TIMERNUMMER, 50, nil);
   end;
 end;
 
@@ -2253,14 +2253,14 @@ begin
   if (FScrollBars in [ssVertical, ssBoth]) and PtInRect(SBRect, Point(X, Y)) then
   begin
     if not FDispValid then BuildDisplay;
-    Deel := ZMScrollHit(SBRect, True, 0, Max(0, Length(FDisp) - 1), FTopLine, VisibleLines, Point(X, Y));
+    Deel := ZMSchuifTreffer(SBRect, True, 0, Max(0, Length(FDisp) - 1), FTopLine, VisibleLines, Point(X, Y));
     FSBPressed := Deel;
     if Deel = spThumb then
-      FSBDragOffset := Y - ZMScrollThumbRect(SBRect, True, 0, Max(0, Length(FDisp) - 1), FTopLine, VisibleLines).Top
+      FSBDragOffset := Y - ZMSchuifknopRechthoek(SBRect, True, 0, Max(0, Length(FDisp) - 1), FTopLine, VisibleLines).Top
     else
     begin
       DoSBPart(Deel);
-      SetTimer(Handle, SB_TIMER_ID, 350, nil);
+      SetTimer(Handle, SB_TIMERNUMMER, 350, nil);
     end;
     Invalidate;
     MouseCapture := True;
@@ -2270,19 +2270,19 @@ begin
   if Button = mbLeft then
   begin
     if not FDispValid then BuildDisplay;
-    H := GEditCanvas.TextHeight('Ag');
+    H := GBewerkTekenvlak.TextHeight('Ag');
     if H <= 0 then H := 13;
     DI := FTopLine + Y div H;
     if DI > High(FDisp) then DI := High(FDisp);
     if DI < 0 then DI := 0;
-    S := Copy(TMemoStrings(FLines).FRaw[FDisp[DI].Line], FDisp[DI].Start, FDisp[DI].Len);
-    if TMemoStrings(FLines).FRaw.Count = 0 then S := '';
+    S := Copy(TMemoTeksten(FLines).FRuw[FDisp[DI].Line], FDisp[DI].Start, FDisp[DI].Len);
+    if TMemoTeksten(FLines).FRuw.Count = 0 then S := '';
     W := TextRectM.Left;
     P := 0;
     for I := 1 to Length(S) do
     begin
-      if X < W + GEditCanvas.TextWidth(S[I]) div 2 then Break;
-      Inc(W, GEditCanvas.TextWidth(S[I]));
+      if X < W + GBewerkTekenvlak.TextWidth(S[I]) div 2 then Break;
+      Inc(W, GBewerkTekenvlak.TextWidth(S[I]));
       Inc(P);
     end;
     FSelStart := LineColToPos(FDisp[DI].Line, FDisp[DI].Start - 1 + P);
@@ -2300,12 +2300,12 @@ begin
   if FSBPressed = spThumb then
   begin
     R := SBRect;
-    Th := ZMScrollThumbRect(R, True, 0, Max(0, Length(FDisp) - 1), FTopLine, VisibleLines);
-    Lengte := (R.Bottom - R.Top - 2 * ZMScrollBarSize) - (Th.Bottom - Th.Top);
+    Th := ZMSchuifknopRechthoek(R, True, 0, Max(0, Length(FDisp) - 1), FTopLine, VisibleLines);
+    Lengte := (R.Bottom - R.Top - 2 * ZMSchuifbalkGrootte) - (Th.Bottom - Th.Top);
     Bereik := Length(FDisp) - VisibleLines;
     if (Lengte > 0) and (Bereik > 0) then
     begin
-      Nieuwboven := (Y - FSBDragOffset - R.Top - ZMScrollBarSize) * Bereik div Lengte;
+      Nieuwboven := (Y - FSBDragOffset - R.Top - ZMSchuifbalkGrootte) * Bereik div Lengte;
       ScrollTo(Nieuwboven);
     end;
     Exit;
@@ -2318,7 +2318,7 @@ begin
   if FSBPressed <> spNone then
   begin
     FSBPressed := spNone;
-    KillTimer(Handle, SB_TIMER_ID);
+    KillTimer(Handle, SB_TIMERNUMMER);
     MouseCapture := False;
     Invalidate;
     Exit;
@@ -2332,11 +2332,11 @@ var
 begin
   if FReadOnly then Exit;
   DeleteSelection;
-  T := TMemoStrings(FLines).GetTextStr;
+  T := TMemoTeksten(FLines).GetTextStr;
   T := Copy(T, 1, FSelStart) + S + Copy(T, FSelStart + 1, MaxInt);
   FCreating := True;
   try
-    TMemoStrings(FLines).FRaw.Text := T;
+    TMemoTeksten(FLines).FRuw.Text := T;
   finally
     FCreating := False;
   end;
@@ -2353,11 +2353,11 @@ begin
   if FSelLength = 0 then Exit;
   St := FSelStart;
   if FSelLength < 0 then St := FSelStart + FSelLength;
-  T := TMemoStrings(FLines).GetTextStr;
+  T := TMemoTeksten(FLines).GetTextStr;
   T := Copy(T, 1, St) + Copy(T, St + Abs(FSelLength) + 1, MaxInt);
   FCreating := True;
   try
-    TMemoStrings(FLines).FRaw.Text := T;
+    TMemoTeksten(FLines).FRuw.Text := T;
   finally
     FCreating := False;
   end;
@@ -2374,8 +2374,8 @@ begin
       begin
         PosToLineCol(FSelStart, L, C);
         if Message.CharCode = VK_UP then Dec(L) else Inc(L);
-        if (L >= 0) and (L < TMemoStrings(FLines).FRaw.Count) then
-          FSelStart := LineColToPos(L, Min(C, Length(TMemoStrings(FLines).FRaw[L])));
+        if (L >= 0) and (L < TMemoTeksten(FLines).FRuw.Count) then
+          FSelStart := LineColToPos(L, Min(C, Length(TMemoTeksten(FLines).FRuw[L])));
         FSelLength := 0;
         DI := DispIndexOfPos(FSelStart);
         if DI < FTopLine then ScrollTo(DI)
@@ -2388,7 +2388,7 @@ begin
       begin
         PosToLineCol(FSelStart, L, C);
         if Message.CharCode = VK_HOME then C := 0
-        else if L < TMemoStrings(FLines).FRaw.Count then C := Length(TMemoStrings(FLines).FRaw[L]);
+        else if L < TMemoTeksten(FLines).FRuw.Count then C := Length(TMemoTeksten(FLines).FRuw[L]);
         FSelStart := LineColToPos(L, C);
         FSelLength := 0;
         Invalidate;
@@ -2479,15 +2479,15 @@ procedure TButtonControl.PaintWindow(DC: HDC);
 var
   Oud: HDC;
 begin
-  if GEditCanvas = nil then GEditCanvas := TCanvas.Create;
+  if GBewerkTekenvlak = nil then GBewerkTekenvlak := TCanvas.Create;
   Oud := 0;
-  if GEditCanvas.HandleAllocated then Oud := GEditCanvas.Handle;
-  GEditCanvas.Handle := DC;
+  if GBewerkTekenvlak.HandleAllocated then Oud := GBewerkTekenvlak.Handle;
+  GBewerkTekenvlak.Handle := DC;
   try
-    GEditCanvas.Font := Font;
+    GBewerkTekenvlak.Font := Font;
     Paint;
   finally
-    GEditCanvas.Handle := Oud;
+    GBewerkTekenvlak.Handle := Oud;
   end;
 end;
 
@@ -2497,7 +2497,7 @@ end;
 
 function TButtonControl.PaintCanvas: TCanvas;
 begin
-  Result := EditCanvas;
+  Result := BewerkTekenvlak;
 end;
 
 procedure TButtonControl.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -2576,7 +2576,7 @@ procedure TButton.Click;
 var
   Formulier: TWinControl;
 begin
-  Formulier := ParentFormOf(Self);
+  Formulier := OuderFormulierVan(Self);
   if (Formulier <> nil) and (FModalResult <> mrNone) and Assigned(ZMSetModalResultHook) then
     ZMSetModalResultHook(Formulier, FModalResult);
   inherited Click;
@@ -2615,7 +2615,7 @@ end;
 procedure TButton.CMDialogChar(var Message: TCMDialogChar);
 begin
   with Message do
-    if IsAccelChar(CharCode, Caption) and CanFocus then
+    if IsAccelTeken(CharCode, Caption) and CanFocus then
     begin
       Click;
       Result := 1;
@@ -2654,17 +2654,17 @@ var
   C: TCanvas;
   Omlaag: Boolean;
 begin
-  C := GEditCanvas;
+  C := GBewerkTekenvlak;
   R := ClientRect;
   Omlaag := FPressed and FMouseInside;
-  ZMDrawButtonFace(C, R, Omlaag, FDefault or FActive, Focused);
+  ZMTekenKnopvlak(C, R, Omlaag, FDefault or FActive, Focused);
   C.Font := Font;
   C.Brush.Style := bsClear;
   if Omlaag then OffsetRect(R, 1, 1);
   if Enabled then
     DrawText(C.Handle, PChar(Caption), Length(Caption), R, DT_CENTER or DT_VCENTER or DT_SINGLELINE)
   else
-    ZMDrawDisabledText(C, R, Caption, DT_CENTER or DT_VCENTER or DT_SINGLELINE);
+    ZMTekenUitgeschakeldeTekst(C, R, Caption, DT_CENTER or DT_VCENTER or DT_SINGLELINE);
   if Focused then
   begin
     R := ClientRect;
@@ -2747,7 +2747,7 @@ end;
 procedure TCustomCheckBox.CMDialogChar(var Message: TCMDialogChar);
 begin
   with Message do
-    if IsAccelChar(CharCode, Caption) and CanFocus then
+    if IsAccelTeken(CharCode, Caption) and CanFocus then
     begin
       SetFocus;
       if Focused then Toggle;
@@ -2762,7 +2762,7 @@ var
   R, Vakr: TRect;
   C: TCanvas;
 begin
-  C := GEditCanvas;
+  C := GBewerkTekenvlak;
   R := ClientRect;
   C.Brush.Color := Color;
   C.Brush.Style := bsSolid;
@@ -2777,13 +2777,13 @@ begin
     Vakr := Rect(Width - 13, (Height - 13) div 2, Width, (Height - 13) div 2 + 13);
     R.Right := Width - 17;
   end;
-  ZMDrawCheck(C, Vakr, FState <> cbUnchecked, FState = cbGrayed, Enabled);
+  ZMTekenVinkje(C, Vakr, FState <> cbUnchecked, FState = cbGrayed, Enabled);
   C.Font := Font;
   C.Brush.Style := bsClear;
   if Enabled then
     DrawText(C.Handle, PChar(Caption), Length(Caption), R, DT_LEFT or DT_VCENTER or DT_SINGLELINE)
   else
-    ZMDrawDisabledText(C, R, Caption, DT_LEFT or DT_VCENTER or DT_SINGLELINE);
+    ZMTekenUitgeschakeldeTekst(C, R, Caption, DT_LEFT or DT_VCENTER or DT_SINGLELINE);
   if Focused then
   begin
     DrawText(C.Handle, PChar(Caption), Length(Caption), R, DT_LEFT or DT_VCENTER or DT_SINGLELINE or DT_CALCRECT);
@@ -2862,7 +2862,7 @@ end;
 procedure TRadioButton.CMDialogChar(var Message: TCMDialogChar);
 begin
   with Message do
-    if IsAccelChar(CharCode, Caption) and CanFocus then
+    if IsAccelTeken(CharCode, Caption) and CanFocus then
     begin
       SetFocus;
       if Focused then SetChecked(True);
@@ -2877,7 +2877,7 @@ var
   R, Vakr: TRect;
   C: TCanvas;
 begin
-  C := GEditCanvas;
+  C := GBewerkTekenvlak;
   R := ClientRect;
   C.Brush.Color := Color;
   C.Brush.Style := bsSolid;
@@ -2892,21 +2892,21 @@ begin
     Vakr := Rect(Width - 12, (Height - 12) div 2, Width, (Height - 12) div 2 + 12);
     R.Right := Width - 17;
   end;
-  ZMDrawRadio(C, Vakr, FChecked, Enabled);
+  ZMTekenKeuzerondje(C, Vakr, FChecked, Enabled);
   C.Font := Font;
   C.Brush.Style := bsClear;
   if Enabled then
     DrawText(C.Handle, PChar(Caption), Length(Caption), R, DT_LEFT or DT_VCENTER or DT_SINGLELINE)
   else
-    ZMDrawDisabledText(C, R, Caption, DT_LEFT or DT_VCENTER or DT_SINGLELINE);
+    ZMTekenUitgeschakeldeTekst(C, R, Caption, DT_LEFT or DT_VCENTER or DT_SINGLELINE);
 end;
 
 { ---------------------------------------------------------------- TCustomListBox }
 
 type
-  TListBoxStrings = class(TStringList)
+  TLijstvakTeksten = class(TStringList)
   private
-    FListBox: TCustomListBox;
+    FLijstvak: TCustomListBox;
   end;
 
 constructor TCustomListBox.Create(AOwner: TComponent);
@@ -2917,8 +2917,8 @@ begin
   TabStop := True;
   ParentColor := False;
   Color := clWindow;
-  FItems := TListBoxStrings.Create;
-  TListBoxStrings(FItems).FListBox := Self;
+  FItems := TLijstvakTeksten.Create;
+  TLijstvakTeksten(FItems).FLijstvak := Self;
   TStringList(FItems).OnChange := ItemsChanged;
   FItemHeight := 16;
   FItemIndex := -1;
@@ -3089,7 +3089,7 @@ end;
 
 function TCustomListBox.SBRect: TRect;
 begin
-  Result := Rect(ClientWidth - ZMScrollBarSize, 0, ClientWidth, ClientHeight);
+  Result := Rect(ClientWidth - ZMSchuifbalkGrootte, 0, ClientWidth, ClientHeight);
 end;
 
 function TCustomListBox.ItemRect(Index: Integer): TRect;
@@ -3097,7 +3097,7 @@ var
   W: Integer;
 begin
   W := ClientWidth;
-  if HasScrollBar then Dec(W, ZMScrollBarSize);
+  if HasScrollBar then Dec(W, ZMSchuifbalkGrootte);
   Result := Rect(0, (Index - FTopIndex) * FItemHeight, W, (Index - FTopIndex + 1) * FItemHeight);
 end;
 
@@ -3158,7 +3158,7 @@ begin
       if (odFocused in Staat) then Canvas.DrawFocusRect(R);
     end;
     if HasScrollBar then
-      ZMDrawScrollBar(Canvas, SBRect, True, 0, FItems.Count - 1, FTopIndex, VisibleCount, FSBPressed, Enabled);
+      ZMTekenSchuifbalk(Canvas, SBRect, True, 0, FItems.Count - 1, FTopIndex, VisibleCount, FSBPressed, Enabled);
   finally
     Canvas.Handle := 0;
   end;
@@ -3207,7 +3207,7 @@ begin
   if CanFocus and not Focused then SetFocus;
   if HasScrollBar and PtInRect(SBRect, Point(X, Y)) then
   begin
-    Deel := ZMScrollHit(SBRect, True, 0, FItems.Count - 1, FTopIndex, VisibleCount, Point(X, Y));
+    Deel := ZMSchuifTreffer(SBRect, True, 0, FItems.Count - 1, FTopIndex, VisibleCount, Point(X, Y));
     case Deel of
       spLineUp: TopIndex := TopIndex - 1;
       spLineDown: TopIndex := TopIndex + 1;
@@ -3241,16 +3241,16 @@ end;
 { ---------------------------------------------------------------- uitklaplijst van de combobox }
 
 type
-  TComboDropList = class(TCustomListBox)
+  TComboUitklaplijst = class(TCustomListBox)
   private
-    FCombo: TCustomComboBox;
+    FKeuzevak: TCustomComboBox;
   protected
     procedure CreateParams(var Params: TCreateParams); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
   end;
 
-procedure TComboDropList.CreateParams(var Params: TCreateParams);
+procedure TComboUitklaplijst.CreateParams(var Params: TCreateParams);
 begin
   inherited CreateParams(Params);
   Params.Style := WS_POPUP or WS_BORDER;
@@ -3258,7 +3258,7 @@ begin
   Params.WndParent := 0;
 end;
 
-procedure TComboDropList.MouseMove(Shift: TShiftState; X, Y: Integer);
+procedure TComboUitklaplijst.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
   I: Integer;
 begin
@@ -3266,15 +3266,15 @@ begin
   if (I >= 0) and (I <> ItemIndex) then ItemIndex := I;
 end;
 
-procedure TComboDropList.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TComboUitklaplijst.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
   I: Integer;
 begin
   I := ItemAtPos(Point(X, Y), True);
   if (I >= 0) and PtInRect(ClientRect, Point(X, Y)) then
-    FCombo.ListSelected(I)
+    FKeuzevak.ListSelected(I)
   else if not PtInRect(ClientRect, Point(X, Y)) then
-    FCombo.DroppedDown := False;
+    FKeuzevak.DroppedDown := False;
 end;
 
 { ---------------------------------------------------------------- TCustomComboBox }
@@ -3413,10 +3413,10 @@ begin
     DropDown;
     if FDropList = nil then
     begin
-      FDropList := TComboDropList.Create(nil);
-      TComboDropList(FDropList).FCombo := Self;
+      FDropList := TComboUitklaplijst.Create(nil);
+      TComboUitklaplijst(FDropList).FKeuzevak := Self;
     end;
-    with TComboDropList(FDropList) do
+    with TComboUitklaplijst(FDropList) do
     begin
       Font := Self.Font;
       Items.Assign(Self.FItems);
@@ -3488,7 +3488,7 @@ begin
   try
     FCanvas.Font := Font;
     R := ClientRect;
-    BR := Rect(R.Right - ZMScrollBarSize, R.Top, R.Right, R.Bottom);
+    BR := Rect(R.Right - ZMSchuifbalkGrootte, R.Top, R.Right, R.Bottom);
     R.Right := BR.Left;
     if Focused and not FDroppedDown then
     begin
@@ -3520,11 +3520,11 @@ begin
     end
     else
     begin
-      ZMDrawRaised(FCanvas, BR);
+      ZMTekenVerheven(FCanvas, BR);
       FCanvas.Brush.Color := clBtnFace;
       FCanvas.FillRect(BR);
     end;
-    ZMDrawArrow(FCanvas, BR, 1, Enabled);
+    ZMTekenPijl(FCanvas, BR, 1, Enabled);
   finally
     FCanvas.Handle := 0;
   end;
@@ -3641,7 +3641,7 @@ begin
   C := TCanvas.Create;
   try
     C.Handle := DC;
-    ZMDrawScrollBar(C, ClientRect, FKind = sbVertical, FMin, FMax, FPosition, FPageSize, FPressed, Enabled);
+    ZMTekenSchuifbalk(C, ClientRect, FKind = sbVertical, FMin, FMax, FPosition, FPageSize, FPressed, Enabled);
     C.Handle := 0;
   finally
     C.Free;
@@ -3650,10 +3650,10 @@ end;
 
 procedure TScrollBar.WMTimer(var Message: TWMTimer);
 begin
-  if (Message.TimerID = SB_TIMER_ID) and (FPressed in [spLineUp, spLineDown, spPageUp, spPageDown]) then
+  if (Message.TimerID = SB_TIMERNUMMER) and (FPressed in [spLineUp, spLineDown, spPageUp, spPageDown]) then
   begin
     DoPart(FPressed);
-    SetTimer(Handle, SB_TIMER_ID, 50, nil);
+    SetTimer(Handle, SB_TIMERNUMMER, 50, nil);
   end;
 end;
 
@@ -3663,16 +3663,16 @@ var
 begin
   if Button = mbLeft then
   begin
-    FPressed := ZMScrollHit(ClientRect, FKind = sbVertical, FMin, FMax, FPosition, FPageSize, Point(X, Y));
+    FPressed := ZMSchuifTreffer(ClientRect, FKind = sbVertical, FMin, FMax, FPosition, FPageSize, Point(X, Y));
     if FPressed = spThumb then
     begin
-      Th := ZMScrollThumbRect(ClientRect, FKind = sbVertical, FMin, FMax, FPosition, FPageSize);
+      Th := ZMSchuifknopRechthoek(ClientRect, FKind = sbVertical, FMin, FMax, FPosition, FPageSize);
       if FKind = sbVertical then FDragOffset := Y - Th.Top else FDragOffset := X - Th.Left;
     end
     else
     begin
       DoPart(FPressed);
-      SetTimer(Handle, SB_TIMER_ID, 350, nil);
+      SetTimer(Handle, SB_TIMERNUMMER, 350, nil);
     end;
     Invalidate;
   end;
@@ -3687,16 +3687,16 @@ begin
   if FPressed = spThumb then
   begin
     R := ClientRect;
-    Th := ZMScrollThumbRect(R, FKind = sbVertical, FMin, FMax, FPosition, FPageSize);
+    Th := ZMSchuifknopRechthoek(R, FKind = sbVertical, FMin, FMax, FPosition, FPageSize);
     if FKind = sbVertical then
     begin
-      Lengte := (R.Bottom - R.Top - 2 * ZMScrollBarSize) - (Th.Bottom - Th.Top);
-      Uit := Y - FDragOffset - R.Top - ZMScrollBarSize;
+      Lengte := (R.Bottom - R.Top - 2 * ZMSchuifbalkGrootte) - (Th.Bottom - Th.Top);
+      Uit := Y - FDragOffset - R.Top - ZMSchuifbalkGrootte;
     end
     else
     begin
-      Lengte := (R.Right - R.Left - 2 * ZMScrollBarSize) - (Th.Right - Th.Left);
-      Uit := X - FDragOffset - R.Left - ZMScrollBarSize;
+      Lengte := (R.Right - R.Left - 2 * ZMSchuifbalkGrootte) - (Th.Right - Th.Left);
+      Uit := X - FDragOffset - R.Left - ZMSchuifbalkGrootte;
     end;
     if Lengte > 0 then
     begin
@@ -3715,7 +3715,7 @@ var
 begin
   if FPressed <> spNone then
   begin
-    KillTimer(Handle, SB_TIMER_ID);
+    KillTimer(Handle, SB_TIMERNUMMER);
     if FPressed = spThumb then
     begin
       P := FPosition;
@@ -3776,6 +3776,6 @@ initialization
   RegisterClasses([TGroupBox, TLabel, TEdit, TMemo, TButton, TCheckBox, TRadioButton,
     TListBox, TComboBox, TScrollBar, TStaticText]);
 finalization
-  FreeAndNil(GEditCanvas);
-  if GEditDC <> 0 then DeleteDC(GEditDC);
+  FreeAndNil(GBewerkTekenvlak);
+  if GBewerkDC <> 0 then DeleteDC(GBewerkDC);
 end.

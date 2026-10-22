@@ -9,7 +9,7 @@ var
 
 function ParamStr(Index: Integer): string;
 begin
-  if Index = 0 then Result := ZMExeName else Result := System.ParamStr(Index);
+  if Index = 0 then Result := ZMExeNaam else Result := System.ParamStr(Index);
 end;
 
 { ---------------------------------------------------------------- macro's }
@@ -224,22 +224,22 @@ end;
 
 function GetDC(hWnd: HWND): HDC;
 begin
-  Result := ZMGetDC(hWnd, False);
+  Result := ZMLeesDC(hWnd, False);
 end;
 
 function GetWindowDC(hWnd: HWND): HDC;
 begin
-  Result := ZMGetDC(hWnd, True);
+  Result := ZMLeesDC(hWnd, True);
 end;
 
 function GetDCEx(hWnd: HWND; hrgnClip: HRGN; flags: DWORD): HDC;
 begin
-  Result := ZMGetDC(hWnd, flags and 1 <> 0);
+  Result := ZMLeesDC(hWnd, flags and 1 <> 0);
 end;
 
 function ReleaseDC(hWnd: HWND; hDC: HDC): Integer;
 begin
-  ZMReleaseDC(hDC);
+  ZMGeefDCVrij(hDC);
   Result := 1;
 end;
 
@@ -247,17 +247,17 @@ function CreateCompatibleDC(DC: HDC): HDC;
 var
   D: TZMDC;
 begin
-  ZMInit;
+  ZMInitialiseer;
   D := TZMDC.Create(nil);
-  D.IsMemDC := True;
-  D.DefBitmap := TZMBitmap.Create(1, 1, 1);
-  D.SelectBitmap(D.DefBitmap);
+  D.IsGeheugenDC := True;
+  D.StandaardBitmap := TZMBitmap.Create(1, 1, 1);
+  D.SelecteerBitmap(D.StandaardBitmap);
   Result := D.Handle;
 end;
 
 function CreateDC(lpszDriver, lpszDevice, lpszOutput: PAnsiChar; lpdvmInit: PDeviceMode): HDC;
 begin
-  Result := ZMGetDC(0, False);
+  Result := ZMLeesDC(0, False);
 end;
 
 function DeleteDC(DC: HDC): BOOL;
@@ -275,10 +275,10 @@ var
 begin
   D := GdiDC(DC);
   if D = nil then Exit(0);
-  SetLength(D.Saved, Length(D.Saved) + 1);
-  D.Saved[High(D.Saved)] := D.St;
-  D.Saved[High(D.Saved)].ClipRgn := RectsCopy(D.St.ClipRgn);
-  Result := Length(D.Saved);
+  SetLength(D.Bewaard, Length(D.Bewaard) + 1);
+  D.Bewaard[High(D.Bewaard)] := D.St;
+  D.Bewaard[High(D.Bewaard)].KnipRegio := RechtlijstKopie(D.St.KnipRegio);
+  Result := Length(D.Bewaard);
 end;
 
 function RestoreDC(DC: HDC; SavedDC: Integer): BOOL;
@@ -287,12 +287,12 @@ var
   N: Integer;
 begin
   D := GdiDC(DC);
-  if (D = nil) or (Length(D.Saved) = 0) then Exit(False);
-  if SavedDC < 0 then N := Length(D.Saved) + SavedDC else N := SavedDC - 1;
-  if (N < 0) or (N > High(D.Saved)) then Exit(False);
-  D.St := D.Saved[N];
-  SetLength(D.Saved, N);
-  D.InvalidateClip;
+  if (D = nil) or (Length(D.Bewaard) = 0) then Exit(False);
+  if SavedDC < 0 then N := Length(D.Bewaard) + SavedDC else N := SavedDC - 1;
+  if (N < 0) or (N > High(D.Bewaard)) then Exit(False);
+  D.St := D.Bewaard[N];
+  SetLength(D.Bewaard, N);
+  D.MaakKnipOngeldig;
   Result := True;
 end;
 
@@ -303,14 +303,14 @@ var
 begin
   D := GdiDC(DC);
   BPP := 32;
-  if (D <> nil) and D.IsMemDC and (D.Target <> nil) then BPP := D.Target.BPP;
+  if (D <> nil) and D.IsGeheugenDC and (D.Target <> nil) then BPP := D.Target.BPP;
   case Index of
     DRIVERVERSION: Result := $400;
     TECHNOLOGY: Result := 1;  { DT_RASDISPLAY }
-    HORZSIZE: Result := ZMScreenW * 254 div 960;
-    VERTSIZE: Result := ZMScreenH * 254 div 960;
-    HORZRES, DESKTOPHORZRES: Result := ZMScreenW;
-    VERTRES, DESKTOPVERTRES: Result := ZMScreenH;
+    HORZSIZE: Result := ZMSchermBreedte * 254 div 960;
+    VERTSIZE: Result := ZMSchermHoogte * 254 div 960;
+    HORZRES, DESKTOPHORZRES: Result := ZMSchermBreedte;
+    VERTRES, DESKTOPVERTRES: Result := ZMSchermHoogte;
     BITSPIXEL: Result := BPP;
     PLANES: Result := 1;
     NUMCOLORS: if BPP <= 8 then Result := 1 shl BPP else Result := -1;
@@ -343,38 +343,38 @@ var
 begin
   Result := 0;
   D := GdiDC(DC);
-  O := GdiObj(p2);
+  O := GdiObject(p2);
   if (D = nil) or (O = nil) then Exit(HGDI_ERROR);
   if O is TZMPen then
   begin
     Result := H2(D.St.Pen);
     D.St.Pen := TZMPen(O);
   end
-  else if O is TZMBrush then
+  else if O is TZMKwast then
   begin
     Result := H2(D.St.Brush);
-    D.St.Brush := TZMBrush(O);
+    D.St.Brush := TZMKwast(O);
   end
-  else if O is TZMFontObj then
+  else if O is TZMLetterObj then
   begin
     Result := H2(D.St.Font);
-    D.St.Font := TZMFontObj(O);
+    D.St.Font := TZMLetterObj(O);
   end
   else if O is TZMBitmap then
   begin
-    if not D.IsMemDC then Exit(0);
+    if not D.IsGeheugenDC then Exit(0);
     Result := H2(D.Target);
-    D.SelectBitmap(TZMBitmap(O));
+    D.SelecteerBitmap(TZMBitmap(O));
   end
-  else if O is TZMRegion then
+  else if O is TZMRegio then
   begin
     SelectClipRgn(DC, p2);
     Result := SIMPLEREGION;
   end
-  else if O is TZMPalette then
+  else if O is TZMPalet then
   begin
     Result := H2(D.St.Palette);
-    D.St.Palette := TZMPalette(O);
+    D.St.Palette := TZMPalet(O);
   end;
 end;
 
@@ -383,12 +383,12 @@ var
   O: TZMGdiObj;
   B: TZMBitmap;
 begin
-  O := GdiObj(p1);
-  if (O = nil) or O.IsStock or (O is TZMDC) then Exit(O <> nil);
+  O := GdiObject(p1);
+  if (O = nil) or O.IsVoorraadObject or (O is TZMDC) then Exit(O <> nil);
   if O is TZMBitmap then
   begin
     B := TZMBitmap(O);
-    if (B.SelectedIn <> nil) and (TZMDC(B.SelectedIn).Target = B) then
+    if (B.GeselecteerdIn <> nil) and (TZMDC(B.GeselecteerdIn).Target = B) then
       Exit(False);  { nog geselecteerd in een DC, zoals in Windows }
   end;
   O.Free;
@@ -397,9 +397,9 @@ end;
 
 function GetStockObject(Index: Integer): HGDIOBJ;
 begin
-  ZMInit;
-  if (Index >= 0) and (Index <= High(StockObjects)) and (StockObjects[Index] <> nil) then
-    Result := StockObjects[Index].Handle
+  ZMInitialiseer;
+  if (Index >= 0) and (Index <= High(StandaardObjecten)) and (StandaardObjecten[Index] <> nil) then
+    Result := StandaardObjecten[Index].Handle
   else
     Result := 0;
 end;
@@ -430,7 +430,7 @@ var
   N: Word;
 begin
   Result := 0;
-  O := GdiObj(p1);
+  O := GdiObject(p1);
   if O = nil then Exit;
   if O is TZMBitmap then
     with TZMBitmap(O) do
@@ -438,7 +438,7 @@ begin
       FillChar(DS, SizeOf(DS), 0);
       DS.dsBm.bmWidth := Width;
       DS.dsBm.bmHeight := Height;
-      DS.dsBm.bmWidthBytes := Stride;
+      DS.dsBm.bmWidthBytes := Rijbytes;
       DS.dsBm.bmPlanes := 1;
       DS.dsBm.bmBitsPixel := BPP;
       DS.dsBm.bmBits := Bits;
@@ -447,7 +447,7 @@ begin
       DS.dsBmih.biHeight := -Height;  { van boven naar beneden }
       DS.dsBmih.biPlanes := 1;
       DS.dsBmih.biBitCount := BPP;
-      DS.dsBmih.biSizeImage := Stride * Height;
+      DS.dsBmih.biSizeImage := Rijbytes * Height;
       if BPP <= 8 then DS.dsBmih.biClrUsed := NumColors;
       if p3 = nil then Exit(SizeOf(TDIBSection));
       if p2 >= SizeOf(TDIBSection) then
@@ -462,17 +462,17 @@ begin
         Move(BM, p3^, Result);
       end;
     end
-  else if O is TZMFontObj then
+  else if O is TZMLetterObj then
   begin
     if p3 = nil then Exit(SizeOf(TLogFont));
     Result := Min(p2, SizeOf(TLogFont));
-    Move(TZMFontObj(O).LF, p3^, Result);
+    Move(TZMLetterObj(O).LF, p3^, Result);
   end
-  else if O is TZMBrush then
+  else if O is TZMKwast then
   begin
-    LB.lbStyle := TZMBrush(O).Style;
-    LB.lbColor := TZMBrush(O).Color;
-    LB.lbHatch := TZMBrush(O).Hatch;
+    LB.lbStyle := TZMKwast(O).Style;
+    LB.lbColor := TZMKwast(O).Color;
+    LB.lbHatch := TZMKwast(O).Arceringsoort;
     if p3 = nil then Exit(SizeOf(LB));
     Result := Min(p2, SizeOf(LB));
     Move(LB, p3^, Result);
@@ -486,9 +486,9 @@ begin
     Result := Min(p2, SizeOf(LP));
     Move(LP, p3^, Result);
   end
-  else if O is TZMPalette then
+  else if O is TZMPalet then
   begin
-    N := TZMPalette(O).Count;
+    N := TZMPalet(O).Count;
     if p3 <> nil then PWord(p3)^ := N;
     Result := 2;
   end;
@@ -498,10 +498,10 @@ function GetObjectType(h: HGDIOBJ): DWORD;
 var
   O: TZMGdiObj;
 begin
-  O := GdiObj(h);
+  O := GdiObject(h);
   if O = nil then Exit(0);
-  Result := O.ObjType;
-  if (O is TZMDC) and TZMDC(O).IsMemDC then Result := OBJ_MEMDC;
+  Result := O.ObjSoort;
+  if (O is TZMDC) and TZMDC(O).IsGeheugenDC then Result := OBJ_MEMDC;
 end;
 
 function SetBkColor(DC: HDC; Color: COLORREF): COLORREF;
@@ -541,15 +541,15 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(CLR_INVALID);
-  Result := D.St.TextColor;
-  D.St.TextColor := Color;
+  Result := D.St.TekstKleurVoor;
+  D.St.TekstKleurVoor := Color;
 end;
 
 function GetTextColor(DC: HDC): COLORREF;
 var D: TZMDC;
 begin
   D := GdiDC(DC);
-  if D = nil then Result := CLR_INVALID else Result := D.St.TextColor;
+  if D = nil then Result := CLR_INVALID else Result := D.St.TekstKleurVoor;
 end;
 
 function SetTextAlign(DC: HDC; Flags: UINT): UINT;
@@ -557,15 +557,15 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(GDI_ERROR);
-  Result := D.St.TextAlign;
-  D.St.TextAlign := Flags;
+  Result := D.St.TekstUitlijning;
+  D.St.TekstUitlijning := Flags;
 end;
 
 function GetTextAlign(DC: HDC): UINT;
 var D: TZMDC;
 begin
   D := GdiDC(DC);
-  if D = nil then Result := GDI_ERROR else Result := D.St.TextAlign;
+  if D = nil then Result := GDI_ERROR else Result := D.St.TekstUitlijning;
 end;
 
 function SetROP2(DC: HDC; p2: Integer): Integer;
@@ -605,8 +605,8 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  if PrevPt <> nil then PrevPt^ := D.St.BrushOrg;
-  D.St.BrushOrg := Types.Point(X, Y);
+  if PrevPt <> nil then PrevPt^ := D.St.KwastOorsprong;
+  D.St.KwastOorsprong := Types.Point(X, Y);
   Result := True;
 end;
 
@@ -615,8 +615,8 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  if Point <> nil then Point^ := D.St.WinOrg;
-  D.St.WinOrg := Types.Point(X, Y);
+  if Point <> nil then Point^ := D.St.VensterOorsprong;
+  D.St.VensterOorsprong := Types.Point(X, Y);
   Result := True;
 end;
 
@@ -625,7 +625,7 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  Point := D.St.WinOrg;
+  Point := D.St.VensterOorsprong;
   Result := True;
 end;
 
@@ -634,8 +634,8 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  if Point <> nil then Point^ := D.St.VpOrg;
-  D.St.VpOrg := Types.Point(X, Y);
+  if Point <> nil then Point^ := D.St.ViewportOorsprong;
+  D.St.ViewportOorsprong := Types.Point(X, Y);
   Result := True;
 end;
 
@@ -644,7 +644,7 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  Point := D.St.VpOrg;
+  Point := D.St.ViewportOorsprong;
   Result := True;
 end;
 
@@ -658,8 +658,8 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  if p4 <> nil then p4^ := D.St.CurPos;
-  D.St.CurPos := Types.Point(p2, p3);
+  if p4 <> nil then p4^ := D.St.HuidigePositie;
+  D.St.HuidigePositie := Types.Point(p2, p3);
   Result := True;
 end;
 
@@ -668,8 +668,8 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  GdiLine(D, D.St.CurPos.X, D.St.CurPos.Y, X, Y, False);
-  D.St.CurPos := Types.Point(X, Y);
+  GdiLijn(D, D.St.HuidigePositie.X, D.St.HuidigePositie.Y, X, Y, False);
+  D.St.HuidigePositie := Types.Point(X, Y);
   Result := True;
 end;
 
@@ -678,7 +678,7 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if (D = nil) or (Point = nil) then Exit(False);
-  Point^ := D.St.CurPos;
+  Point^ := D.St.HuidigePositie;
   Result := True;
 end;
 
@@ -687,7 +687,7 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  GdiRectangle(D, X1, Y1, X2, Y2);
+  GdiRechthoek(D, X1, Y1, X2, Y2);
   Result := True;
 end;
 
@@ -696,7 +696,7 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  GdiRoundRect(D, X1, Y1, X2, Y2, X3, Y3);
+  GdiAfrondRechthoek(D, X1, Y1, X2, Y2, X3, Y3);
   Result := True;
 end;
 
@@ -705,7 +705,7 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  GdiEllipse(D, X1, Y1, X2, Y2);
+  GdiEllips(D, X1, Y1, X2, Y2);
   Result := True;
 end;
 
@@ -718,7 +718,7 @@ begin
   if (D = nil) or (Count <= 0) then Exit(False);
   SetLength(P, Count);
   Move(Points, P[0], Count * SizeOf(TPoint));
-  GdiPolygon(D, P, True);
+  GdiVeelhoek(D, P, True);
   Result := True;
 end;
 
@@ -731,7 +731,7 @@ begin
   if (D = nil) or (Count <= 0) then Exit(False);
   SetLength(P, Count);
   Move(Points, P[0], Count * SizeOf(TPoint));
-  GdiPolyline(D, P);
+  GdiPolylijn(D, P);
   Result := True;
 end;
 
@@ -741,24 +741,24 @@ var
 begin
   D := GdiDC(hDC);
   if D = nil then Exit(0);
-  GdiFillRect(D, lprc, GdiBrush(hbr));
+  GdiVulRechthoek(D, lprc, GdiKwast(hbr));
   Result := 1;
 end;
 
 function FrameRect(hDC: HDC; const lprc: TRect; hbr: HBRUSH): Integer;
 var
   D: TZMDC;
-  B: TZMBrush;
+  B: TZMKwast;
 begin
   D := GdiDC(hDC);
-  B := GdiBrush(hbr);
+  B := GdiKwast(hbr);
   if (D = nil) or (B = nil) then Exit(0);
   with lprc do
   begin
-    GdiFillRect(D, Types.Rect(Left, Top, Right, Top + 1), B);
-    GdiFillRect(D, Types.Rect(Left, Bottom - 1, Right, Bottom), B);
-    GdiFillRect(D, Types.Rect(Left, Top, Left + 1, Bottom), B);
-    GdiFillRect(D, Types.Rect(Right - 1, Top, Right, Bottom), B);
+    GdiVulRechthoek(D, Types.Rect(Left, Top, Right, Top + 1), B);
+    GdiVulRechthoek(D, Types.Rect(Left, Bottom - 1, Right, Bottom), B);
+    GdiVulRechthoek(D, Types.Rect(Left, Top, Left + 1, Bottom), B);
+    GdiVulRechthoek(D, Types.Rect(Right - 1, Top, Right, Bottom), B);
   end;
   Result := 1;
 end;
@@ -768,7 +768,7 @@ var D: TZMDC;
 begin
   D := GdiDC(hDC);
   if D = nil then Exit(False);
-  GdiInvertRect(D, lprc);
+  GdiInverteerRechthoek(D, lprc);
   Result := True;
 end;
 
@@ -777,7 +777,7 @@ var D: TZMDC;
 begin
   D := GdiDC(hDC);
   if D = nil then Exit(False);
-  GdiFocusRect(D, lprc);
+  GdiFocusRechthoek(D, lprc);
   Result := True;
 end;
 
@@ -789,13 +789,13 @@ var
   begin
     if grfFlags and BF_FLAT <> 0 then
     begin
-      TL := SysColors[COLOR_BTNSHADOW];
+      TL := SysteemKleuren[COLOR_BTNSHADOW];
       BR := TL;
     end;
-    if grfFlags and BF_TOP <> 0 then GdiFillSolid(D, Types.Rect(R.Left, R.Top, R.Right, R.Top + 1), TL);
-    if grfFlags and BF_LEFT <> 0 then GdiFillSolid(D, Types.Rect(R.Left, R.Top, R.Left + 1, R.Bottom), TL);
-    if grfFlags and BF_BOTTOM <> 0 then GdiFillSolid(D, Types.Rect(R.Left, R.Bottom - 1, R.Right, R.Bottom), BR);
-    if grfFlags and BF_RIGHT <> 0 then GdiFillSolid(D, Types.Rect(R.Right - 1, R.Top, R.Right, R.Bottom), BR);
+    if grfFlags and BF_TOP <> 0 then GdiVulEffen(D, Types.Rect(R.Left, R.Top, R.Right, R.Top + 1), TL);
+    if grfFlags and BF_LEFT <> 0 then GdiVulEffen(D, Types.Rect(R.Left, R.Top, R.Left + 1, R.Bottom), TL);
+    if grfFlags and BF_BOTTOM <> 0 then GdiVulEffen(D, Types.Rect(R.Left, R.Bottom - 1, R.Right, R.Bottom), BR);
+    if grfFlags and BF_RIGHT <> 0 then GdiVulEffen(D, Types.Rect(R.Right - 1, R.Top, R.Right, R.Bottom), BR);
     if grfFlags and BF_TOP <> 0 then Inc(R.Top);
     if grfFlags and BF_LEFT <> 0 then Inc(R.Left);
     if grfFlags and BF_BOTTOM <> 0 then Dec(R.Bottom);
@@ -805,11 +805,11 @@ begin
   D := GdiDC(hdc);
   if D = nil then Exit(False);
   R := qrc;
-  if edge and BDR_RAISEDOUTER <> 0 then Regel(True, SysColors[COLOR_3DLIGHT], SysColors[COLOR_3DDKSHADOW])
-  else if edge and BDR_SUNKENOUTER <> 0 then Regel(True, SysColors[COLOR_BTNSHADOW], SysColors[COLOR_BTNHIGHLIGHT]);
-  if edge and BDR_RAISEDINNER <> 0 then Regel(False, SysColors[COLOR_BTNHIGHLIGHT], SysColors[COLOR_BTNSHADOW])
-  else if edge and BDR_SUNKENINNER <> 0 then Regel(False, SysColors[COLOR_3DDKSHADOW], SysColors[COLOR_3DLIGHT]);
-  if grfFlags and BF_MIDDLE <> 0 then GdiFillSolid(D, R, SysColors[COLOR_BTNFACE]);
+  if edge and BDR_RAISEDOUTER <> 0 then Regel(True, SysteemKleuren[COLOR_3DLIGHT], SysteemKleuren[COLOR_3DDKSHADOW])
+  else if edge and BDR_SUNKENOUTER <> 0 then Regel(True, SysteemKleuren[COLOR_BTNSHADOW], SysteemKleuren[COLOR_BTNHIGHLIGHT]);
+  if edge and BDR_RAISEDINNER <> 0 then Regel(False, SysteemKleuren[COLOR_BTNHIGHLIGHT], SysteemKleuren[COLOR_BTNSHADOW])
+  else if edge and BDR_SUNKENINNER <> 0 then Regel(False, SysteemKleuren[COLOR_3DDKSHADOW], SysteemKleuren[COLOR_3DLIGHT]);
+  if grfFlags and BF_MIDDLE <> 0 then GdiVulEffen(D, R, SysteemKleuren[COLOR_BTNFACE]);
   if grfFlags and BF_ADJUST <> 0 then qrc := R;
   Result := True;
 end;
@@ -838,27 +838,27 @@ begin
         if uState and $F = DFCS_BUTTONCHECK then
         begin
           DrawEdge(DC, R, EDGE_SUNKEN, BF_RECT or BF_ADJUST);
-          if uState and DFCS_INACTIVE <> 0 then C := SysColors[COLOR_BTNFACE] else C := $FFFFFF;
-          GdiFillSolid(D, R, C);
+          if uState and DFCS_INACTIVE <> 0 then C := SysteemKleuren[COLOR_BTNFACE] else C := $FFFFFF;
+          GdiVulEffen(D, R, C);
           if uState and DFCS_CHECKED <> 0 then
             for I := 0 to 2 do
             begin
-              GdiFillSolid(D, Types.Rect(R.Left + 1 + I, R.Top + 3 + I, R.Left + 2 + I, R.Top + 6 + I), 0);
-              GdiFillSolid(D, Types.Rect(R.Left + 4 + I, R.Top + 5 - I, R.Left + 5 + I, R.Top + 8 - I), 0);
+              GdiVulEffen(D, Types.Rect(R.Left + 1 + I, R.Top + 3 + I, R.Left + 2 + I, R.Top + 6 + I), 0);
+              GdiVulEffen(D, Types.Rect(R.Left + 4 + I, R.Top + 5 - I, R.Left + 5 + I, R.Top + 8 - I), 0);
             end;
         end
         else
         begin
           { radioknop }
-          D.St.Brush := TZMBrush(StockObjects[WHITE_BRUSH]);
-          D.St.Pen := TZMPen(StockObjects[BLACK_PEN]);
-          GdiEllipse(D, R.Left, R.Top, R.Right, R.Bottom);
+          D.St.Brush := TZMKwast(StandaardObjecten[WHITE_BRUSH]);
+          D.St.Pen := TZMPen(StandaardObjecten[BLACK_PEN]);
+          GdiEllips(D, R.Left, R.Top, R.Right, R.Bottom);
           if uState and DFCS_CHECKED <> 0 then
           begin
             CX := (R.Left + R.Right) div 2;
             CY := (R.Top + R.Bottom) div 2;
-            GdiFillSolid(D, Types.Rect(CX - 2, CY - 1, CX + 2, CY + 1), 0);
-            GdiFillSolid(D, Types.Rect(CX - 1, CY - 2, CX + 1, CY + 2), 0);
+            GdiVulEffen(D, Types.Rect(CX - 2, CY - 1, CX + 2, CY + 1), 0);
+            GdiVulEffen(D, Types.Rect(CX - 1, CY - 2, CX + 1, CY + 2), 0);
           end;
         end;
       end;
@@ -870,13 +870,13 @@ begin
           DrawEdge(DC, R, EDGE_RAISED, BF_RECT or BF_MIDDLE);
         CX := (R.Left + R.Right) div 2;
         CY := (R.Top + R.Bottom) div 2;
-        if uState and DFCS_INACTIVE <> 0 then C := SysColors[COLOR_BTNSHADOW] else C := 0;
+        if uState and DFCS_INACTIVE <> 0 then C := SysteemKleuren[COLOR_BTNSHADOW] else C := 0;
         for I := 0 to 3 do
           case uState and $F of
-            DFCS_SCROLLUP: GdiFillSolid(D, Types.Rect(CX - I, CY - 2 + I, CX + I + 1, CY - 1 + I), C);
-            DFCS_SCROLLDOWN: GdiFillSolid(D, Types.Rect(CX - I, CY + 1 - I, CX + I + 1, CY + 2 - I), C);
-            DFCS_SCROLLLEFT: GdiFillSolid(D, Types.Rect(CX - 2 + I, CY - I, CX - 1 + I, CY + I + 1), C);
-            DFCS_SCROLLRIGHT: GdiFillSolid(D, Types.Rect(CX + 1 - I, CY - I, CX + 2 - I, CY + I + 1), C);
+            DFCS_SCROLLUP: GdiVulEffen(D, Types.Rect(CX - I, CY - 2 + I, CX + I + 1, CY - 1 + I), C);
+            DFCS_SCROLLDOWN: GdiVulEffen(D, Types.Rect(CX - I, CY + 1 - I, CX + I + 1, CY + 2 - I), C);
+            DFCS_SCROLLLEFT: GdiVulEffen(D, Types.Rect(CX - 2 + I, CY - I, CX - 1 + I, CY + I + 1), C);
+            DFCS_SCROLLRIGHT: GdiVulEffen(D, Types.Rect(CX + 1 - I, CY - I, CX + 2 - I, CY + I + 1), C);
           end;
       end;
   end;
@@ -888,7 +888,7 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  GdiPatBlt(D, X, Y, Width, Height, Rop);
+  GdiPatKopieer(D, X, Y, Width, Height, Rop);
   Result := True;
 end;
 
@@ -897,7 +897,7 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(CLR_INVALID);
-  GdiSetPixel(D, X, Y, Color);
+  GdiZetPixel(D, X, Y, Color);
   Result := Color;
 end;
 
@@ -911,7 +911,7 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(CLR_INVALID);
-  Result := GdiGetPixel(D, X, Y);
+  Result := GdiLeesPixel(D, X, Y);
 end;
 
 function FloodFill(DC: HDC; XStart, YStart: Integer; Color: COLORREF): BOOL;
@@ -924,7 +924,7 @@ var D: TZMDC;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  GdiFloodFill(D, XStart, YStart, Color, FillType = 1);
+  GdiVulGebied(D, XStart, YStart, Color, FillType = 1);
   Result := True;
 end;
 
@@ -935,7 +935,7 @@ var
 begin
   D := GdiDC(DestDC);
   if D = nil then Exit(False);
-  GdiBlt(D, X, Y, Width, Height, GdiDC(SrcDC), XSrc, YSrc, Width, Height, Rop, False);
+  GdiKopieer(D, X, Y, Width, Height, GdiDC(SrcDC), XSrc, YSrc, Width, Height, Rop, False);
   Result := True;
 end;
 
@@ -946,7 +946,7 @@ var
 begin
   D := GdiDC(DestDC);
   if D = nil then Exit(False);
-  GdiBlt(D, X, Y, Width, Height, GdiDC(SrcDC), XSrc, YSrc, SrcWidth, SrcHeight, Rop, True);
+  GdiKopieer(D, X, Y, Width, Height, GdiDC(SrcDC), XSrc, YSrc, SrcWidth, SrcHeight, Rop, True);
   Result := True;
 end;
 
@@ -971,8 +971,8 @@ begin
     begin
       SX := XSrc + XX * SrcWidth div Width;
       SY := YSrc + YY * SrcHeight div Height;
-      C := GdiGetPixel(S, SX, SY);
-      if (C <> CLR_INVALID) and (C <> (Transparent and $FFFFFF)) then GdiSetPixel(D, X + XX, Y + YY, C);
+      C := GdiLeesPixel(S, SX, SY);
+      if (C <> CLR_INVALID) and (C <> (Transparent and $FFFFFF)) then GdiZetPixel(D, X + XX, Y + YY, C);
     end;
   Result := True;
 end;
@@ -990,20 +990,20 @@ var
   B: TZMBitmap;
   BPP: Integer;
 begin
-  ZMInit;
+  ZMInitialiseer;
   D := GdiDC(DC);
   BPP := 32;
-  if (D <> nil) and D.IsMemDC and (D.Target <> nil) then
+  if (D <> nil) and D.IsGeheugenDC and (D.Target <> nil) then
   begin
     BPP := D.Target.BPP;
     if BPP < 8 then BPP := D.Target.BPP;
   end;
   B := TZMBitmap.Create(Width, Height, BPP);
-  if (D <> nil) and D.IsMemDC and (D.Target <> nil) and (BPP <= 8) then
+  if (D <> nil) and D.IsGeheugenDC and (D.Target <> nil) and (BPP <= 8) then
   begin
     B.NumColors := D.Target.NumColors;
-    Move(D.Target.Colors, B.Colors, SizeOf(B.Colors));
-    B.ColorsChanged;
+    Move(D.Target.Kleuren, B.Kleuren, SizeOf(B.Kleuren));
+    B.KleurenGewijzigd;
   end;
   Result := B.Handle;
 end;
@@ -1013,14 +1013,14 @@ var
   B: TZMBitmap;
   Y, Bronstap: Integer;
 begin
-  ZMInit;
+  ZMInitialiseer;
   if not (BitCount in [1, 4, 8, 16, 24, 32]) then BitCount := 1;
   B := TZMBitmap.Create(Width, Height, BitCount);
   if Bits <> nil then
   begin
     Bronstap := ((Width * BitCount + 15) div 16) * 2;   { DDB-rijen zijn WORD-uitgelijnd }
     for Y := 0 to Height - 1 do
-      Move((PByte(Bits) + Y * Bronstap)^, B.RowPtr(Y)^, Min(Bronstap, B.Stride));
+      Move((PByte(Bits) + Y * Bronstap)^, B.RijPtr(Y)^, Min(Bronstap, B.Rijbytes));
   end;
   Result := B.Handle;
 end;
@@ -1030,7 +1030,7 @@ begin
   Result := CreateBitmap(p1.bmWidth, p1.bmHeight, p1.bmPlanes, p1.bmBitsPixel, p1.bmBits);
 end;
 
-function CurPal(DC: HDC): TZMPalette;
+function CurPal(DC: HDC): TZMPalet;
 var
   D: TZMDC;
 begin
@@ -1043,14 +1043,14 @@ function CreateDIBSection(DC: HDC; const p2: TBitmapInfo; p3: UINT; var p4: Poin
 var
   B: TZMBitmap;
 begin
-  ZMInit;
-  B := NewBitmapFromInfo(p2, p3, CurPal(DC));
+  ZMInitialiseer;
+  B := NieuweBitmapUitInfo(p2, p3, CurPal(DC));
   p4 := B.Bits;
   Result := B.Handle;
 end;
 
 { kopieer DIB-bits (van onder naar boven, tenzij biHeight < 0) naar een bitmap }
-procedure CopyDIBIn(B: TZMBitmap; Startscan, Aantalscans: Integer; Bits: Pointer; const BI: TBitmapInfo; Gebruik: UINT; Pal: TZMPalette);
+procedure CopyDIBIn(B: TZMBitmap; Startscan, Aantalscans: Integer; Bits: Pointer; const BI: TBitmapInfo; Gebruik: UINT; Pal: TZMPalet);
 var
   Bron: TZMBitmap;
   Y, SY, Bronstap, H, X: Integer;
@@ -1068,22 +1068,22 @@ begin
       if Bovenaf then SY := Y else SY := H - 1 - Y;
       if (SY < 0) or (SY >= B.Height) then Continue;
       Rij := PByte(Bits) + (Y - Startscan) * Bronstap;
-      Move(Rij^, B.RowPtr(SY)^, Min(Bronstap, B.Stride));
+      Move(Rij^, B.RijPtr(SY)^, Min(Bronstap, B.Rijbytes));
     end;
     Exit;
   end;
   { formaatconversie via een tijdelijke DIB }
-  Bron := NewBitmapFromInfo(BI, Gebruik, Pal);
+  Bron := NieuweBitmapUitInfo(BI, Gebruik, Pal);
   try
     for Y := Startscan to Min(Integer(Startscan + Aantalscans), H) - 1 do
     begin
       if Bovenaf then SY := Y else SY := H - 1 - Y;
       Rij := PByte(Bits) + (Y - Startscan) * Bronstap;
-      if SY < Bron.Height then Move(Rij^, Bron.RowPtr(SY)^, Min(Bronstap, Bron.Stride));
+      if SY < Bron.Height then Move(Rij^, Bron.RijPtr(SY)^, Min(Bronstap, Bron.Rijbytes));
     end;
     for Y := 0 to Min(B.Height, Bron.Height) - 1 do
       for X := 0 to Min(B.Width, Bron.Width) - 1 do
-        B.SetNative(X, Y, B.RGBToNative(Bron.NativeToRGB(Bron.GetNative(X, Y))));
+        B.ZetNatief(X, Y, B.RGBNaarNatief(Bron.NatiefNaarRGB(Bron.LeesNatief(X, Y))));
   finally
     Bron.Free;
   end;
@@ -1094,7 +1094,7 @@ function CreateDIBitmap(DC: HDC; var InfoHeader: TBitmapInfoHeader; dwUsage: DWO
 var
   B: TZMBitmap;
 begin
-  ZMInit;
+  ZMInitialiseer;
   B := TZMBitmap.Create(InfoHeader.biWidth, Abs(InfoHeader.biHeight), 32);
   if dwUsage and 4 <> 0 then  { CBM_INIT }
     CopyDIBIn(B, 0, Abs(InitInfo.bmiHeader.biHeight), InitBits, InitInfo, wUsage, CurPal(DC));
@@ -1131,9 +1131,9 @@ begin
     if (B.BPP <= 8) and (B.BPP = BC) then
       for I := 0 to (1 shl BC) - 1 do
       begin
-        Q[I].rgbRed := (B.Colors[I] shr 16) and $FF;
-        Q[I].rgbGreen := (B.Colors[I] shr 8) and $FF;
-        Q[I].rgbBlue := B.Colors[I] and $FF;
+        Q[I].rgbRed := (B.Kleuren[I] shr 16) and $FF;
+        Q[I].rgbGreen := (B.Kleuren[I] shr 8) and $FF;
+        Q[I].rgbBlue := B.Kleuren[I] and $FF;
         Q[I].rgbReserved := 0;
       end;
   end;
@@ -1142,19 +1142,19 @@ begin
   if H = 0 then H := B.Height;
   Bovenaf := BitInfo.bmiHeader.biHeight < 0;
   Doelstap := ((B.Width * BC + 31) div 32) * 4;
-  Tmp := NewBitmapFromInfo(BitInfo, DIB_RGB_COLORS, nil);
+  Tmp := NieuweBitmapUitInfo(BitInfo, DIB_RGB_COLORS, nil);
   try
     for Y := 0 to Min(Tmp.Height, B.Height) - 1 do
       for X := 0 to Min(Tmp.Width, B.Width) - 1 do
         if (Tmp.BPP = B.BPP) and (B.BPP <= 8) then
-          Tmp.SetNative(X, Y, B.GetNative(X, Y))
+          Tmp.ZetNatief(X, Y, B.LeesNatief(X, Y))
         else
-          Tmp.SetNative(X, Y, Tmp.RGBToNative(B.NativeToRGB(B.GetNative(X, Y))));
+          Tmp.ZetNatief(X, Y, Tmp.RGBNaarNatief(B.NatiefNaarRGB(B.LeesNatief(X, Y))));
     for Y := StartScan to Min(Integer(StartScan + NumScans), H) - 1 do
     begin
       if Bovenaf then SY := Y else SY := H - 1 - Y;
       if SY >= Tmp.Height then Continue;
-      Move(Tmp.RowPtr(SY)^, (PByte(Bits) + (Y - StartScan) * Doelstap)^, Min(Doelstap, Tmp.Stride));
+      Move(Tmp.RijPtr(SY)^, (PByte(Bits) + (Y - StartScan) * Doelstap)^, Min(Doelstap, Tmp.Rijbytes));
       Inc(Result);
     end;
   finally
@@ -1183,14 +1183,14 @@ var
 begin
   D := GdiDC(DC);
   if D = nil then Exit(0);
-  Bron := NewBitmapFromInfo(BitsInfo, Usage, D.St.Palette);
+  Bron := NieuweBitmapUitInfo(BitsInfo, Usage, D.St.Palette);
   try
     H := Abs(BitsInfo.bmiHeader.biHeight);
     CopyDIBIn(Bron, 0, H, Bits, BitsInfo, Usage, D.St.Palette);
     { DIB-brongecoördinaten zijn van onder naar boven bij DIB's die van onder naar boven lopen }
     if BitsInfo.bmiHeader.biHeight > 0 then
       SrcY := H - SrcY - SrcHeight;
-    GdiBltBitmap(D, DestX, DestY, DestWidth, DestHeight, Bron, $FFFFFF, SrcX, SrcY,
+    GdiKopieerBitmap(D, DestX, DestY, DestWidth, DestHeight, Bron, $FFFFFF, SrcX, SrcY,
       SrcWidth, SrcHeight, Rop, True);
   finally
     Bron.Free;
@@ -1218,9 +1218,9 @@ begin
   Q := @RGBQuadStructs;
   for I := p2 to Min(Integer(p2 + p3), D.Target.NumColors) - 1 do
   begin
-    Q^.rgbRed := (D.Target.Colors[I] shr 16) and $FF;
-    Q^.rgbGreen := (D.Target.Colors[I] shr 8) and $FF;
-    Q^.rgbBlue := D.Target.Colors[I] and $FF;
+    Q^.rgbRed := (D.Target.Kleuren[I] shr 16) and $FF;
+    Q^.rgbGreen := (D.Target.Kleuren[I] shr 8) and $FF;
+    Q^.rgbBlue := D.Target.Kleuren[I] and $FF;
     Q^.rgbReserved := 0;
     Inc(Q);
     Inc(Result);
@@ -1239,11 +1239,11 @@ begin
   Q := @RGBQuadSTructs;
   for I := p2 to Min(Integer(p2 + p3), D.Target.NumColors) - 1 do
   begin
-    D.Target.Colors[I] := (Q^.rgbRed shl 16) or (Q^.rgbGreen shl 8) or Q^.rgbBlue;
+    D.Target.Kleuren[I] := (Q^.rgbRed shl 16) or (Q^.rgbGreen shl 8) or Q^.rgbBlue;
     Inc(Q);
     Inc(Result);
   end;
-  D.Target.ColorsChanged;
+  D.Target.KleurenGewijzigd;
 end;
 
 function GetBitmapBits(Bitmap: HBITMAP; Count: Longint; Bits: Pointer): Longint;
@@ -1252,7 +1252,7 @@ var
 begin
   B := GdiBitmap(Bitmap);
   if (B = nil) or (Bits = nil) then Exit(0);
-  Result := Min(Count, B.Stride * B.Height);
+  Result := Min(Count, B.Rijbytes * B.Height);
   Move(B.Bits^, Bits^, Result);
 end;
 
@@ -1262,7 +1262,7 @@ var
 begin
   B := GdiBitmap(p1);
   if (B = nil) or (bits = nil) then Exit(0);
-  Result := Min(Integer(p2), B.Stride * B.Height);
+  Result := Min(Integer(p2), B.Rijbytes * B.Height);
   Move(bits^, B.Bits^, Result);
 end;
 
@@ -1270,11 +1270,11 @@ end;
 
 function CreatePalette(const LogPalette: TLogPalette): HPALETTE;
 var
-  P: TZMPalette;
+  P: TZMPalet;
   N: Integer;
 begin
-  ZMInit;
-  P := TZMPalette.Create;
+  ZMInitialiseer;
+  P := TZMPalet.Create;
   N := Min(LogPalette.palNumEntries, 256);
   P.Count := N;
   if N > 0 then Move(LogPalette.palPalEntry[0], P.Entries[0], N * SizeOf(TPaletteEntry));
@@ -1283,22 +1283,22 @@ end;
 
 function CreateHalftonePalette(DC: HDC): HPALETTE;
 var
-  P: TZMPalette;
+  P: TZMPalet;
 begin
-  ZMInit;
-  P := TZMPalette.Create;
+  ZMInitialiseer;
+  P := TZMPalet.Create;
   P.Count := 256;
-  HalftoneEntries(P.Entries);
+  HalftoneIngangen(P.Entries);
   Result := P.Handle;
 end;
 
 function SelectPalette(DC: HDC; Palette: HPALETTE; ForceBackground: Bool): HPALETTE;
 var
   D: TZMDC;
-  P: TZMPalette;
+  P: TZMPalet;
 begin
   D := GdiDC(DC);
-  P := GdiPalette(Palette);
+  P := GdiPalet(Palette);
   if (D = nil) or (P = nil) then Exit(0);
   Result := H2(D.St.Palette);
   D.St.Palette := P;
@@ -1316,10 +1316,10 @@ end;
 function GetPaletteEntries(Palette: HPALETTE; StartIndex, NumEntries: UINT;
   var PaletteEntries): UINT;
 var
-  P: TZMPalette;
+  P: TZMPalet;
   N: Integer;
 begin
-  P := GdiPalette(Palette);
+  P := GdiPalet(Palette);
   if P = nil then Exit(0);
   if @PaletteEntries = nil then Exit(P.Count);
   if Integer(StartIndex) >= P.Count then Exit(0);
@@ -1331,10 +1331,10 @@ end;
 function SetPaletteEntries(Palette: HPALETTE; StartIndex, NumEntries: UINT;
   var PaletteEntries): UINT;
 var
-  P: TZMPalette;
+  P: TZMPalet;
   N: Integer;
 begin
-  P := GdiPalette(Palette);
+  P := GdiPalet(Palette);
   if (P = nil) or (Integer(StartIndex) >= P.Count) then Exit(0);
   N := Min(Integer(NumEntries), P.Count - Integer(StartIndex));
   Move(PaletteEntries, P.Entries[StartIndex], N * SizeOf(TPaletteEntry));
@@ -1348,9 +1348,9 @@ end;
 
 function ResizePalette(Palette: HPALETTE; Entries: UINT): BOOL;
 var
-  P: TZMPalette;
+  P: TZMPalet;
 begin
-  P := GdiPalette(Palette);
+  P := GdiPalet(Palette);
   if P = nil then Exit(False);
   P.Count := Min(Integer(Entries), 256);
   Result := True;
@@ -1358,10 +1358,10 @@ end;
 
 function GetNearestPaletteIndex(Palette: HPALETTE; Color: COLORREF): UINT;
 var
-  P: TZMPalette;
+  P: TZMPalet;
   I, D, Beste: Integer;
 begin
-  P := GdiPalette(Palette);
+  P := GdiPalet(Palette);
   Result := CLR_INVALID;
   if (P = nil) or (P.Count = 0) then Exit;
   Beste := MaxInt;
@@ -1383,7 +1383,7 @@ var
 begin
   D := GdiDC(DC);
   if (D = nil) or (D.Target = nil) then Exit(Color and $FFFFFF);
-  Result := RGBToColorRef(D.Target.NativeToRGB(D.ColorToNative(Color)));
+  Result := RGBNaarKleurRef(D.Target.NatiefNaarRGB(D.KleurNaarNatief(Color)));
 end;
 
 function GetSystemPaletteEntries(DC: HDC; StartIndex, NumEntries: UINT;
@@ -1392,7 +1392,7 @@ var
   E: array[0..255] of TPaletteEntry;
   N: Integer;
 begin
-  HalftoneEntries(E);
+  HalftoneIngangen(E);
   if @PaletteEntries = nil then Exit(256);
   N := Min(Integer(NumEntries), 256 - Integer(StartIndex));
   if N <= 0 then Exit(0);
@@ -1414,10 +1414,10 @@ end;
 
 function CreateSolidBrush(p1: COLORREF): HBRUSH;
 var
-  B: TZMBrush;
+  B: TZMKwast;
 begin
-  ZMInit;
-  B := TZMBrush.Create;
+  ZMInitialiseer;
+  B := TZMKwast.Create;
   B.Style := BS_SOLID;
   B.Color := p1;
   Result := B.Handle;
@@ -1425,24 +1425,24 @@ end;
 
 function CreateBrushIndirect(const p1: TLogBrush): HBRUSH;
 var
-  B: TZMBrush;
+  B: TZMKwast;
   P: TZMBitmap;
 begin
-  ZMInit;
-  B := TZMBrush.Create;
+  ZMInitialiseer;
+  B := TZMKwast.Create;
   B.Style := p1.lbStyle;
   B.Color := p1.lbColor;
-  B.Hatch := p1.lbHatch;
+  B.Arceringsoort := p1.lbHatch;
   if (B.Style = BS_PATTERN) then
   begin
     P := GdiBitmap(HBITMAP(p1.lbHatch));
     if P <> nil then
     begin
-      B.Pattern := TZMBitmap.Create(P.Width, P.Height, P.BPP);
-      Move(P.Bits^, B.Pattern.Bits^, P.Stride * P.Height);
-      B.Pattern.NumColors := P.NumColors;
-      B.Pattern.Colors := P.Colors;
-      B.Pattern.ColorsChanged;
+      B.Motief := TZMBitmap.Create(P.Width, P.Height, P.BPP);
+      Move(P.Bits^, B.Motief.Bits^, P.Rijbytes * P.Height);
+      B.Motief.NumColors := P.NumColors;
+      B.Motief.Kleuren := P.Kleuren;
+      B.Motief.KleurenGewijzigd;
     end;
   end;
   Result := B.Handle;
@@ -1472,7 +1472,7 @@ function CreatePen(Style, Width: Integer; Color: COLORREF): HPEN;
 var
   P: TZMPen;
 begin
-  ZMInit;
+  ZMInitialiseer;
   P := TZMPen.Create;
   P.Style := Style and $F;
   if P.Style = PS_INSIDEFRAME then P.Style := PS_SOLID;
@@ -1489,8 +1489,8 @@ end;
 
 function CreateFontIndirect(const p1: TLogFont): HFONT;
 begin
-  ZMInit;
-  Result := TZMFontObj.Create(p1).Handle;
+  ZMInitialiseer;
+  Result := TZMLetterObj.Create(p1).Handle;
 end;
 
 function CreateFont(nHeight, nWidth, nEscapement, nOrientaion, fnWeight: Integer;
@@ -1516,9 +1516,9 @@ end;
 
 function GetSysColorBrush(nIndex: Integer): HBRUSH;
 begin
-  ZMInit;
-  if (nIndex >= 0) and (nIndex <= High(SysColorBrushes)) then
-    Result := SysColorBrushes[nIndex].Handle
+  ZMInitialiseer;
+  if (nIndex >= 0) and (nIndex <= High(SysteemKleurKwasten)) then
+    Result := SysteemKleurKwasten[nIndex].Handle
   else
     Result := 0;
 end;
@@ -1531,7 +1531,7 @@ var
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  GdiTextOut(D, X, Y, Str, Count, True, nil, nil);
+  GdiTekstUit(D, X, Y, Str, Count, True, nil, nil);
   Result := True;
 end;
 
@@ -1547,7 +1547,7 @@ begin
   Opq := nil;
   if (Rect <> nil) and (Options and ETO_CLIPPED <> 0) then Knipgebied := Rect;
   if (Rect <> nil) and (Options and ETO_OPAQUE <> 0) then Opq := Rect;
-  GdiTextOut(D, X, Y, Str, Count, Opq = nil, Knipgebied, Opq);
+  GdiTekstUit(D, X, Y, Str, Count, Opq = nil, Knipgebied, Opq);
   Result := True;
 end;
 
@@ -1558,18 +1558,18 @@ var
 begin
   D := GdiDC(hDC);
   if D = nil then Exit(0);
-  Result := GdiDrawText(D, lpString, nCount, lpRect, uFormat);
+  Result := GdiTekenTekst(D, lpString, nCount, lpRect, uFormat);
 end;
 
 function GetTextExtentPoint(DC: HDC; Str: PAnsiChar; Count: Integer; var Size: TSize): BOOL;
 var
   D: TZMDC;
-  F: PZMFace;
+  F: PZMGezicht;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  F := GdiFace(D);
-  Size.cx := GdiTextWidth(D, Str, Count);
+  F := GdiGezicht(D);
+  Size.cx := GdiTekstBreedte(D, Str, Count);
   Size.cy := F^.Height;
   Result := True;
 end;
@@ -1582,27 +1582,27 @@ end;
 function GetTextMetrics(DC: HDC; var TM: TTextMetric): BOOL;
 var
   D: TZMDC;
-  F: PZMFace;
+  F: PZMGezicht;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  F := GdiFace(D);
+  F := GdiGezicht(D);
   FillChar(TM, SizeOf(TM), 0);
   TM.tmHeight := F^.Height;
-  TM.tmAscent := F^.Ascent;
-  TM.tmDescent := F^.Descent;
-  TM.tmInternalLeading := F^.IntLeading;
-  TM.tmAveCharWidth := F^.AvgWidth;
+  TM.tmAscent := F^.Opstijging;
+  TM.tmDescent := F^.Afdaling;
+  TM.tmInternalLeading := F^.InterneInterlinie;
+  TM.tmAveCharWidth := F^.GemiddeldeBreedte;
   TM.tmMaxCharWidth := F^.MaxWidth;
-  if F^.Bold then TM.tmWeight := FW_BOLD else TM.tmWeight := FW_NORMAL;
+  if F^.Vetgedrukt then TM.tmWeight := FW_BOLD else TM.tmWeight := FW_NORMAL;
   TM.tmDigitizedAspectX := 96;
   TM.tmDigitizedAspectY := 96;
   TM.tmFirstChar := #32;
   TM.tmLastChar := #255;
   TM.tmDefaultChar := '?';
   TM.tmBreakChar := ' ';
-  TM.tmItalic := Ord(F^.Italic);
-  if F^.Family = 'mono' then TM.tmPitchAndFamily := FF_MODERN
+  TM.tmItalic := Ord(F^.Schuin);
+  if F^.Lettertypefamilie = 'mono' then TM.tmPitchAndFamily := FF_MODERN
   else TM.tmPitchAndFamily := FF_SWISS or 1 or 4;  { variabele breedte, TrueType }
   if D.St.Font <> nil then TM.tmCharSet := D.St.Font.LF.lfCharSet;
   Result := True;
@@ -1632,14 +1632,14 @@ end;
 
 function NewRgn(const R: TRect): HRGN;
 var
-  G: TZMRegion;
+  G: TZMRegio;
 begin
-  ZMInit;
-  G := TZMRegion.Create;
+  ZMInitialiseer;
+  G := TZMRegio.Create;
   if (R.Right > R.Left) and (R.Bottom > R.Top) then
   begin
-    SetLength(G.Rects, 1);
-    G.Rects[0] := R;
+    SetLength(G.Rechtlijst, 1);
+    G.Rechtlijst[0] := R;
   end;
   Result := G.Handle;
 end;
@@ -1656,12 +1656,12 @@ end;
 
 function CreateEllipticRgn(p1, p2, p3, p4: Integer): HRGN;
 var
-  G: TZMRegion;
+  G: TZMRegio;
   CX, CY, RX, RY, DY, HW: Double;
   Y: Integer;
 begin
-  ZMInit;
-  G := TZMRegion.Create;
+  ZMInitialiseer;
+  G := TZMRegio.Create;
   RX := (p3 - p1) / 2; RY := (p4 - p2) / 2;
   CX := p1 + RX; CY := p2 + RY;
   if (RX > 0) and (RY > 0) then
@@ -1672,8 +1672,8 @@ begin
       HW := RX * Sqrt(1 - DY * DY);
       if Round(CX + HW) > Round(CX - HW) then
       begin
-        SetLength(G.Rects, Length(G.Rects) + 1);
-        G.Rects[High(G.Rects)] := Types.Rect(Round(CX - HW), Y, Round(CX + HW), Y + 1);
+        SetLength(G.Rechtlijst, Length(G.Rechtlijst) + 1);
+        G.Rechtlijst[High(G.Rechtlijst)] := Types.Rect(Round(CX - HW), Y, Round(CX + HW), Y + 1);
       end;
     end;
   Result := G.Handle;
@@ -1698,9 +1698,9 @@ begin
   Result := NewRgn(R);
 end;
 
-function RgnType(G: TZMRegion): Integer;
+function RgnType(G: TZMRegio): Integer;
 begin
-  case Length(G.Rects) of
+  case Length(G.Rechtlijst) of
     0: Result := NULLREGION;
     1: Result := SIMPLEREGION;
   else
@@ -1710,100 +1710,100 @@ end;
 
 function SetRectRgn(Rgn: HRGN; X1, Y1, X2, Y2: Integer): BOOL;
 var
-  G: TZMRegion;
+  G: TZMRegio;
 begin
-  G := GdiRegion(Rgn);
+  G := GdiRegio(Rgn);
   if G = nil then Exit(False);
-  G.Rects := nil;
+  G.Rechtlijst := nil;
   if (X2 > X1) and (Y2 > Y1) then
   begin
-    SetLength(G.Rects, 1);
-    G.Rects[0] := Types.Rect(X1, Y1, X2, Y2);
+    SetLength(G.Rechtlijst, 1);
+    G.Rechtlijst[0] := Types.Rect(X1, Y1, X2, Y2);
   end;
   Result := True;
 end;
 
 function CombineRgn(p1, p2, p3: HRGN; p4: Integer): Integer;
 var
-  D, A, B: TZMRegion;
-  R: TZMRects;
+  D, A, B: TZMRegio;
+  R: TZMRechtlijst;
 begin
-  D := GdiRegion(p1);
-  A := GdiRegion(p2);
-  B := GdiRegion(p3);
+  D := GdiRegio(p1);
+  A := GdiRegio(p2);
+  B := GdiRegio(p3);
   if (D = nil) or (A = nil) then Exit(ERROR);
   case p4 of
-    RGN_AND: if B = nil then Exit(ERROR) else R := RectsIntersect(A.Rects, B.Rects);
-    RGN_OR: if B = nil then Exit(ERROR) else R := RectsUnion(A.Rects, B.Rects);
-    RGN_DIFF: if B = nil then Exit(ERROR) else R := RectsSubtract(A.Rects, B.Rects);
+    RGN_AND: if B = nil then Exit(ERROR) else R := RechtlijstSnijd(A.Rechtlijst, B.Rechtlijst);
+    RGN_OR: if B = nil then Exit(ERROR) else R := RechtlijstVereniging(A.Rechtlijst, B.Rechtlijst);
+    RGN_DIFF: if B = nil then Exit(ERROR) else R := RechtlijstAftrek(A.Rechtlijst, B.Rechtlijst);
     RGN_XOR: if B = nil then Exit(ERROR) else
-      R := RectsUnion(RectsSubtract(A.Rects, B.Rects), RectsSubtract(B.Rects, A.Rects));
-    RGN_COPY: R := RectsCopy(A.Rects);
+      R := RechtlijstVereniging(RechtlijstAftrek(A.Rechtlijst, B.Rechtlijst), RechtlijstAftrek(B.Rechtlijst, A.Rechtlijst));
+    RGN_COPY: R := RechtlijstKopie(A.Rechtlijst);
   else
     Exit(ERROR);
   end;
-  D.Rects := R;
+  D.Rechtlijst := R;
   Result := RgnType(D);
 end;
 
 function OffsetRgn(RGN: HRGN; XOffset, YOffset: Integer): Integer;
 var
-  G: TZMRegion;
+  G: TZMRegio;
 begin
-  G := GdiRegion(RGN);
+  G := GdiRegio(RGN);
   if G = nil then Exit(ERROR);
-  G.Rects := RectsOffset(G.Rects, XOffset, YOffset);
+  G.Rechtlijst := RechtlijstVerschuif(G.Rechtlijst, XOffset, YOffset);
   Result := RgnType(G);
 end;
 
 function GetRgnBox(RGN: HRGN; var p2: TRect): Integer;
 var
-  G: TZMRegion;
+  G: TZMRegio;
 begin
-  G := GdiRegion(RGN);
+  G := GdiRegio(RGN);
   if G = nil then Exit(ERROR);
-  p2 := G.Box;
+  p2 := G.Omhullende;
   Result := RgnType(G);
 end;
 
 function PtInRegion(RGN: HRGN; X, Y: Integer): BOOL;
 var
-  G: TZMRegion;
+  G: TZMRegio;
 begin
-  G := GdiRegion(RGN);
-  Result := (G <> nil) and RectsContain(G.Rects, X, Y);
+  G := GdiRegio(RGN);
+  Result := (G <> nil) and RechtlijstBevat(G.Rechtlijst, X, Y);
 end;
 
 function RectInRegion(RGN: HRGN; const p2: TRect): BOOL;
 var
-  G: TZMRegion;
+  G: TZMRegio;
 begin
-  G := GdiRegion(RGN);
-  Result := (G <> nil) and (Length(RectsIntersectRect(G.Rects, p2)) > 0);
+  G := GdiRegio(RGN);
+  Result := (G <> nil) and (Length(RechtlijstSnijdRechthoek(G.Rechtlijst, p2)) > 0);
 end;
 
 function SelectClipRgn(DC: HDC; Region: HRGN): Integer;
 var
   D: TZMDC;
-  G: TZMRegion;
+  G: TZMRegio;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(ERROR);
-  G := GdiRegion(Region);
+  G := GdiRegio(Region);
   if G = nil then
   begin
-    D.St.HasClip := False;
-    D.St.ClipRgn := nil;
-    D.InvalidateClip;
+    D.St.HeeftKnip := False;
+    D.St.KnipRegio := nil;
+    D.MaakKnipOngeldig;
     Exit(SIMPLEREGION);
   end;
-  D.St.HasClip := True;
-  D.St.ClipRgn := RectsCopy(G.Rects);
-  D.InvalidateClip;
+  D.St.HeeftKnip := True;
+  D.St.KnipRegio := RechtlijstKopie(G.Rechtlijst);
+  D.MaakKnipOngeldig;
   Result := RgnType(G);
 end;
 
-function DeviceAll(D: TZMDC): TZMRects;
+function DeviceAll(D: TZMDC): TZMRechtlijst;
 begin
   SetLength(Result, 1);
   Result[0] := Types.Rect(-100000, -100000, 100000, 100000);
@@ -1812,24 +1812,24 @@ end;
 function ExtSelectClipRgn(DC: HDC; Region: HRGN; Mode: Integer): Integer;
 var
   D: TZMDC;
-  G: TZMRegion;
-  Huidig: TZMRects;
+  G: TZMRegio;
+  Huidig: TZMRechtlijst;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(ERROR);
-  G := GdiRegion(Region);
+  G := GdiRegio(Region);
   if Mode = RGN_COPY then Exit(SelectClipRgn(DC, Region));
   if G = nil then Exit(ERROR);
-  if D.St.HasClip then Huidig := D.St.ClipRgn else Huidig := DeviceAll(D);
+  if D.St.HeeftKnip then Huidig := D.St.KnipRegio else Huidig := DeviceAll(D);
   case Mode of
-    RGN_AND: Huidig := RectsIntersect(Huidig, G.Rects);
-    RGN_OR: Huidig := RectsUnion(Huidig, G.Rects);
-    RGN_DIFF: Huidig := RectsSubtract(Huidig, G.Rects);
-    RGN_XOR: Huidig := RectsUnion(RectsSubtract(Huidig, G.Rects), RectsSubtract(G.Rects, Huidig));
+    RGN_AND: Huidig := RechtlijstSnijd(Huidig, G.Rechtlijst);
+    RGN_OR: Huidig := RechtlijstVereniging(Huidig, G.Rechtlijst);
+    RGN_DIFF: Huidig := RechtlijstAftrek(Huidig, G.Rechtlijst);
+    RGN_XOR: Huidig := RechtlijstVereniging(RechtlijstAftrek(Huidig, G.Rechtlijst), RechtlijstAftrek(G.Rechtlijst, Huidig));
   end;
-  D.St.HasClip := True;
-  D.St.ClipRgn := Huidig;
-  D.InvalidateClip;
+  D.St.HeeftKnip := True;
+  D.St.KnipRegio := Huidig;
+  D.MaakKnipOngeldig;
   if Length(Huidig) = 0 then Result := NULLREGION else Result := SIMPLEREGION;
 end;
 
@@ -1837,67 +1837,67 @@ end;
 function LToDev(D: TZMDC; const R: TRect): TRect;
 begin
   Result := R;
-  OffsetRect(Result, D.St.VpOrg.X - D.St.WinOrg.X, D.St.VpOrg.Y - D.St.WinOrg.Y);
+  OffsetRect(Result, D.St.ViewportOorsprong.X - D.St.VensterOorsprong.X, D.St.ViewportOorsprong.Y - D.St.VensterOorsprong.Y);
 end;
 
 function GetClipBox(DC: HDC; var Rect: TRect): Integer;
 var
   D: TZMDC;
-  E: TZMRects;
+  E: TZMRechtlijst;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(ERROR);
-  E := D.Eff;
+  E := D.Effectief;
   if Length(E) = 0 then
   begin
     Rect := Types.Rect(0, 0, 0, 0);
     Exit(NULLREGION);
   end;
-  Rect := RectsBox(E);
-  OffsetRect(Rect, -D.OffX, -D.OffY);
+  Rect := RechtlijstOmhulling(E);
+  OffsetRect(Rect, -D.OorsprongX, -D.OorsprongY);
   if Length(E) = 1 then Result := SIMPLEREGION else Result := COMPLEXREGION;
 end;
 
 function GetClipRgn(DC: HDC; rgn: HRGN): Integer;
 var
   D: TZMDC;
-  G: TZMRegion;
+  G: TZMRegio;
 begin
   D := GdiDC(DC);
-  G := GdiRegion(rgn);
+  G := GdiRegio(rgn);
   if (D = nil) or (G = nil) then Exit(-1);
-  if not D.St.HasClip then Exit(0);
-  G.Rects := RectsCopy(D.St.ClipRgn);
+  if not D.St.HeeftKnip then Exit(0);
+  G.Rechtlijst := RechtlijstKopie(D.St.KnipRegio);
   Result := 1;
 end;
 
 function IntersectClipRect(DC: HDC; X1, Y1, X2, Y2: Integer): Integer;
 var
   D: TZMDC;
-  Huidig: TZMRects;
+  Huidig: TZMRechtlijst;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(ERROR);
-  if D.St.HasClip then Huidig := D.St.ClipRgn else Huidig := DeviceAll(D);
-  Huidig := RectsIntersectRect(Huidig, LToDev(D, Types.Rect(X1, Y1, X2, Y2)));
-  D.St.HasClip := True;
-  D.St.ClipRgn := Huidig;
-  D.InvalidateClip;
+  if D.St.HeeftKnip then Huidig := D.St.KnipRegio else Huidig := DeviceAll(D);
+  Huidig := RechtlijstSnijdRechthoek(Huidig, LToDev(D, Types.Rect(X1, Y1, X2, Y2)));
+  D.St.HeeftKnip := True;
+  D.St.KnipRegio := Huidig;
+  D.MaakKnipOngeldig;
   if Length(Huidig) = 0 then Result := NULLREGION else Result := SIMPLEREGION;
 end;
 
 function ExcludeClipRect(DC: HDC; LeftRect, TopRect, RightRect, BottomRect: Integer): Integer;
 var
   D: TZMDC;
-  Huidig: TZMRects;
+  Huidig: TZMRechtlijst;
 begin
   D := GdiDC(DC);
   if D = nil then Exit(ERROR);
-  if D.St.HasClip then Huidig := D.St.ClipRgn else Huidig := DeviceAll(D);
-  Huidig := RectsSubtractRect(Huidig, LToDev(D, Types.Rect(LeftRect, TopRect, RightRect, BottomRect)));
-  D.St.HasClip := True;
-  D.St.ClipRgn := Huidig;
-  D.InvalidateClip;
+  if D.St.HeeftKnip then Huidig := D.St.KnipRegio else Huidig := DeviceAll(D);
+  Huidig := RechtlijstAftrekRechthoek(Huidig, LToDev(D, Types.Rect(LeftRect, TopRect, RightRect, BottomRect)));
+  D.St.HeeftKnip := True;
+  D.St.KnipRegio := Huidig;
+  D.MaakKnipOngeldig;
   if Length(Huidig) = 0 then Result := NULLREGION else Result := COMPLEXREGION;
 end;
 
@@ -1907,10 +1907,10 @@ var
 begin
   D := GdiDC(DC);
   if D = nil then Exit(ERROR);
-  if D.St.HasClip then
+  if D.St.HeeftKnip then
   begin
-    D.St.ClipRgn := RectsOffset(D.St.ClipRgn, XOffset, YOffset);
-    D.InvalidateClip;
+    D.St.KnipRegio := RechtlijstVerschuif(D.St.KnipRegio, XOffset, YOffset);
+    D.MaakKnipOngeldig;
   end;
   Result := SIMPLEREGION;
 end;
@@ -1923,8 +1923,8 @@ begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
   R := Rect;
-  OffsetRect(R, D.OffX, D.OffY);
-  Result := Length(RectsIntersectRect(D.Eff, R)) > 0;
+  OffsetRect(R, D.OorsprongX, D.OorsprongY);
+  Result := Length(RechtlijstSnijdRechthoek(D.Effectief, R)) > 0;
 end;
 
 function PtVisible(DC: HDC; X, Y: Integer): BOOL;
@@ -1933,7 +1933,7 @@ var
 begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
-  Result := RectsContain(D.Eff, X + D.OffX, Y + D.OffY);
+  Result := RechtlijstBevat(D.Effectief, X + D.OorsprongX, Y + D.OorsprongY);
 end;
 
 { ---------------------------------------------------------------- cursors / iconen }
@@ -1964,7 +1964,7 @@ end;
 function SetCursor(hCursor: HCURSOR): HCURSOR;
 begin
   Result := 32512;
-  ZMSetCursorShape(hCursor);
+  ZMZetAanwijzerVorm(hCursor);
 end;
 
 function GetCursor: HCURSOR;
@@ -1985,13 +1985,13 @@ end;
 
 function GetCursorPos(var lpPoint: TPoint): BOOL;
 begin
-  lpPoint := ZMCursorPos;
+  lpPoint := ZMAanwijzerPositie;
   Result := True;
 end;
 
 function SetCursorPos(X, Y: Integer): BOOL;
 begin
-  ZMSetCursorPos(X, Y);
+  ZMZetAanwijzerPositie(X, Y);
   Result := True;
 end;
 
@@ -2068,7 +2068,7 @@ function CreateWindowEx(dwExStyle: DWORD; lpClassName: PAnsiChar; lpWindowName: 
 var
   I: Integer;
   Proc: Pointer;
-  W: TZMWindow;
+  W: TZMVenster;
   Naam, Tkst: string;
 begin
   Naam := ClassNameStr(lpClassName);
@@ -2080,14 +2080,14 @@ begin
   if Y = Integer($80000000) then Y := 0;
   if nWidth = Integer($80000000) then nWidth := 400;
   if nHeight = Integer($80000000) then nHeight := 300;
-  Result := ZMCreateWindow(dwExStyle, Naam, Tkst, dwStyle, X, Y, nWidth, nHeight, hWndParent,
+  Result := ZMMaakVenster(dwExStyle, Naam, Tkst, dwStyle, X, Y, nWidth, nHeight, hWndParent,
     PtrInt(hMenu), nil, Proc);
-  W := ZMWindowObj(Result);
+  W := ZMVensterObj(Result);
   if (W <> nil) and (I >= 0) then
   begin
-    W.ClsStyle := RegClasses[I].WC.style;
-    W.ClsBrush := RegClasses[I].WC.hbrBackground;
-    W.ClsCursor := RegClasses[I].WC.hCursor;
+    W.KlasseStijl := RegClasses[I].WC.style;
+    W.KlasseKwast := RegClasses[I].WC.hbrBackground;
+    W.KlasseAanwijzer := RegClasses[I].WC.hCursor;
   end;
 end;
 
@@ -2101,7 +2101,7 @@ end;
 
 function DestroyWindow(hWnd: HWND): BOOL;
 begin
-  Result := ZMDestroyWindow(hWnd);
+  Result := ZMVernietigVenster(hWnd);
 end;
 
 function RegisterClass(const lpWndClass: TWndClass): ATOM;
@@ -2141,22 +2141,22 @@ end;
 
 function IsWindow(hWnd: HWND): BOOL;
 begin
-  Result := ZMWindowObj(hWnd) <> nil;
+  Result := ZMVensterObj(hWnd) <> nil;
 end;
 
 function IsWindowVisible(hWnd: HWND): BOOL;
 var
-  W: TZMWindow;
+  W: TZMVenster;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   Result := (W <> nil) and W.IsVisible;
 end;
 
 function IsWindowEnabled(hWnd: HWND): BOOL;
 var
-  W: TZMWindow;
+  W: TZMVenster;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   Result := (W <> nil) and (W.Style and WS_DISABLED = 0);
 end;
 
@@ -2167,17 +2167,17 @@ end;
 
 function IsZoomed(hWnd: HWND): BOOL;
 var
-  W: TZMWindow;
+  W: TZMVenster;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   Result := (W <> nil) and (W.Style and WS_MAXIMIZE <> 0);
 end;
 
 function IsChild(hWndParent, hWnd: HWND): BOOL;
 var
-  W: TZMWindow;
+  W: TZMVenster;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   if W <> nil then W := W.Parent;
   while W <> nil do
   begin
@@ -2189,109 +2189,109 @@ end;
 
 function EnableWindow(hWnd: HWND; bEnable: BOOL): BOOL;
 begin
-  Result := ZMEnableWindow(hWnd, bEnable);
+  Result := ZMSchakelVensterIn(hWnd, bEnable);
 end;
 
 function ShowWindow(hWnd: HWND; nCmdShow: Integer): BOOL;
 var
-  W: TZMWindow;
+  W: TZMVenster;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   if W = nil then Exit(False);
   case nCmdShow of
-    SW_HIDE: Result := ZMShowWindow(hWnd, False);
+    SW_HIDE: Result := ZMToonVenster(hWnd, False);
     SW_SHOWMAXIMIZED:
       begin
         W.Style := W.Style or WS_MAXIMIZE;
         if W.Parent = nil then
-          ZMSetWindowPos(hWnd, 0, 0, 0, ZMScreenW, ZMScreenH, SWP_NOZORDER);
-        Result := ZMShowWindow(hWnd, True);
-        ZMSetActive(hWnd);
+          ZMZetVensterPositie(hWnd, 0, 0, 0, ZMSchermBreedte, ZMSchermHoogte, SWP_NOZORDER);
+        Result := ZMToonVenster(hWnd, True);
+        ZMZetActief(hWnd);
       end;
     SW_SHOWNOACTIVATE, SW_SHOWNA, SW_SHOWMINNOACTIVE:
-      Result := ZMShowWindow(hWnd, True);
+      Result := ZMToonVenster(hWnd, True);
   else
     begin
       if nCmdShow in [SW_RESTORE, SW_SHOWNORMAL] then W.Style := W.Style and not WS_MAXIMIZE;
-      Result := ZMShowWindow(hWnd, True);
-      if (W.Parent = nil) and (nCmdShow <> SW_SHOWMINIMIZED) then ZMSetActive(hWnd);
+      Result := ZMToonVenster(hWnd, True);
+      if (W.Parent = nil) and (nCmdShow <> SW_SHOWMINIMIZED) then ZMZetActief(hWnd);
     end;
   end;
 end;
 
 function SetWindowPos(hWnd: HWND; hWndInsertAfter: HWND; X, Y, cx, cy: Integer; uFlags: UINT): BOOL;
 begin
-  ZMSetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+  ZMZetVensterPositie(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
   if uFlags and SWP_SHOWWINDOW <> 0 then
-    if (ZMWindowObj(hWnd) <> nil) and (ZMWindowObj(hWnd).Parent = nil) and (uFlags and SWP_NOACTIVATE = 0) then
-      ZMSetActive(hWnd);
-  Result := ZMWindowObj(hWnd) <> nil;
+    if (ZMVensterObj(hWnd) <> nil) and (ZMVensterObj(hWnd).Parent = nil) and (uFlags and SWP_NOACTIVATE = 0) then
+      ZMZetActief(hWnd);
+  Result := ZMVensterObj(hWnd) <> nil;
 end;
 
 function MoveWindow(hWnd: HWND; X, Y, nWidth, nHeight: Integer; bRepaint: BOOL): BOOL;
 begin
-  ZMSetWindowPos(hWnd, 0, X, Y, nWidth, nHeight, SWP_NOZORDER or SWP_NOACTIVATE);
-  Result := ZMWindowObj(hWnd) <> nil;
+  ZMZetVensterPositie(hWnd, 0, X, Y, nWidth, nHeight, SWP_NOZORDER or SWP_NOACTIVATE);
+  Result := ZMVensterObj(hWnd) <> nil;
 end;
 
 function BringWindowToTop(hWnd: HWND): BOOL;
 begin
-  ZMSetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE);
+  ZMZetVensterPositie(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE);
   Result := True;
 end;
 
 function SetForegroundWindow(hWnd: HWND): BOOL;
 begin
-  ZMSetActive(hWnd);
+  ZMZetActief(hWnd);
   Result := True;
 end;
 
 function GetForegroundWindow: HWND;
 begin
-  Result := ZMGetActive;
+  Result := ZMLeesActief;
 end;
 
 function SetActiveWindow(hWnd: HWND): HWND;
 begin
-  Result := ZMSetActive(hWnd);
+  Result := ZMZetActief(hWnd);
 end;
 
 function GetActiveWindow: HWND;
 begin
-  Result := ZMGetActive;
+  Result := ZMLeesActief;
 end;
 
 function SetFocus(hWnd: HWND): HWND;
 begin
-  Result := ZMSetFocus(hWnd);
+  Result := ZMZetFocus(hWnd);
 end;
 
 function GetFocus: HWND;
 begin
-  Result := ZMGetFocus;
+  Result := ZMLeesFocus;
 end;
 
 function SetCapture(hWnd: HWND): HWND;
 begin
-  Result := ZMSetCapture(hWnd);
+  Result := ZMZetVastlegging(hWnd);
 end;
 
 function GetCapture: HWND;
 begin
-  Result := ZMGetCapture;
+  Result := ZMLeesVastlegging;
 end;
 
 function ReleaseCapture: BOOL;
 begin
-  ZMReleaseCapture;
+  ZMGeefVastleggingVrij;
   Result := True;
 end;
 
 function GetParent(hWnd: HWND): HWND;
 var
-  W: TZMWindow;
+  W: TZMVenster;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   if W = nil then Exit(0);
   if W.Parent <> nil then Result := W.Parent.Handle else Result := W.Owner;
 end;
@@ -2299,17 +2299,17 @@ end;
 function SetParent(hWndChild, hWndNewParent: HWND): HWND;
 begin
   Result := GetParent(hWndChild);
-  ZMSetParent(hWndChild, hWndNewParent);
+  ZMZetOuder(hWndChild, hWndNewParent);
 end;
 
 function GetWindow(hWnd: HWND; uCmd: UINT): HWND;
 begin
-  Result := ZMGetWindowInZ(hWnd, uCmd);
+  Result := ZMLeesVensterInZ(hWnd, uCmd);
 end;
 
 function GetTopWindow(hWnd: HWND): HWND;
 begin
-  Result := ZMGetWindowInZ(hWnd, 5);
+  Result := ZMLeesVensterInZ(hWnd, 5);
 end;
 
 function GetDesktopWindow: HWND;
@@ -2319,43 +2319,43 @@ end;
 
 function GetWindowRect(hWnd: HWND; var lpRect: TRect): BOOL;
 var
-  W: TZMWindow;
+  W: TZMVenster;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   if W = nil then
   begin
-    lpRect := Types.Rect(0, 0, ZMScreenW, ZMScreenH);
+    lpRect := Types.Rect(0, 0, ZMSchermBreedte, ZMSchermHoogte);
     Exit(hWnd = 0);
   end;
-  lpRect := W.WindowRectScreen;
+  lpRect := W.VensterRectScherm;
   Result := True;
 end;
 
 function GetClientRect(hWnd: HWND; var lpRect: TRect): BOOL;
 var
-  W: TZMWindow;
+  W: TZMVenster;
   R: TRect;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   if W = nil then
   begin
-    lpRect := Types.Rect(0, 0, ZMScreenW, ZMScreenH);
+    lpRect := Types.Rect(0, 0, ZMSchermBreedte, ZMSchermHoogte);
     Exit(hWnd = 0);
   end;
-  R := W.ClientRectScreen;
+  R := W.KlientRectScherm;
   lpRect := Types.Rect(0, 0, R.Right - R.Left, R.Bottom - R.Top);
   Result := True;
 end;
 
 function ClientToScreen(hWnd: HWND; var lpPoint: TPoint): BOOL;
 begin
-  ZMClientToScreen(hWnd, lpPoint);
+  ZMKlientNaarScherm(hWnd, lpPoint);
   Result := True;
 end;
 
 function ScreenToClient(hWnd: HWND; var lpPoint: TPoint): BOOL;
 begin
-  ZMScreenToClient(hWnd, lpPoint);
+  ZMSchermNaarKlient(hWnd, lpPoint);
   Result := True;
 end;
 
@@ -2367,8 +2367,8 @@ var
 begin
   A := Types.Point(0, 0);
   B := Types.Point(0, 0);
-  if hWndFrom <> 0 then ZMClientToScreen(hWndFrom, A);
-  if hWndTo <> 0 then ZMClientToScreen(hWndTo, B);
+  if hWndFrom <> 0 then ZMKlientNaarScherm(hWndFrom, A);
+  if hWndTo <> 0 then ZMKlientNaarScherm(hWndTo, B);
   P := @lpPoints;
   for I := 0 to Integer(cPoints) - 1 do
   begin
@@ -2381,7 +2381,7 @@ end;
 
 function WindowFromPoint(Point: TPoint): HWND;
 begin
-  Result := ZMWindowFromPoint(Point, False);
+  Result := ZMVensterVanPunt(Point, False);
 end;
 
 function ChildWindowFromPoint(hWndParent: HWND; Point: TPoint): HWND;
@@ -2390,8 +2390,8 @@ var
   H: HWND;
 begin
   P := Point;
-  ZMClientToScreen(hWndParent, P);
-  H := ZMWindowFromPoint(P, False);
+  ZMKlientNaarScherm(hWndParent, P);
+  H := ZMVensterVanPunt(P, False);
   while (H <> 0) and (GetParent(H) <> hWndParent) and (H <> hWndParent) do
     H := GetParent(H);
   if H = 0 then H := hWndParent;
@@ -2400,35 +2400,35 @@ end;
 
 function InvalidateRect(hWnd: HWND; lpRect: PRect; bErase: BOOL): BOOL;
 begin
-  ZMInvalidate(hWnd, lpRect, bErase);
+  ZMMaakOngeldig(hWnd, lpRect, bErase);
   Result := True;
 end;
 
 function InvalidateRgn(hWnd: HWND; hRgn: HRGN; bErase: BOOL): BOOL;
 var
-  G: TZMRegion;
+  G: TZMRegio;
   R: TRect;
 begin
-  G := GdiRegion(hRgn);
+  G := GdiRegio(hRgn);
   if G = nil then
-    ZMInvalidate(hWnd, nil, bErase)
+    ZMMaakOngeldig(hWnd, nil, bErase)
   else
   begin
-    R := G.Box;
-    ZMInvalidate(hWnd, @R, bErase);
+    R := G.Omhullende;
+    ZMMaakOngeldig(hWnd, @R, bErase);
   end;
   Result := True;
 end;
 
 function ValidateRect(hWnd: HWND; lpRect: PRect): BOOL;
 begin
-  ZMValidate(hWnd, lpRect);
+  ZMMaakGeldig(hWnd, lpRect);
   Result := True;
 end;
 
 function UpdateWindow(hWnd: HWND): BOOL;
 begin
-  ZMUpdateWindow(hWnd);
+  ZMVerversVenster(hWnd);
   Result := True;
 end;
 
@@ -2436,10 +2436,10 @@ function RedrawWindow(hWnd: HWND; lprcUpdate: PRect; hrgnUpdate: HRGN; flags: UI
 const
   RDW_INVALIDATE = 1; RDW_ERASE = 4; RDW_FRAME = $400; RDW_UPDATENOW = $100; RDW_ALLCHILDREN = $80;
 var
-  W: TZMWindow;
+  W: TZMVenster;
   R: TRect;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   if flags and RDW_INVALIDATE <> 0 then
   begin
     if (flags and RDW_ALLCHILDREN <> 0) and (W <> nil) then
@@ -2447,17 +2447,17 @@ begin
       if lprcUpdate <> nil then
       begin
         R := lprcUpdate^;
-        OffsetRect(R, W.ClientRectScreen.Left, W.ClientRectScreen.Top);
+        OffsetRect(R, W.KlientRectScherm.Left, W.KlientRectScherm.Top);
       end
       else
-        R := W.WindowRectScreen;
-      ZMInvalidateTree(W, R);
+        R := W.VensterRectScherm;
+      ZMMaakBoomOngeldig(W, R);
     end
     else
-      ZMInvalidate(hWnd, lprcUpdate, flags and RDW_ERASE <> 0);
-    if (flags and RDW_FRAME <> 0) and (W <> nil) then W.NCDirty := True;
+      ZMMaakOngeldig(hWnd, lprcUpdate, flags and RDW_ERASE <> 0);
+    if (flags and RDW_FRAME <> 0) and (W <> nil) then W.NCVuil := True;
   end;
-  if flags and RDW_UPDATENOW <> 0 then ZMUpdateWindow(hWnd);
+  if flags and RDW_UPDATENOW <> 0 then ZMVerversVenster(hWnd);
   Result := True;
 end;
 
@@ -2465,54 +2465,54 @@ function GetUpdateRect(hWnd: HWND; lpRect: PRect; bErase: BOOL): BOOL;
 var
   R: TRect;
 begin
-  Result := ZMGetUpdateRect(hWnd, R);
+  Result := ZMLeesBijwerkRect(hWnd, R);
   if lpRect <> nil then lpRect^ := R;
 end;
 
 function BeginPaint(hWnd: HWND; var lpPaint: TPaintStruct): HDC;
 begin
-  Result := ZMBeginPaint(hWnd, lpPaint);
+  Result := ZMBeginTekenen(hWnd, lpPaint);
 end;
 
 function EndPaint(hWnd: HWND; const lpPaint: TPaintStruct): BOOL;
 begin
-  ZMEndPaint(hWnd, lpPaint);
+  ZMEindeTekenen(hWnd, lpPaint);
   Result := True;
 end;
 
 function ScrollWindow(hWnd: HWND; XAmount, YAmount: Integer; Rect, ClipRect: PRect): BOOL;
 begin
-  ZMInvalidate(hWnd, nil, True);
+  ZMMaakOngeldig(hWnd, nil, True);
   Result := True;
 end;
 
 function SetWindowText(hWnd: HWND; lpString: PAnsiChar): BOOL;
 begin
-  Result := ZMSendMessage(hWnd, $000C, 0, LPARAM(lpString)) <> 0;
+  Result := ZMZendBericht(hWnd, $000C, 0, LPARAM(lpString)) <> 0;
 end;
 
 function GetWindowText(hWnd: HWND; lpString: PAnsiChar; nMaxCount: Integer): Integer;
 begin
-  Result := ZMSendMessage(hWnd, $000D, nMaxCount, LPARAM(lpString));
+  Result := ZMZendBericht(hWnd, $000D, nMaxCount, LPARAM(lpString));
 end;
 
 function GetWindowTextLength(hWnd: HWND): Integer;
 begin
-  Result := ZMSendMessage(hWnd, $000E, 0, 0);
+  Result := ZMZendBericht(hWnd, $000E, 0, 0);
 end;
 
 function GetWindowLong(hWnd: HWND; nIndex: Integer): PtrInt;
 var
-  W: TZMWindow;
+  W: TZMVenster;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   Result := 0;
   if W = nil then Exit;
   case nIndex of
     GWL_STYLE: Result := PtrInt(W.Style);
     GWL_EXSTYLE: Result := PtrInt(W.ExStyle);
     GWL_ID: Result := W.ID;
-    GWL_USERDATA: Result := W.UserData;
+    GWL_USERDATA: Result := W.GebruikersData;
     GWL_WNDPROC: Result := PtrInt(W.Proc);
     GWL_HWNDPARENT: Result := PtrInt(GetParent(hWnd));
     GWL_HINSTANCE: Result := PtrInt(HInstance);
@@ -2521,17 +2521,17 @@ end;
 
 function SetWindowLong(hWnd: HWND; nIndex: Integer; dwNewLong: PtrInt): PtrInt;
 var
-  W: TZMWindow;
+  W: TZMVenster;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   Result := 0;
   if W = nil then Exit;
   Result := GetWindowLong(hWnd, nIndex);
   case nIndex of
-    GWL_STYLE: ZMSetStyle(hWnd, DWORD(dwNewLong));
-    GWL_EXSTYLE: ZMSetExStyle(hWnd, DWORD(dwNewLong));
+    GWL_STYLE: ZMZetStijl(hWnd, DWORD(dwNewLong));
+    GWL_EXSTYLE: ZMZetUitStijl(hWnd, DWORD(dwNewLong));
     GWL_ID: W.ID := dwNewLong;
-    GWL_USERDATA: W.UserData := dwNewLong;
+    GWL_USERDATA: W.GebruikersData := dwNewLong;
     GWL_WNDPROC: W.Proc := Pointer(dwNewLong);
     GWL_HWNDPARENT: W.Owner := THandle(dwNewLong);
   end;
@@ -2549,19 +2549,19 @@ end;
 
 function GetClassName(hWnd: HWND; lpClassName: PAnsiChar; nMaxCount: Integer): Integer;
 var
-  W: TZMWindow;
+  W: TZMVenster;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   if (W = nil) or (lpClassName = nil) then Exit(0);
-  StrPLCopy(lpClassName, W.ClsName, nMaxCount - 1);
+  StrPLCopy(lpClassName, W.VensterKlasseNaam, nMaxCount - 1);
   Result := StrLen(lpClassName);
 end;
 
 function GetWindowPlacement(hWnd: HWND; WindowPlacement: PWindowPlacement): BOOL;
 var
-  W: TZMWindow;
+  W: TZMVenster;
 begin
-  W := ZMWindowObj(hWnd);
+  W := ZMVensterObj(hWnd);
   if (W = nil) or (WindowPlacement = nil) then Exit(False);
   WindowPlacement^.flags := 0;
   if W.Style and WS_MAXIMIZE <> 0 then WindowPlacement^.showCmd := SW_SHOWMAXIMIZED
@@ -2574,14 +2574,14 @@ function SetWindowPlacement(hWnd: HWND; WindowPlacement: PWindowPlacement): BOOL
 begin
   if WindowPlacement = nil then Exit(False);
   with WindowPlacement^.rcNormalPosition do
-    ZMSetWindowPos(hWnd, 0, Left, Top, Right - Left, Bottom - Top, SWP_NOZORDER);
+    ZMZetVensterPositie(hWnd, 0, Left, Top, Right - Left, Bottom - Top, SWP_NOZORDER);
   ShowWindow(hWnd, WindowPlacement^.showCmd);
   Result := True;
 end;
 
 type
   TFindData = record
-    Cls, Txt: string;
+    Klasse, Txt: string;
     UseCls, UseTxt: Boolean;
     Found: HWND;
   end;
@@ -2589,12 +2589,12 @@ type
 
 function FindProc(Venster: HWND; Gegevens: Pointer): Boolean;
 var
-  W: TZMWindow;
+  W: TZMVenster;
 begin
-  W := ZMWindowObj(Venster);
+  W := ZMVensterObj(Venster);
   Result := True;
   with PFindData(Gegevens)^ do
-    if (not UseCls or SameText(W.ClsName, Cls)) and (not UseTxt or (W.Text = Txt)) then
+    if (not UseCls or SameText(W.VensterKlasseNaam, Klasse)) and (not UseTxt or (W.Text = Txt)) then
     begin
       Found := Venster;
       Result := False;
@@ -2607,19 +2607,19 @@ var
 begin
   F.UseCls := lpClassName <> nil;
   F.UseTxt := lpWindowName <> nil;
-  if F.UseCls then F.Cls := ClassNameStr(lpClassName);
+  if F.UseCls then F.Klasse := ClassNameStr(lpClassName);
   if F.UseTxt then F.Txt := StrPas(lpWindowName);
   F.Found := 0;
-  ZMEnumTopLevel(FindProc, @F);
+  ZMOpsommenTopniveau(FindProc, @F);
   Result := F.Found;
 end;
 
 function GetSystemMetrics(nIndex: Integer): Integer;
 begin
   case nIndex of
-    SM_CXSCREEN, SM_CXFULLSCREEN, SM_CXMAXIMIZED: Result := ZMScreenW;
-    SM_CYSCREEN, SM_CYMAXIMIZED: Result := ZMScreenH;
-    SM_CYFULLSCREEN: Result := ZMScreenH - 19;
+    SM_CXSCREEN, SM_CXFULLSCREEN, SM_CXMAXIMIZED: Result := ZMSchermBreedte;
+    SM_CYSCREEN, SM_CYMAXIMIZED: Result := ZMSchermHoogte;
+    SM_CYFULLSCREEN: Result := ZMSchermHoogte - 19;
     SM_CXVSCROLL, SM_CYHSCROLL, SM_CYVSCROLL, SM_CXHSCROLL, SM_CYVTHUMB, SM_CXHTHUMB: Result := 16;
     SM_CYCAPTION: Result := 19;
     SM_CXBORDER, SM_CYBORDER: Result := 1;
@@ -2638,8 +2638,8 @@ end;
 
 function GetSysColor(nIndex: Integer): DWORD;
 begin
-  ZMInit;
-  if (nIndex >= 0) and (nIndex <= High(SysColors)) then Result := SysColors[nIndex] else Result := 0;
+  ZMInitialiseer;
+  if (nIndex >= 0) and (nIndex <= High(SysteemKleuren)) then Result := SysteemKleuren[nIndex] else Result := 0;
 end;
 
 function FlashWindow(hWnd: HWND; bInvert: BOOL): BOOL;
@@ -2649,12 +2649,12 @@ end;
 
 function GetKeyState(nVirtKey: Integer): SHORT;
 begin
-  Result := ZMKeyState(nVirtKey);
+  Result := ZMToetsStatus(nVirtKey);
 end;
 
 function GetAsyncKeyState(vKey: Integer): SHORT;
 begin
-  Result := ZMKeyState(vKey);
+  Result := ZMToetsStatus(vKey);
 end;
 
 function GetKeyboardState(var KeyState): BOOL;
@@ -2664,7 +2664,7 @@ var
 begin
   P := @KeyState;
   for I := 0 to 255 do
-    if ZMKeyState(I) < 0 then P[I] := $80 else P[I] := 0;
+    if ZMToetsStatus(I) < 0 then P[I] := $80 else P[I] := 0;
   Result := True;
 end;
 
@@ -2681,14 +2681,14 @@ end;
 function CallWindowProc(lpPrevWndFunc: TFNWndProc; hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT;
 begin
   if lpPrevWndFunc = nil then
-    Result := ZMDefWindowProc(hWnd, Msg, wParam, lParam)
+    Result := ZMStandaardVensterProc(hWnd, Msg, wParam, lParam)
   else
     Result := TWndProcFunc(lpPrevWndFunc)(hWnd, Msg, wParam, lParam);
 end;
 
 function DefWindowProc(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT;
 begin
-  Result := ZMDefWindowProc(hWnd, Msg, wParam, lParam);
+  Result := ZMStandaardVensterProc(hWnd, Msg, wParam, lParam);
 end;
 
 function ChangeDisplaySettings(var lpDevMode: TDeviceMode; dwFlags: DWORD): Longint;
@@ -2720,8 +2720,8 @@ begin
   lpDevMode.dmDisplayFrequency := 60;
   if (iModeNum = ENUM_CURRENT_SETTINGS) or (iModeNum = ENUM_REGISTRY_SETTINGS) then
   begin
-    lpDevMode.dmPelsWidth := ZMScreenW;
-    lpDevMode.dmPelsHeight := ZMScreenH;
+    lpDevMode.dmPelsWidth := ZMSchermBreedte;
+    lpDevMode.dmPelsHeight := ZMSchermHoogte;
     lpDevMode.dmBitsPerPel := 32;
     Exit(True);
   end;
@@ -2739,7 +2739,7 @@ const
 begin
   Result := True;
   case uiAction of
-    SPI_GETWORKAREA: if pvParam <> nil then PRect(pvParam)^ := Types.Rect(0, 0, ZMScreenW, ZMScreenH);
+    SPI_GETWORKAREA: if pvParam <> nil then PRect(pvParam)^ := Types.Rect(0, 0, ZMSchermBreedte, ZMSchermHoogte);
   else
     if pvParam <> nil then PDWORD(pvParam)^ := 0;
   end;
@@ -2759,8 +2759,8 @@ end;
 
 function MessageBox(hWnd: HWND; lpText, lpCaption: PAnsiChar; uType: UINT): Integer;
 begin
-  if Assigned(ZMMessageBoxHook) then
-    Result := ZMMessageBoxHook(hWnd, StrPas(lpText), StrPas(lpCaption), uType)
+  if Assigned(ZMBerichtvensterHaak) then
+    Result := ZMBerichtvensterHaak(hWnd, StrPas(lpText), StrPas(lpCaption), uType)
   else
   begin
     WriteLn(StdErr, 'MessageBox: ', StrPas(lpCaption), ': ', StrPas(lpText));
@@ -2772,62 +2772,62 @@ end;
 
 function PostMessage(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): BOOL;
 begin
-  Result := ZMPostMessage(hWnd, Msg, wParam, lParam);
+  Result := ZMPlaatsBericht(hWnd, Msg, wParam, lParam);
 end;
 
 function SendMessage(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT;
 begin
-  Result := ZMSendMessage(hWnd, Msg, wParam, lParam);
+  Result := ZMZendBericht(hWnd, Msg, wParam, lParam);
 end;
 
 function PostThreadMessage(idThread: DWORD; Msg: UINT; wParam: WPARAM; lParam: LPARAM): BOOL;
 begin
-  Result := ZMPostMessage(0, Msg, wParam, lParam);
+  Result := ZMPlaatsBericht(0, Msg, wParam, lParam);
 end;
 
 procedure PostQuitMessage(nExitCode: Integer);
 begin
-  ZMExitCode := nExitCode;
-  ZMPostMessage(0, $0012, nExitCode, 0);
+  ZMAfsluitcode := nExitCode;
+  ZMPlaatsBericht(0, $0012, nExitCode, 0);
 end;
 
 function PeekMessage(var lpMsg: TMsg; hWnd: HWND; wMsgFilterMin, wMsgFilterMax, wRemoveMsg: UINT): BOOL;
 begin
-  Result := ZMPeekMessage(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+  Result := ZMBekijkBericht(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
 end;
 
 function GetMessage(var lpMsg: TMsg; hWnd: HWND; wMsgFilterMin, wMsgFilterMax: UINT): BOOL;
 begin
-  Result := ZMGetMessage(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
+  Result := ZMLeesBericht(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
 end;
 
 function TranslateMessage(const lpMsg: TMsg): BOOL;
 begin
-  ZMTranslateMessage(lpMsg);
+  ZMVertaalBericht(lpMsg);
   Result := True;
 end;
 
 function DispatchMessage(const lpMsg: TMsg): Longint;
 begin
-  Result := ZMDispatchMessage(lpMsg);
+  Result := ZMVerwerkBericht(lpMsg);
 end;
 
 function WaitMessage: BOOL;
 begin
-  ZMWaitMessage;
+  ZMWachtOpBericht;
   Result := True;
 end;
 
 function GetMessageTime: Longint;
 begin
-  Result := ZMMessageTime;
+  Result := ZMBerichtTijd;
 end;
 
 function GetMessagePos: DWORD;
 var
   P: TPoint;
 begin
-  P := ZMMessagePos;
+  P := ZMBerichtPositie;
   Result := DWORD(MakeLong(Word(P.X), Word(P.Y)));
 end;
 
@@ -2835,7 +2835,7 @@ function GetQueueStatus(flags: UINT): DWORD;
 var
   M: TMsg;
 begin
-  if ZMPeekMessage(M, 0, 0, 0, PM_NOREMOVE) then Result := $FFFF else Result := 0;
+  if ZMBekijkBericht(M, 0, 0, 0, PM_NOREMOVE) then Result := $FFFF else Result := 0;
 end;
 
 function InSendMessage: BOOL;
@@ -2858,18 +2858,18 @@ end;
 
 function SetTimer(hWnd: HWND; nIDEvent, uElapse: UINT; lpTimerFunc: TFNTimerProc): UINT;
 begin
-  Result := ZMSetTimer(hWnd, nIDEvent, uElapse, lpTimerFunc);
+  Result := ZMZetTimer(hWnd, nIDEvent, uElapse, lpTimerFunc);
 end;
 
 function KillTimer(hWnd: HWND; uIDEvent: UINT): BOOL;
 begin
-  Result := ZMKillTimer(hWnd, uIDEvent);
+  Result := ZMVerwijderTimer(hWnd, uIDEvent);
 end;
 
 function MsgWaitForMultipleObjects(nCount: DWORD; var pHandles; fWaitAll: BOOL;
   dwMilliseconds, dwWakeMask: DWORD): DWORD;
 begin
-  ZMWaitMessage;
+  ZMWachtOpBericht;
   Result := nCount;  { WAIT_OBJECT_0 + nCount: invoer beschikbaar }
 end;
 
@@ -2877,24 +2877,24 @@ end;
 
 function GetTickCount: DWORD;
 begin
-  Result := ZMTicks;
+  Result := ZMTikken;
 end;
 
 function QueryPerformanceCounter(var lpPerformanceCount: TLargeInteger): BOOL;
 begin
-  lpPerformanceCount := ZMBackend.PerfCounter;
+  lpPerformanceCount := ZMBackend.PrestatieTeller;
   Result := True;
 end;
 
 function QueryPerformanceFrequency(var lpFrequency: TLargeInteger): BOOL;
 begin
-  lpFrequency := ZMBackend.PerfFrequency;
+  lpFrequency := ZMBackend.PrestatieFrequentie;
   Result := True;
 end;
 
 procedure Sleep(dwMilliseconds: DWORD);
 begin
-  ZMBackend.Delay(dwMilliseconds);
+  ZMBackend.Pauzeer(dwMilliseconds);
 end;
 
 function GetVersionEx(var lpVersionInformation: TOSVersionInfo): BOOL;
@@ -2950,7 +2950,7 @@ function GetModuleFileName(hModule: HINST; lpFilename: PAnsiChar; nSize: DWORD):
 var
   S: string;
 begin
-  S := ZMExeName;
+  S := ZMExeNaam;
   StrPLCopy(lpFilename, S, nSize - 1);
   Result := StrLen(lpFilename);
 end;
@@ -2976,7 +2976,7 @@ end;
 
 function SetCurrentDirectory(lpPathName: PAnsiChar): BOOL;
 begin
-  Result := SetCurrentDir(ZMResolvePath(StrPas(lpPathName)));
+  Result := SetCurrentDir(ZMOplosPad(StrPas(lpPathName)));
 end;
 
 function GetWindowsDirectory(lpBuffer: PAnsiChar; uSize: UINT): UINT;
@@ -3050,18 +3050,18 @@ begin
   B := AllocMem(SizeOf(TGlobalBlock) + dwBytes);
   B^.Size := dwBytes;
   O := TObject(Pointer(B));
-  Result := ZMAllocHandle(O);
+  Result := ZMReserveerGreep(O);
 end;
 
 function GlobalFree(hMem: HGLOBAL): HGLOBAL;
 var
   P: Pointer;
 begin
-  P := Pointer(ZMHandleObj(hMem));
+  P := Pointer(ZMGreepVoorwerp(hMem));
   if P <> nil then
   begin
     FreeMem(P);
-    ZMFreeHandle(hMem);
+    ZMGeefGreepVrij(hMem);
   end;
   Result := 0;
 end;
@@ -3070,7 +3070,7 @@ function GlobalLock(hMem: HGLOBAL): Pointer;
 var
   P: PGlobalBlock;
 begin
-  P := PGlobalBlock(Pointer(ZMHandleObj(hMem)));
+  P := PGlobalBlock(Pointer(ZMGreepVoorwerp(hMem)));
   if P = nil then Exit(nil);
   Result := @P^.Data;
 end;
@@ -3084,7 +3084,7 @@ function GlobalSize(hMem: HGLOBAL): PtrUInt;
 var
   P: PGlobalBlock;
 begin
-  P := PGlobalBlock(Pointer(ZMHandleObj(hMem)));
+  P := PGlobalBlock(Pointer(ZMGreepVoorwerp(hMem)));
   if P = nil then Result := 0 else Result := P^.Size;
 end;
 
@@ -3202,26 +3202,26 @@ end;
 function GetPrivateProfileString(lpAppName, lpKeyName, lpDefault: PAnsiChar;
   lpReturnedString: PAnsiChar; nSize: DWORD; lpFileName: PAnsiChar): DWORD;
 begin
-  Result := ZMGetPrivateProfileString(lpAppName, lpKeyName, lpDefault, lpReturnedString,
+  Result := ZMLeesPrivateProfileString(lpAppName, lpKeyName, lpDefault, lpReturnedString,
     nSize, lpFileName);
 end;
 
 function WritePrivateProfileString(lpAppName, lpKeyName, lpString, lpFileName: PAnsiChar): BOOL;
 begin
-  Result := ZMWritePrivateProfileString(lpAppName, lpKeyName, lpString, lpFileName);
+  Result := ZMSchrijfPrivateProfileString(lpAppName, lpKeyName, lpString, lpFileName);
 end;
 
 function GetPrivateProfileInt(lpAppName, lpKeyName: PAnsiChar; nDefault: Integer;
   lpFileName: PAnsiChar): UINT;
 begin
-  Result := ZMGetPrivateProfileInt(lpAppName, lpKeyName, nDefault, lpFileName);
+  Result := ZMLeesPrivateProfileGetal(lpAppName, lpKeyName, nDefault, lpFileName);
 end;
 
 { ---------------------------------------------------------------- resources }
 
 function FindResource(hModule: HMODULE; lpName, lpType: PAnsiChar): HRSRC;
 begin
-  Result := ZMFindExeResource(lpName, lpType);
+  Result := ZMZoekExeHulpbron(lpName, lpType);
 end;
 
 function LoadResource(hModule: HINST; hResInfo: HRSRC): HGLOBAL;
@@ -3231,12 +3231,12 @@ end;
 
 function LockResource(hResData: HGLOBAL): Pointer;
 begin
-  Result := ZMExeResourceData(hResData);
+  Result := ZMExeHulpbronGegevens(hResData);
 end;
 
 function SizeofResource(hModule: HINST; hResInfo: HRSRC): DWORD;
 begin
-  Result := ZMExeResourceSize(hResInfo);
+  Result := ZMExeHulpbronGrootte(hResInfo);
 end;
 
 function FreeResource(hResData: HGLOBAL): BOOL;

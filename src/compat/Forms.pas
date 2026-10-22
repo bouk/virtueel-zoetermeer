@@ -745,7 +745,7 @@ end;
 
 function AllocateHWnd(Method: TWndMethod): HWND;
 begin
-  Result := ZMCreateWindow(WS_EX_TOOLWINDOW, 'TPUtilWindow', '', WS_POPUP, 0, 0, 0, 0, 0, 0, Method, nil);
+  Result := ZMMaakVenster(WS_EX_TOOLWINDOW, 'TPUtilWindow', '', WS_POPUP, 0, 0, 0, 0, 0, 0, Method, nil);
 end;
 
 procedure DeallocateHWnd(Wnd: HWND);
@@ -754,27 +754,27 @@ begin
 end;
 
 type
-  PTaskWindow = ^TTaskWindow;
-  TTaskWindow = record
-    Next: PTaskWindow;
+  PTaakVenster = ^TTaakVenster;
+  TTaakVenster = record
+    Next: PTaakVenster;
     Window: HWnd;
   end;
 
 var
-  TaskActiveWindow: HWnd = 0;
-  TaskFirstWindow: HWnd = 0;
-  TaskWindowList: PTaskWindow = nil;
+  TaakActiefVenster: HWnd = 0;
+  TaakEersteVenster: HWnd = 0;
+  TaakVensterlijst: PTaakVenster = nil;
 
-function DoDisableWindow(Vensterobject: HWnd; Gegevens: Pointer): Boolean;
+function DoUitschakelVenster(Vensterobject: HWnd; Gegevens: Pointer): Boolean;
 var
-  P: PTaskWindow;
+  P: PTaakVenster;
 begin
-  if (Vensterobject <> TaskActiveWindow) and IsWindowVisible(Vensterobject) and IsWindowEnabled(Vensterobject) then
+  if (Vensterobject <> TaakActiefVenster) and IsWindowVisible(Vensterobject) and IsWindowEnabled(Vensterobject) then
   begin
     New(P);
-    P^.Next := TaskWindowList;
+    P^.Next := TaakVensterlijst;
     P^.Window := Vensterobject;
-    TaskWindowList := P;
+    TaakVensterlijst := P;
     EnableWindow(Vensterobject, False);
   end;
   Result := True;
@@ -786,24 +786,24 @@ var
   Bewaarvensterlijst: Pointer;
 begin
   Result := nil;
-  Bewaaractievenster := TaskActiveWindow;
-  Bewaarvensterlijst := TaskWindowList;
-  TaskActiveWindow := ActiveWindow;
-  TaskWindowList := nil;
+  Bewaaractievenster := TaakActiefVenster;
+  Bewaarvensterlijst := TaakVensterlijst;
+  TaakActiefVenster := ActiveWindow;
+  TaakVensterlijst := nil;
   try
-    ZMEnumTopLevel(DoDisableWindow, nil);
-    Result := TaskWindowList;
+    ZMOpsommenTopniveau(DoUitschakelVenster, nil);
+    Result := TaakVensterlijst;
   except
-    EnableTaskWindows(TaskWindowList);
+    EnableTaskWindows(TaakVensterlijst);
     raise;
   end;
-  TaskWindowList := Bewaarvensterlijst;
-  TaskActiveWindow := Bewaaractievenster;
+  TaakVensterlijst := Bewaarvensterlijst;
+  TaakActiefVenster := Bewaaractievenster;
 end;
 
 procedure EnableTaskWindows(WindowList: Pointer);
 var
-  P: PTaskWindow;
+  P: PTaakVenster;
 begin
   while WindowList <> nil do
   begin
@@ -817,32 +817,32 @@ end;
 { ---------------------------------------------------------------- DFM laden }
 
 type
-  TReaderHelper = class
-    procedure PropertyNotFound(Lezer: TReader; Exemplaar: TPersistent; var Eigenschapsnaam: string;
+  TLezerHulp = class
+    procedure EigenschapNietGevonden(Lezer: TReader; Exemplaar: TPersistent; var Eigenschapsnaam: string;
       IsPad: Boolean; var Afgehandeld, Overslaan: Boolean);
-    procedure FindMethod(Lezer: TReader; const Methodenaam: string; var Adres: Pointer;
+    procedure ZoekMethode(Lezer: TReader; const Methodenaam: string; var Adres: Pointer;
       var Fout: Boolean);
-    procedure ReaderError(Lezer: TReader; const Bericht: string; var Afgehandeld: Boolean);
+    procedure LezerFout(Lezer: TReader; const Bericht: string; var Afgehandeld: Boolean);
   end;
 
 var
-  ReaderHelper: TReaderHelper;
+  LezerHulp: TLezerHulp;
 
-function DebugOn: Boolean;
+function DebugAan: Boolean;
 begin
   Result := GetEnvironmentVariable('ZM_DEBUG') <> '';
 end;
 
-procedure TReaderHelper.PropertyNotFound(Lezer: TReader; Exemplaar: TPersistent; var Eigenschapsnaam: string;
+procedure TLezerHulp.EigenschapNietGevonden(Lezer: TReader; Exemplaar: TPersistent; var Eigenschapsnaam: string;
   IsPad: Boolean; var Afgehandeld, Overslaan: Boolean);
 begin
-  if DebugOn then
+  if DebugAan then
     WriteLn(StdErr, 'DFM: onbekende eigenschap ', Exemplaar.ClassName, '.', Eigenschapsnaam, ' (overgeslagen)');
   Overslaan := True;
   Afgehandeld := True;
 end;
 
-procedure TReaderHelper.FindMethod(Lezer: TReader; const Methodenaam: string; var Adres: Pointer;
+procedure TLezerHulp.ZoekMethode(Lezer: TReader; const Methodenaam: string; var Adres: Pointer;
   var Fout: Boolean);
 begin
   if Fout then
@@ -852,13 +852,13 @@ begin
   end;
 end;
 
-procedure TReaderHelper.ReaderError(Lezer: TReader; const Bericht: string; var Afgehandeld: Boolean);
+procedure TLezerHulp.LezerFout(Lezer: TReader; const Bericht: string; var Afgehandeld: Boolean);
 begin
   WriteLn(StdErr, 'DFM: ', Bericht);
   Afgehandeld := True;
 end;
 
-function LoadFormResource(Exemplaar: TComponent; Aklasse: TClass): Boolean;
+function LaadFormulierResource(Exemplaar: TComponent; Aklasse: TClass): Boolean;
 var
   Gegevens: Pointer;
   Grootte: Integer;
@@ -866,16 +866,16 @@ var
   R: TReader;
 begin
   Result := False;
-  if not ZMLoadExeResource(UpperCase(Aklasse.ClassName), 10, Gegevens, Grootte) then Exit;
+  if not ZMLaadExeHulpbron(UpperCase(Aklasse.ClassName), 10, Gegevens, Grootte) then Exit;
   MS := TMemoryStream.Create;
   try
     MS.WriteBuffer(Gegevens^, Grootte);
     MS.Position := 0;
     R := TReader.Create(MS, 4096);
     try
-      R.OnPropertyNotFound := ReaderHelper.PropertyNotFound;
-      R.OnFindMethod := ReaderHelper.FindMethod;
-      R.OnError := ReaderHelper.ReaderError;
+      R.OnPropertyNotFound := LezerHulp.EigenschapNietGevonden;
+      R.OnFindMethod := LezerHulp.ZoekMethode;
+      R.OnError := LezerHulp.LezerFout;
       R.ReadRootComponent(Exemplaar);
     finally
       R.Free;
@@ -893,7 +893,7 @@ function ZMInitInheritedComponent(Instance: TComponent; RootAncestor: TClass): B
     Result := False;
     if (C = TComponent) or (C = RootAncestor) or (C = nil) then Exit;
     Result := DoInit(C.ClassParent);
-    Result := LoadFormResource(Instance, C) or Result;
+    Result := LaadFormulierResource(Instance, C) or Result;
   end;
 
 begin
@@ -2095,7 +2095,7 @@ begin
   Result := FFonts;
 end;
 
-function DefaultCursorHandle(Index: Integer): HCURSOR;
+function StandaardCursorHandvat(Index: Integer): HCURSOR;
 begin
   case Index of
     crArrow, crDefault: Result := 32512;
@@ -2124,7 +2124,7 @@ var
 begin
   for I := 0 to High(FCursors) do
     if FCursors[I].Index = Index then Exit(FCursors[I].Handle);
-  Result := DefaultCursorHandle(Index);
+  Result := StandaardCursorHandvat(Index);
 end;
 
 procedure TScreen.SetCursors(Index: Integer; Handle: HCURSOR);
@@ -2223,8 +2223,8 @@ procedure TApplication.CreateHandle;
 begin
   if FHandleCreated then Exit;
   FHandleCreated := True;
-  FHandle := ZMCreateWindow(0, 'TApplication', FTitle, WS_POPUP or WS_CAPTION or
-    WS_CLIPSIBLINGS or WS_SYSMENU or WS_MINIMIZEBOX, ZMScreenW div 2, ZMScreenH div 2, 0, 0,
+  FHandle := ZMMaakVenster(0, 'TApplication', FTitle, WS_POPUP or WS_CAPTION or
+    WS_CLIPSIBLINGS or WS_SYSMENU or WS_MINIMIZEBOX, ZMSchermBreedte div 2, ZMSchermHoogte div 2, 0, 0,
     0, 0, WndProc, nil);
 end;
 
@@ -2237,13 +2237,13 @@ begin
       WM_ACTIVATEAPP:
         FActive := WParam <> 0;
     else
-      Result := ZMDefWindowProc(FHandle, Msg, WParam, LParam);
+      Result := ZMStandaardVensterProc(FHandle, Msg, WParam, LParam);
     end;
 end;
 
 function TApplication.GetExeName: string;
 begin
-  Result := ZMExeName;
+  Result := ZMExeNaam;
 end;
 
 function TApplication.GetTitle: string;
@@ -2299,7 +2299,7 @@ begin
   begin
     TForm(Exemplaar).HandleNeeded;
     FMainForm := TForm(Exemplaar);
-    ZMMainWindow := FMainForm.Handle;
+    ZMHoofdVenster := FMainForm.Handle;
   end;
 end;
 
@@ -2541,7 +2541,7 @@ end;
 
 { ---------------------------------------------------------------- berichtvenster }
 
-function ZMMessageBox(Venster: HWND; const Tekst, Titel: string; Vlaggen: UINT): Integer;
+function ZMMeldingsvenster(Venster: HWND; const Tekst, Titel: string; Vlaggen: UINT): Integer;
 const
   BtnCaptions: array[1..7] of string = ('OK', 'Annuleren', 'Afbreken', 'Opnieuw', 'Negeren', 'Ja', 'Nee');
 var
@@ -2613,22 +2613,22 @@ end;
 
 { ---------------------------------------------------------------- hooks voor Controls }
 
-function HookGetParentForm(Besturing: TControl): TWinControl;
+function HaakKrijgOuderFormulier(Besturing: TControl): TWinControl;
 begin
   Result := GetParentForm(Besturing);
 end;
 
-function HookCursor(Cursor: TCursor): HCURSOR;
+function HaakCursor(Cursor: TCursor): HCURSOR;
 begin
   Result := Screen.Cursors[Cursor];
 end;
 
-function HookKeyPreview(Formulier: TWinControl): Boolean;
+function HaakToetsPreview(Formulier: TWinControl): Boolean;
 begin
   Result := (Formulier is TCustomForm) and TCustomForm(Formulier).KeyPreview;
 end;
 
-function HookSetFocusedControl(Formulier, Besturing: TWinControl): Boolean;
+function HaakZetFocusBesturing(Formulier, Besturing: TWinControl): Boolean;
 begin
   if Formulier is TCustomForm then
     Result := TCustomForm(Formulier).SetFocusedControl(Besturing)
@@ -2636,7 +2636,7 @@ begin
     Result := True;
 end;
 
-procedure HookFocusControl(Formulier, Besturing: TWinControl);
+procedure HaakFocusBesturing(Formulier, Besturing: TWinControl);
 begin
   if Formulier is TCustomForm then
     TCustomForm(Formulier).FocusControl(Besturing)
@@ -2644,45 +2644,45 @@ begin
     Windows.SetFocus(Besturing.Handle);
 end;
 
-procedure HookDefocus(Formulier, Besturing: TWinControl; Verwijderen: Boolean);
+procedure HaakDefocus(Formulier, Besturing: TWinControl; Verwijderen: Boolean);
 begin
   if Formulier is TCustomForm then TCustomForm(Formulier).DefocusControl(Besturing, Verwijderen);
 end;
 
-procedure HookSetModalResult(Formulier: TWinControl; MR: Integer);
+procedure HaakZetModaalResultaat(Formulier: TWinControl; MR: Integer);
 begin
   if Formulier is TCustomForm then TCustomForm(Formulier).ModalResult := MR;
 end;
 
-procedure HookHandleException(Sender: TObject);
+procedure HaakAfhandelFout(Sender: TObject);
 begin
   if Application <> nil then Application.HandleException(Sender);
 end;
 
-function HookScreenCursor: TCursor;
+function HaakSchermCursor: TCursor;
 begin
   if Screen <> nil then Result := Screen.Cursor else Result := crDefault;
 end;
 
 initialization
-  ReaderHelper := TReaderHelper.Create;
-  ZMGetParentFormHook := HookGetParentForm;
-  ZMCursorHook := HookCursor;
-  ZMKeyPreviewHook := HookKeyPreview;
-  ZMSetFocusedControlHook := HookSetFocusedControl;
-  ZMFocusControlHook := HookFocusControl;
-  ZMDefocusHook := HookDefocus;
-  ZMHandleExceptionHook := HookHandleException;
-  ZMSetModalResultHook := HookSetModalResult;
-  ZMScreenCursorHook := HookScreenCursor;
-  ZMMessageBoxHook := ZMMessageBox;
-  ZMInit;
+  LezerHulp := TLezerHulp.Create;
+  ZMGetParentFormHook := HaakKrijgOuderFormulier;
+  ZMCursorHook := HaakCursor;
+  ZMKeyPreviewHook := HaakToetsPreview;
+  ZMSetFocusedControlHook := HaakZetFocusBesturing;
+  ZMFocusControlHook := HaakFocusBesturing;
+  ZMDefocusHook := HaakDefocus;
+  ZMHandleExceptionHook := HaakAfhandelFout;
+  ZMSetModalResultHook := HaakZetModaalResultaat;
+  ZMScreenCursorHook := HaakSchermCursor;
+  ZMBerichtvensterHaak := ZMMeldingsvenster;
+  ZMInitialiseer;
   Screen := TScreen.Create(nil);
   Application := TApplication.Create(nil);
   RegisterClasses([TForm, TFrame, TScrollBox]);
 finalization
   FreeAndNil(Application);
   FreeAndNil(Screen);
-  ZMShutdown;
-  FreeAndNil(ReaderHelper);
+  ZMAfsluiten;
+  FreeAndNil(LezerHulp);
 end.

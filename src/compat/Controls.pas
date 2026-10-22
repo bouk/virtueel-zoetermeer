@@ -919,7 +919,7 @@ procedure MoveWindowOrg(DC: HDC; DX, DY: Integer);
 
 implementation
 
-uses Math, ZMWin;
+uses Math, ZMWin, Forms;
 
 var
   CaptureControl: TControl = nil;
@@ -1002,13 +1002,13 @@ begin
 end;
 
 type
-  TCursorEntry = record
+  TCursorInvoer = record
     Value: Longint;
     Name: string;
   end;
 
 const
-  Cursors: array[0..21] of TCursorEntry = (
+  Cursors: array[0..21] of TCursorInvoer = (
     (Value: crDefault; Name: 'crDefault'),
     (Value: crArrow; Name: 'crArrow'),
     (Value: crCross; Name: 'crCross'),
@@ -1077,7 +1077,7 @@ begin
   for I := Low(Cursors) to High(Cursors) do Proc(Cursors[I].Name);
 end;
 
-function ParentFormOf(C: TControl): TWinControl;
+function OuderFormulierVan(C: TControl): TWinControl;
 begin
   if Assigned(ZMGetParentFormHook) then
     Result := ZMGetParentFormHook(C)
@@ -1091,17 +1091,17 @@ end;
 { ---------------------------------------------------------------- vensterzoeken }
 
 var
-  WinControls: TList = nil;   { alle TWinControls met een handle }
+  WinBesturingen: TList = nil;   { alle TWinControls met een handle }
 
 function FindControl(Handle: HWnd): TWinControl;
 var
   I: Integer;
 begin
   Result := nil;
-  if (Handle = 0) or (WinControls = nil) then Exit;
-  for I := 0 to WinControls.Count - 1 do
-    if TWinControl(WinControls[I]).FHandle = Handle then
-      Exit(TWinControl(WinControls[I]));
+  if (Handle = 0) or (WinBesturingen = nil) then Exit;
+  for I := 0 to WinBesturingen.Count - 1 do
+    if TWinControl(WinBesturingen[I]).FHandle = Handle then
+      Exit(TWinControl(WinBesturingen[I]));
 end;
 
 function FindVCLWindow(const Pos: TPoint): TWinControl;
@@ -1314,6 +1314,10 @@ end;
 
 destructor TControl.Destroy;
 begin
+  { Zoals in Delphi: de applicatie vergeet dit besturingselement (FMouseControl, hoofdformulier),
+    anders roept TApplication.DoMouseIdle later een vrijgegeven object aan. }
+  if Application <> nil then
+    Application.ControlDestroyed(Self);
   if (FParent <> nil) then FParent.RemoveControl(Self);
   if CaptureControl = Self then CaptureControl := nil;
   FFont.Free;
@@ -2514,7 +2518,7 @@ procedure TWinControl.RemoveFocus(Removing: Boolean);
 var
   Formulier: TWinControl;
 begin
-  Formulier := ParentFormOf(Self);
+  Formulier := OuderFormulierVan(Self);
   if (Formulier <> nil) and Assigned(ZMDefocusHook) then ZMDefocusHook(Formulier, Self, Removing);
 end;
 
@@ -2998,18 +3002,18 @@ end;
 procedure TWinControl.CreateWindowHandle(const Params: TCreateParams);
 var
   Tkst: string;
-  W: TZMWindow;
+  W: TZMVenster;
 begin
   with Params do
   begin
     if Caption <> nil then Tkst := StrPas(Caption) else Tkst := '';
-    FHandle := ZMCreateWindow(ExStyle, StrPas(WinClassName), Tkst, Style and not WS_VISIBLE,
+    FHandle := ZMMaakVenster(ExStyle, StrPas(WinClassName), Tkst, Style and not WS_VISIBLE,
       X, Y, Width, Height, WndParent, 0, MainWndProc, nil);
-    W := ZMWindowObj(FHandle);
+    W := ZMVensterObj(FHandle);
     if W <> nil then
     begin
-      W.ClsStyle := WindowClass.style;
-      W.ClsCursor := WindowClass.hCursor;
+      W.KlasseStijl := WindowClass.style;
+      W.KlasseAanwijzer := WindowClass.hCursor;
     end;
   end;
 end;
@@ -3036,8 +3040,8 @@ begin
     CreationControl := nil;
     if FHandle = 0 then
       raise EOutOfResources.Create('Error creating window');
-    if WinControls = nil then WinControls := TList.Create;
-    WinControls.Add(Self);
+    if WinBesturingen = nil then WinBesturingen := TList.Create;
+    WinBesturingen.Add(Self);
     FWinCreated := True;
   end;
   if TabStop then ;
@@ -3087,10 +3091,10 @@ begin
     H := FHandle;
     if H <> 0 then
     begin
-      if WinControls <> nil then WinControls.Remove(Self);
+      if WinBesturingen <> nil then WinBesturingen.Remove(Self);
       FHandle := 0;
       FShowing := False;
-      ZMDestroyWindow(H);
+      ZMVernietigVenster(H);
     end;
   finally
     Exclude(FControlState, csDestroyingHandle);
@@ -3124,7 +3128,7 @@ begin
   inherited;
   if FHandle <> 0 then
   begin
-    if WinControls <> nil then WinControls.Remove(Self);
+    if WinBesturingen <> nil then WinBesturingen.Remove(Self);
     FHandle := 0;
     FShowing := False;
   end;
@@ -3374,7 +3378,7 @@ begin
   case Message.Msg of
     WM_SETFOCUS:
       begin
-        Formulier := ParentFormOf(Self);
+        Formulier := OuderFormulierVan(Self);
         if (Formulier <> nil) and Assigned(ZMSetFocusedControlHook) then
           if not ZMSetFocusedControlHook(Formulier, Self) then Exit;
       end;
@@ -3408,7 +3412,7 @@ begin
           begin
             inherited DefaultHandler(Message);
             if (Msg = WM_SETTEXT) and (FHandle <> 0) then
-              ZMWindowObj(FHandle).Text := FText;
+              ZMVensterObj(FHandle).Text := FText;
             Exit;
           end;
         WM_ERASEBKGND:
@@ -3425,7 +3429,7 @@ begin
           Result := SendMessage(LParam, CN_BASE + Msg, WParam, LParam);
       end;
       if Msg < CM_BASE then
-        Result := ZMDefWindowProc(FHandle, Msg, WParam, LParam);
+        Result := ZMStandaardVensterProc(FHandle, Msg, WParam, LParam);
     end;
   end
   else
@@ -3454,7 +3458,7 @@ begin
         if (Masker <> 0) and (Perform(CM_WANTSPECIALKEY, Message.CharCode, Message.KeyData) = 0) and
           (Perform(WM_GETDLGCODE, 0, 0) and Masker = 0) then
         begin
-          Formulier := ParentFormOf(Self);
+          Formulier := OuderFormulierVan(Self);
           if (Formulier <> nil) and (Formulier.Perform(CM_DIALOGKEY, Message.CharCode, Message.KeyData) <> 0) then
           begin
             Message.Result := 1;
@@ -3468,7 +3472,7 @@ begin
         if DoKeyPress(Message) then Exit;
         if Message.Msg = WM_SYSCHAR then
         begin
-          Formulier := ParentFormOf(Self);
+          Formulier := OuderFormulierVan(Self);
           if (Formulier <> nil) and (Formulier.Perform(CM_DIALOGCHAR, Message.CharCode, Message.KeyData) <> 0) then Exit;
         end;
         KeyPressDefault(Message);
@@ -3481,7 +3485,7 @@ end;
 procedure TWinControl.KeyDownDefault(var Message: TWMKey);
 begin
   if Message.Msg = WM_SYSKEYDOWN then
-    ZMDefWindowProc(FHandle, Message.Msg, Message.CharCode, Message.KeyData);
+    ZMStandaardVensterProc(FHandle, Message.Msg, Message.CharCode, Message.KeyData);
 end;
 
 procedure TWinControl.KeyPressDefault(var Message: TWMKey);
@@ -3494,7 +3498,7 @@ var
   Formulier: TWinControl;
 begin
   Result := True;
-  Formulier := ParentFormOf(Self);
+  Formulier := OuderFormulierVan(Self);
   if (Formulier <> nil) and (Formulier <> Self) and Assigned(ZMKeyPreviewHook) and ZMKeyPreviewHook(Formulier) and
     TWinControl(Formulier).DoKeyDown(Message) then Exit;
   with Message do
@@ -3515,7 +3519,7 @@ var
   Ch: Char;
 begin
   Result := True;
-  Formulier := ParentFormOf(Self);
+  Formulier := OuderFormulierVan(Self);
   if (Formulier <> nil) and (Formulier <> Self) and Assigned(ZMKeyPreviewHook) and ZMKeyPreviewHook(Formulier) and
     TWinControl(Formulier).DoKeyPress(Message) then Exit;
   if not (csNoStdEvents in ControlStyle) then
@@ -3535,7 +3539,7 @@ var
   Formulier: TWinControl;
 begin
   Result := True;
-  Formulier := ParentFormOf(Self);
+  Formulier := OuderFormulierVan(Self);
   if (Formulier <> nil) and (Formulier <> Self) and Assigned(ZMKeyPreviewHook) and ZMKeyPreviewHook(Formulier) and
     TWinControl(Formulier).DoKeyUp(Message) then Exit;
   with Message do
@@ -3638,7 +3642,7 @@ procedure TWinControl.SetFocus;
 var
   Ouder: TWinControl;
 begin
-  Ouder := ParentFormOf(Self);
+  Ouder := OuderFormulierVan(Self);
   if (Ouder <> nil) and Assigned(ZMFocusControlHook) then
     ZMFocusControlHook(Ouder, Self)
   else if FParentWindow <> 0 then
@@ -4193,6 +4197,6 @@ end;
 initialization
   RegisterIntegerConsts(TypeInfo(TCursor), IdentToCursor, CursorToIdent);
 finalization
-  FreeAndNil(WinControls);
+  FreeAndNil(WinBesturingen);
   FreeAndNil(CanvasList);
 end.

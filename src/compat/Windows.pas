@@ -1155,7 +1155,7 @@ function LockResource(hResData: HGLOBAL): Pointer;
 function SizeofResource(hModule: HINST; hResInfo: HRSRC): DWORD;
 function FreeResource(hResData: HGLOBAL): BOOL;
 
-{ ParamStr(0) meldt de locatie van het originele spel (zie ZMData.ZMShadowDir), zodat de
+{ ParamStr(0) meldt de locatie van het originele spel (zie ZMData.ZMSchaduwMap), zodat de
   ExtractFilePath(ParamStr(0))-aanroep van het spel zijn datubestanden vindt. }
 function ParamStr(Index: Integer): string;
 

@@ -131,7 +131,7 @@ begin
   Result := Lib <> NilHandle;
 end;
 
-function PcLibDirs: TStringList;
+function PcBibliotheekMappen: TStringList;
 var
   Paden: TStringList;
   Teller, Regelnr: Integer;
@@ -163,7 +163,7 @@ begin
   end;
 end;
 
-function TryLoad(const Naam: string): Boolean;
+function ProbeerLaden(const Naam: string): Boolean;
 begin
   if Naam = '' then Exit(False);
   Lib := LoadLibrary(Naam);
@@ -185,17 +185,17 @@ var
   end;
 begin
   if Lib <> NilHandle then Exit(True);
-  Result := TryLoad(GetEnvironmentVariable('ZM_SDL3_LIB'));
+  Result := ProbeerLaden(GetEnvironmentVariable('ZM_SDL3_LIB'));
   for Teller := 0 to High(Namen) do
-    if not Result then Result := TryLoad(Namen[Teller]);
+    if not Result then Result := ProbeerLaden(Namen[Teller]);
   if not Result then
   begin
-    Mappen := PcLibDirs;
+    Mappen := PcBibliotheekMappen;
     try
       for Mapnr := 0 to Mappen.Count - 1 do
         for Teller := 0 to High(Namen) do
           if not Result then
-            Result := TryLoad(IncludeTrailingPathDelimiter(Mappen[Mapnr]) + Namen[Teller]);
+            Result := ProbeerLaden(IncludeTrailingPathDelimiter(Mappen[Mapnr]) + Namen[Teller]);
     finally
       Mappen.Free;
     end;

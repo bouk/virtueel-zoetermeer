@@ -17,22 +17,22 @@ unit ZMPlatform;
 interface
 
 type
-  TZMEventKind = (zeNone, zeQuit, zeMouseMove, zeMouseDown, zeMouseUp, zeMouseWheel,
+  TZMGebeurtenisSoort = (zeNone, zeQuit, zeMouseMove, zeMouseDown, zeMouseUp, zeMouseWheel,
     zeKeyDown, zeKeyUp, zeText, zeActivate, zeDeactivate, zeExpose, zeMouseLeave);
 
-  TZMEvent = record
-    Kind: TZMEventKind;
+  TZMGebeurtenis = record
+    Kind: TZMGebeurtenisSoort;
     X, Y: Integer;        { muispositie in schermcoördinaten }
     Button: Integer;      { 1 = links, 2 = rechts, 3 = midden }
     Key: Word;            { Windows-virtual-keycode }
-    ScanCode: Word;
-    Repeated: Boolean;
+    Toetsnummer: Word;
+    Herhaald: Boolean;
     Text: string[15];     { getypte Windows-1252-tekens (zeText) }
-    Wheel: Integer;       { +120 = één klik van de gebruiker af }
+    Wiel: Integer;       { +120 = één klik van de gebruiker af }
     Shift, Ctrl, Alt: Boolean;
   end;
 
-  TZMCursorShape = (zcArrow, zcIBeam, zcWait, zcCross, zcHand, zcSizeAll, zcSizeNS,
+  TZMCursorvorm = (zcArrow, zcIBeam, zcWait, zcCross, zcHand, zcSizeAll, zcSizeNS,
     zcSizeWE, zcSizeNWSE, zcSizeNESW, zcNo, zcAppStart, zcNone);
 
   TZMBackend = class
@@ -42,17 +42,17 @@ type
     function Open(const Titel: string; Breedte, Hoogte: Integer): Boolean; virtual;
     procedure Close; virtual;
     procedure Resize(Breedte, Hoogte: Integer); virtual;
-    { toon een beeld: Pixels zijn W x H 32-bits $00RRGGBB-waarden, Stride bytes per regel }
-    procedure Present(Pixels: Pointer; Breedte, Hoogte, Regellengte: Integer); virtual;
-    function PollEvent(out Gebeurtenis: TZMEvent): Boolean; virtual;
+    { toon een beeld: Pixels zijn W x H 32-bits $00RRGGBB-waarden, Rijbytes bytes per regel }
+    procedure Toon(Pixels: Pointer; Breedte, Hoogte, Regellengte: Integer); virtual;
+    function PeilGebeurtenis(out Gebeurtenis: TZMGebeurtenis): Boolean; virtual;
     { blokkeer tot een gebeurtenis binnenkomt of TimeoutMs verstreken is (-1 = oneindig) }
-    procedure WaitEvent(TijdslimietMs: Integer); virtual;
-    function Ticks: LongWord; virtual;             { milliseconden }
-    function PerfCounter: Int64; virtual;
-    function PerfFrequency: Int64; virtual;
-    procedure Delay(Milliseconden: Integer); virtual;
+    procedure WachtOpGebeurtenis(TijdslimietMs: Integer); virtual;
+    function KloktijdMs: LongWord; virtual;             { milliseconden }
+    function PrestatieTeller: Int64; virtual;
+    function PrestatieFrequentie: Int64; virtual;
+    procedure Pauzeer(Milliseconden: Integer); virtual;
     procedure SetTitle(const Tekst: string); virtual;
-    procedure SetCursor(Vorm: TZMCursorShape); virtual;
+    procedure SetCursor(Vorm: TZMCursorvorm); virtual;
     procedure Beep; virtual;
   end;
 
@@ -60,16 +60,16 @@ var
   { Wordt eenmaal per iteratie van de berichtenpomp aangeroepen (bij elke PeekMessage/
     GetMessage/WaitMessage, inclusief de modale lussen van ShowModal en MessageBox).
     Gebruikt door het differentiële-testharnas. }
-  ZMIdleHook: procedure = nil;
+  ZMInactiefHaak: procedure = nil;
 
-procedure ZMRegisterBackend(Achterkant: TZMBackend; Prioriteit: Integer);
+procedure ZMRegistreerBackend(Achterkant: TZMBackend; Prioriteit: Integer);
 function ZMBackend: TZMBackend;
 { vervang de huidige backend door de null-backend (bijv. wanneer geen beeldscherm beschikbaar is) }
-procedure ZMFallbackToNull;
+procedure ZMValTerugOpNul;
 
 { Hulpfuncties die door backends en tests gedeeld worden }
-function ZMUtf8ToCp1252(const Tekst: AnsiString): AnsiString;
-function ZMSavePNG(const Bestandsnaam: string; Pixels: Pointer; Breedte, Hoogte, Regellengte: Integer): Boolean;
+function ZMUtf8NaarCp1252(const Tekst: AnsiString): AnsiString;
+function ZMBewaarPNG(const Bestandsnaam: string; Pixels: Pointer; Breedte, Hoogte, Regellengte: Integer): Boolean;
 
 implementation
 
@@ -80,7 +80,7 @@ var
   GBackend: TZMBackend = nil;
   GPriority: Integer = -1;
 
-procedure ZMRegisterBackend(Achterkant: TZMBackend; Prioriteit: Integer);
+procedure ZMRegistreerBackend(Achterkant: TZMBackend; Prioriteit: Integer);
 begin
   if GetEnvironmentVariable('ZM_HEADLESS') = '1' then
   begin
@@ -107,7 +107,7 @@ begin
   Result := GBackend;
 end;
 
-procedure ZMFallbackToNull;
+procedure ZMValTerugOpNul;
 begin
   FreeAndNil(GBackend);
   GBackend := TZMBackend.Create;
@@ -134,28 +134,28 @@ procedure TZMBackend.Resize(Breedte, Hoogte: Integer);
 begin
 end;
 
-procedure TZMBackend.Present(Pixels: Pointer; Breedte, Hoogte, Regellengte: Integer);
+procedure TZMBackend.Toon(Pixels: Pointer; Breedte, Hoogte, Regellengte: Integer);
 begin
 end;
 
-function TZMBackend.PollEvent(out Gebeurtenis: TZMEvent): Boolean;
+function TZMBackend.PeilGebeurtenis(out Gebeurtenis: TZMGebeurtenis): Boolean;
 begin
   FillChar(Gebeurtenis, SizeOf(Gebeurtenis), 0);
   Result := False;
 end;
 
-procedure TZMBackend.WaitEvent(TijdslimietMs: Integer);
+procedure TZMBackend.WachtOpGebeurtenis(TijdslimietMs: Integer);
 begin
   if TijdslimietMs < 0 then TijdslimietMs := 10;
-  if TijdslimietMs > 0 then Delay(TijdslimietMs);
+  if TijdslimietMs > 0 then Pauzeer(TijdslimietMs);
 end;
 
-function TZMBackend.PerfFrequency: Int64;
+function TZMBackend.PrestatieFrequentie: Int64;
 begin
   Result := 1000000;
 end;
 
-function TZMBackend.PerfCounter: Int64;
+function TZMBackend.PrestatieTeller: Int64;
 {$IFDEF UNIX}
 var
   Tijdwaarde: TTimeVal;
@@ -170,15 +170,15 @@ end;
 {$ENDIF}
 
 var
-  StartCounter: Int64 = 0;
+  StartTeller: Int64 = 0;
 
-function TZMBackend.Ticks: LongWord;
+function TZMBackend.KloktijdMs: LongWord;
 begin
-  if StartCounter = 0 then StartCounter := PerfCounter - 1000000;
-  Result := LongWord((PerfCounter - StartCounter) * 1000 div PerfFrequency);
+  if StartTeller = 0 then StartTeller := PrestatieTeller - 1000000;
+  Result := LongWord((PrestatieTeller - StartTeller) * 1000 div PrestatieFrequentie);
 end;
 
-procedure TZMBackend.Delay(Milliseconden: Integer);
+procedure TZMBackend.Pauzeer(Milliseconden: Integer);
 begin
   if Milliseconden > 0 then SysUtils.Sleep(Milliseconden);
 end;
@@ -187,7 +187,7 @@ procedure TZMBackend.SetTitle(const Tekst: string);
 begin
 end;
 
-procedure TZMBackend.SetCursor(Vorm: TZMCursorShape);
+procedure TZMBackend.SetCursor(Vorm: TZMCursorvorm);
 begin
 end;
 
@@ -197,7 +197,7 @@ end;
 
 { ---------------------------------------------------------------- hulpfuncties }
 
-function ZMUtf8ToCp1252(const Tekst: AnsiString): AnsiString;
+function ZMUtf8NaarCp1252(const Tekst: AnsiString): AnsiString;
 const
   Hoogtabel: array[$80..$9F] of Word = (
     $20AC, $0081, $201A, $0192, $201E, $2026, $2020, $2021, $02C6, $2030, $0160, $2039, $0152, $008D, $017D, $008F,
@@ -236,32 +236,32 @@ end;
 { minimale PNG-schrijver (opgeslagen deflate-blokken) }
 
 var
-  CrcTable: array[0..255] of LongWord;
-  CrcReady: Boolean = False;
+  CrcTabel: array[0..255] of LongWord;
+  CrcGereed: Boolean = False;
 
-function Crc32(Startwaarde: LongWord; Gegevens: PByte; Aantal: Integer): LongWord;
+function Crc32Bereken(Startwaarde: LongWord; Gegevens: PByte; Aantal: Integer): LongWord;
 var
   Index, Bit: Integer;
   Waarde: LongWord;
 begin
-  if not CrcReady then
+  if not CrcGereed then
   begin
     for Index := 0 to 255 do
     begin
       Waarde := Index;
       for Bit := 0 to 7 do
         if Waarde and 1 <> 0 then Waarde := $EDB88320 xor (Waarde shr 1) else Waarde := Waarde shr 1;
-      CrcTable[Index] := Waarde;
+      CrcTabel[Index] := Waarde;
     end;
-    CrcReady := True;
+    CrcGereed := True;
   end;
   Waarde := Startwaarde xor $FFFFFFFF;
   for Index := 0 to Aantal - 1 do
-    Waarde := CrcTable[(Waarde xor Gegevens[Index]) and $FF] xor (Waarde shr 8);
+    Waarde := CrcTabel[(Waarde xor Gegevens[Index]) and $FF] xor (Waarde shr 8);
   Result := Waarde xor $FFFFFFFF;
 end;
 
-function ZMSavePNG(const Bestandsnaam: string; Pixels: Pointer; Breedte, Hoogte, Regellengte: Integer): Boolean;
+function ZMBewaarPNG(const Bestandsnaam: string; Pixels: Pointer; Breedte, Hoogte, Regellengte: Integer): Boolean;
 var
   Ruw, Zlibstroom: array of Byte;
   Bestand: File;
@@ -282,7 +282,7 @@ var
     SetLength(Buffer, Lengte + 4);
     Move(Soort[1], Buffer[0], 4);
     if Lengte > 0 then Move(Gegevens^, Buffer[4], Lengte);
-    Controlesom := Crc32(0, @Buffer[0], Lengte + 4);
+    Controlesom := Crc32Bereken(0, @Buffer[0], Lengte + 4);
     Controlebytes[0] := Controlesom shr 24; Controlebytes[1] := Controlesom shr 16; Controlebytes[2] := Controlesom shr 8; Controlebytes[3] := Controlesom;
     BlockWrite(Bestand, Controlebytes, 4);
   end;

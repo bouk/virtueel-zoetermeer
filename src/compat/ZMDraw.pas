@@ -10,29 +10,29 @@ interface
 uses Windows, Graphics;
 
 const
-  ZMScrollBarSize = 16;
+  ZMSchuifbalkGrootte = 16;
 
 type
   TZMScrollPart = (spNone, spLineUp, spPageUp, spThumb, spPageDown, spLineDown);
 
-procedure ZMFrame3D(Tekenvlak: TCanvas; R: TRect; LinksBoven, RechtsOnder: TColor);
-procedure ZMDrawRaised(Tekenvlak: TCanvas; var R: TRect);      { knoprand, 2 px }
-procedure ZMDrawSunken(Tekenvlak: TCanvas; var R: TRect);      { bewerkrand, 2 px }
-procedure ZMDrawButtonFace(Tekenvlak: TCanvas; R: TRect; Ingedrukt, IsStandaard, HeeftFocus: Boolean);
-procedure ZMDrawCheck(Tekenvlak: TCanvas; R: TRect; Aangevinkt, Grijs, Ingeschakeld: Boolean);
-procedure ZMDrawRadio(Tekenvlak: TCanvas; R: TRect; Aangevinkt, Ingeschakeld: Boolean);
-procedure ZMDrawArrow(Tekenvlak: TCanvas; R: TRect; Richting: Integer; Ingeschakeld: Boolean); { 0 omhoog 1 omlaag 2 links 3 rechts }
-procedure ZMDrawScrollBar(Tekenvlak: TCanvas; R: TRect; Verticaal: Boolean; Minimum, Maximum, Positie, Pagina: Integer;
+procedure ZMKader3D(Tekenvlak: TCanvas; R: TRect; LinksBoven, RechtsOnder: TColor);
+procedure ZMTekenVerheven(Tekenvlak: TCanvas; var R: TRect);      { knoprand, 2 px }
+procedure ZMTekenVerzonken(Tekenvlak: TCanvas; var R: TRect);      { bewerkrand, 2 px }
+procedure ZMTekenKnopvlak(Tekenvlak: TCanvas; R: TRect; Ingedrukt, IsStandaard, HeeftFocus: Boolean);
+procedure ZMTekenVinkje(Tekenvlak: TCanvas; R: TRect; Aangevinkt, Grijs, Ingeschakeld: Boolean);
+procedure ZMTekenKeuzerondje(Tekenvlak: TCanvas; R: TRect; Aangevinkt, Ingeschakeld: Boolean);
+procedure ZMTekenPijl(Tekenvlak: TCanvas; R: TRect; Richting: Integer; Ingeschakeld: Boolean); { 0 omhoog 1 omlaag 2 links 3 rechts }
+procedure ZMTekenSchuifbalk(Tekenvlak: TCanvas; R: TRect; Verticaal: Boolean; Minimum, Maximum, Positie, Pagina: Integer;
   Ingedrukt: TZMScrollPart; Ingeschakeld: Boolean);
-function ZMScrollHit(R: TRect; Verticaal: Boolean; Minimum, Maximum, Positie, Pagina: Integer; Punt: TPoint): TZMScrollPart;
-function ZMScrollThumbRect(R: TRect; Verticaal: Boolean; Minimum, Maximum, Positie, Pagina: Integer): TRect;
-procedure ZMDrawDisabledText(Tekenvlak: TCanvas; R: TRect; const Tekst: string; Vlaggen: UINT);
+function ZMSchuifTreffer(R: TRect; Verticaal: Boolean; Minimum, Maximum, Positie, Pagina: Integer; Punt: TPoint): TZMScrollPart;
+function ZMSchuifknopRechthoek(R: TRect; Verticaal: Boolean; Minimum, Maximum, Positie, Pagina: Integer): TRect;
+procedure ZMTekenUitgeschakeldeTekst(Tekenvlak: TCanvas; R: TRect; const Tekst: string; Vlaggen: UINT);
 
 implementation
 
 uses Classes;
 
-procedure ZMFrame3D(Tekenvlak: TCanvas; R: TRect; LinksBoven, RechtsOnder: TColor);
+procedure ZMKader3D(Tekenvlak: TCanvas; R: TRect; LinksBoven, RechtsOnder: TColor);
 begin
   with Tekenvlak do
   begin
@@ -48,23 +48,23 @@ begin
   end;
 end;
 
-procedure ZMDrawRaised(Tekenvlak: TCanvas; var R: TRect);
+procedure ZMTekenVerheven(Tekenvlak: TCanvas; var R: TRect);
 begin
-  ZMFrame3D(Tekenvlak, R, clBtnHighlight, cl3DDkShadow);
+  ZMKader3D(Tekenvlak, R, clBtnHighlight, cl3DDkShadow);
   InflateRect(R, -1, -1);
-  ZMFrame3D(Tekenvlak, R, cl3DLight, clBtnShadow);
+  ZMKader3D(Tekenvlak, R, cl3DLight, clBtnShadow);
   InflateRect(R, -1, -1);
 end;
 
-procedure ZMDrawSunken(Tekenvlak: TCanvas; var R: TRect);
+procedure ZMTekenVerzonken(Tekenvlak: TCanvas; var R: TRect);
 begin
-  ZMFrame3D(Tekenvlak, R, clBtnShadow, clBtnHighlight);
+  ZMKader3D(Tekenvlak, R, clBtnShadow, clBtnHighlight);
   InflateRect(R, -1, -1);
-  ZMFrame3D(Tekenvlak, R, cl3DDkShadow, cl3DLight);
+  ZMKader3D(Tekenvlak, R, cl3DDkShadow, cl3DLight);
   InflateRect(R, -1, -1);
 end;
 
-procedure ZMDrawButtonFace(Tekenvlak: TCanvas; R: TRect; Ingedrukt, IsStandaard, HeeftFocus: Boolean);
+procedure ZMTekenKnopvlak(Tekenvlak: TCanvas; R: TRect; Ingedrukt, IsStandaard, HeeftFocus: Boolean);
 begin
   with Tekenvlak do
   begin
@@ -85,18 +85,18 @@ begin
     end
     else
     begin
-      ZMDrawRaised(Tekenvlak, R);
+      ZMTekenVerheven(Tekenvlak, R);
       Brush.Color := clBtnFace;
       FillRect(R);
     end;
   end;
 end;
 
-procedure ZMDrawCheck(Tekenvlak: TCanvas; R: TRect; Aangevinkt, Grijs, Ingeschakeld: Boolean);
+procedure ZMTekenVinkje(Tekenvlak: TCanvas; R: TRect; Aangevinkt, Grijs, Ingeschakeld: Boolean);
 var
   Teller, Xpositie, Ypositie: Integer;
 begin
-  ZMDrawSunken(Tekenvlak, R);
+  ZMTekenVerzonken(Tekenvlak, R);
   with Tekenvlak do
   begin
     Brush.Style := bsSolid;
@@ -121,7 +121,7 @@ begin
   end;
 end;
 
-procedure ZMDrawRadio(Tekenvlak: TCanvas; R: TRect; Aangevinkt, Ingeschakeld: Boolean);
+procedure ZMTekenKeuzerondje(Tekenvlak: TCanvas; R: TRect; Aangevinkt, Ingeschakeld: Boolean);
 var
   MiddenX, MiddenY: Integer;
 begin
@@ -146,7 +146,7 @@ begin
   end;
 end;
 
-procedure ZMDrawArrow(Tekenvlak: TCanvas; R: TRect; Richting: Integer; Ingeschakeld: Boolean);
+procedure ZMTekenPijl(Tekenvlak: TCanvas; R: TRect; Richting: Integer; Ingeschakeld: Boolean);
 var
   MiddenX, MiddenY, Teller: Integer;
   procedure Teken(VerschuivingX, VerschuivingY: Integer; Kleur: TColor);
@@ -175,30 +175,30 @@ begin
   if Teller = 0 then ;
 end;
 
-function TrackRect(R: TRect; Verticaal: Boolean): TRect;
+function SpoorRechthoek(R: TRect; Verticaal: Boolean): TRect;
 begin
   Result := R;
   if Verticaal then
   begin
-    Inc(Result.Top, ZMScrollBarSize);
-    Dec(Result.Bottom, ZMScrollBarSize);
+    Inc(Result.Top, ZMSchuifbalkGrootte);
+    Dec(Result.Bottom, ZMSchuifbalkGrootte);
   end
   else
   begin
-    Inc(Result.Left, ZMScrollBarSize);
-    Dec(Result.Right, ZMScrollBarSize);
+    Inc(Result.Left, ZMSchuifbalkGrootte);
+    Dec(Result.Right, ZMSchuifbalkGrootte);
   end;
 end;
 
-function ZMScrollThumbRect(R: TRect; Verticaal: Boolean; Minimum, Maximum, Positie, Pagina: Integer): TRect;
+function ZMSchuifknopRechthoek(R: TRect; Verticaal: Boolean; Minimum, Maximum, Positie, Pagina: Integer): TRect;
 var
   Spoor: TRect;
   Lengte, Knoplengte, Bereik, Verschuiving: Integer;
 begin
-  Spoor := TrackRect(R, Verticaal);
+  Spoor := SpoorRechthoek(R, Verticaal);
   if Verticaal then Lengte := Spoor.Bottom - Spoor.Top else Lengte := Spoor.Right - Spoor.Left;
   Bereik := Maximum - Minimum + 1;
-  if Pagina <= 0 then Knoplengte := ZMScrollBarSize
+  if Pagina <= 0 then Knoplengte := ZMSchuifbalkGrootte
   else if Bereik > 0 then Knoplengte := Lengte * Pagina div Bereik
   else Knoplengte := Lengte;
   if Knoplengte < 8 then Knoplengte := 8;
@@ -221,7 +221,7 @@ begin
   end;
 end;
 
-procedure ZMDrawScrollBar(Tekenvlak: TCanvas; R: TRect; Verticaal: Boolean; Minimum, Maximum, Positie, Pagina: Integer;
+procedure ZMTekenSchuifbalk(Tekenvlak: TCanvas; R: TRect; Verticaal: Boolean; Minimum, Maximum, Positie, Pagina: Integer;
   Ingedrukt: TZMScrollPart; Ingeschakeld: Boolean);
 var
   Knop1, Knop2, Spoor, Duim: TRect;
@@ -238,67 +238,67 @@ var
     end
     else
     begin
-      ZMDrawRaised(Tekenvlak, Knopgebied);
+      ZMTekenVerheven(Tekenvlak, Knopgebied);
       Tekenvlak.Brush.Color := clBtnFace;
       Tekenvlak.FillRect(Knopgebied);
     end;
-    ZMDrawArrow(Tekenvlak, Knopgebied, Richting, Ingeschakeld);
+    ZMTekenPijl(Tekenvlak, Knopgebied, Richting, Ingeschakeld);
   end;
 begin
   Tekenvlak.Brush.Style := bsSolid;
   if Verticaal then
   begin
-    Knop1 := Rect(R.Left, R.Top, R.Right, R.Top + ZMScrollBarSize);
-    Knop2 := Rect(R.Left, R.Bottom - ZMScrollBarSize, R.Right, R.Bottom);
+    Knop1 := Rect(R.Left, R.Top, R.Right, R.Top + ZMSchuifbalkGrootte);
+    Knop2 := Rect(R.Left, R.Bottom - ZMSchuifbalkGrootte, R.Right, R.Bottom);
     Knop(Knop1, 0, Ingedrukt = spLineUp);
     Knop(Knop2, 1, Ingedrukt = spLineDown);
   end
   else
   begin
-    Knop1 := Rect(R.Left, R.Top, R.Left + ZMScrollBarSize, R.Bottom);
-    Knop2 := Rect(R.Right - ZMScrollBarSize, R.Top, R.Right, R.Bottom);
+    Knop1 := Rect(R.Left, R.Top, R.Left + ZMSchuifbalkGrootte, R.Bottom);
+    Knop2 := Rect(R.Right - ZMSchuifbalkGrootte, R.Top, R.Right, R.Bottom);
     Knop(Knop1, 2, Ingedrukt = spLineUp);
     Knop(Knop2, 3, Ingedrukt = spLineDown);
   end;
-  Spoor := TrackRect(R, Verticaal);
+  Spoor := SpoorRechthoek(R, Verticaal);
   { gerasterde baan }
   Tekenvlak.Brush.Color := cl3DLight;
   Tekenvlak.FillRect(Spoor);
   if Ingeschakeld and (Maximum > Minimum) then
   begin
-    Duim := ZMScrollThumbRect(R, Verticaal, Minimum, Maximum, Positie, Pagina);
-    ZMDrawRaised(Tekenvlak, Duim);
+    Duim := ZMSchuifknopRechthoek(R, Verticaal, Minimum, Maximum, Positie, Pagina);
+    ZMTekenVerheven(Tekenvlak, Duim);
     Tekenvlak.Brush.Color := clBtnFace;
     Tekenvlak.FillRect(Duim);
   end;
 end;
 
-function ZMScrollHit(R: TRect; Verticaal: Boolean; Minimum, Maximum, Positie, Pagina: Integer; Punt: TPoint): TZMScrollPart;
+function ZMSchuifTreffer(R: TRect; Verticaal: Boolean; Minimum, Maximum, Positie, Pagina: Integer; Punt: TPoint): TZMScrollPart;
 var
   Duim: TRect;
 begin
   Result := spNone;
   if not PtInRect(R, Punt) then Exit;
-  Duim := ZMScrollThumbRect(R, Verticaal, Minimum, Maximum, Positie, Pagina);
+  Duim := ZMSchuifknopRechthoek(R, Verticaal, Minimum, Maximum, Positie, Pagina);
   if Verticaal then
   begin
-    if Punt.Y < R.Top + ZMScrollBarSize then Result := spLineUp
-    else if Punt.Y >= R.Bottom - ZMScrollBarSize then Result := spLineDown
+    if Punt.Y < R.Top + ZMSchuifbalkGrootte then Result := spLineUp
+    else if Punt.Y >= R.Bottom - ZMSchuifbalkGrootte then Result := spLineDown
     else if Punt.Y < Duim.Top then Result := spPageUp
     else if Punt.Y >= Duim.Bottom then Result := spPageDown
     else Result := spThumb;
   end
   else
   begin
-    if Punt.X < R.Left + ZMScrollBarSize then Result := spLineUp
-    else if Punt.X >= R.Right - ZMScrollBarSize then Result := spLineDown
+    if Punt.X < R.Left + ZMSchuifbalkGrootte then Result := spLineUp
+    else if Punt.X >= R.Right - ZMSchuifbalkGrootte then Result := spLineDown
     else if Punt.X < Duim.Left then Result := spPageUp
     else if Punt.X >= Duim.Right then Result := spPageDown
     else Result := spThumb;
   end;
 end;
 
-procedure ZMDrawDisabledText(Tekenvlak: TCanvas; R: TRect; const Tekst: string; Vlaggen: UINT);
+procedure ZMTekenUitgeschakeldeTekst(Tekenvlak: TCanvas; R: TRect; const Tekst: string; Vlaggen: UINT);
 var
   RSchaduw: TRect;
 begin

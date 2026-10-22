@@ -31,18 +31,18 @@ Linux, macOS (aarch64-darwin, SDL3) en later WebAssembly. De eigen RTL van FPC l
 ### Platformgrens (`ZMPlatform.TZMBackend`)
 
 Een backend opent één venster met het geëmuleerde scherm, presenteert een 32-bits XRGB-framebuffer,
-levert invoerevents (muis in schermcoördinaten, Windows-VK-codes, Windows-1252-tekst), tijd (`Ticks`,
-`PerfCounter`), `Delay`, `WaitEvent(timeout)` en een cursorvorm. Niets anders raakt SDL aan. Een
+levert invoerevents (muis in schermcoördinaten, Windows-VK-codes, Windows-1252-tekst), tijd (`KloktijdMs`,
+`PrestatieTeller`), `Delay`, `WachtOpGebeurtenis(timeout)` en een cursorvorm. Niets anders raakt SDL aan. Een
 browserbackend implementeert dezelfde klasse.
 
-Het **enige blokkerende punt** is `ZMWin.ZMWaitMessage` (gebruikt door `WaitMessage`,
+Het **enige blokkerende punt** is `ZMWin.ZMWachtOpBericht` (gebruikt door `WaitMessage`,
 `GetMessage`, `Application.HandleMessage`/`Idle`, `ShowModal`, `MessageBox`, de bestandsdialogen).
 Voor WebAssembly is dit de plek waar het programma de browser de beurt moet geven (Asyncify of
 een equivalent); al het andere is niet-blokkerend.
 
 ### Scherm en vensters
 
-Er is één geëmuleerd scherm, een 1024x768 32-bits bitmap (`ZMScreen`). Vensters op het hoogste niveau
+Er is één geëmuleerd scherm, een 1024x768 32-bits bitmap (`ZMScherm`). Vensters op het hoogste niveau
 (formulieren, berichtvensters, popups) worden erop geplaatst; kindvensters (TWinControls) binnen hun
 ouders. Alle vensters tekenen **rechtstreeks in het scherm** via venster-DC's waarvan de zichtbare
 regio het clientgebied van het venster is, min overlappende broers erboven en min zijn kindvensters
@@ -116,7 +116,7 @@ Anti-aliasing en breedtes, zoals Wine (de referentie) het doet:
 * tmAscent/tmDescent zijn usWinAscent/usWinDescent geschaald en afgerond.
 * Grijsniveau = FreeType-dekking * 17 / 256 (naar beneden afgerond, zoals
   `get_bitmap_outline` in Wine); niveau 0 en 1 laten de pixel ongemoeid, 16 is de
-  tekstkleur, daartussen mengt `ZMGdi.AAComp` met de gammacurve van Wine
+  tekstkleur, daartussen mengt `ZMGdi.AACombineer` met de gammacurve van Wine
   (`dibdrv/primitives.c`). Hiermee zijn de teksten pixel-gelijk aan de referentie.
 
 ### Gegevensbestanden en paden
@@ -139,15 +139,15 @@ uitvoerbare bestand, en ROS.exe via `--exe=<file>`, `$ZM_EXE` of de gegevensmap.
   (`root-<hash>/<pid>/`, opgeruimd bij afsluiten; mappen van beëindigde processen
   ruimt de volgende start op), zodat twee gelijktijdige runs elkaar niet storen.
 * Het eigen bestandstoegang van compat (`TGraphic.LoadFromFile`, dialogen, `FileCtrl`) loopt via
-  `ZMData.ZMResolvePath` (backslashes en hoofdlettergebruik worden opgelost tegen de echte boomstructuur).
+  `ZMData.ZMOplosPad` (backslashes en hoofdlettergebruik worden opgelost tegen de echte boomstructuur).
 
 **Schrijfbare overlay.** Het spel schrijft nooit in de datamap (bij `nix build
-.#zoetermeer` is dat een alleen-lezen store-pad). `ZMData.ZMWritePath` stuurt elke
+.#zoetermeer` is dat een alleen-lezen store-pad). `ZMData.ZMSchrijfPad` stuurt elke
 schrijfactie op een bestand uit de data- of schaduwmap naar een map per gebruiker:
 `$ZM_SAVE`, anders `$XDG_DATA_HOME/zoetermeer` (`~/.local/share/zoetermeer`), op macOS
 `~/Library/Application Support/Virtueel Zoetermeer`. Een bestaand origineel wordt eerst
 gekopieerd (copy-on-write). De schaduwlinks wijzen naar de overlaykopie zodra die bestaat
-(ook bij een volgende start), en `ZMResolvePath` geeft voor een pad in de datamap de
+(ook bij een volgende start), en `ZMOplosPad` geeft voor een pad in de datamap de
 overlaykopie terug: lezen geeft dus altijd de laatst geschreven versie. Via de overlay
 lopen: INI-bestanden, `TGraphic.SaveToFile` en de opslaandialoog (`TSaveDialog` geeft
 een pad in de overlay terug; open- en opslaandialoog beginnen daar als de game geen
@@ -192,13 +192,13 @@ SDL's eigen variabelen werken ook (`SDL_VIDEODRIVER=offscreen`).
 
 ## Haken voor het differentiële-testharnas
 
-* `ZMPlatform.ZMIdleHook: procedure`: wordt één keer per iteratie van de berichtenpomp aangeroepen
+* `ZMPlatform.ZMInactiefHaak: procedure`: wordt één keer per iteratie van de berichtenpomp aangeroepen
   (elke PeekMessage/GetMessage/WaitMessage, dus ook binnen `ShowModal` en `MessageBox`).
-* `ZMWin.ZMInjectMouse(X, Y, Button {0 move, 1 left, 2 right}, Down)`,
-  `ZMWin.ZMInjectKey(VK, Down)`, `ZMWin.ZMInjectChar(C)`: zetten synthetische invoer in de wachtrij precies
+* `ZMWin.ZMInjecteerMuis(X, Y, Button {0 move, 1 left, 2 right}, Down)`,
+  `ZMWin.ZMInjecteerToets(VK, Down)`, `ZMWin.ZMInjecteerKarakter(C)`: zetten synthetische invoer in de wachtrij precies
   zoals backend-events (ook headless). Coördinaten zijn relatief aan het clientgebied van
-  `ZMWin.ZMMainWindow` (ingesteld door `Application.CreateForm` voor het hoofdformulier).
-* `ZMWin.ZMSaveScreenshot(FileName)`, `ZMWin.ZMDumpWindows`.
+  `ZMWin.ZMHoofdVenster` (ingesteld door `Application.CreateForm` voor het hoofdformulier).
+* `ZMWin.ZMBewaarSchermafdruk(FileName)`, `ZMWin.ZMDumpVensters`.
 
 ## Tests
 

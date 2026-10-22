@@ -72,7 +72,7 @@ begin
   F.Show;
   Application.ProcessMessages;
   Application.ProcessMessages;
-  ZMPresent(True);
-  ZMSaveScreenshot(OutFile);
+  ZMPresenteer(True);
+  ZMBewaarSchermafdruk(OutFile);
   if Fails = 0 then WriteLn('OK test_dfm -> ', OutFile) else Halt(1);
 end.

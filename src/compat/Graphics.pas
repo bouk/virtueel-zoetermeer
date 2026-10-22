@@ -616,7 +616,7 @@ type
   end;
 
 const
-  Colors: array[0..41] of TIdentMapEntryG = (
+  Kleuren: array[0..41] of TIdentMapEntryG = (
     (Value: clBlack; Name: 'clBlack'),
     (Value: clMaroon; Name: 'clMaroon'),
     (Value: clGreen; Name: 'clGreen'),
@@ -692,10 +692,10 @@ function ColorToIdent(Color: Longint; var Ident: string): Boolean;
 var
   I: Integer;
 begin
-  for I := Low(Colors) to High(Colors) do
-    if Colors[I].Value = Color then
+  for I := Low(Kleuren) to High(Kleuren) do
+    if Kleuren[I].Value = Color then
     begin
-      Ident := Colors[I].Name;
+      Ident := Kleuren[I].Name;
       Exit(True);
     end;
   Result := False;
@@ -705,10 +705,10 @@ function IdentToColor(const Ident: string; var Color: Longint): Boolean;
 var
   I: Integer;
 begin
-  for I := Low(Colors) to High(Colors) do
-    if SameText(Colors[I].Name, Ident) then
+  for I := Low(Kleuren) to High(Kleuren) do
+    if SameText(Kleuren[I].Name, Ident) then
     begin
-      Color := Colors[I].Value;
+      Color := Kleuren[I].Value;
       Exit(True);
     end;
   Result := False;
@@ -734,7 +734,7 @@ procedure GetColorValues(Proc: TGetStrProc);
 var
   I: Integer;
 begin
-  for I := Low(Colors) to High(Colors) do Proc(Colors[I].Name);
+  for I := Low(Kleuren) to High(Kleuren) do Proc(Kleuren[I].Name);
 end;
 
 function CharsetToIdent(Charset: Longint; var Ident: string): Boolean;
@@ -1761,7 +1761,7 @@ procedure TGraphic.LoadFromFile(const Filename: string);
 var
   Stroom: TStream;
 begin
-  Stroom := TFileStream.Create(ZMResolvePath(Filename), fmOpenRead or fmShareDenyWrite);
+  Stroom := TFileStream.Create(ZMOplosPad(Filename), fmOpenRead or fmShareDenyWrite);
   try
     LoadFromStream(Stroom);
   finally
@@ -1773,7 +1773,7 @@ procedure TGraphic.SaveToFile(const Filename: string);
 var
   Stroom: TStream;
 begin
-  Stroom := TFileStream.Create(ZMWritePath(ZMResolvePath(Filename)), fmCreate);
+  Stroom := TFileStream.Create(ZMSchrijfPad(ZMOplosPad(Filename)), fmCreate);
   try
     SaveToStream(Stroom);
   finally
@@ -1784,20 +1784,20 @@ end;
 { ---------------------------------------------------------------- TPicture }
 
 type
-  TFileFormat = record
-    Ext, Desc: string;
-    Cls: TGraphicClass;
+  TBestandsFormaat = record
+    Achtervoegsel, Omschrijving: string;
+    Klasse: TGraphicClass;
   end;
 
 var
-  FileFormats: array of TFileFormat;
+  BestandsFormaten: array of TBestandsFormaat;
 
 class procedure TPicture.RegisterFileFormat(const AExtension, ADescription: string; AGraphicClass: TGraphicClass);
 begin
-  SetLength(FileFormats, Length(FileFormats) + 1);
-  FileFormats[High(FileFormats)].Ext := LowerCase(AExtension);
-  FileFormats[High(FileFormats)].Desc := ADescription;
-  FileFormats[High(FileFormats)].Cls := AGraphicClass;
+  SetLength(BestandsFormaten, Length(BestandsFormaten) + 1);
+  BestandsFormaten[High(BestandsFormaten)].Achtervoegsel := LowerCase(AExtension);
+  BestandsFormaten[High(BestandsFormaten)].Omschrijving := ADescription;
+  BestandsFormaten[High(BestandsFormaten)].Klasse := AGraphicClass;
   Classes.RegisterClass(AGraphicClass);
 end;
 
@@ -1805,8 +1805,8 @@ class procedure TPicture.UnregisterGraphicClass(AClass: TGraphicClass);
 var
   I: Integer;
 begin
-  for I := 0 to High(FileFormats) do
-    if FileFormats[I].Cls = AClass then FileFormats[I].Cls := nil;
+  for I := 0 to High(BestandsFormaten) do
+    if BestandsFormaten[I].Klasse = AClass then BestandsFormaten[I].Klasse := nil;
 end;
 
 class function TPicture.SupportsClipboardFormat(AFormat: Word): Boolean;
@@ -1814,14 +1814,14 @@ begin
   Result := AFormat in [CF_BITMAP, CF_DIB];
 end;
 
-function FindGraphicClassName(const Naam: string): TGraphicClass;
+function ZoekGrafischeKlasseNaam(const Naam: string): TGraphicClass;
 var
   I: Integer;
   C: TPersistentClass;
 begin
-  for I := 0 to High(FileFormats) do
-    if (FileFormats[I].Cls <> nil) and SameText(FileFormats[I].Cls.ClassName, Naam) then
-      Exit(FileFormats[I].Cls);
+  for I := 0 to High(BestandsFormaten) do
+    if (BestandsFormaten[I].Klasse <> nil) and SameText(BestandsFormaten[I].Klasse.ClassName, Naam) then
+      Exit(BestandsFormaten[I].Klasse);
   C := GetClass(Naam);
   if (C <> nil) and C.InheritsFrom(TGraphic) then
     Result := TGraphicClass(C)
@@ -1936,8 +1936,8 @@ begin
   Extensie := LowerCase(ExtractFileExt(Filename));
   Delete(Extensie, 1, 1);
   Grafischklasse := nil;
-  for I := 0 to High(FileFormats) do
-    if FileFormats[I].Ext = Extensie then Grafischklasse := FileFormats[I].Cls;
+  for I := 0 to High(BestandsFormaten) do
+    if BestandsFormaten[I].Achtervoegsel = Extensie then Grafischklasse := BestandsFormaten[I].Klasse;
   if Grafischklasse = nil then
     raise EInvalidGraphic.CreateFmt('Unknown picture file extension (.%s)', [Extensie]);
   Nieuwegrafiek := Grafischklasse.Create;
@@ -1990,7 +1990,7 @@ var
 begin
   Stream.Read(Klassenaam[0], 1);
   Stream.Read(Klassenaam[1], Integer(Klassenaam[0]));
-  Grafischklasse := FindGraphicClassName(Klassenaam);
+  Grafischklasse := ZoekGrafischeKlasseNaam(Klassenaam);
   Nieuwegrafiek := nil;
   if Grafischklasse <> nil then
   begin
@@ -2153,7 +2153,7 @@ end;
 
 { ---------------------------------------------------------------- TBitmap }
 
-function BPPOf(PF: TPixelFormat): Integer;
+function BPPVan(PF: TPixelFormat): Integer;
 begin
   case PF of
     pf1bit: Result := 1;
@@ -2167,7 +2167,7 @@ begin
   end;
 end;
 
-function PFOf(BPP: Integer): TPixelFormat;
+function PFVan(BPP: Integer): TPixelFormat;
 begin
   case BPP of
     1: Result := pf1bit;
@@ -2223,14 +2223,14 @@ begin
   Nieuw := TZMBitmap.Create(AWidth, AHeight, ABPP);
   if (Oud <> nil) and (Oud.BPP <= 8) and (ABPP <= 8) and (Oud.NumColors > 0) then
   begin
-    for I := 0 to Min(Oud.NumColors, Nieuw.NumColors) - 1 do Nieuw.Colors[I] := Oud.Colors[I];
-    Nieuw.ColorsChanged;
+    for I := 0 to Min(Oud.NumColors, Nieuw.NumColors) - 1 do Nieuw.Kleuren[I] := Oud.Kleuren[I];
+    Nieuw.KleurenGewijzigd;
   end
   else if (ABPP = 8) and (FPalette <> 0) then
   begin
-    for I := 0 to Min(GdiPalette(FPalette).Count, 256) - 1 do
-      with GdiPalette(FPalette).Entries[I] do Nieuw.Colors[I] := (peRed shl 16) or (peGreen shl 8) or peBlue;
-    Nieuw.ColorsChanged;
+    for I := 0 to Min(GdiPalet(FPalette).Count, 256) - 1 do
+      with GdiPalet(FPalette).Entries[I] do Nieuw.Kleuren[I] := (peRed shl 16) or (peGreen shl 8) or peBlue;
+    Nieuw.KleurenGewijzigd;
   end;
   if ABPP > 1 then
     { nieuwe DIB's beginnen wit, zoals de TBitmap van Delphi (Canvas-kwast); dat wordt hier niet gedaan:
@@ -2247,28 +2247,28 @@ begin
         { zelfde formaat: kopieer de rijen (behoudt de indices van palet-bitmaps) }
         for Y := 0 to H - 1 do
           if (ABPP mod 8 = 0) then
-            Move(Oud.RowPtr(Y)^, Nieuw.RowPtr(Y)^, W * (ABPP div 8))
+            Move(Oud.RijPtr(Y)^, Nieuw.RijPtr(Y)^, W * (ABPP div 8))
           else
-            for X := 0 to W - 1 do Nieuw.SetNative(X, Y, Oud.GetNative(X, Y));
+            for X := 0 to W - 1 do Nieuw.ZetNatief(X, Y, Oud.LeesNatief(X, Y));
       end
       else
       begin
         SetLength(Rijbuffer, W);
         for Y := 0 to H - 1 do
         begin
-          ZMReadRow(Oud, Y, 0, W, @Rijbuffer[0]);
+          ZMLeesRij(Oud, Y, 0, W, @Rijbuffer[0]);
           if Oud.BPP <= 8 then
           begin
             if Length(LUT) = 0 then
             begin
               SetLength(LUT, 256);
-              for X := 0 to 255 do LUT[X] := Nieuw.RGBToNative(Oud.NativeToRGB(X));
+              for X := 0 to 255 do LUT[X] := Nieuw.RGBNaarNatief(Oud.NatiefNaarRGB(X));
             end;
             for X := 0 to W - 1 do Rijbuffer[X] := LUT[Rijbuffer[X] and $FF];
           end
           else
-            for X := 0 to W - 1 do Rijbuffer[X] := Nieuw.RGBToNative(Oud.NativeToRGB(Rijbuffer[X]));
-          ZMWriteRow(Nieuw, Y, 0, W, @Rijbuffer[0]);
+            for X := 0 to W - 1 do Rijbuffer[X] := Nieuw.RGBNaarNatief(Oud.NatiefNaarRGB(Rijbuffer[X]));
+          ZMSchrijfRij(Nieuw, Y, 0, W, @Rijbuffer[0]);
         end;
       end;
     end;
@@ -2299,7 +2299,7 @@ end;
 
 function TBitmap.GetHandle: HBITMAP;
 begin
-  if FHandle = 0 then NewImage(0, 0, BPPOf(FPixelFormat), False);
+  if FHandle = 0 then NewImage(0, 0, BPPVan(FPixelFormat), False);
   Result := FHandle;
 end;
 
@@ -2315,7 +2315,7 @@ begin
   B := TZMBitmap(Img);
   if B <> nil then
   begin
-    FPixelFormat := PFOf(B.BPP);
+    FPixelFormat := PFVan(B.BPP);
     FMonochrome := B.BPP = 1;
   end;
   Changed(Self);
@@ -2334,7 +2334,7 @@ end;
 procedure TBitmap.SetHandleType(Value: TBitmapHandleType);
 begin
   { de pixels blijven zoals ze zijn; alleen de DIB/DDB-aard verandert (dat is van belang voor
-    tekst-anti-aliasing, zie ZMGdi.GdiUseAA) }
+    tekst-anti-aliasing, zie ZMGdi.GdiGebruikAA) }
   FHandleType := Value;
   if Img <> nil then
     TZMBitmap(Img).IsDIB := (Value = bmDIB) or (FPixelFormat <> pfDevice);
@@ -2351,10 +2351,10 @@ begin
     B := TZMBitmap(Img);
     if B = nil then Exit(0);
     M := TZMBitmap.Create(B.Width, B.Height, 1);
-    T := ColorRefToRGB(ColorToRGB(GetTransparentColor) and $FFFFFF);
+    T := KleurRefNaarRGB(ColorToRGB(GetTransparentColor) and $FFFFFF);
     for Y := 0 to B.Height - 1 do
       for X := 0 to B.Width - 1 do
-        if B.NativeToRGB(B.GetNative(X, Y)) = T then M.SetNative(X, Y, 1);
+        if B.NatiefNaarRGB(B.LeesNatief(X, Y)) = T then M.ZetNatief(X, Y, 1);
     FMaskHandle := M.Handle;
   end;
   Result := FMaskHandle;
@@ -2411,9 +2411,9 @@ begin
   if Value <> pfDevice then FHandleType := bmDIB;
   B := TZMBitmap(Img);
   if B <> nil then
-    NewImage(B.Width, B.Height, BPPOf(Value), True)
+    NewImage(B.Width, B.Height, BPPVan(Value), True)
   else
-    NewImage(0, 0, BPPOf(Value), False);
+    NewImage(0, 0, BPPVan(Value), False);
   FPixelFormat := Value;
   Changed(Self);
 end;
@@ -2425,7 +2425,7 @@ begin
   B := TZMBitmap(Img);
   if (B = nil) or (Row < 0) or (Row >= B.Height) then
     raise EInvalidGraphicOperation.Create('Scan line index out of range');
-  Result := B.RowPtr(Row);
+  Result := B.RijPtr(Row);
 end;
 
 function TBitmap.GetTransparentColor: TColor;
@@ -2436,7 +2436,7 @@ begin
   begin
     B := TZMBitmap(Img);
     if (B = nil) or (B.Height = 0) or (B.Width = 0) then Exit(clDefault);
-    Result := TColor(RGBToColorRef(B.NativeToRGB(B.GetNative(0, B.Height - 1)))) or $02000000;
+    Result := TColor(RGBNaarKleurRef(B.NatiefNaarRGB(B.LeesNatief(0, B.Height - 1)))) or $02000000;
   end
   else
     Result := ColorToRGB(FTransparentColor) or $02000000;
@@ -2492,7 +2492,7 @@ begin
   if D = nil then Exit;
   if Transparent then
   begin
-    T := ColorRefToRGB(GetTransparentColor and $FFFFFF);
+    T := KleurRefNaarRGB(GetTransparentColor and $FFFFFF);
     W := Rect.Right - Rect.Left;
     H := Rect.Bottom - Rect.Top;
     if (W <= 0) or (H <= 0) then Exit;
@@ -2502,15 +2502,15 @@ begin
       for X := 0 to W - 1 do
       begin
         SX := X * B.Width div W;
-        if B.NativeToRGB(B.GetNative(SX, SY)) <> T then
-          GdiSetPixel(D, Rect.Left + X, Rect.Top + Y, RGBToColorRef(B.NativeToRGB(B.GetNative(SX, SY))));
+        if B.NatiefNaarRGB(B.LeesNatief(SX, SY)) <> T then
+          GdiZetPixel(D, Rect.Left + X, Rect.Top + Y, RGBNaarKleurRef(B.NatiefNaarRGB(B.LeesNatief(SX, SY))));
       end;
     end;
   end
   else
   begin
     Oudemodus := SetStretchBltMode(DC, COLORONCOLOR);
-    GdiBltBitmap(D, Rect.Left, Rect.Top, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, B,
+    GdiKopieerBitmap(D, Rect.Left, Rect.Top, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, B,
       $FFFFFF, 0, 0, B.Width, B.Height, ACanvas.CopyMode, True);
     SetStretchBltMode(DC, Oudemodus);
   end;
@@ -2545,7 +2545,7 @@ begin
   if Value < 0 then Value := 0;
   if Value <> GetHeight then
   begin
-    NewImage(GetWidth, Value, BPPOf(FPixelFormat), True);
+    NewImage(GetWidth, Value, BPPVan(FPixelFormat), True);
     Changed(Self);
   end;
 end;
@@ -2555,7 +2555,7 @@ begin
   if Value < 0 then Value := 0;
   if Value <> GetWidth then
   begin
-    NewImage(Value, GetHeight, BPPOf(FPixelFormat), True);
+    NewImage(Value, GetHeight, BPPVan(FPixelFormat), True);
     Changed(Self);
   end;
 end;
@@ -2572,7 +2572,7 @@ begin
     Result := FPalette;
     Exit;
   end;
-  if (FPalette = 0) or (FPaletteStamp <> B.ColorStamp) then
+  if (FPalette = 0) or (FPaletteStamp <> B.KleurStempel) then
   begin
     if FPalette <> 0 then
     begin
@@ -2583,13 +2583,13 @@ begin
     LP.palNumEntries := B.NumColors;
     for I := 0 to B.NumColors - 1 do
     begin
-      LP.palPalEntry[I].peRed := (B.Colors[I] shr 16) and $FF;
-      LP.palPalEntry[I].peGreen := (B.Colors[I] shr 8) and $FF;
-      LP.palPalEntry[I].peBlue := B.Colors[I] and $FF;
+      LP.palPalEntry[I].peRed := (B.Kleuren[I] shr 16) and $FF;
+      LP.palPalEntry[I].peGreen := (B.Kleuren[I] shr 8) and $FF;
+      LP.palPalEntry[I].peBlue := B.Kleuren[I] and $FF;
       LP.palPalEntry[I].peFlags := 0;
     end;
     FPalette := CreatePalette(PLogPalette(@LP)^);
-    FPaletteStamp := B.ColorStamp;
+    FPaletteStamp := B.KleurStempel;
   end;
   Result := FPalette;
 end;
@@ -2597,21 +2597,21 @@ end;
 procedure TBitmap.SetPalette(Value: HPALETTE);
 var
   B: TZMBitmap;
-  P: TZMPalette;
+  P: TZMPalet;
   I: Integer;
 begin
   if Value = FPalette then Exit;
   B := TZMBitmap(Img);
-  P := GdiPalette(Value);
+  P := GdiPalet(Value);
   if FCanvas <> nil then TBitmapCanvas(FCanvas).FreeContext;
   if (FPalette <> 0) and (FPalette <> Value) then DeleteObject(FPalette);
   FPalette := Value;
   if (B <> nil) and (B.BPP <= 8) and (P <> nil) then
   begin
     for I := 0 to Min(P.Count, B.NumColors) - 1 do
-      with P.Entries[I] do B.Colors[I] := (peRed shl 16) or (peGreen shl 8) or peBlue;
-    B.ColorsChanged;
-    FPaletteStamp := B.ColorStamp;
+      with P.Entries[I] do B.Kleuren[I] := (peRed shl 16) or (peGreen shl 8) or peBlue;
+    B.KleurenGewijzigd;
+    FPaletteStamp := B.KleurStempel;
   end;
   PaletteModified := True;
   Changed(Self);
@@ -2661,10 +2661,10 @@ begin
       begin
         B := TZMBitmap.Create(S.Width, S.Height, S.BPP);
         B.IsDIB := S.IsDIB;
-        if (S.Bits <> nil) then Move(S.Bits^, B.Bits^, S.Stride * S.Height);
+        if (S.Bits <> nil) then Move(S.Bits^, B.Bits^, S.Rijbytes * S.Height);
         B.NumColors := S.NumColors;
-        B.Colors := S.Colors;
-        B.ColorsChanged;
+        B.Kleuren := S.Kleuren;
+        B.KleurenGewijzigd;
         FHandle := B.Handle;
         FImgHandle := 0;
       end;
@@ -2698,11 +2698,11 @@ var
 begin
   B := TZMBitmap(Img);
   if B = nil then Exit;
-  T := ColorRefToRGB(ColorToRGB(TransparentColor) and $FFFFFF);
+  T := KleurRefNaarRGB(ColorToRGB(TransparentColor) and $FFFFFF);
   M := TZMBitmap.Create(B.Width, B.Height, 1);
   for Y := 0 to B.Height - 1 do
     for X := 0 to B.Width - 1 do
-      if B.NativeToRGB(B.GetNative(X, Y)) = T then M.SetNative(X, Y, 1);
+      if B.NatiefNaarRGB(B.LeesNatief(X, Y)) = T then M.ZetNatief(X, Y, 1);
   ReselectInCanvas;
   DeleteObject(FHandle);
   FHandle := M.Handle;
@@ -2713,14 +2713,14 @@ begin
 end;
 
 { BMP lezen }
-procedure DecodeRLE(Bron: PByte; Bronlengte: Integer; B: TZMBitmap; Is4: Boolean);
+procedure DecodeerRLE(Bron: PByte; Bronlengte: Integer; B: TZMBitmap; Is4: Boolean);
 var
   X, Y, I, N, C: Integer;
   P, E: PByte;
   procedure Plaats(V: Integer);
   begin
     if (X >= 0) and (X < B.Width) and (Y >= 0) and (Y < B.Height) then
-      B.SetNative(X, B.Height - 1 - Y, V);
+      B.ZetNatief(X, B.Height - 1 - Y, V);
     Inc(X);
   end;
 begin
@@ -2849,10 +2849,10 @@ begin
       B.NumColors := 1 shl BPP;
       for I := 0 to B.NumColors - 1 do
         if I < Kleurenaantal then
-          B.Colors[I] := (Pal[I].rgbRed shl 16) or (Pal[I].rgbGreen shl 8) or Pal[I].rgbBlue
+          B.Kleuren[I] := (Pal[I].rgbRed shl 16) or (Pal[I].rgbGreen shl 8) or Pal[I].rgbBlue
         else
-          B.Colors[I] := 0;
-      B.ColorsChanged;
+          B.Kleuren[I] := 0;
+      B.KleurenGewijzigd;
     end;
     Bronstap := ((W * BPP + 31) div 32) * 4;
     if (BI.biCompression = BI_RLE8) or (BI.biCompression = BI_RLE4) then
@@ -2861,7 +2861,7 @@ begin
       if Gegevenslengte = 0 then Gegevenslengte := Stream.Size - Stream.Position;
       SetLength(Gegevens, Gegevenslengte);
       if Gegevenslengte > 0 then Stream.ReadBuffer(Gegevens[0], Gegevenslengte);
-      DecodeRLE(@Gegevens[0], Gegevenslengte, B, BI.biCompression = BI_RLE4);
+      DecodeerRLE(@Gegevens[0], Gegevenslengte, B, BI.biCompression = BI_RLE4);
     end
     else
     begin
@@ -2870,7 +2870,7 @@ begin
       begin
         if Bronstap > 0 then Stream.ReadBuffer(Gegevens[0], Bronstap);
         if Bovenaf then SY := Y else SY := H - 1 - Y;
-        Rij := B.RowPtr(SY);
+        Rij := B.RijPtr(SY);
         if (BPP = 16) and (BI.biCompression = BI_BITFIELDS) and (Maskers[1] = $7E0) then
         begin
           { 5-6-5 -> 5-5-5 }
@@ -2881,7 +2881,7 @@ begin
           end;
         end
         else
-          Move(Gegevens[0], Rij^, Min(Bronstap, B.Stride));
+          Move(Gegevens[0], Rij^, Min(Bronstap, B.Rijbytes));
       end;
     end;
   except
@@ -2893,7 +2893,7 @@ begin
   FHandle := B.Handle;
   FImgHandle := 0;
   FHandleType := bmDIB;
-  FPixelFormat := PFOf(BPP);
+  FPixelFormat := PFVan(BPP);
   FMonochrome := BPP = 1;
   Changed(Self);
 end;
@@ -2943,9 +2943,9 @@ begin
   Stream.WriteBuffer(BI, SizeOf(BI));
   for I := 0 to NC - 1 do
   begin
-    Q.rgbRed := (B.Colors[I] shr 16) and $FF;
-    Q.rgbGreen := (B.Colors[I] shr 8) and $FF;
-    Q.rgbBlue := B.Colors[I] and $FF;
+    Q.rgbRed := (B.Kleuren[I] shr 16) and $FF;
+    Q.rgbGreen := (B.Kleuren[I] shr 8) and $FF;
+    Q.rgbBlue := B.Kleuren[I] and $FF;
     Q.rgbReserved := 0;
     Stream.WriteBuffer(Q, 4);
   end;
@@ -2953,8 +2953,8 @@ begin
   if B <> nil then
     for Y := B.Height - 1 downto 0 do
     begin
-      Stream.WriteBuffer(B.RowPtr(Y)^, Min(Stap, B.Stride));
-      if Stap > B.Stride then Stream.WriteBuffer(Pad, Stap - B.Stride);
+      Stream.WriteBuffer(B.RijPtr(Y)^, Min(Stap, B.Rijbytes));
+      if Stap > B.Rijbytes then Stream.WriteBuffer(Pad, Stap - B.Rijbytes);
     end;
 end;
 
@@ -3141,11 +3141,11 @@ var
   I: Integer;
 begin
   Result := '';
-  for I := 0 to High(FileFormats) do
-    if (FileFormats[I].Cls <> nil) and FileFormats[I].Cls.InheritsFrom(GraphicClass) then
+  for I := 0 to High(BestandsFormaten) do
+    if (BestandsFormaten[I].Klasse <> nil) and BestandsFormaten[I].Klasse.InheritsFrom(GraphicClass) then
     begin
       if Result <> '' then Result := Result + '|';
-      Result := Result + FileFormats[I].Desc + ' (*.' + FileFormats[I].Ext + ')|*.' + FileFormats[I].Ext;
+      Result := Result + BestandsFormaten[I].Omschrijving + ' (*.' + BestandsFormaten[I].Achtervoegsel + ')|*.' + BestandsFormaten[I].Achtervoegsel;
     end;
 end;
 
@@ -3153,8 +3153,8 @@ function GraphicExtension(GraphicClass: TGraphicClass): string;
 var
   I: Integer;
 begin
-  for I := 0 to High(FileFormats) do
-    if FileFormats[I].Cls = GraphicClass then Exit(FileFormats[I].Ext);
+  for I := 0 to High(BestandsFormaten) do
+    if BestandsFormaten[I].Klasse = GraphicClass then Exit(BestandsFormaten[I].Achtervoegsel);
   Result := '';
 end;
 
@@ -3163,11 +3163,11 @@ var
   I: Integer;
 begin
   Result := '';
-  for I := 0 to High(FileFormats) do
-    if (FileFormats[I].Cls <> nil) and FileFormats[I].Cls.InheritsFrom(GraphicClass) then
+  for I := 0 to High(BestandsFormaten) do
+    if (BestandsFormaten[I].Klasse <> nil) and BestandsFormaten[I].Klasse.InheritsFrom(GraphicClass) then
     begin
       if Result <> '' then Result := Result + ';';
-      Result := Result + '*.' + FileFormats[I].Ext;
+      Result := Result + '*.' + BestandsFormaten[I].Achtervoegsel;
     end;
 end;
 
@@ -3203,11 +3203,11 @@ end;
 
 function CopyPalette(Palette: HPALETTE): HPALETTE;
 var
-  P: TZMPalette;
+  P: TZMPalet;
   LP: TMaxLogPalette;
 begin
   Result := 0;
-  P := GdiPalette(Palette);
+  P := GdiPalet(Palette);
   if P = nil then Exit;
   LP.palVersion := $300;
   LP.palNumEntries := P.Count;
@@ -3251,14 +3251,14 @@ begin
   for Y := 0 to S.Height - 1 do
     for X := 0 to S.Width - 1 do
     begin
-      C := S.NativeToRGB(S.GetNative(X, Y));
+      C := S.NatiefNaarRGB(S.LeesNatief(X, Y));
       for I := 0 to Min(High(OldColors), High(NewColors)) do
-        if C = ColorRefToRGB(ColorToRGB(OldColors[I]) and $FFFFFF) then
+        if C = KleurRefNaarRGB(ColorToRGB(OldColors[I]) and $FFFFFF) then
         begin
-          C := ColorRefToRGB(ColorToRGB(NewColors[I]) and $FFFFFF);
+          C := KleurRefNaarRGB(ColorToRGB(NewColors[I]) and $FFFFFF);
           Break;
         end;
-      B.SetNative(X, Y, C);
+      B.ZetNatief(X, Y, C);
     end;
   Result := B.Handle;
 end;

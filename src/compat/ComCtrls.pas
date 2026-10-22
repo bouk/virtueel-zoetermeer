@@ -314,7 +314,7 @@ uses Math;
 { ---------------------------------------------------------------- TCustomTabControl }
 
 type
-  TTabStrings = class(TStringList);
+  TTabTeksten = class(TStringList);
 
 constructor TCustomTabControl.Create(AOwner: TComponent);
 begin
@@ -323,7 +323,7 @@ begin
   Height := 193;
   TabStop := True;
   ControlStyle := [csAcceptsControls, csDoubleClicks];
-  FTabs := TTabStrings.Create;
+  FTabs := TTabTeksten.Create;
   TStringList(FTabs).OnChange := TabsChanged;
   FTabIndex := -1;
   FCanvas := TControlCanvas.Create;
@@ -599,9 +599,9 @@ begin
     DR := DisplayRect;
     InflateRect(DR, 2, 2);
     Dec(DR.Top, 0);
-    ZMFrame3D(FCanvas, DR, clBtnHighlight, cl3DDkShadow);
+    ZMKader3D(FCanvas, DR, clBtnHighlight, cl3DDkShadow);
     InflateRect(DR, -1, -1);
-    ZMFrame3D(FCanvas, DR, cl3DLight, clBtnShadow);
+    ZMKader3D(FCanvas, DR, cl3DLight, clBtnShadow);
     SetLength(Volgorde, FTabs.Count);
     for I := 0 to FTabs.Count - 1 do Volgorde[I] := I;
     for I := 0 to FTabs.Count - 1 do
@@ -1020,7 +1020,7 @@ begin
     C.Brush.Color := clBtnFace;
     C.FillRect(R);
     InflateRect(R, -2, -2);
-    ZMFrame3D(C, R, clBtnShadow, clBtnHighlight);
+    ZMKader3D(C, R, clBtnShadow, clBtnHighlight);
     C.Font := Font;
     C.Brush.Style := bsClear;
     C.TextOut(R.Left + 2, R.Top + 1, FSimpleText);
@@ -1067,10 +1067,10 @@ begin
     C.Brush.Color := clBtnFace;
     C.FillRect(R);
     T := Rect(8, Height div 2 - 2, Width - 8, Height div 2 + 2);
-    ZMDrawSunken(C, T);
+    ZMTekenVerzonken(C, T);
     if FMax > FMin then X := 8 + (Width - 16) * (FPosition - FMin) div (FMax - FMin) else X := 8;
     T := Rect(X - 5, Height div 2 - 10, X + 6, Height div 2 + 10);
-    ZMDrawRaised(C, T);
+    ZMTekenVerheven(C, T);
     C.Brush.Color := clBtnFace;
     C.FillRect(T);
     C.Handle := 0;

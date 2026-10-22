@@ -440,16 +440,16 @@ begin
 end;
 
 var
-  TheDD: TDirectDrawEmu = nil;
+  DDHoofd: TDirectDrawEmu = nil;
 
 function DirectDrawCreate(lpGUID: PGUID; out lplpDD: IDirectDraw; pUnkOuter: IUnknown): HResult; stdcall;
 begin
-  if TheDD = nil then TheDD := TDirectDrawEmu.Create;
+  if DDHoofd = nil then DDHoofd := TDirectDrawEmu.Create;
   Pointer(lplpDD) := nil;
-  lplpDD := TheDD as IDirectDraw;
+  lplpDD := DDHoofd as IDirectDraw;
   Result := DD_OK;
 end;
 
 finalization
-  TheDD.Free;
+  DDHoofd.Free;
 end.

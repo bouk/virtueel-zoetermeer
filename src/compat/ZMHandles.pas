@@ -9,11 +9,11 @@ unit ZMHandles;
 interface
 
 const
-  ZM_HANDLE_BASE = $10000;
+  ZM_GREEP_BASIS = $10000;
 
-function ZMAllocHandle(Voorwerp: TObject): System.THandle;
-procedure ZMFreeHandle(Greep: System.THandle);
-function ZMHandleObj(Greep: System.THandle): TObject;
+function ZMReserveerGreep(Voorwerp: TObject): System.THandle;
+procedure ZMGeefGreepVrij(Greep: System.THandle);
+function ZMGreepVoorwerp(Greep: System.THandle): TObject;
 
 implementation
 
@@ -22,7 +22,7 @@ var
   FreeList: array of Integer;
   FreeCount: Integer;
 
-function ZMAllocHandle(Voorwerp: TObject): System.THandle;
+function ZMReserveerGreep(Voorwerp: TObject): System.THandle;
 var
   Index: Integer;
 begin
@@ -37,14 +37,14 @@ begin
     SetLength(Table, Index + 1);
   end;
   Table[Index] := Voorwerp;
-  Result := ZM_HANDLE_BASE + Index;
+  Result := ZM_GREEP_BASIS + Index;
 end;
 
-procedure ZMFreeHandle(Greep: System.THandle);
+procedure ZMGeefGreepVrij(Greep: System.THandle);
 var
   Index: Integer;
 begin
-  Index := Integer(Greep) - ZM_HANDLE_BASE;
+  Index := Integer(Greep) - ZM_GREEP_BASIS;
   if (Index < 0) or (Index >= Length(Table)) or (Table[Index] = nil) then Exit;
   Table[Index] := nil;
   if FreeCount >= Length(FreeList) then SetLength(FreeList, FreeCount * 2 + 16);
@@ -52,11 +52,11 @@ begin
   Inc(FreeCount);
 end;
 
-function ZMHandleObj(Greep: System.THandle): TObject;
+function ZMGreepVoorwerp(Greep: System.THandle): TObject;
 var
   Index: Integer;
 begin
-  Index := Integer(Greep) - ZM_HANDLE_BASE;
+  Index := Integer(Greep) - ZM_GREEP_BASIS;
   if (Index < 0) or (Index >= Length(Table)) then Exit(nil);
   Result := Table[Index];
 end;

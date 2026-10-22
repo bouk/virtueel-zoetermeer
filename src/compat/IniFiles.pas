@@ -87,7 +87,7 @@ implementation
 uses Windows, ZMData;
 
 const
-  SIniFileWriteError = 'Kan niet schrijven naar %s';
+  SIniBestandSchrijffout = 'Kan niet schrijven naar %s';
 
 { ---------------------------------------------------------------- TCustomIniFile }
 
@@ -246,7 +246,7 @@ procedure TIniFile.WriteString(const Section, Ident, Value: string);
 begin
   if not WritePrivateProfileString(PAnsiChar(Section), PAnsiChar(Ident), PAnsiChar(Value),
     PAnsiChar(FFileName)) then
-    raise Exception.CreateFmt(SIniFileWriteError, [FFileName]);
+    raise Exception.CreateFmt(SIniBestandSchrijffout, [FFileName]);
 end;
 
 procedure TIniFile.ReadSections(Strings: TStrings);
@@ -346,7 +346,7 @@ end;
 procedure TIniFile.EraseSection(const Section: string);
 begin
   if not WritePrivateProfileString(PAnsiChar(Section), nil, nil, PAnsiChar(FFileName)) then
-    raise Exception.CreateFmt(SIniFileWriteError, [FFileName]);
+    raise Exception.CreateFmt(SIniBestandSchrijffout, [FFileName]);
 end;
 
 procedure TIniFile.DeleteKey(const Section, Ident: string);
@@ -445,7 +445,7 @@ var
   Lijst: TStringList;
   Pad: string;
 begin
-  Pad := ZMResolvePath(FileName);
+  Pad := ZMOplosPad(FileName);
   if (FileName <> '') and FileExists(Pad) then
   begin
     Lijst := TStringList.Create;
@@ -550,7 +550,7 @@ begin
   Lijst := TStringList.Create;
   try
     GetStrings(Lijst);
-    Lijst.SaveToFile(ZMWritePath(ZMResolvePath(FileName)));
+    Lijst.SaveToFile(ZMSchrijfPad(ZMOplosPad(FileName)));
   finally
     Lijst.Free;
   end;

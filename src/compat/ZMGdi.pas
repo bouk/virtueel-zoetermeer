@@ -16,22 +16,22 @@ interface
 uses Windows, ZMFonts;
 
 const
-  ZM_GDI_MAGIC = $47444D5A;  { 'ZMDG' }
+  ZM_GDI_MAGIE = $47444D5A;  { 'ZMDG' }
 
 type
-  TZMRects = array of TRect;
+  TZMRechtlijst = array of TRect;
 
   TZMGdiObj = class
   public
-    Magic: LongWord;
+    Magie: LongWord;
     Handle: THandle;
-    ObjType: Integer;     { OBJ_xxx }
-    IsStock: Boolean;
+    ObjSoort: Integer;     { OBJ_xxx }
+    IsVoorraadObject: Boolean;
     constructor Create(ASoort: Integer);
     destructor Destroy; override;
   end;
 
-  TZMPalette = class(TZMGdiObj)
+  TZMPalet = class(TZMGdiObj)
   public
     Count: Integer;
     Entries: array[0..255] of TPaletteEntry;
@@ -40,37 +40,37 @@ type
 
   TZMBitmap = class(TZMGdiObj)
   private
-    FNearCache: array of SmallInt;   { 15-bit RGB -> dichtstbijzijnde index + 1 }
-    FNearStamp: LongWord;
+    FDichtbijCache: array of SmallInt;   { 15-bit RGB -> dichtstbijzijnde index + 1 }
+    FDichtbijStempel: LongWord;
   public
-    Width, Height, BPP, Stride: Integer;
+    Width, Height, BPP, Rijbytes: Integer;
     Bits: PByte;
-    OwnsBits: Boolean;
+    EigenBits: Boolean;
     NumColors: Integer;
-    Colors: array[0..255] of LongWord;  { $00RRGGBB }
-    ColorStamp: LongWord;               { wordt verhoogd wanneer Colors wijzigt }
-    Dirty: Boolean;                     { gezet door tekenen (gebruikt voor het scherm) }
+    Kleuren: array[0..255] of LongWord;  { $00RRGGBB }
+    KleurStempel: LongWord;               { wordt verhoogd wanneer Kleuren wijzigt }
+    Vuil: Boolean;                     { gezet door tekenen (gebruikt voor het scherm) }
     IsDIB: Boolean;                     { DIB-sectie (versus apparaatafhankelijke bitmap) }
-    SelectedIn: TObject;                { DC waarin de bitmap is geselecteerd }
+    GeselecteerdIn: TObject;                { DC waarin de bitmap is geselecteerd }
     constructor Create(ABreedte, AHoogte, ABPP: Integer);
     destructor Destroy; override;
-    procedure SetDefaultColors;
-    procedure ColorsChanged;
-    function RowPtr(Y: Integer): PByte; inline;
-    function GetNative(X, Y: Integer): LongWord;
-    procedure SetNative(X, Y: Integer; Waarde: LongWord);
-    function NativeToRGB(Waarde: LongWord): LongWord;
-    function RGBToNative(RGB: LongWord): LongWord;
-    function Nearest(RGB: LongWord): Integer;
-    function NativeMask: LongWord;
+    procedure ZetStandaardKleuren;
+    procedure KleurenGewijzigd;
+    function RijPtr(Y: Integer): PByte; inline;
+    function LeesNatief(X, Y: Integer): LongWord;
+    procedure ZetNatief(X, Y: Integer; Waarde: LongWord);
+    function NatiefNaarRGB(Waarde: LongWord): LongWord;
+    function RGBNaarNatief(RGB: LongWord): LongWord;
+    function Dichtstbij(RGB: LongWord): Integer;
+    function NatiefMasker: LongWord;
   end;
 
-  TZMBrush = class(TZMGdiObj)
+  TZMKwast = class(TZMGdiObj)
   public
     Style: UINT;
     Color: COLORREF;
-    Hatch: PtrInt;
-    Pattern: TZMBitmap;  { eigen kopie voor BS_PATTERN }
+    Arceringsoort: PtrInt;
+    Motief: TZMBitmap;  { eigen kopie voor BS_PATTERN }
     constructor Create;
     destructor Destroy; override;
   end;
@@ -83,139 +83,139 @@ type
     constructor Create;
   end;
 
-  TZMFontObj = class(TZMGdiObj)
+  TZMLetterObj = class(TZMGdiObj)
   public
     LF: TLogFont;
-    Face: PZMFace;
-    BitmapFont: Integer;   { -1 onbekend, 0 TrueType, 1 bitmaplettertype }
+    Lettergezicht: PZMGezicht;
+    BitmapLetter: Integer;   { -1 onbekend, 0 TrueType, 1 bitmaplettertype }
     constructor Create(const ALettertype: TLogFont);
   end;
 
-  TZMRegion = class(TZMGdiObj)
+  TZMRegio = class(TZMGdiObj)
   public
-    Rects: TZMRects;
+    Rechtlijst: TZMRechtlijst;
     constructor Create;
-    function Box: TRect;
+    function Omhullende: TRect;
   end;
 
-  TZMDCState = record
-    WinOrg, VpOrg: TPoint;
-    HasClip: Boolean;
-    ClipRgn: TZMRects;
+  TZMDCToestand = record
+    VensterOorsprong, ViewportOorsprong: TPoint;
+    HeeftKnip: Boolean;
+    KnipRegio: TZMRechtlijst;
     Pen: TZMPen;
-    Brush: TZMBrush;
-    Font: TZMFontObj;
-    Palette: TZMPalette;
-    BkColor, TextColor: COLORREF;
+    Brush: TZMKwast;
+    Font: TZMLetterObj;
+    Palette: TZMPalet;
+    BkColor, TekstKleurVoor: COLORREF;
     BkMode, ROP2, StretchMode: Integer;
-    TextAlign: UINT;
-    CurPos, BrushOrg: TPoint;
+    TekstUitlijning: UINT;
+    HuidigePositie, KwastOorsprong: TPoint;
     CharExtra: Integer;
   end;
 
   TZMDC = class(TZMGdiObj)
   private
-    FEff: TZMRects;
-    FEffValid: Boolean;
+    FEffectief: TZMRechtlijst;
+    FEffGeldig: Boolean;
   public
     Target: TZMBitmap;     { oppervlak waarop getekend wordt }
-    IsMemDC: Boolean;
-    DefBitmap: TZMBitmap;  { 1x1 mono-bitmap van een nieuwe geheugen-DC }
+    IsGeheugenDC: Boolean;
+    StandaardBitmap: TZMBitmap;  { 1x1 mono-bitmap van een nieuwe geheugen-DC }
     Wnd: HWND;             { venster van een vensterDC (0 = scherm / geheugen) }
-    IsPaintDC: Boolean;
-    DevOrg: TPoint;        { positie van de oorsprong van het apparaat (client) in Target }
-    HasVis: Boolean;
-    VisRgn: TZMRects;      { zichtbaar gebied in Target-coördinaten }
-    VisGen: Integer;       { ZMVisGeneration toen VisRgn berekend werd (vensterDCs) }
-    IsWindowDC: Boolean;   { GetWindowDC: oorsprong bij de vensterhoek, niet bij de client }
-    PaintRgn: TZMRects;    { BeginPaint: updateregio (Target-coördinaten) }
-    HasPaintRgn: Boolean;
-    St: TZMDCState;
-    Saved: array of TZMDCState;
+    IsTekenDC: Boolean;
+    ApparaatOorsprong: TPoint;        { positie van de oorsprong van het apparaat (client) in Target }
+    HeeftZichtbaar: Boolean;
+    ZichtRegio: TZMRechtlijst;      { zichtbaar gebied in Target-coördinaten }
+    ZichtGeneratie: Integer;       { ZMZichtGeneratie toen ZichtRegio berekend werd (vensterDCs) }
+    IsVensterDC: Boolean;   { GetWindowDC: oorsprong bij de vensterhoek, niet bij de client }
+    TekenRegio: TZMRechtlijst;    { BeginPaint: updateregio (Target-coördinaten) }
+    HeeftTekenRegio: Boolean;
+    St: TZMDCToestand;
+    Bewaard: array of TZMDCToestand;
     constructor Create(ADoel: TZMBitmap);
     destructor Destroy; override;
-    procedure InvalidateClip;
-    function Eff: TZMRects;                { effectieve knipregio in Target-coördinaten }
-    function LPtoT(X, Y: Integer): TPoint; inline;   { logisch -> target }
-    function OffX: Integer; inline;
-    function OffY: Integer; inline;
-    function ColorToNative(Kleur: COLORREF): LongWord;
+    procedure MaakKnipOngeldig;
+    function Effectief: TZMRechtlijst;                { effectieve knipregio in Target-coördinaten }
+    function LPnaarT(X, Y: Integer): TPoint; inline;   { logisch -> target }
+    function OorsprongX: Integer; inline;
+    function OorsprongY: Integer; inline;
+    function KleurNaarNatief(Kleur: COLORREF): LongWord;
     function ColorToRGB(Kleur: COLORREF): LongWord;
-    procedure SelectBitmap(Bitmap: TZMBitmap);
+    procedure SelecteerBitmap(Bitmap: TZMBitmap);
   end;
 
 var
   { ZM_NO_AA=1: tekst nooit anti-aliasen }
-  ZMNoAntialias: Boolean = False;
+  ZMGeenAntialias: Boolean = False;
   { vensterDCs berekenen hun zichtbare regio opnieuw wanneer de vensterindeling wijzigt }
-  ZMVisGeneration: Integer = 1;
-  ZMVisProvider: procedure(DC: TObject) = nil;
+  ZMZichtGeneratie: Integer = 1;
+  ZMZichtLeverancier: procedure(DC: TObject) = nil;
 
-  StockObjects: array[0..17] of TZMGdiObj;
-  SysColors: array[0..30] of COLORREF;
-  SysColorBrushes: array[0..30] of TZMBrush;
+  StandaardObjecten: array[0..17] of TZMGdiObj;
+  SysteemKleuren: array[0..30] of COLORREF;
+  SysteemKleurKwasten: array[0..30] of TZMKwast;
 
 { handle-hulpfuncties }
-function GdiObj(Handvat: THandle): TZMGdiObj;
+function GdiObject(Handvat: THandle): TZMGdiObj;
 function GdiDC(Handvat: THandle): TZMDC;
 function GdiBitmap(Handvat: THandle): TZMBitmap;
-function GdiPalette(Handvat: THandle): TZMPalette;
-function GdiBrush(Handvat: THandle): TZMBrush;
-function GdiRegion(Handvat: THandle): TZMRegion;
-function GdiFont(Handvat: THandle): TZMFontObj;
+function GdiPalet(Handvat: THandle): TZMPalet;
+function GdiKwast(Handvat: THandle): TZMKwast;
+function GdiRegio(Handvat: THandle): TZMRegio;
+function GdiLetter(Handvat: THandle): TZMLetterObj;
 function H2(Ding: TObject): THandle;
 
 { kleuren }
-function ColorRefToRGB(Kleur: COLORREF): LongWord; inline;   { $00BBGGRR -> $00RRGGBB }
-function RGBToColorRef(Kleur: LongWord): COLORREF; inline;
+function KleurRefNaarRGB(Kleur: COLORREF): LongWord; inline;   { $00BBGGRR -> $00RRGGBB }
+function RGBNaarKleurRef(Kleur: LongWord): COLORREF; inline;
 
 { rechthoeklijsten }
-function RectsIntersectRect(const Rechthoeken: TZMRects; const R: TRect): TZMRects;
-function RectsIntersect(const Rechthoeken, Andere: TZMRects): TZMRects;
-function RectsSubtractRect(const Rechthoeken: TZMRects; const R: TRect): TZMRects;
-function RectsSubtract(const Rechthoeken, Andere: TZMRects): TZMRects;
-function RectsUnion(const Rechthoeken, Andere: TZMRects): TZMRects;
-function RectsOffset(const Rechthoeken: TZMRects; VerschuifX, VerschuifY: Integer): TZMRects;
-function RectsBox(const Rechthoeken: TZMRects): TRect;
-function RectsContain(const Rechthoeken: TZMRects; X, Y: Integer): Boolean;
-function RectsCopy(const Rechthoeken: TZMRects): TZMRects;
+function RechtlijstSnijdRechthoek(const Rechthoeken: TZMRechtlijst; const R: TRect): TZMRechtlijst;
+function RechtlijstSnijd(const Rechthoeken, Andere: TZMRechtlijst): TZMRechtlijst;
+function RechtlijstAftrekRechthoek(const Rechthoeken: TZMRechtlijst; const R: TRect): TZMRechtlijst;
+function RechtlijstAftrek(const Rechthoeken, Andere: TZMRechtlijst): TZMRechtlijst;
+function RechtlijstVereniging(const Rechthoeken, Andere: TZMRechtlijst): TZMRechtlijst;
+function RechtlijstVerschuif(const Rechthoeken: TZMRechtlijst; VerschuifX, VerschuifY: Integer): TZMRechtlijst;
+function RechtlijstOmhulling(const Rechthoeken: TZMRechtlijst): TRect;
+function RechtlijstBevat(const Rechthoeken: TZMRechtlijst; X, Y: Integer): Boolean;
+function RechtlijstKopie(const Rechthoeken: TZMRechtlijst): TZMRechtlijst;
 
 { tekenprimitieven (coördinaten zijn logisch, d.w.z. zoals ze aan de API worden doorgegeven) }
-procedure GdiBlt(DoelDC: TZMDC; X, Y, Breedte, Hoogte: Integer; BronDC: TZMDC; BronPosX, BronPosY, BronBreedte, BronHoogte: Integer;
+procedure GdiKopieer(DoelDC: TZMDC; X, Y, Breedte, Hoogte: Integer; BronDC: TZMDC; BronPosX, BronPosY, BronBreedte, BronHoogte: Integer;
   Rop: DWORD; Uitrekken: Boolean);
-procedure GdiBltBitmap(DoelDC: TZMDC; X, Y, Breedte, Hoogte: Integer; BronBitmap: TZMBitmap; BronAchtergrond: COLORREF;
+procedure GdiKopieerBitmap(DoelDC: TZMDC; X, Y, Breedte, Hoogte: Integer; BronBitmap: TZMBitmap; BronAchtergrond: COLORREF;
   BronPosX, BronPosY, BronBreedte, BronHoogte: Integer; Rop: DWORD; Uitrekken: Boolean);
-procedure GdiPatBlt(DC: TZMDC; X, Y, Breedte, Hoogte: Integer; Rop: DWORD);
-procedure GdiFillRect(DC: TZMDC; const R: TRect; Kwast: TZMBrush);
-procedure GdiFillSolid(DC: TZMDC; const R: TRect; Kleur: COLORREF);
-procedure GdiInvertRect(DC: TZMDC; const R: TRect);
-procedure GdiFocusRect(DC: TZMDC; const R: TRect);
-procedure GdiLine(DC: TZMDC; X1, Y1, X2, Y2: Integer; LaatstePixel: Boolean);
-procedure GdiRectangle(DC: TZMDC; X1, Y1, X2, Y2: Integer);
-procedure GdiEllipse(DC: TZMDC; X1, Y1, X2, Y2: Integer);
-procedure GdiRoundRect(DC: TZMDC; X1, Y1, X2, Y2, RondBreedte, RondHoogte: Integer);
-procedure GdiPolygon(DC: TZMDC; const Punten: array of TPoint; Vullen: Boolean);
-procedure GdiPolyline(DC: TZMDC; const Punten: array of TPoint);
-procedure GdiSetPixel(DC: TZMDC; X, Y: Integer; Kleur: COLORREF);
-function GdiGetPixel(DC: TZMDC; X, Y: Integer): COLORREF;
-procedure GdiFloodFill(DC: TZMDC; X, Y: Integer; Kleur: COLORREF; Oppervlak: Boolean);
+procedure GdiPatKopieer(DC: TZMDC; X, Y, Breedte, Hoogte: Integer; Rop: DWORD);
+procedure GdiVulRechthoek(DC: TZMDC; const R: TRect; Kwast: TZMKwast);
+procedure GdiVulEffen(DC: TZMDC; const R: TRect; Kleur: COLORREF);
+procedure GdiInverteerRechthoek(DC: TZMDC; const R: TRect);
+procedure GdiFocusRechthoek(DC: TZMDC; const R: TRect);
+procedure GdiLijn(DC: TZMDC; X1, Y1, X2, Y2: Integer; LaatstePixel: Boolean);
+procedure GdiRechthoek(DC: TZMDC; X1, Y1, X2, Y2: Integer);
+procedure GdiEllips(DC: TZMDC; X1, Y1, X2, Y2: Integer);
+procedure GdiAfrondRechthoek(DC: TZMDC; X1, Y1, X2, Y2, RondBreedte, RondHoogte: Integer);
+procedure GdiVeelhoek(DC: TZMDC; const Punten: array of TPoint; Vullen: Boolean);
+procedure GdiPolylijn(DC: TZMDC; const Punten: array of TPoint);
+procedure GdiZetPixel(DC: TZMDC; X, Y: Integer; Kleur: COLORREF);
+function GdiLeesPixel(DC: TZMDC; X, Y: Integer): COLORREF;
+procedure GdiVulGebied(DC: TZMDC; X, Y: Integer; Kleur: COLORREF; Oppervlak: Boolean);
 
 { tekst }
-function GdiFace(DC: TZMDC): PZMFace;
-function GdiUseAA(DC: TZMDC): Boolean;
-function GdiGlyphs(DC: TZMDC): PZMGlyphs;
-function GdiTextWidth(DC: TZMDC; Tekst: PAnsiChar; Aantal: Integer): Integer;
-function IsBitmapFontName(const Naam: string): Boolean;
-procedure GdiTextOut(DC: TZMDC; X, Y: Integer; Tekst: PAnsiChar; Aantal: Integer;
+function GdiGezicht(DC: TZMDC): PZMGezicht;
+function GdiGebruikAA(DC: TZMDC): Boolean;
+function GdiGlyfen(DC: TZMDC): PZMTekenbeelden;
+function GdiTekstBreedte(DC: TZMDC; Tekst: PAnsiChar; Aantal: Integer): Integer;
+function IsBitmapLetterNaam(const Naam: string): Boolean;
+procedure GdiTekstUit(DC: TZMDC; X, Y: Integer; Tekst: PAnsiChar; Aantal: Integer;
   MetVulling: Boolean; KnipR: PRect; VulR: PRect);
-function GdiDrawText(DC: TZMDC; Tekst: PAnsiChar; Aantal: Integer; var R: TRect; Opmaak: UINT): Integer;
+function GdiTekenTekst(DC: TZMDC; Tekst: PAnsiChar; Aantal: Integer; var R: TRect; Opmaak: UINT): Integer;
 
 { hulpfuncties }
-procedure ZMReadRow(Bitmap: TZMBitmap; Y, X, Aantal: Integer; Buffer: PLongWord);
-procedure ZMWriteRow(Bitmap: TZMBitmap; Y, X, Aantal: Integer; Buffer: PLongWord);
-function NewBitmapFromInfo(const Info: TBitmapInfo; Gebruik: UINT; Palet: TZMPalette): TZMBitmap;
-procedure HalftoneEntries(var Ingangen: array of TPaletteEntry);
-procedure InitStockObjects;
+procedure ZMLeesRij(Bitmap: TZMBitmap; Y, X, Aantal: Integer; Buffer: PLongWord);
+procedure ZMSchrijfRij(Bitmap: TZMBitmap; Y, X, Aantal: Integer; Buffer: PLongWord);
+function NieuweBitmapUitInfo(const Info: TBitmapInfo; Gebruik: UINT; Palet: TZMPalet): TZMBitmap;
+procedure HalftoneIngangen(var Ingangen: array of TPaletteEntry);
+procedure InitStandaardObjecten;
 
 implementation
 
@@ -226,15 +226,15 @@ uses SysUtils, Math, Classes, ZMHandles;
 constructor TZMGdiObj.Create(ASoort: Integer);
 begin
   inherited Create;
-  Magic := ZM_GDI_MAGIC;
-  ObjType := ASoort;
-  Handle := ZMAllocHandle(Self);
+  Magie := ZM_GDI_MAGIE;
+  ObjSoort := ASoort;
+  Handle := ZMReserveerGreep(Self);
 end;
 
 destructor TZMGdiObj.Destroy;
 begin
-  Magic := 0;
-  ZMFreeHandle(Handle);
+  Magie := 0;
+  ZMGeefGreepVrij(Handle);
   inherited Destroy;
 end;
 
@@ -243,75 +243,75 @@ begin
   if Ding = nil then Result := 0 else Result := TZMGdiObj(Ding).Handle;
 end;
 
-function GdiObj(Handvat: THandle): TZMGdiObj;
+function GdiObject(Handvat: THandle): TZMGdiObj;
 var Ding: TObject;
 begin
   Result := nil;
-  Ding := ZMHandleObj(Handvat);
+  Ding := ZMGreepVoorwerp(Handvat);
   if (Ding <> nil) and (Ding is TZMGdiObj) then Result := TZMGdiObj(Ding);
 end;
 
 function GdiDC(Handvat: THandle): TZMDC;
 var Ding: TZMGdiObj;
 begin
-  Ding := GdiObj(Handvat);
+  Ding := GdiObject(Handvat);
   if (Ding <> nil) and (Ding is TZMDC) then Result := TZMDC(Ding) else Result := nil;
 end;
 
 function GdiBitmap(Handvat: THandle): TZMBitmap;
 var Ding: TZMGdiObj;
 begin
-  Ding := GdiObj(Handvat);
+  Ding := GdiObject(Handvat);
   if (Ding <> nil) and (Ding is TZMBitmap) then Result := TZMBitmap(Ding) else Result := nil;
 end;
 
-function GdiPalette(Handvat: THandle): TZMPalette;
+function GdiPalet(Handvat: THandle): TZMPalet;
 var Ding: TZMGdiObj;
 begin
-  Ding := GdiObj(Handvat);
-  if (Ding <> nil) and (Ding is TZMPalette) then Result := TZMPalette(Ding) else Result := nil;
+  Ding := GdiObject(Handvat);
+  if (Ding <> nil) and (Ding is TZMPalet) then Result := TZMPalet(Ding) else Result := nil;
 end;
 
-function GdiBrush(Handvat: THandle): TZMBrush;
+function GdiKwast(Handvat: THandle): TZMKwast;
 var Ding: TZMGdiObj;
 begin
   if (Handvat > 0) and (Handvat <= 31) then
   begin
     { (COLOR_xxx + 1) gebruikt als klasse-achtergrondkwast }
-    Result := SysColorBrushes[Handvat - 1];
+    Result := SysteemKleurKwasten[Handvat - 1];
     Exit;
   end;
-  Ding := GdiObj(Handvat);
-  if (Ding <> nil) and (Ding is TZMBrush) then Result := TZMBrush(Ding) else Result := nil;
+  Ding := GdiObject(Handvat);
+  if (Ding <> nil) and (Ding is TZMKwast) then Result := TZMKwast(Ding) else Result := nil;
 end;
 
-function GdiRegion(Handvat: THandle): TZMRegion;
+function GdiRegio(Handvat: THandle): TZMRegio;
 var Ding: TZMGdiObj;
 begin
-  Ding := GdiObj(Handvat);
-  if (Ding <> nil) and (Ding is TZMRegion) then Result := TZMRegion(Ding) else Result := nil;
+  Ding := GdiObject(Handvat);
+  if (Ding <> nil) and (Ding is TZMRegio) then Result := TZMRegio(Ding) else Result := nil;
 end;
 
-function GdiFont(Handvat: THandle): TZMFontObj;
+function GdiLetter(Handvat: THandle): TZMLetterObj;
 var Ding: TZMGdiObj;
 begin
-  Ding := GdiObj(Handvat);
-  if (Ding <> nil) and (Ding is TZMFontObj) then Result := TZMFontObj(Ding) else Result := nil;
+  Ding := GdiObject(Handvat);
+  if (Ding <> nil) and (Ding is TZMLetterObj) then Result := TZMLetterObj(Ding) else Result := nil;
 end;
 
-constructor TZMPalette.Create;
+constructor TZMPalet.Create;
 begin
   inherited Create(OBJ_PAL);
 end;
 
-constructor TZMBrush.Create;
+constructor TZMKwast.Create;
 begin
   inherited Create(OBJ_BRUSH);
 end;
 
-destructor TZMBrush.Destroy;
+destructor TZMKwast.Destroy;
 begin
-  Pattern.Free;
+  Motief.Free;
   inherited Destroy;
 end;
 
@@ -321,32 +321,32 @@ begin
   Width := 1;
 end;
 
-constructor TZMFontObj.Create(const ALettertype: TLogFont);
+constructor TZMLetterObj.Create(const ALettertype: TLogFont);
 begin
   inherited Create(OBJ_FONT);
   LF := ALettertype;
-  Face := ZMFindFace(LF);
-  BitmapFont := -1;
+  Lettergezicht := ZMZoekGezicht(LF);
+  BitmapLetter := -1;
 end;
 
-constructor TZMRegion.Create;
+constructor TZMRegio.Create;
 begin
   inherited Create(OBJ_REGION);
 end;
 
-function TZMRegion.Box: TRect;
+function TZMRegio.Omhullende: TRect;
 begin
-  Result := RectsBox(Rects);
+  Result := RechtlijstOmhulling(Rechtlijst);
 end;
 
 { ---------------------------------------------------------------- kleuren }
 
-function ColorRefToRGB(Kleur: COLORREF): LongWord; inline;
+function KleurRefNaarRGB(Kleur: COLORREF): LongWord; inline;
 begin
   Result := ((Kleur and $FF) shl 16) or (Kleur and $FF00) or ((Kleur shr 16) and $FF);
 end;
 
-function RGBToColorRef(Kleur: LongWord): COLORREF; inline;
+function RGBNaarKleurRef(Kleur: LongWord): COLORREF; inline;
 begin
   Result := ((Kleur and $FF) shl 16) or (Kleur and $FF00) or ((Kleur shr 16) and $FF);
 end;
@@ -361,22 +361,22 @@ begin
   Width := ABreedte;
   Height := AHoogte;
   BPP := ABPP;
-  Stride := ((Width * BPP + 31) div 32) * 4;
-  if Stride * Height > 0 then
+  Rijbytes := ((Width * BPP + 31) div 32) * 4;
+  if Rijbytes * Height > 0 then
   begin
-    Bits := AllocMem(Stride * Height);
-    OwnsBits := True;
+    Bits := AllocMem(Rijbytes * Height);
+    EigenBits := True;
   end;
-  SetDefaultColors;
+  ZetStandaardKleuren;
 end;
 
 destructor TZMBitmap.Destroy;
 begin
-  if OwnsBits and (Bits <> nil) then FreeMem(Bits);
+  if EigenBits and (Bits <> nil) then FreeMem(Bits);
   inherited Destroy;
 end;
 
-procedure HalftoneEntries(var Ingangen: array of TPaletteEntry);
+procedure HalftoneIngangen(var Ingangen: array of TPaletteEntry);
 const
   Sys20: array[0..19] of LongWord = (
     $000000, $800000, $008000, $808000, $000080, $800080, $008080, $C0C0C0,
@@ -410,7 +410,7 @@ begin
   end;
 end;
 
-procedure TZMBitmap.SetDefaultColors;
+procedure TZMBitmap.ZetStandaardKleuren;
 var
   Ingangen: array[0..255] of TPaletteEntry;
   I: Integer;
@@ -419,44 +419,44 @@ begin
     1:
       begin
         NumColors := 2;
-        Colors[0] := 0;
-        Colors[1] := $FFFFFF;
+        Kleuren[0] := 0;
+        Kleuren[1] := $FFFFFF;
       end;
     4:
       begin
         NumColors := 16;
-        HalftoneEntries(Ingangen);
+        HalftoneIngangen(Ingangen);
         for I := 0 to 7 do
-          Colors[I] := (Ingangen[I].peRed shl 16) or (Ingangen[I].peGreen shl 8) or Ingangen[I].peBlue;
+          Kleuren[I] := (Ingangen[I].peRed shl 16) or (Ingangen[I].peGreen shl 8) or Ingangen[I].peBlue;
         for I := 8 to 15 do
-          Colors[I] := (Ingangen[240 + I].peRed shl 16) or (Ingangen[240 + I].peGreen shl 8) or Ingangen[240 + I].peBlue;
-        Colors[7] := $C0C0C0;
-        Colors[8] := $808080;
+          Kleuren[I] := (Ingangen[240 + I].peRed shl 16) or (Ingangen[240 + I].peGreen shl 8) or Ingangen[240 + I].peBlue;
+        Kleuren[7] := $C0C0C0;
+        Kleuren[8] := $808080;
       end;
     8:
       begin
         NumColors := 256;
-        HalftoneEntries(Ingangen);
+        HalftoneIngangen(Ingangen);
         for I := 0 to 255 do
-          Colors[I] := (Ingangen[I].peRed shl 16) or (Ingangen[I].peGreen shl 8) or Ingangen[I].peBlue;
+          Kleuren[I] := (Ingangen[I].peRed shl 16) or (Ingangen[I].peGreen shl 8) or Ingangen[I].peBlue;
       end;
   else
     NumColors := 0;
   end;
-  ColorsChanged;
+  KleurenGewijzigd;
 end;
 
-procedure TZMBitmap.ColorsChanged;
+procedure TZMBitmap.KleurenGewijzigd;
 begin
-  Inc(ColorStamp);
+  Inc(KleurStempel);
 end;
 
-function TZMBitmap.RowPtr(Y: Integer): PByte; inline;
+function TZMBitmap.RijPtr(Y: Integer): PByte; inline;
 begin
-  Result := Bits + PtrInt(Y) * Stride;
+  Result := Bits + PtrInt(Y) * Rijbytes;
 end;
 
-function TZMBitmap.NativeMask: LongWord;
+function TZMBitmap.NatiefMasker: LongWord;
 begin
   case BPP of
     1: Result := 1;
@@ -468,11 +468,11 @@ begin
   end;
 end;
 
-function TZMBitmap.GetNative(X, Y: Integer): LongWord;
+function TZMBitmap.LeesNatief(X, Y: Integer): LongWord;
 var
   Rij: PByte;
 begin
-  Rij := Bits + PtrInt(Y) * Stride;
+  Rij := Bits + PtrInt(Y) * Rijbytes;
   case BPP of
     1: Result := (Rij[X shr 3] shr (7 - (X and 7))) and 1;
     4: if X and 1 = 0 then Result := Rij[X shr 1] shr 4 else Result := Rij[X shr 1] and $F;
@@ -485,12 +485,12 @@ begin
   end;
 end;
 
-procedure TZMBitmap.SetNative(X, Y: Integer; Waarde: LongWord);
+procedure TZMBitmap.ZetNatief(X, Y: Integer; Waarde: LongWord);
 var
   Rij: PByte;
   Masker: Byte;
 begin
-  Rij := Bits + PtrInt(Y) * Stride;
+  Rij := Bits + PtrInt(Y) * Rijbytes;
   case BPP of
     1:
       begin
@@ -508,11 +508,11 @@ begin
   end;
 end;
 
-function TZMBitmap.NativeToRGB(Waarde: LongWord): LongWord;
+function TZMBitmap.NatiefNaarRGB(Waarde: LongWord): LongWord;
 begin
   case BPP of
     1, 4, 8:
-      if Integer(Waarde) < NumColors then Result := Colors[Waarde] else Result := 0;
+      if Integer(Waarde) < NumColors then Result := Kleuren[Waarde] else Result := 0;
     16:
       Result := (((Waarde shr 10) and $1F) * 255 div 31) shl 16 or
         (((Waarde shr 5) and $1F) * 255 div 31) shl 8 or ((Waarde and $1F) * 255 div 31);
@@ -521,30 +521,30 @@ begin
   end;
 end;
 
-function TZMBitmap.Nearest(RGB: LongWord): Integer;
+function TZMBitmap.Dichtstbij(RGB: LongWord): Integer;
 var
   Sleutel, I, Afstand, BesteAfstand, R, G, B, VerschilR, VerschilG, VerschilB: Integer;
 begin
   if NumColors <= 0 then Exit(0);
   Sleutel := ((RGB shr 9) and $7C00) or ((RGB shr 6) and $3E0) or ((RGB shr 3) and $1F);
-  if (Length(FNearCache) = 0) or (FNearStamp <> ColorStamp) then
+  if (Length(FDichtbijCache) = 0) or (FDichtbijStempel <> KleurStempel) then
   begin
-    SetLength(FNearCache, 32768);
-    FillChar(FNearCache[0], 32768 * SizeOf(SmallInt), 0);
-    FNearStamp := ColorStamp;
+    SetLength(FDichtbijCache, 32768);
+    FillChar(FDichtbijCache[0], 32768 * SizeOf(SmallInt), 0);
+    FDichtbijStempel := KleurStempel;
   end;
   { exacte kleuren worden direct opgezocht (de cache geldt alleen per 5-bit cel) }
   for I := 0 to NumColors - 1 do
-    if Colors[I] = RGB then Exit(I);
-  if FNearCache[Sleutel] > 0 then Exit(FNearCache[Sleutel] - 1);
+    if Kleuren[I] = RGB then Exit(I);
+  if FDichtbijCache[Sleutel] > 0 then Exit(FDichtbijCache[Sleutel] - 1);
   R := (RGB shr 16) and $FF; G := (RGB shr 8) and $FF; B := RGB and $FF;
   BesteAfstand := MaxInt;
   Result := 0;
   for I := 0 to NumColors - 1 do
   begin
-    VerschilR := R - Integer((Colors[I] shr 16) and $FF);
-    VerschilG := G - Integer((Colors[I] shr 8) and $FF);
-    VerschilB := B - Integer(Colors[I] and $FF);
+    VerschilR := R - Integer((Kleuren[I] shr 16) and $FF);
+    VerschilG := G - Integer((Kleuren[I] shr 8) and $FF);
+    VerschilB := B - Integer(Kleuren[I] and $FF);
     Afstand := VerschilR * VerschilR * 3 + VerschilG * VerschilG * 4 + VerschilB * VerschilB * 2;
     if Afstand < BesteAfstand then
     begin
@@ -552,24 +552,24 @@ begin
       Result := I;
     end;
   end;
-  FNearCache[Sleutel] := Result + 1;
+  FDichtbijCache[Sleutel] := Result + 1;
 end;
 
-function TZMBitmap.RGBToNative(RGB: LongWord): LongWord;
+function TZMBitmap.RGBNaarNatief(RGB: LongWord): LongWord;
 begin
   case BPP of
     1:
-      if NumColors = 2 then Result := Nearest(RGB)
+      if NumColors = 2 then Result := Dichtstbij(RGB)
       else if ((RGB shr 16) and $FF) + ((RGB shr 8) and $FF) + (RGB and $FF) >= 384 then Result := 1
       else Result := 0;
-    4, 8: Result := Nearest(RGB);
+    4, 8: Result := Dichtstbij(RGB);
     16: Result := (((RGB shr 19) and $1F) shl 10) or (((RGB shr 11) and $1F) shl 5) or ((RGB shr 3) and $1F);
   else
     Result := RGB and $FFFFFF;
   end;
 end;
 
-function NewBitmapFromInfo(const Info: TBitmapInfo; Gebruik: UINT; Palet: TZMPalette): TZMBitmap;
+function NieuweBitmapUitInfo(const Info: TBitmapInfo; Gebruik: UINT; Palet: TZMPalet): TZMBitmap;
 var
   Breedte, Hoogte, BitTeller, I, Aantal: Integer;
   Kwad: PRGBQuad;
@@ -593,30 +593,30 @@ begin
       begin
         if (Palet <> nil) and (Index[I] < Palet.Count) then
           with Palet.Entries[Index[I]] do
-            Result.Colors[I] := (peRed shl 16) or (peGreen shl 8) or peBlue
+            Result.Kleuren[I] := (peRed shl 16) or (peGreen shl 8) or peBlue
         else
-          Result.Colors[I] := 0;
+          Result.Kleuren[I] := 0;
       end;
     end
     else
     begin
       Kwad := @Info.bmiColors[0];
       for I := 0 to Aantal - 1 do
-        Result.Colors[I] := (Kwad[I].rgbRed shl 16) or (Kwad[I].rgbGreen shl 8) or Kwad[I].rgbBlue;
+        Result.Kleuren[I] := (Kwad[I].rgbRed shl 16) or (Kwad[I].rgbGreen shl 8) or Kwad[I].rgbBlue;
     end;
-    for I := Aantal to Result.NumColors - 1 do Result.Colors[I] := 0;
-    Result.ColorsChanged;
+    for I := Aantal to Result.NumColors - 1 do Result.Kleuren[I] := 0;
+    Result.KleurenGewijzigd;
   end;
 end;
 
 { ---------------------------------------------------------------- rechthoeklijsten }
 
-function RectsCopy(const Rechthoeken: TZMRects): TZMRects;
+function RechtlijstKopie(const Rechthoeken: TZMRechtlijst): TZMRechtlijst;
 begin
   Result := Copy(Rechthoeken, 0, Length(Rechthoeken));
 end;
 
-procedure AddRect(var Rechthoeken: TZMRects; const R: TRect); inline;
+procedure VoegRechthoekToe(var Rechthoeken: TZMRechtlijst; const R: TRect); inline;
 begin
   if (R.Right > R.Left) and (R.Bottom > R.Top) then
   begin
@@ -625,7 +625,7 @@ begin
   end;
 end;
 
-function RectsIntersectRect(const Rechthoeken: TZMRects; const R: TRect): TZMRects;
+function RechtlijstSnijdRechthoek(const Rechthoeken: TZMRechtlijst; const R: TRect): TZMRechtlijst;
 var
   I: Integer;
   Tussen: TRect;
@@ -637,24 +637,24 @@ begin
     Tussen.Top := Rechthoeken[I].Top; if R.Top > Tussen.Top then Tussen.Top := R.Top;
     Tussen.Right := Rechthoeken[I].Right; if R.Right < Tussen.Right then Tussen.Right := R.Right;
     Tussen.Bottom := Rechthoeken[I].Bottom; if R.Bottom < Tussen.Bottom then Tussen.Bottom := R.Bottom;
-    AddRect(Result, Tussen);
+    VoegRechthoekToe(Result, Tussen);
   end;
 end;
 
-function RectsIntersect(const Rechthoeken, Andere: TZMRects): TZMRects;
+function RechtlijstSnijd(const Rechthoeken, Andere: TZMRechtlijst): TZMRechtlijst;
 var
   I, J: Integer;
-  Tussen: TZMRects;
+  Tussen: TZMRechtlijst;
 begin
   Result := nil;
   for J := 0 to High(Andere) do
   begin
-    Tussen := RectsIntersectRect(Rechthoeken, Andere[J]);
-    for I := 0 to High(Tussen) do AddRect(Result, Tussen[I]);
+    Tussen := RechtlijstSnijdRechthoek(Rechthoeken, Andere[J]);
+    for I := 0 to High(Tussen) do VoegRechthoekToe(Result, Tussen[I]);
   end;
 end;
 
-function RectsSubtractRect(const Rechthoeken: TZMRects; const R: TRect): TZMRects;
+function RechtlijstAftrekRechthoek(const Rechthoeken: TZMRechtlijst; const R: TRect): TZMRechtlijst;
 var
   I: Integer;
   Deel: TRect;
@@ -665,41 +665,41 @@ begin
     Deel := Rechthoeken[I];
     if (R.Right <= Deel.Left) or (R.Left >= Deel.Right) or (R.Bottom <= Deel.Top) or (R.Top >= Deel.Bottom) then
     begin
-      AddRect(Result, Deel);
+      VoegRechthoekToe(Result, Deel);
       Continue;
     end;
     { bovenste strook }
-    if R.Top > Deel.Top then AddRect(Result, Rect(Deel.Left, Deel.Top, Deel.Right, R.Top));
+    if R.Top > Deel.Top then VoegRechthoekToe(Result, Rect(Deel.Left, Deel.Top, Deel.Right, R.Top));
     { onderste strook }
-    if R.Bottom < Deel.Bottom then AddRect(Result, Rect(Deel.Left, R.Bottom, Deel.Right, Deel.Bottom));
+    if R.Bottom < Deel.Bottom then VoegRechthoekToe(Result, Rect(Deel.Left, R.Bottom, Deel.Right, Deel.Bottom));
     { midden: linker- en rechterdeel }
     if R.Left > Deel.Left then
-      AddRect(Result, Rect(Deel.Left, Max(Deel.Top, R.Top), R.Left, Min(Deel.Bottom, R.Bottom)));
+      VoegRechthoekToe(Result, Rect(Deel.Left, Max(Deel.Top, R.Top), R.Left, Min(Deel.Bottom, R.Bottom)));
     if R.Right < Deel.Right then
-      AddRect(Result, Rect(R.Right, Max(Deel.Top, R.Top), Deel.Right, Min(Deel.Bottom, R.Bottom)));
+      VoegRechthoekToe(Result, Rect(R.Right, Max(Deel.Top, R.Top), Deel.Right, Min(Deel.Bottom, R.Bottom)));
   end;
 end;
 
-function RectsSubtract(const Rechthoeken, Andere: TZMRects): TZMRects;
+function RechtlijstAftrek(const Rechthoeken, Andere: TZMRechtlijst): TZMRechtlijst;
 var
   J: Integer;
 begin
-  Result := RectsCopy(Rechthoeken);
+  Result := RechtlijstKopie(Rechthoeken);
   for J := 0 to High(Andere) do
-    Result := RectsSubtractRect(Result, Andere[J]);
+    Result := RechtlijstAftrekRechthoek(Result, Andere[J]);
 end;
 
-function RectsUnion(const Rechthoeken, Andere: TZMRects): TZMRects;
+function RechtlijstVereniging(const Rechthoeken, Andere: TZMRechtlijst): TZMRechtlijst;
 var
   I: Integer;
-  Tussen: TZMRects;
+  Tussen: TZMRechtlijst;
 begin
-  Result := RectsCopy(Rechthoeken);
-  Tussen := RectsSubtract(Andere, Rechthoeken);
-  for I := 0 to High(Tussen) do AddRect(Result, Tussen[I]);
+  Result := RechtlijstKopie(Rechthoeken);
+  Tussen := RechtlijstAftrek(Andere, Rechthoeken);
+  for I := 0 to High(Tussen) do VoegRechthoekToe(Result, Tussen[I]);
 end;
 
-function RectsOffset(const Rechthoeken: TZMRects; VerschuifX, VerschuifY: Integer): TZMRects;
+function RechtlijstVerschuif(const Rechthoeken: TZMRechtlijst; VerschuifX, VerschuifY: Integer): TZMRechtlijst;
 var
   I: Integer;
 begin
@@ -713,7 +713,7 @@ begin
   end;
 end;
 
-function RectsBox(const Rechthoeken: TZMRects): TRect;
+function RechtlijstOmhulling(const Rechthoeken: TZMRechtlijst): TRect;
 var
   I: Integer;
 begin
@@ -728,7 +728,7 @@ begin
   end;
 end;
 
-function RectsContain(const Rechthoeken: TZMRects; X, Y: Integer): Boolean;
+function RechtlijstBevat(const Rechthoeken: TZMRechtlijst; X, Y: Integer): Boolean;
 var
   I: Integer;
 begin
@@ -744,12 +744,12 @@ constructor TZMDC.Create(ADoel: TZMBitmap);
 begin
   inherited Create(OBJ_DC);
   Target := ADoel;
-  St.Pen := TZMPen(StockObjects[BLACK_PEN]);
-  St.Brush := TZMBrush(StockObjects[WHITE_BRUSH]);
-  St.Font := TZMFontObj(StockObjects[SYSTEM_FONT]);
-  St.Palette := TZMPalette(StockObjects[DEFAULT_PALETTE]);
+  St.Pen := TZMPen(StandaardObjecten[BLACK_PEN]);
+  St.Brush := TZMKwast(StandaardObjecten[WHITE_BRUSH]);
+  St.Font := TZMLetterObj(StandaardObjecten[SYSTEM_FONT]);
+  St.Palette := TZMPalet(StandaardObjecten[DEFAULT_PALETTE]);
   St.BkColor := $FFFFFF;
-  St.TextColor := 0;
+  St.TekstKleurVoor := 0;
   St.BkMode := OPAQUE;
   St.ROP2 := R2_COPYPEN;
   St.StretchMode := BLACKONWHITE;
@@ -757,65 +757,65 @@ end;
 
 destructor TZMDC.Destroy;
 begin
-  if (Target <> nil) and (Target.SelectedIn = Self) then Target.SelectedIn := nil;
-  DefBitmap.Free;
+  if (Target <> nil) and (Target.GeselecteerdIn = Self) then Target.GeselecteerdIn := nil;
+  StandaardBitmap.Free;
   inherited Destroy;
 end;
 
-procedure TZMDC.SelectBitmap(Bitmap: TZMBitmap);
+procedure TZMDC.SelecteerBitmap(Bitmap: TZMBitmap);
 begin
-  if (Target <> nil) and (Target.SelectedIn = Self) then Target.SelectedIn := nil;
+  if (Target <> nil) and (Target.GeselecteerdIn = Self) then Target.GeselecteerdIn := nil;
   Target := Bitmap;
-  if Bitmap <> nil then Bitmap.SelectedIn := Self;
-  InvalidateClip;
+  if Bitmap <> nil then Bitmap.GeselecteerdIn := Self;
+  MaakKnipOngeldig;
 end;
 
-procedure TZMDC.InvalidateClip;
+procedure TZMDC.MaakKnipOngeldig;
 begin
-  FEffValid := False;
+  FEffGeldig := False;
 end;
 
-function TZMDC.Eff: TZMRects;
+function TZMDC.Effectief: TZMRechtlijst;
 var
-  Volledig: TZMRects;
+  Volledig: TZMRechtlijst;
 begin
-  if (Wnd <> 0) and (VisGen <> ZMVisGeneration) and Assigned(ZMVisProvider) then
+  if (Wnd <> 0) and (ZichtGeneratie <> ZMZichtGeneratie) and Assigned(ZMZichtLeverancier) then
   begin
-    ZMVisProvider(Self);
-    VisGen := ZMVisGeneration;
-    FEffValid := False;
+    ZMZichtLeverancier(Self);
+    ZichtGeneratie := ZMZichtGeneratie;
+    FEffGeldig := False;
   end;
-  if not FEffValid then
+  if not FEffGeldig then
   begin
     SetLength(Volledig, 1);
     if Target <> nil then
       Volledig[0] := Rect(0, 0, Target.Width, Target.Height)
     else
       Volledig[0] := Rect(0, 0, 0, 0);
-    if HasVis then Volledig := RectsIntersect(Volledig, VisRgn);
-    if HasPaintRgn then Volledig := RectsIntersect(Volledig, PaintRgn);
-    if St.HasClip then
-      Volledig := RectsIntersect(Volledig, RectsOffset(St.ClipRgn, DevOrg.X, DevOrg.Y));
-    FEff := Volledig;
-    FEffValid := True;
+    if HeeftZichtbaar then Volledig := RechtlijstSnijd(Volledig, ZichtRegio);
+    if HeeftTekenRegio then Volledig := RechtlijstSnijd(Volledig, TekenRegio);
+    if St.HeeftKnip then
+      Volledig := RechtlijstSnijd(Volledig, RechtlijstVerschuif(St.KnipRegio, ApparaatOorsprong.X, ApparaatOorsprong.Y));
+    FEffectief := Volledig;
+    FEffGeldig := True;
   end;
-  Result := FEff;
+  Result := FEffectief;
 end;
 
-function TZMDC.OffX: Integer; inline;
+function TZMDC.OorsprongX: Integer; inline;
 begin
-  Result := DevOrg.X + St.VpOrg.X - St.WinOrg.X;
+  Result := ApparaatOorsprong.X + St.ViewportOorsprong.X - St.VensterOorsprong.X;
 end;
 
-function TZMDC.OffY: Integer; inline;
+function TZMDC.OorsprongY: Integer; inline;
 begin
-  Result := DevOrg.Y + St.VpOrg.Y - St.WinOrg.Y;
+  Result := ApparaatOorsprong.Y + St.ViewportOorsprong.Y - St.VensterOorsprong.Y;
 end;
 
-function TZMDC.LPtoT(X, Y: Integer): TPoint; inline;
+function TZMDC.LPnaarT(X, Y: Integer): TPoint; inline;
 begin
-  Result.X := X + OffX;
-  Result.Y := Y + OffY;
+  Result.X := X + OorsprongX;
+  Result.Y := Y + OorsprongY;
 end;
 
 function TZMDC.ColorToRGB(Kleur: COLORREF): LongWord;
@@ -826,23 +826,23 @@ begin
   begin
     I := Kleur and $FFFF;
     if (Target <> nil) and (Target.BPP <= 8) and (I < Target.NumColors) then
-      Result := Target.Colors[I]
+      Result := Target.Kleuren[I]
     else if (St.Palette <> nil) and (I < St.Palette.Count) then
       with St.Palette.Entries[I] do Result := (peRed shl 16) or (peGreen shl 8) or peBlue
     else
       Result := 0;
   end
   else
-    Result := ColorRefToRGB(Kleur and $FFFFFF);
+    Result := KleurRefNaarRGB(Kleur and $FFFFFF);
 end;
 
-function TZMDC.ColorToNative(Kleur: COLORREF): LongWord;
+function TZMDC.KleurNaarNatief(Kleur: COLORREF): LongWord;
 begin
   if Target = nil then Exit(0);
   if ((Kleur and $FF000000) = $01000000) and (Target.BPP <= 8) then
-    Result := (Kleur and $FFFF) and Target.NativeMask
+    Result := (Kleur and $FFFF) and Target.NatiefMasker
   else
-    Result := Target.RGBToNative(ColorToRGB(Kleur));
+    Result := Target.RGBNaarNatief(ColorToRGB(Kleur));
 end;
 
 { ---------------------------------------------------------------- rasterbewerkingen }
@@ -882,30 +882,30 @@ begin
   end;
 end;
 
-function RopUsesSrc(Code: Byte): Boolean; inline;
+function RopGebruiktBron(Code: Byte): Boolean; inline;
 begin
   Result := ((Code shr 2) and $33) <> (Code and $33);
 end;
 
-function RopUsesDst(Code: Byte): Boolean; inline;
+function RopGebruiktDoel(Code: Byte): Boolean; inline;
 begin
   Result := ((Code shr 1) and $55) <> (Code and $55);
 end;
 
-function RopUsesPat(Code: Byte): Boolean; inline;
+function RopGebruiktPatroon(Code: Byte): Boolean; inline;
 begin
   Result := ((Code shr 4) and $0F) <> (Code and $0F);
 end;
 
 { patroonwaarde van het kwast van de DC op een doelpixel (native) }
 type
-  TPatInfo = record
-    Solid: Boolean;
+  TPatroonInfo = record
+    Effen: Boolean;
     Value: LongWord;
-    Pat: array[0..7, 0..7] of LongWord;
+    Patronen: array[0..7, 0..7] of LongWord;
   end;
 
-procedure PreparePattern(DC: TZMDC; var Patroon: TPatInfo);
+procedure BereidPatroonVoor(DC: TZMDC; var Patroon: TPatroonInfo);
 const
   HatchBits: array[0..5, 0..7] of Byte = (
     ($00, $00, $00, $00, $FF, $00, $00, $00),   { horizontaal }
@@ -915,66 +915,66 @@ const
     ($08, $08, $08, $08, $FF, $08, $08, $08),   { kruis }
     ($81, $42, $24, $18, $18, $24, $42, $81));  { diagonaal kruis }
 var
-  Kwast: TZMBrush;
+  Kwast: TZMKwast;
   X, Y, Arcering: Integer;
   Voorgrond, Achtergrond: LongWord;
   Bitmap: TZMBitmap;
 begin
   Kwast := DC.St.Brush;
-  Patroon.Solid := True;
+  Patroon.Effen := True;
   Patroon.Value := 0;
   if Kwast = nil then Exit;
   case Kwast.Style of
-    BS_SOLID: Patroon.Value := DC.ColorToNative(Kwast.Color);
+    BS_SOLID: Patroon.Value := DC.KleurNaarNatief(Kwast.Color);
     BS_HATCHED:
       begin
-        Patroon.Solid := False;
-        Voorgrond := DC.ColorToNative(Kwast.Color);
-        Achtergrond := DC.ColorToNative(DC.St.BkColor);
-        Arcering := Kwast.Hatch;
+        Patroon.Effen := False;
+        Voorgrond := DC.KleurNaarNatief(Kwast.Color);
+        Achtergrond := DC.KleurNaarNatief(DC.St.BkColor);
+        Arcering := Kwast.Arceringsoort;
         if (Arcering < 0) or (Arcering > 5) then Arcering := 0;
         for Y := 0 to 7 do
           for X := 0 to 7 do
-            if HatchBits[Arcering, Y] and ($80 shr X) <> 0 then Patroon.Pat[Y, X] := Voorgrond else Patroon.Pat[Y, X] := Achtergrond;
+            if HatchBits[Arcering, Y] and ($80 shr X) <> 0 then Patroon.Patronen[Y, X] := Voorgrond else Patroon.Patronen[Y, X] := Achtergrond;
       end;
     BS_PATTERN, BS_DIBPATTERN:
       begin
-        Bitmap := Kwast.Pattern;
+        Bitmap := Kwast.Motief;
         if (Bitmap = nil) or (Bitmap.Width = 0) or (Bitmap.Height = 0) then Exit;
-        Patroon.Solid := False;
+        Patroon.Effen := False;
         for Y := 0 to 7 do
           for X := 0 to 7 do
           begin
             if Bitmap.BPP = 1 then
             begin
-              if Bitmap.GetNative(X mod Bitmap.Width, Y mod Bitmap.Height) = 0 then
-                Patroon.Pat[Y, X] := DC.ColorToNative(DC.St.TextColor)
+              if Bitmap.LeesNatief(X mod Bitmap.Width, Y mod Bitmap.Height) = 0 then
+                Patroon.Patronen[Y, X] := DC.KleurNaarNatief(DC.St.TekstKleurVoor)
               else
-                Patroon.Pat[Y, X] := DC.ColorToNative(DC.St.BkColor);
+                Patroon.Patronen[Y, X] := DC.KleurNaarNatief(DC.St.BkColor);
             end
             else
-              Patroon.Pat[Y, X] := DC.Target.RGBToNative(Bitmap.NativeToRGB(Bitmap.GetNative(X mod Bitmap.Width, Y mod Bitmap.Height)));
+              Patroon.Patronen[Y, X] := DC.Target.RGBNaarNatief(Bitmap.NatiefNaarRGB(Bitmap.LeesNatief(X mod Bitmap.Width, Y mod Bitmap.Height)));
           end;
       end;
   else
-    Patroon.Value := DC.ColorToNative(Kwast.Color);
+    Patroon.Value := DC.KleurNaarNatief(Kwast.Color);
   end;
 end;
 
-function PatAt(const Patroon: TPatInfo; DC: TZMDC; X, Y: Integer): LongWord; inline;
+function PatroonOp(const Patroon: TPatroonInfo; DC: TZMDC; X, Y: Integer): LongWord; inline;
 begin
-  if Patroon.Solid then Result := Patroon.Value
-  else Result := Patroon.Pat[(Y - DC.St.BrushOrg.Y) and 7, (X - DC.St.BrushOrg.X) and 7];
+  if Patroon.Effen then Result := Patroon.Value
+  else Result := Patroon.Patronen[(Y - DC.St.KwastOorsprong.Y) and 7, (X - DC.St.KwastOorsprong.X) and 7];
 end;
 
 { ---------------------------------------------------------------- blits }
 
-procedure ZMReadRow(Bitmap: TZMBitmap; Y, X, Aantal: Integer; Buffer: PLongWord);
+procedure ZMLeesRij(Bitmap: TZMBitmap; Y, X, Aantal: Integer; Buffer: PLongWord);
 var
   Rij: PByte;
   I: Integer;
 begin
-  Rij := Bitmap.RowPtr(Y);
+  Rij := Bitmap.RijPtr(Y);
   case Bitmap.BPP of
     8: for I := 0 to Aantal - 1 do Buffer[I] := Rij[X + I];
     32: for I := 0 to Aantal - 1 do Buffer[I] := PLongWord(Rij + (X + I) * 4)^ and $FFFFFF;
@@ -989,18 +989,18 @@ begin
       end;
     1: for I := 0 to Aantal - 1 do Buffer[I] := (Rij[(X + I) shr 3] shr (7 - ((X + I) and 7))) and 1;
   else
-    for I := 0 to Aantal - 1 do Buffer[I] := Bitmap.GetNative(X + I, Y);
+    for I := 0 to Aantal - 1 do Buffer[I] := Bitmap.LeesNatief(X + I, Y);
   end;
 end;
 
-procedure ZMWriteRow(Bitmap: TZMBitmap; Y, X, Aantal: Integer; Buffer: PLongWord);
+procedure ZMSchrijfRij(Bitmap: TZMBitmap; Y, X, Aantal: Integer; Buffer: PLongWord);
 var
   Rij: PByte;
   I, Xpos: Integer;
   Masker: Byte;
 begin
   if Aantal <= 0 then Exit;
-  Rij := Bitmap.RowPtr(Y);
+  Rij := Bitmap.RijPtr(Y);
   case Bitmap.BPP of
     8: for I := 0 to Aantal - 1 do Rij[X + I] := Buffer[I];
     32: for I := 0 to Aantal - 1 do PLongWord(Rij + (X + I) * 4)^ := Buffer[I] and $FFFFFF;
@@ -1022,27 +1022,27 @@ begin
         else Rij[Xpos shr 3] := Rij[Xpos shr 3] and not Masker;
       end;
   else
-    for I := 0 to Aantal - 1 do Bitmap.SetNative(X + I, Y, Buffer[I]);
+    for I := 0 to Aantal - 1 do Bitmap.ZetNatief(X + I, Y, Buffer[I]);
   end;
 end;
 
 type
-  TConvKind = (ckIdentity, ckLUT, ckToMono, ckRGBToIndex, ckRGBToRGB, ckGeneric);
+  TOmzettingSoort = (ckIdentity, ckLUT, ckToMono, ckRGBToIndex, ckRGBToRGB, ckGeneric);
 
-procedure GdiBltBitmap(DoelDC: TZMDC; X, Y, Breedte, Hoogte: Integer; BronBitmap: TZMBitmap; BronAchtergrond: COLORREF;
+procedure GdiKopieerBitmap(DoelDC: TZMDC; X, Y, Breedte, Hoogte: Integer; BronBitmap: TZMBitmap; BronAchtergrond: COLORREF;
   BronPosX, BronPosY, BronBreedte, BronHoogte: Integer; Rop: DWORD; Uitrekken: Boolean);
 var
   Code: Byte;
   GebruikBron, GebruikDoel, GebruikPatroon: Boolean;
   Doel: TZMBitmap;
-  Knip: TZMRects;
+  Knip: TZMRechtlijst;
   DoelR, KnipR: TRect;
   I, DoelXX, DoelYY, BronXX, BronYY, SpiegelX, SpiegelY: Integer;
-  Omzetting: TConvKind;
+  Omzetting: TOmzettingSoort;
   Tabel: array[0..255] of LongWord;
   BronAchtergrondNatief: LongWord;
   Masker: LongWord;
-  Patroon: TPatInfo;
+  Patroon: TPatroonInfo;
   BronW, Doelwaarde, Patwaarde, Waarde: LongWord;
   OfsX, OfsY, DoelBreedte, DoelHoogte: Integer;
   BronRij, DoelRij: PByte;
@@ -1054,10 +1054,10 @@ begin
   Doel := DoelDC.Target;
   if (Doel = nil) or (Doel.Bits = nil) then Exit;
   Code := (Rop shr 16) and $FF;
-  GebruikBron := RopUsesSrc(Code) and (BronBitmap <> nil) and (BronBitmap.Bits <> nil);
-  GebruikDoel := RopUsesDst(Code);
-  GebruikPatroon := RopUsesPat(Code);
-  if RopUsesSrc(Code) and not GebruikBron then Exit;
+  GebruikBron := RopGebruiktBron(Code) and (BronBitmap <> nil) and (BronBitmap.Bits <> nil);
+  GebruikDoel := RopGebruiktDoel(Code);
+  GebruikPatroon := RopGebruiktPatroon(Code);
+  if RopGebruiktBron(Code) and not GebruikBron then Exit;
   if not Uitrekken then
   begin
     BronBreedte := Breedte;
@@ -1071,13 +1071,13 @@ begin
   if BronHoogte < 0 then begin BronPosY := BronPosY + BronHoogte; BronHoogte := -BronHoogte; SpiegelY := SpiegelY xor 1; end;
   if (Breedte = 0) or (Hoogte = 0) then Exit;
   if GebruikBron and ((BronBreedte = 0) or (BronHoogte = 0)) then Exit;
-  OfsX := DoelDC.OffX;
-  OfsY := DoelDC.OffY;
+  OfsX := DoelDC.OorsprongX;
+  OfsY := DoelDC.OorsprongY;
   DoelR := Rect(X + OfsX, Y + OfsY, X + OfsX + Breedte, Y + OfsY + Hoogte);
-  Knip := RectsIntersectRect(DoelDC.Eff, DoelR);
+  Knip := RechtlijstSnijdRechthoek(DoelDC.Effectief, DoelR);
   if Length(Knip) = 0 then Exit;
-  Masker := Doel.NativeMask;
-  if GebruikPatroon then PreparePattern(DoelDC, Patroon);
+  Masker := Doel.NatiefMasker;
+  if GebruikPatroon then BereidPatroonVoor(DoelDC, Patroon);
 
   { kleurconversie van bron naar doel }
   Omzetting := ckGeneric;
@@ -1087,8 +1087,8 @@ begin
     if BronBitmap.BPP = 1 then
     begin
       Omzetting := ckLUT;
-      Tabel[0] := DoelDC.ColorToNative(DoelDC.St.TextColor);
-      Tabel[1] := DoelDC.ColorToNative(DoelDC.St.BkColor);
+      Tabel[0] := DoelDC.KleurNaarNatief(DoelDC.St.TekstKleurVoor);
+      Tabel[1] := DoelDC.KleurNaarNatief(DoelDC.St.BkColor);
       if Doel.BPP = 1 then
       begin
         { mono -> mono: rechtstreekse kopie }
@@ -1101,18 +1101,18 @@ begin
       if ((BronAchtergrond and $FF000000) = $01000000) and (BronBitmap.BPP <= 8) then
         BronAchtergrondNatief := BronAchtergrond and $FFFF
       else
-        BronAchtergrondNatief := BronBitmap.RGBToNative(ColorRefToRGB(BronAchtergrond and $FFFFFF));
+        BronAchtergrondNatief := BronBitmap.RGBNaarNatief(KleurRefNaarRGB(BronAchtergrond and $FFFFFF));
     end
     else if BronBitmap.BPP <= 8 then
     begin
       if (Doel.BPP = BronBitmap.BPP) and (Doel.NumColors = BronBitmap.NumColors) and
-        CompareMem(@Doel.Colors[0], @BronBitmap.Colors[0], BronBitmap.NumColors * 4) then
+        CompareMem(@Doel.Kleuren[0], @BronBitmap.Kleuren[0], BronBitmap.NumColors * 4) then
         Omzetting := ckIdentity
       else
       begin
         Omzetting := ckLUT;
         for I := 0 to (1 shl BronBitmap.BPP) - 1 do
-          Tabel[I] := Doel.RGBToNative(BronBitmap.NativeToRGB(I));
+          Tabel[I] := Doel.RGBNaarNatief(BronBitmap.NatiefNaarRGB(I));
       end;
     end
     else if Doel.BPP <= 8 then
@@ -1140,8 +1140,8 @@ begin
         if BronXX < 0 then begin Inc(DoelXX, -BronXX); Dec(Telling, -BronXX); BronXX := 0; end;
         if BronXX + Telling > BronBitmap.Width then Telling := BronBitmap.Width - BronXX;
         if Telling <= 0 then Continue;
-        BronRij := BronBitmap.RowPtr(BronYY);
-        DoelRij := Doel.RowPtr(DoelYY);
+        BronRij := BronBitmap.RijPtr(BronYY);
+        DoelRij := Doel.RijPtr(DoelYY);
         if (Omzetting = ckIdentity) and (BronBitmap.BPP = Doel.BPP) and (Doel.BPP >= 8) then
           Move(BronRij[BronXX * (Doel.BPP div 8)], DoelRij[DoelXX * (Doel.BPP div 8)], Telling * (Doel.BPP div 8))
         else if (Omzetting = ckLUT) and (BronBitmap.BPP = 8) and (Doel.BPP = 32) then
@@ -1165,17 +1165,17 @@ begin
         begin
           while Telling > 0 do
           begin
-            BronW := BronBitmap.GetNative(BronXX, BronYY);
+            BronW := BronBitmap.LeesNatief(BronXX, BronYY);
             case Omzetting of
               ckLUT: Waarde := Tabel[BronW];
               ckToMono: if BronW = BronAchtergrondNatief then Waarde := 1 else Waarde := 0;
-              ckRGBToIndex: Waarde := Doel.Nearest(BronBitmap.NativeToRGB(BronW));
+              ckRGBToIndex: Waarde := Doel.Dichtstbij(BronBitmap.NatiefNaarRGB(BronW));
               ckRGBToRGB: Waarde := BronW;
               ckIdentity: Waarde := BronW;
             else
-              Waarde := Doel.RGBToNative(BronBitmap.NativeToRGB(BronW));
+              Waarde := Doel.RGBNaarNatief(BronBitmap.NatiefNaarRGB(BronW));
             end;
-            Doel.SetNative(DoelXX, DoelYY, Waarde);
+            Doel.ZetNatief(DoelXX, DoelYY, Waarde);
             Inc(DoelXX); Inc(BronXX); Dec(Telling);
           end;
         end;
@@ -1210,7 +1210,7 @@ begin
           if BronXX < 0 then XVan := -BronXX;
           if BronXX + Aantal > BronBitmap.Width then XTot := BronBitmap.Width - BronXX;
           if XTot <= XVan then Continue;
-          ZMReadRow(BronBitmap, BronYY, BronXX + XVan, XTot - XVan, @BronBuf[XVan]);
+          ZMLeesRij(BronBitmap, BronYY, BronXX + XVan, XTot - XVan, @BronBuf[XVan]);
           for K := XVan to XTot - 1 do Geldig[K] := True;
         end
         else
@@ -1221,23 +1221,23 @@ begin
             else
               BronXX := BronPosX + BronBreedte - 1 - Int64(KnipR.Left + K - DoelR.Left) * BronBreedte div DoelBreedte;
             Geldig[K] := (BronXX >= 0) and (BronXX < BronBitmap.Width);
-            if Geldig[K] then BronBuf[K] := BronBitmap.GetNative(BronXX, BronYY) else BronBuf[K] := 0;
+            if Geldig[K] then BronBuf[K] := BronBitmap.LeesNatief(BronXX, BronYY) else BronBuf[K] := 0;
           end;
         { kleurconversie }
         case Omzetting of
           ckLUT: for K := XVan to XTot - 1 do BronBuf[K] := Tabel[BronBuf[K] and $FF];
           ckToMono: for K := XVan to XTot - 1 do
               if BronBuf[K] = BronAchtergrondNatief then BronBuf[K] := 1 else BronBuf[K] := 0;
-          ckRGBToIndex: for K := XVan to XTot - 1 do BronBuf[K] := Doel.Nearest(BronBitmap.NativeToRGB(BronBuf[K]));
+          ckRGBToIndex: for K := XVan to XTot - 1 do BronBuf[K] := Doel.Dichtstbij(BronBitmap.NatiefNaarRGB(BronBuf[K]));
           ckRGBToRGB, ckIdentity: ;
         else
-          for K := XVan to XTot - 1 do BronBuf[K] := Doel.RGBToNative(BronBitmap.NativeToRGB(BronBuf[K]));
+          for K := XVan to XTot - 1 do BronBuf[K] := Doel.RGBNaarNatief(BronBitmap.NatiefNaarRGB(BronBuf[K]));
         end;
       end
       else
         for K := 0 to Aantal - 1 do Geldig[K] := True;
       if GebruikDoel or not ((BronBreedte = DoelBreedte) and (SpiegelX = 0)) or not GebruikBron then
-        ZMReadRow(Doel, DoelYY, KnipR.Left, Aantal, @DoelBuf[0]);
+        ZMLeesRij(Doel, DoelYY, KnipR.Left, Aantal, @DoelBuf[0]);
       case Code of
         $CC: for K := XVan to XTot - 1 do if Geldig[K] then DoelBuf[K] := BronBuf[K];
         $88: for K := XVan to XTot - 1 do if Geldig[K] then DoelBuf[K] := DoelBuf[K] and BronBuf[K];
@@ -1250,17 +1250,17 @@ begin
         for K := XVan to XTot - 1 do
           if Geldig[K] then
           begin
-            if GebruikPatroon then Patwaarde := PatAt(Patroon, DoelDC, KnipR.Left + K, DoelYY) else Patwaarde := 0;
+            if GebruikPatroon then Patwaarde := PatroonOp(Patroon, DoelDC, KnipR.Left + K, DoelYY) else Patwaarde := 0;
             DoelBuf[K] := Rop3(Code, Patwaarde, BronBuf[K], DoelBuf[K]) and Masker;
           end;
       end;
-      ZMWriteRow(Doel, DoelYY, KnipR.Left + XVan, XTot - XVan, @DoelBuf[XVan]);
+      ZMSchrijfRij(Doel, DoelYY, KnipR.Left + XVan, XTot - XVan, @DoelBuf[XVan]);
     end;
   end;
-  Doel.Dirty := True;
+  Doel.Vuil := True;
 end;
 
-procedure GdiBlt(DoelDC: TZMDC; X, Y, Breedte, Hoogte: Integer; BronDC: TZMDC; BronPosX, BronPosY, BronBreedte, BronHoogte: Integer;
+procedure GdiKopieer(DoelDC: TZMDC; X, Y, Breedte, Hoogte: Integer; BronDC: TZMDC; BronPosX, BronPosY, BronBreedte, BronHoogte: Integer;
   Rop: DWORD; Uitrekken: Boolean);
 var
   BronBitmap: TZMBitmap;
@@ -1270,23 +1270,23 @@ begin
   if BronDC <> nil then
   begin
     BronBitmap := BronDC.Target;
-    BronOfsX := BronDC.OffX;
-    BronOfsY := BronDC.OffY;
-    GdiBltBitmap(DoelDC, X, Y, Breedte, Hoogte, BronBitmap, BronDC.St.BkColor, BronPosX + BronOfsX, BronPosY + BronOfsY, BronBreedte, BronHoogte, Rop, Uitrekken);
+    BronOfsX := BronDC.OorsprongX;
+    BronOfsY := BronDC.OorsprongY;
+    GdiKopieerBitmap(DoelDC, X, Y, Breedte, Hoogte, BronBitmap, BronDC.St.BkColor, BronPosX + BronOfsX, BronPosY + BronOfsY, BronBreedte, BronHoogte, Rop, Uitrekken);
   end
   else
-    GdiBltBitmap(DoelDC, X, Y, Breedte, Hoogte, nil, 0, 0, 0, 0, 0, Rop, Uitrekken);
+    GdiKopieerBitmap(DoelDC, X, Y, Breedte, Hoogte, nil, 0, 0, 0, 0, 0, Rop, Uitrekken);
 end;
 
-procedure GdiPatBlt(DC: TZMDC; X, Y, Breedte, Hoogte: Integer; Rop: DWORD);
+procedure GdiPatKopieer(DC: TZMDC; X, Y, Breedte, Hoogte: Integer; Rop: DWORD);
 begin
-  GdiBltBitmap(DC, X, Y, Breedte, Hoogte, nil, 0, 0, 0, 0, 0, Rop and $00FF0000, False);
+  GdiKopieerBitmap(DC, X, Y, Breedte, Hoogte, nil, 0, 0, 0, 0, 0, Rop and $00FF0000, False);
 end;
 
 { vul een rechthoek (target-coördinaten) met een effen native waarde, geknipt }
-procedure FillNative(DC: TZMDC; R: TRect; Waarde: LongWord);
+procedure VulNatief(DC: TZMDC; R: TRect; Waarde: LongWord);
 var
-  Knip: TZMRects;
+  Knip: TZMRechtlijst;
   I, X, Y: Integer;
   Doel: TZMBitmap;
   Rij: PLongWord;
@@ -1294,7 +1294,7 @@ var
 begin
   Doel := DC.Target;
   if (Doel = nil) or (Doel.Bits = nil) then Exit;
-  Knip := RectsIntersectRect(DC.Eff, R);
+  Knip := RechtlijstSnijdRechthoek(DC.Effectief, R);
   for I := 0 to High(Knip) do
   begin
     KnipR := Knip[I];
@@ -1302,67 +1302,67 @@ begin
       case Doel.BPP of
         32:
           begin
-            Rij := PLongWord(Doel.RowPtr(Y)) + KnipR.Left;
+            Rij := PLongWord(Doel.RijPtr(Y)) + KnipR.Left;
             for X := KnipR.Left to KnipR.Right - 1 do
             begin
               Rij^ := Waarde;
               Inc(Rij);
             end;
           end;
-        8: FillChar(Doel.RowPtr(Y)[KnipR.Left], KnipR.Right - KnipR.Left, Byte(Waarde));
+        8: FillChar(Doel.RijPtr(Y)[KnipR.Left], KnipR.Right - KnipR.Left, Byte(Waarde));
       else
-        for X := KnipR.Left to KnipR.Right - 1 do Doel.SetNative(X, Y, Waarde);
+        for X := KnipR.Left to KnipR.Right - 1 do Doel.ZetNatief(X, Y, Waarde);
       end;
   end;
-  Doel.Dirty := True;
+  Doel.Vuil := True;
 end;
 
-procedure GdiFillRect(DC: TZMDC; const R: TRect; Kwast: TZMBrush);
+procedure GdiVulRechthoek(DC: TZMDC; const R: TRect; Kwast: TZMKwast);
 var
-  Oud: TZMBrush;
+  Oud: TZMKwast;
 begin
   if (Kwast = nil) or (Kwast.Style = BS_NULL) then Exit;
   Oud := DC.St.Brush;
   DC.St.Brush := Kwast;
   try
-    GdiPatBlt(DC, R.Left, R.Top, R.Right - R.Left, R.Bottom - R.Top, PATCOPY);
+    GdiPatKopieer(DC, R.Left, R.Top, R.Right - R.Left, R.Bottom - R.Top, PATCOPY);
   finally
     DC.St.Brush := Oud;
   end;
 end;
 
-procedure GdiFillSolid(DC: TZMDC; const R: TRect; Kleur: COLORREF);
+procedure GdiVulEffen(DC: TZMDC; const R: TRect; Kleur: COLORREF);
 var
   OfsX, OfsY: Integer;
 begin
   if (R.Right <= R.Left) or (R.Bottom <= R.Top) then Exit;
-  OfsX := DC.OffX; OfsY := DC.OffY;
-  FillNative(DC, Rect(R.Left + OfsX, R.Top + OfsY, R.Right + OfsX, R.Bottom + OfsY), DC.ColorToNative(Kleur));
+  OfsX := DC.OorsprongX; OfsY := DC.OorsprongY;
+  VulNatief(DC, Rect(R.Left + OfsX, R.Top + OfsY, R.Right + OfsX, R.Bottom + OfsY), DC.KleurNaarNatief(Kleur));
 end;
 
-procedure GdiInvertRect(DC: TZMDC; const R: TRect);
+procedure GdiInverteerRechthoek(DC: TZMDC; const R: TRect);
 begin
-  GdiPatBlt(DC, R.Left, R.Top, R.Right - R.Left, R.Bottom - R.Top, DSTINVERT);
+  GdiPatKopieer(DC, R.Left, R.Top, R.Right - R.Left, R.Bottom - R.Top, DSTINVERT);
 end;
 
 { ---------------------------------------------------------------- pixels en lijnen }
 
-procedure PlotNative(DC: TZMDC; X, Y: Integer; Waarde: LongWord; Modus: Integer); inline;
+procedure TekenPixelNatief(DC: TZMDC; X, Y: Integer; Waarde: LongWord; Modus: Integer); inline;
 var
   Doel: TZMBitmap;
   Doelwaarde: LongWord;
 begin
   Doel := DC.Target;
   if (X < 0) or (Y < 0) or (X >= Doel.Width) or (Y >= Doel.Height) then Exit;
-  if not RectsContain(DC.Eff, X, Y) then Exit;
+  if not RechtlijstBevat(DC.Effectief, X, Y) then Exit;
   if Modus = R2_COPYPEN then
-    Doel.SetNative(X, Y, Waarde)
+    Doel.ZetNatief(X, Y, Waarde)
   else
   begin
-    Doelwaarde := Doel.GetNative(X, Y);
+    Doelwaarde := Doel.LeesNatief(X, Y);
     case Modus of
       R2_BLACK: Doelwaarde := 0;
-      R2_WHITE: Doelwaarde := Doel.RGBToNative($FFFFFF);
+      R2_WHITE: Doelwaarde := Doel.RGBNaarNatief($FFFFFF);
       R2_NOT: Doelwaarde := not Doelwaarde;
       R2_XORPEN: Doelwaarde := Doelwaarde xor Waarde;
       R2_NOTXORPEN: Doelwaarde := not (Doelwaarde xor Waarde);
@@ -1373,45 +1373,45 @@ begin
     else
       Doelwaarde := Waarde;
     end;
-    Doel.SetNative(X, Y, Doelwaarde and Doel.NativeMask);
+    Doel.ZetNatief(X, Y, Doelwaarde and Doel.NatiefMasker);
   end;
-  Doel.Dirty := True;
+  Doel.Vuil := True;
 end;
 
-procedure GdiSetPixel(DC: TZMDC; X, Y: Integer; Kleur: COLORREF);
+procedure GdiZetPixel(DC: TZMDC; X, Y: Integer; Kleur: COLORREF);
 begin
   if DC.Target = nil then Exit;
-  PlotNative(DC, X + DC.OffX, Y + DC.OffY, DC.ColorToNative(Kleur), R2_COPYPEN);
+  TekenPixelNatief(DC, X + DC.OorsprongX, Y + DC.OorsprongY, DC.KleurNaarNatief(Kleur), R2_COPYPEN);
 end;
 
-function GdiGetPixel(DC: TZMDC; X, Y: Integer): COLORREF;
+function GdiLeesPixel(DC: TZMDC; X, Y: Integer): COLORREF;
 var
   Doel: TZMBitmap;
 begin
   Doel := DC.Target;
   Result := CLR_INVALID;
   if Doel = nil then Exit;
-  Inc(X, DC.OffX); Inc(Y, DC.OffY);
+  Inc(X, DC.OorsprongX); Inc(Y, DC.OorsprongY);
   if (X < 0) or (Y < 0) or (X >= Doel.Width) or (Y >= Doel.Height) then Exit;
-  Result := RGBToColorRef(Doel.NativeToRGB(Doel.GetNative(X, Y)));
+  Result := RGBNaarKleurRef(Doel.NatiefNaarRGB(Doel.LeesNatief(X, Y)));
 end;
 
-procedure PenPlot(DC: TZMDC; X, Y: Integer; Waarde: LongWord; PenBreedte: Integer);
+procedure PenTekenen(DC: TZMDC; X, Y: Integer; Waarde: LongWord; PenBreedte: Integer);
 var
   I, J, Helft: Integer;
 begin
   if PenBreedte <= 1 then
-    PlotNative(DC, X, Y, Waarde, DC.St.ROP2)
+    TekenPixelNatief(DC, X, Y, Waarde, DC.St.ROP2)
   else
   begin
     Helft := PenBreedte div 2;
     for J := Y - Helft to Y - Helft + PenBreedte - 1 do
       for I := X - Helft to X - Helft + PenBreedte - 1 do
-        PlotNative(DC, I, J, Waarde, DC.St.ROP2);
+        TekenPixelNatief(DC, I, J, Waarde, DC.St.ROP2);
   end;
 end;
 
-procedure LineNative(DC: TZMDC; X1, Y1, X2, Y2: Integer; Waarde: LongWord; PenBreedte: Integer;
+procedure LijnNatief(DC: TZMDC; X1, Y1, X2, Y2: Integer; Waarde: LongWord; PenBreedte: Integer;
   Stijl: UINT; LaatstePixel: Boolean);
 var
   AfstX, AfstY, StapX, StapY, Fout, Dubbelfout, Teller: Integer;
@@ -1426,7 +1426,7 @@ begin
   begin
     if (X1 = X2) and (Y1 = Y2) then
     begin
-      if LaatstePixel then PenPlot(DC, X1, Y1, Waarde, PenBreedte);
+      if LaatstePixel then PenTekenen(DC, X1, Y1, Waarde, PenBreedte);
       Break;
     end;
     case Stijl of
@@ -1436,7 +1436,7 @@ begin
     else
       Tekenen := True;
     end;
-    if Tekenen then PenPlot(DC, X1, Y1, Waarde, PenBreedte);
+    if Tekenen then PenTekenen(DC, X1, Y1, Waarde, PenBreedte);
     Inc(Teller);
     Dubbelfout := 2 * Fout;
     if Dubbelfout >= AfstY then begin Inc(Fout, AfstY); Inc(X1, StapX); end;
@@ -1444,17 +1444,17 @@ begin
   end;
 end;
 
-procedure GdiLine(DC: TZMDC; X1, Y1, X2, Y2: Integer; LaatstePixel: Boolean);
+procedure GdiLijn(DC: TZMDC; X1, Y1, X2, Y2: Integer; LaatstePixel: Boolean);
 var
   Pen: TZMPen;
 begin
   Pen := DC.St.Pen;
   if (Pen = nil) or (Pen.Style = PS_NULL) or (DC.Target = nil) then Exit;
-  LineNative(DC, X1 + DC.OffX, Y1 + DC.OffY, X2 + DC.OffX, Y2 + DC.OffY,
-    DC.ColorToNative(Pen.Color), Pen.Width, Pen.Style, LaatstePixel);
+  LijnNatief(DC, X1 + DC.OorsprongX, Y1 + DC.OorsprongY, X2 + DC.OorsprongX, Y2 + DC.OorsprongY,
+    DC.KleurNaarNatief(Pen.Color), Pen.Width, Pen.Style, LaatstePixel);
 end;
 
-procedure GdiRectangle(DC: TZMDC; X1, Y1, X2, Y2: Integer);
+procedure GdiRechthoek(DC: TZMDC; X1, Y1, X2, Y2: Integer);
 var
   Pen: TZMPen;
   Tussen: Integer;
@@ -1465,31 +1465,31 @@ begin
   if (DC.St.Brush <> nil) and (DC.St.Brush.Style <> BS_NULL) then
   begin
     if (Pen <> nil) and (Pen.Style <> PS_NULL) then
-      GdiPatBlt(DC, X1 + 1, Y1 + 1, X2 - X1 - 2, Y2 - Y1 - 2, PATCOPY)
+      GdiPatKopieer(DC, X1 + 1, Y1 + 1, X2 - X1 - 2, Y2 - Y1 - 2, PATCOPY)
     else
-      GdiPatBlt(DC, X1, Y1, X2 - X1 - 1, Y2 - Y1 - 1, PATCOPY);
+      GdiPatKopieer(DC, X1, Y1, X2 - X1 - 1, Y2 - Y1 - 1, PATCOPY);
   end;
   if (Pen <> nil) and (Pen.Style <> PS_NULL) then
   begin
-    GdiLine(DC, X1, Y1, X2 - 1, Y1, False);
-    GdiLine(DC, X2 - 1, Y1, X2 - 1, Y2 - 1, False);
-    GdiLine(DC, X2 - 1, Y2 - 1, X1, Y2 - 1, False);
-    GdiLine(DC, X1, Y2 - 1, X1, Y1, False);
+    GdiLijn(DC, X1, Y1, X2 - 1, Y1, False);
+    GdiLijn(DC, X2 - 1, Y1, X2 - 1, Y2 - 1, False);
+    GdiLijn(DC, X2 - 1, Y2 - 1, X1, Y2 - 1, False);
+    GdiLijn(DC, X1, Y2 - 1, X1, Y1, False);
   end;
 end;
 
 { scanlijn-polygonvulling (alternatieve regel), target-coördinaten }
-procedure FillPolyNative(DC: TZMDC; const Punten: array of TPoint);
+procedure VulVeelhoekNatief(DC: TZMDC; const Punten: array of TPoint);
 var
   LaagsteY, HoogsteY, Y, I, J, Aantal, Snijpunten, Tussen: Integer;
   XSnij: array of Integer;
-  Patroon: TPatInfo;
+  Patroon: TPatroonInfo;
   X, XVan, XTot: Integer;
   YMidden, X1, Y1, X2, Y2: Double;
 begin
   Aantal := Length(Punten);
   if Aantal < 3 then Exit;
-  PreparePattern(DC, Patroon);
+  BereidPatroonVoor(DC, Patroon);
   LaagsteY := Punten[0].Y; HoogsteY := Punten[0].Y;
   for I := 1 to Aantal - 1 do
   begin
@@ -1524,13 +1524,13 @@ begin
     begin
       XVan := XSnij[I]; XTot := XSnij[I + 1];
       for X := XVan to XTot - 1 do
-        PlotNative(DC, X, Y, PatAt(Patroon, DC, X, Y), R2_COPYPEN);
+        TekenPixelNatief(DC, X, Y, PatroonOp(Patroon, DC, X, Y), R2_COPYPEN);
       Inc(I, 2);
     end;
   end;
 end;
 
-procedure GdiPolygon(DC: TZMDC; const Punten: array of TPoint; Vullen: Boolean);
+procedure GdiVeelhoek(DC: TZMDC; const Punten: array of TPoint; Vullen: Boolean);
 var
   Omgezet: array of TPoint;
   I, Aantal: Integer;
@@ -1538,24 +1538,24 @@ begin
   Aantal := Length(Punten);
   if (Aantal < 2) or (DC.Target = nil) then Exit;
   SetLength(Omgezet, Aantal);
-  for I := 0 to Aantal - 1 do Omgezet[I] := DC.LPtoT(Punten[I].X, Punten[I].Y);
+  for I := 0 to Aantal - 1 do Omgezet[I] := DC.LPnaarT(Punten[I].X, Punten[I].Y);
   if Vullen and (DC.St.Brush <> nil) and (DC.St.Brush.Style <> BS_NULL) then
-    FillPolyNative(DC, Omgezet);
+    VulVeelhoekNatief(DC, Omgezet);
   if (DC.St.Pen <> nil) and (DC.St.Pen.Style <> PS_NULL) then
     for I := 0 to Aantal - 1 do
-      LineNative(DC, Omgezet[I].X, Omgezet[I].Y, Omgezet[(I + 1) mod Aantal].X, Omgezet[(I + 1) mod Aantal].Y,
-        DC.ColorToNative(DC.St.Pen.Color), DC.St.Pen.Width, DC.St.Pen.Style, False);
+      LijnNatief(DC, Omgezet[I].X, Omgezet[I].Y, Omgezet[(I + 1) mod Aantal].X, Omgezet[(I + 1) mod Aantal].Y,
+        DC.KleurNaarNatief(DC.St.Pen.Color), DC.St.Pen.Width, DC.St.Pen.Style, False);
 end;
 
-procedure GdiPolyline(DC: TZMDC; const Punten: array of TPoint);
+procedure GdiPolylijn(DC: TZMDC; const Punten: array of TPoint);
 var
   I: Integer;
 begin
   for I := 0 to High(Punten) - 1 do
-    GdiLine(DC, Punten[I].X, Punten[I].Y, Punten[I + 1].X, Punten[I + 1].Y, False);
+    GdiLijn(DC, Punten[I].X, Punten[I].Y, Punten[I + 1].X, Punten[I + 1].Y, False);
 end;
 
-procedure EllipsePoints(X1, Y1, X2, Y2: Integer; var Punten: TZMRects);
+procedure EllipsPunten(X1, Y1, X2, Y2: Integer; var Punten: TZMRechtlijst);
 { geeft per rij het horizontale bereik [Left, Right) van de in de
   rechthoek ingeschreven ellips, in Pts (Top = Bottom - 1 = rij) }
 var
@@ -1576,46 +1576,46 @@ begin
   end;
 end;
 
-procedure GdiEllipse(DC: TZMDC; X1, Y1, X2, Y2: Integer);
+procedure GdiEllips(DC: TZMDC; X1, Y1, X2, Y2: Integer);
 var
-  Rijen: TZMRects;
+  Rijen: TZMRechtlijst;
   I, X: Integer;
-  Patroon: TPatInfo;
+  Patroon: TPatroonInfo;
   OfsX, OfsY: Integer;
   Waarde: LongWord;
   PenBreedte: Integer;
   Vorige: TRect;
 begin
   if DC.Target = nil then Exit;
-  OfsX := DC.OffX; OfsY := DC.OffY;
-  EllipsePoints(X1 + OfsX, Y1 + OfsY, X2 + OfsX, Y2 + OfsY, Rijen);
+  OfsX := DC.OorsprongX; OfsY := DC.OorsprongY;
+  EllipsPunten(X1 + OfsX, Y1 + OfsY, X2 + OfsX, Y2 + OfsY, Rijen);
   if (DC.St.Brush <> nil) and (DC.St.Brush.Style <> BS_NULL) then
   begin
-    PreparePattern(DC, Patroon);
+    BereidPatroonVoor(DC, Patroon);
     for I := 0 to High(Rijen) do
       for X := Rijen[I].Left to Rijen[I].Right - 1 do
-        PlotNative(DC, X, Rijen[I].Top, PatAt(Patroon, DC, X, Rijen[I].Top), R2_COPYPEN);
+        TekenPixelNatief(DC, X, Rijen[I].Top, PatroonOp(Patroon, DC, X, Rijen[I].Top), R2_COPYPEN);
   end;
   if (DC.St.Pen <> nil) and (DC.St.Pen.Style <> PS_NULL) and (Length(Rijen) > 0) then
   begin
-    Waarde := DC.ColorToNative(DC.St.Pen.Color);
+    Waarde := DC.KleurNaarNatief(DC.St.Pen.Color);
     PenBreedte := DC.St.Pen.Width;
     for I := 0 to High(Rijen) do
     begin
       if I = 0 then Vorige := Rijen[I] else Vorige := Rijen[I - 1];
       { linker- en rechterrand, verbonden met de vorige rij }
       for X := Min(Rijen[I].Left, Vorige.Left) to Max(Rijen[I].Left, Vorige.Left) do
-        PenPlot(DC, X, Rijen[I].Top, Waarde, PenBreedte);
+        PenTekenen(DC, X, Rijen[I].Top, Waarde, PenBreedte);
       for X := Min(Rijen[I].Right, Vorige.Right) - 1 to Max(Rijen[I].Right, Vorige.Right) - 1 do
-        PenPlot(DC, X, Rijen[I].Top, Waarde, PenBreedte);
+        PenTekenen(DC, X, Rijen[I].Top, Waarde, PenBreedte);
     end;
-    for X := Rijen[0].Left to Rijen[0].Right - 1 do PenPlot(DC, X, Rijen[0].Top, Waarde, PenBreedte);
+    for X := Rijen[0].Left to Rijen[0].Right - 1 do PenTekenen(DC, X, Rijen[0].Top, Waarde, PenBreedte);
     I := High(Rijen);
-    for X := Rijen[I].Left to Rijen[I].Right - 1 do PenPlot(DC, X, Rijen[I].Top, Waarde, PenBreedte);
+    for X := Rijen[I].Left to Rijen[I].Right - 1 do PenTekenen(DC, X, Rijen[I].Top, Waarde, PenBreedte);
   end;
 end;
 
-procedure GdiRoundRect(DC: TZMDC; X1, Y1, X2, Y2, RondBreedte, RondHoogte: Integer);
+procedure GdiAfrondRechthoek(DC: TZMDC; X1, Y1, X2, Y2, RondBreedte, RondHoogte: Integer);
 var
   Punten: array of TPoint;
   Aantal, I, Stappen: Integer;
@@ -1634,7 +1634,7 @@ begin
   RX := RondBreedte / 2; RY := RondHoogte / 2;
   if (RX < 1) or (RY < 1) then
   begin
-    GdiRectangle(DC, X1, Y1, X2, Y2);
+    GdiRechthoek(DC, X1, Y1, X2, Y2);
     Exit;
   end;
   if RX > (X2 - X1) / 2 then RX := (X2 - X1) / 2;
@@ -1648,23 +1648,23 @@ begin
   Hoekpunt(X2 - 1 - RX, Y2 - 1 - RY, 3 * Pi / 2);
   I := Aantal;
   SetLength(Punten, I);
-  GdiPolygon(DC, Punten, True);
+  GdiVeelhoek(DC, Punten, True);
 end;
 
-procedure GdiFocusRect(DC: TZMDC; const R: TRect);
+procedure GdiFocusRechthoek(DC: TZMDC; const R: TRect);
 var
   X, Y, OfsX, OfsY: Integer;
   Doel: TZMBitmap;
   procedure Inverteer(PX, PY: Integer);
   begin
     if (PX < 0) or (PY < 0) or (PX >= Doel.Width) or (PY >= Doel.Height) then Exit;
-    if not RectsContain(DC.Eff, PX, PY) then Exit;
-    Doel.SetNative(PX, PY, (not Doel.GetNative(PX, PY)) and Doel.NativeMask);
+    if not RechtlijstBevat(DC.Effectief, PX, PY) then Exit;
+    Doel.ZetNatief(PX, PY, (not Doel.LeesNatief(PX, PY)) and Doel.NatiefMasker);
   end;
 begin
   Doel := DC.Target;
   if Doel = nil then Exit;
-  OfsX := DC.OffX; OfsY := DC.OffY;
+  OfsX := DC.OorsprongX; OfsY := DC.OorsprongY;
   for X := R.Left to R.Right - 1 do
     if (X + R.Top) and 1 = 0 then
     begin
@@ -1677,29 +1677,29 @@ begin
       Inverteer(R.Left + OfsX, Y + OfsY);
       if R.Right - 1 > R.Left then Inverteer(R.Right - 1 + OfsX, Y + OfsY);
     end;
-  Doel.Dirty := True;
+  Doel.Vuil := True;
 end;
 
-procedure GdiFloodFill(DC: TZMDC; X, Y: Integer; Kleur: COLORREF; Oppervlak: Boolean);
+procedure GdiVulGebied(DC: TZMDC; X, Y: Integer; Kleur: COLORREF; Oppervlak: Boolean);
 var
   Doel: TZMBitmap;
   Referentie, Waarde: LongWord;
   Stapel: array of TPoint;
   Stapelpos: Integer;
   Punt: TPoint;
-  Patroon: TPatInfo;
+  Patroon: TPatroonInfo;
   Bezocht: array of Boolean;
   function Overeenkomt(PX, PY: Integer): Boolean;
   var Natief: LongWord;
   begin
-    Natief := Doel.GetNative(PX, PY);
+    Natief := Doel.LeesNatief(PX, PY);
     if Oppervlak then Result := Natief = Referentie else Result := Natief <> Referentie;
   end;
   procedure Duw(PX, PY: Integer);
   begin
     if (PX < 0) or (PY < 0) or (PX >= Doel.Width) or (PY >= Doel.Height) then Exit;
     if Bezocht[PY * Doel.Width + PX] then Exit;
-    if not RectsContain(DC.Eff, PX, PY) then Exit;
+    if not RechtlijstBevat(DC.Effectief, PX, PY) then Exit;
     if not Overeenkomt(PX, PY) then Exit;
     Bezocht[PY * Doel.Width + PX] := True;
     if Stapelpos >= Length(Stapel) then SetLength(Stapel, Length(Stapel) * 2 + 64);
@@ -1709,9 +1709,9 @@ var
 begin
   Doel := DC.Target;
   if Doel = nil then Exit;
-  Inc(X, DC.OffX); Inc(Y, DC.OffY);
-  Referentie := DC.ColorToNative(Kleur);
-  PreparePattern(DC, Patroon);
+  Inc(X, DC.OorsprongX); Inc(Y, DC.OorsprongY);
+  Referentie := DC.KleurNaarNatief(Kleur);
+  BereidPatroonVoor(DC, Patroon);
   SetLength(Bezocht, Doel.Width * Doel.Height);
   Stapelpos := 0;
   Duw(X, Y);
@@ -1719,27 +1719,27 @@ begin
   begin
     Dec(Stapelpos);
     Punt := Stapel[Stapelpos];
-    Waarde := PatAt(Patroon, DC, Punt.X, Punt.Y);
-    Doel.SetNative(Punt.X, Punt.Y, Waarde);
+    Waarde := PatroonOp(Patroon, DC, Punt.X, Punt.Y);
+    Doel.ZetNatief(Punt.X, Punt.Y, Waarde);
     Duw(Punt.X + 1, Punt.Y); Duw(Punt.X - 1, Punt.Y); Duw(Punt.X, Punt.Y + 1); Duw(Punt.X, Punt.Y - 1);
   end;
-  Doel.Dirty := True;
+  Doel.Vuil := True;
 end;
 
 { ---------------------------------------------------------------- tekst }
 
-function GdiFace(DC: TZMDC): PZMFace;
+function GdiGezicht(DC: TZMDC): PZMGezicht;
 begin
-  if (DC.St.Font <> nil) and (DC.St.Font.Face <> nil) then
-    Result := DC.St.Font.Face
+  if (DC.St.Font <> nil) and (DC.St.Font.Lettergezicht <> nil) then
+    Result := DC.St.Font.Lettergezicht
   else
-    Result := TZMFontObj(StockObjects[SYSTEM_FONT]).Face;
+    Result := TZMLetterObj(StandaardObjecten[SYSTEM_FONT]).Lettergezicht;
 end;
 
 { Net als de DIB-engine van Wine: TrueType-lettertypen worden anti-aliased (GGO_GRAY4) op DIB's
   met meer dan 8 bpp; bitmaplettertypen (MS Sans Serif, System, ...) en doelen met <= 8 bpp
   krijgen 1-bit glyphs. De voortgangsbreedtes van de glyphs verschillen tussen beide. }
-function IsBitmapFontName(const Naam: string): Boolean;
+function IsBitmapLetterNaam(const Naam: string): Boolean;
 var
   Genormeerd: string;
 begin
@@ -1749,9 +1749,9 @@ begin
     (Genormeerd = 'roman') or (Genormeerd = 'script') or (Genormeerd = '');
 end;
 
-function GdiUseAA(DC: TZMDC): Boolean;
+function GdiGebruikAA(DC: TZMDC): Boolean;
 var
-  Lettertype: TZMFontObj;
+  Lettertype: TZMLetterObj;
 begin
   Result := False;
   { anti-aliasing vereist een doel met > 8 bpp en een grootte die de gasp-tabel van het lettertype
@@ -1759,62 +1759,62 @@ begin
   if (DC.Target = nil) or (DC.Target.BPP <= 8) then Exit;
   Lettertype := DC.St.Font;
   if (Lettertype = nil) or (Lettertype.LF.lfQuality = NONANTIALIASED_QUALITY) then Exit;
-  if Lettertype.BitmapFont < 0 then
-    if IsBitmapFontName(StrPas(Lettertype.LF.lfFaceName)) then Lettertype.BitmapFont := 1 else Lettertype.BitmapFont := 0;
-  Result := (Lettertype.BitmapFont = 0) and not ZMNoAntialias and GdiFace(DC)^.Gray;
+  if Lettertype.BitmapLetter < 0 then
+    if IsBitmapLetterNaam(StrPas(Lettertype.LF.lfFaceName)) then Lettertype.BitmapLetter := 1 else Lettertype.BitmapLetter := 0;
+  Result := (Lettertype.BitmapLetter = 0) and not ZMGeenAntialias and GdiGezicht(DC)^.Grijstint;
 end;
 
-function GdiGlyphs(DC: TZMDC): PZMGlyphs;
+function GdiGlyfen(DC: TZMDC): PZMTekenbeelden;
 begin
-  if GdiUseAA(DC) then Result := @GdiFace(DC)^.AAGlyphs else Result := @GdiFace(DC)^.Glyphs;
+  if GdiGebruikAA(DC) then Result := @GdiGezicht(DC)^.AATekenbeelden else Result := @GdiGezicht(DC)^.Tekenbeelden;
 end;
 
 { Tekstafmetingen gebruiken de normaal gehinte voortgangsbreedtes van TrueType-lettertypen, ook waar de
   glyphs 1-bit getekend worden met de (smallere of bredere) mono-voortgangsbreedtes: Wine meet
   met GGO_METRICS (FT_LOAD_DEFAULT) en tekent met FT_LOAD_TARGET_MONO. }
-function GdiExtentGlyphs(DC: TZMDC): PZMGlyphs;
+function GdiOmvangGlyfen(DC: TZMDC): PZMTekenbeelden;
 var
-  Lettertype: TZMFontObj;
+  Lettertype: TZMLetterObj;
 begin
   Lettertype := DC.St.Font;
   if Lettertype <> nil then
   begin
-    if Lettertype.BitmapFont < 0 then
-      if IsBitmapFontName(StrPas(Lettertype.LF.lfFaceName)) then Lettertype.BitmapFont := 1 else Lettertype.BitmapFont := 0;
-    if (Lettertype.BitmapFont = 0) and not ZMNoAntialias then Exit(@GdiFace(DC)^.AAGlyphs);
+    if Lettertype.BitmapLetter < 0 then
+      if IsBitmapLetterNaam(StrPas(Lettertype.LF.lfFaceName)) then Lettertype.BitmapLetter := 1 else Lettertype.BitmapLetter := 0;
+    if (Lettertype.BitmapLetter = 0) and not ZMGeenAntialias then Exit(@GdiGezicht(DC)^.AATekenbeelden);
   end;
-  Result := @GdiFace(DC)^.Glyphs;
+  Result := @GdiGezicht(DC)^.Tekenbeelden;
 end;
 
-function GdiTextWidth(DC: TZMDC; Tekst: PAnsiChar; Aantal: Integer): Integer;
+function GdiTekstBreedte(DC: TZMDC; Tekst: PAnsiChar; Aantal: Integer): Integer;
 var
   I: Integer;
-  Glyfen: PZMGlyphs;
+  Glyfen: PZMTekenbeelden;
 begin
   Result := 0;
   if Tekst = nil then Exit;
-  Glyfen := GdiExtentGlyphs(DC);
+  Glyfen := GdiOmvangGlyfen(DC);
   for I := 0 to Aantal - 1 do
-    Inc(Result, Glyfen^[Byte(Tekst[I])].Adv + DC.St.CharExtra);
+    Inc(Result, Glyfen^[Byte(Tekst[I])].Voortgang + DC.St.CharExtra);
 end;
 
 { Wine dibdrv: anti-aliased glyph-pixels mengen met een gammaverloop }
 const
-  AARamp: array[0..16] of Byte = (0, $4d, $68, $7c, $8c, $9a, $a7, $b2, $bd, $c7, $d0, $d9,
+  AAVerloop: array[0..16] of Byte = (0, $4d, $68, $7c, $8c, $9a, $a7, $b2, $bd, $c7, $d0, $d9,
     $e1, $e9, $f0, $f8, $ff);
 
-function AAComp(Doelkleur, Tekstkleur, Niveau: Integer): Integer; inline;
+function AACombineer(Doelkleur, Tekstkleur, Niveau: Integer): Integer; inline;
 var
   MinKleur, MaxKleur: Integer;
 begin
-  MinKleur := (AARamp[Niveau] * Tekstkleur) div $FF;
-  MaxKleur := AARamp[16 - Niveau] + (($FF - AARamp[16 - Niveau]) * Tekstkleur) div $FF;
+  MinKleur := (AAVerloop[Niveau] * Tekstkleur) div $FF;
+  MaxKleur := AAVerloop[16 - Niveau] + (($FF - AAVerloop[16 - Niveau]) * Tekstkleur) div $FF;
   if Doelkleur = Tekstkleur then Result := Doelkleur
   else if Doelkleur > Tekstkleur then Result := Tekstkleur + ((Doelkleur - Tekstkleur) * (MaxKleur - Tekstkleur)) div ($FF - Tekstkleur)
   else Result := Tekstkleur - ((Tekstkleur - Doelkleur) * (Tekstkleur - MinKleur)) div Tekstkleur;
 end;
 
-procedure DrawGlyphAA(DC: TZMDC; const Glyf: TZMGlyph; X, Y: Integer; RGB: LongWord; const Knip: TZMRects);
+procedure TekenGlyfAA(DC: TZMDC; const Glyf: TZMTekenbeeld; X, Y: Integer; RGB: LongWord; const Knip: TZMRechtlijst);
 var
   I, PX, PY, Dekking: Integer;
   GlyfR, KnipR: TRect;
@@ -1826,7 +1826,7 @@ begin
   if (Glyf.W <= 0) or (Glyf.H <= 0) or (Glyf.Data = nil) then Exit;
   Doel := DC.Target;
   TekstR := (RGB shr 16) and $FF; TekstG := (RGB shr 8) and $FF; TekstB := RGB and $FF;
-  GlyfR := Rect(X + Glyf.XOff, Y + Glyf.YOff, X + Glyf.XOff + Glyf.W, Y + Glyf.YOff + Glyf.H);
+  GlyfR := Rect(X + Glyf.XVerschuiving, Y + Glyf.YVerschuiving, X + Glyf.XVerschuiving + Glyf.W, Y + Glyf.YVerschuiving + Glyf.H);
   for I := 0 to High(Knip) do
   begin
     KnipR := Knip[I];
@@ -1843,20 +1843,20 @@ begin
         Dekking := Rij[PX - GlyfR.Left];
         if Dekking <= 1 then Continue;   { zoals Wine: niveau 0 en 1 laten de pixel staan }
         if Dekking >= 16 then
-          Doel.SetNative(PX, PY, Doel.RGBToNative(RGB))
+          Doel.ZetNatief(PX, PY, Doel.RGBNaarNatief(RGB))
         else
         begin
-          Doelwaarde := Doel.NativeToRGB(Doel.GetNative(PX, PY));
-          Doelwaarde := (LongWord(AAComp((Doelwaarde shr 16) and $FF, TekstR, Dekking)) shl 16) or
-            (LongWord(AAComp((Doelwaarde shr 8) and $FF, TekstG, Dekking)) shl 8) or LongWord(AAComp(Doelwaarde and $FF, TekstB, Dekking));
-          Doel.SetNative(PX, PY, Doel.RGBToNative(Doelwaarde));
+          Doelwaarde := Doel.NatiefNaarRGB(Doel.LeesNatief(PX, PY));
+          Doelwaarde := (LongWord(AACombineer((Doelwaarde shr 16) and $FF, TekstR, Dekking)) shl 16) or
+            (LongWord(AACombineer((Doelwaarde shr 8) and $FF, TekstG, Dekking)) shl 8) or LongWord(AACombineer(Doelwaarde and $FF, TekstB, Dekking));
+          Doel.ZetNatief(PX, PY, Doel.RGBNaarNatief(Doelwaarde));
         end;
       end;
     end;
   end;
 end;
 
-procedure DrawGlyph(DC: TZMDC; const Glyf: TZMGlyph; X, Y: Integer; Waarde: LongWord; const Knip: TZMRects);
+procedure TekenGlyf(DC: TZMDC; const Glyf: TZMTekenbeeld; X, Y: Integer; Waarde: LongWord; const Knip: TZMRechtlijst);
 var
   I, GlyfRij, GlyfKol, Rijlengte, PX, PY: Integer;
   GlyfR, KnipR: TRect;
@@ -1866,7 +1866,7 @@ begin
   if (Glyf.W <= 0) or (Glyf.H <= 0) or (Glyf.Data = nil) then Exit;
   Doel := DC.Target;
   Rijlengte := (Glyf.W + 7) div 8;
-  GlyfR := Rect(X + Glyf.XOff, Y + Glyf.YOff, X + Glyf.XOff + Glyf.W, Y + Glyf.YOff + Glyf.H);
+  GlyfR := Rect(X + Glyf.XVerschuiving, Y + Glyf.YVerschuiving, X + Glyf.XVerschuiving + Glyf.W, Y + Glyf.YVerschuiving + Glyf.H);
   for I := 0 to High(Knip) do
   begin
     KnipR := Knip[I];
@@ -1883,87 +1883,87 @@ begin
       begin
         GlyfKol := PX - GlyfR.Left;
         if Rij[GlyfKol shr 3] and ($80 shr (GlyfKol and 7)) <> 0 then
-          Doel.SetNative(PX, PY, Waarde);
+          Doel.ZetNatief(PX, PY, Waarde);
       end;
     end;
   end;
 end;
 
-procedure GdiTextOut(DC: TZMDC; X, Y: Integer; Tekst: PAnsiChar; Aantal: Integer;
+procedure GdiTekstUit(DC: TZMDC; X, Y: Integer; Tekst: PAnsiChar; Aantal: Integer;
   MetVulling: Boolean; KnipR: PRect; VulR: PRect);
 var
-  Gezicht: PZMFace;
+  Gezicht: PZMGezicht;
   Breedte, I, TekstX, TekstY, OfsX, OfsY: Integer;
-  Knip: TZMRects;
+  Knip: TZMRechtlijst;
   Waarde: LongWord;
   Achtergrond: TRect;
   Uitlijning: UINT;
   Letterdef: TLogFont;
-  Glyfen: PZMGlyphs;
+  Glyfen: PZMTekenbeelden;
   Antialias: Boolean;
 begin
   if (DC.Target = nil) or (DC.Target.Bits = nil) then Exit;
-  Gezicht := GdiFace(DC);
-  Glyfen := GdiGlyphs(DC);
-  Antialias := GdiUseAA(DC);
-  Breedte := GdiTextWidth(DC, Tekst, Aantal);
-  Uitlijning := DC.St.TextAlign;
+  Gezicht := GdiGezicht(DC);
+  Glyfen := GdiGlyfen(DC);
+  Antialias := GdiGebruikAA(DC);
+  Breedte := GdiTekstBreedte(DC, Tekst, Aantal);
+  Uitlijning := DC.St.TekstUitlijning;
   if Uitlijning and TA_UPDATECP <> 0 then
   begin
-    X := DC.St.CurPos.X;
-    Y := DC.St.CurPos.Y;
+    X := DC.St.HuidigePositie.X;
+    Y := DC.St.HuidigePositie.Y;
   end;
   case Uitlijning and (TA_CENTER) of
     TA_RIGHT: Dec(X, Breedte);
     TA_CENTER: Dec(X, Breedte div 2);
   end;
-  if Uitlijning and TA_BASELINE = TA_BASELINE then Dec(Y, Gezicht^.Ascent)
+  if Uitlijning and TA_BASELINE = TA_BASELINE then Dec(Y, Gezicht^.Opstijging)
   else if Uitlijning and TA_BOTTOM <> 0 then Dec(Y, Gezicht^.Height);
   if Uitlijning and TA_UPDATECP <> 0 then
-    DC.St.CurPos.X := X + Breedte;
-  OfsX := DC.OffX; OfsY := DC.OffY;
-  Knip := DC.Eff;
+    DC.St.HuidigePositie.X := X + Breedte;
+  OfsX := DC.OorsprongX; OfsY := DC.OorsprongY;
+  Knip := DC.Effectief;
   if KnipR <> nil then
-    Knip := RectsIntersectRect(Knip, Rect(KnipR^.Left + OfsX, KnipR^.Top + OfsY, KnipR^.Right + OfsX, KnipR^.Bottom + OfsY));
+    Knip := RechtlijstSnijdRechthoek(Knip, Rect(KnipR^.Left + OfsX, KnipR^.Top + OfsY, KnipR^.Right + OfsX, KnipR^.Bottom + OfsY));
   if VulR <> nil then
-    FillNative(DC, Rect(VulR^.Left + OfsX, VulR^.Top + OfsY, VulR^.Right + OfsX, VulR^.Bottom + OfsY),
-      DC.ColorToNative(DC.St.BkColor));
+    VulNatief(DC, Rect(VulR^.Left + OfsX, VulR^.Top + OfsY, VulR^.Right + OfsX, VulR^.Bottom + OfsY),
+      DC.KleurNaarNatief(DC.St.BkColor));
   if MetVulling and (DC.St.BkMode = OPAQUE) then
   begin
     Achtergrond := Rect(X + OfsX, Y + OfsY, X + OfsX + Breedte, Y + OfsY + Gezicht^.Height);
     if KnipR <> nil then
       IntersectRect(Achtergrond, Achtergrond, Rect(KnipR^.Left + OfsX, KnipR^.Top + OfsY, KnipR^.Right + OfsX, KnipR^.Bottom + OfsY));
-    FillNative(DC, Achtergrond, DC.ColorToNative(DC.St.BkColor));
+    VulNatief(DC, Achtergrond, DC.KleurNaarNatief(DC.St.BkColor));
   end;
-  Waarde := DC.ColorToNative(DC.St.TextColor);
+  Waarde := DC.KleurNaarNatief(DC.St.TekstKleurVoor);
   TekstX := X + OfsX;
   TekstY := Y + OfsY;
   for I := 0 to Aantal - 1 do
   begin
     if Antialias then
-      DrawGlyphAA(DC, Glyfen^[Byte(Tekst[I])], TekstX, TekstY, DC.ColorToRGB(DC.St.TextColor), Knip)
+      TekenGlyfAA(DC, Glyfen^[Byte(Tekst[I])], TekstX, TekstY, DC.ColorToRGB(DC.St.TekstKleurVoor), Knip)
     else
-      DrawGlyph(DC, Glyfen^[Byte(Tekst[I])], TekstX, TekstY, Waarde, Knip);
-    Inc(TekstX, Glyfen^[Byte(Tekst[I])].Adv + DC.St.CharExtra);
+      TekenGlyf(DC, Glyfen^[Byte(Tekst[I])], TekstX, TekstY, Waarde, Knip);
+    Inc(TekstX, Glyfen^[Byte(Tekst[I])].Voortgang + DC.St.CharExtra);
   end;
   if DC.St.Font <> nil then
   begin
     Letterdef := DC.St.Font.LF;
     if Letterdef.lfUnderline <> 0 then
-      FillNative(DC, RectsBox(RectsIntersectRect(Knip,
-        Rect(X + OfsX, Y + OfsY + Gezicht^.Ascent + 1, X + OfsX + Breedte, Y + OfsY + Gezicht^.Ascent + 2))), Waarde);
+      VulNatief(DC, RechtlijstOmhulling(RechtlijstSnijdRechthoek(Knip,
+        Rect(X + OfsX, Y + OfsY + Gezicht^.Opstijging + 1, X + OfsX + Breedte, Y + OfsY + Gezicht^.Opstijging + 2))), Waarde);
     if Letterdef.lfStrikeOut <> 0 then
-      FillNative(DC, RectsBox(RectsIntersectRect(Knip,
-        Rect(X + OfsX, Y + OfsY + Gezicht^.Ascent * 2 div 3, X + OfsX + Breedte, Y + OfsY + Gezicht^.Ascent * 2 div 3 + 1))), Waarde);
+      VulNatief(DC, RechtlijstOmhulling(RechtlijstSnijdRechthoek(Knip,
+        Rect(X + OfsX, Y + OfsY + Gezicht^.Opstijging * 2 div 3, X + OfsX + Breedte, Y + OfsY + Gezicht^.Opstijging * 2 div 3 + 1))), Waarde);
   end;
-  DC.Target.Dirty := True;
+  DC.Target.Vuil := True;
 end;
 
-function GdiDrawText(DC: TZMDC; Tekst: PAnsiChar; Aantal: Integer; var R: TRect; Opmaak: UINT): Integer;
+function GdiTekenTekst(DC: TZMDC; Tekst: PAnsiChar; Aantal: Integer; var R: TRect; Opmaak: UINT): Integer;
 type
   TLine = record Start, Len: Integer; end;
 var
-  Gezicht: PZMFace;
+  Gezicht: PZMGezicht;
   Invoer: AnsiString;
   Regels: array of TLine;
   I, RegelHoogte, MaxBreedte, Breedte, Y, X, Positie, LaatsteSpatie, RegelStart, HuidigeBreedte, TotaleHoogte: Integer;
@@ -1978,7 +1978,7 @@ var
   end;
   function TekenBreedte(Index: Integer): Integer;
   begin
-    Result := GdiExtentGlyphs(DC)^[Byte(Invoer[Index])].Adv + DC.St.CharExtra;
+    Result := GdiOmvangGlyfen(DC)^[Byte(Invoer[Index])].Voortgang + DC.St.CharExtra;
   end;
   procedure VerwijderPrefix(var Tekstregel: AnsiString; var Onderpos: Integer);
   var J: Integer;
@@ -1998,7 +1998,7 @@ var
   end;
 begin
   Result := 0;
-  Gezicht := GdiFace(DC);
+  Gezicht := GdiGezicht(DC);
   if Aantal < 0 then Aantal := StrLen(Tekst);
   SetString(Invoer, Tekst, Aantal);
   if Opmaak and DT_EXPANDTABS <> 0 then
@@ -2066,7 +2066,7 @@ begin
     begin
       Regeltekst := Copy(Invoer, Regels[I].Start, Regels[I].Len);
       VerwijderPrefix(Regeltekst, Onderlijn);
-      Breedte := GdiTextWidth(DC, PAnsiChar(Regeltekst), Length(Regeltekst));
+      Breedte := GdiTekstBreedte(DC, PAnsiChar(Regeltekst), Length(Regeltekst));
       if Breedte > MaxBreedte then MaxBreedte := Breedte;
     end;
     if not Afbreken or (MaxBreedte > R.Right - R.Left) or True then
@@ -2086,19 +2086,19 @@ begin
   begin
     Regeltekst := Copy(Invoer, Regels[I].Start, Regels[I].Len);
     VerwijderPrefix(Regeltekst, Onderlijn);
-    Breedte := GdiTextWidth(DC, PAnsiChar(Regeltekst), Length(Regeltekst));
+    Breedte := GdiTekstBreedte(DC, PAnsiChar(Regeltekst), Length(Regeltekst));
     if Opmaak and DT_CENTER <> 0 then X := R.Left + (R.Right - R.Left - Breedte) div 2
     else if Opmaak and DT_RIGHT <> 0 then X := R.Right - Breedte
     else X := R.Left;
     if Opmaak and DT_NOCLIP <> 0 then
-      GdiTextOut(DC, X, Y, PAnsiChar(Regeltekst), Length(Regeltekst), True, nil, nil)
+      GdiTekstUit(DC, X, Y, PAnsiChar(Regeltekst), Length(Regeltekst), True, nil, nil)
     else
-      GdiTextOut(DC, X, Y, PAnsiChar(Regeltekst), Length(Regeltekst), True, @R, nil);
+      GdiTekstUit(DC, X, Y, PAnsiChar(Regeltekst), Length(Regeltekst), True, @R, nil);
     if Onderlijn > 0 then
     begin
-      Positie := X + GdiTextWidth(DC, PAnsiChar(Regeltekst), Onderlijn - 1);
-      GdiFillSolid(DC, Rect(Positie, Y + Gezicht^.Ascent + 1, Positie + GdiExtentGlyphs(DC)^[Byte(Regeltekst[Onderlijn])].Adv,
-        Y + Gezicht^.Ascent + 2), DC.St.TextColor);
+      Positie := X + GdiTekstBreedte(DC, PAnsiChar(Regeltekst), Onderlijn - 1);
+      GdiVulEffen(DC, Rect(Positie, Y + Gezicht^.Opstijging + 1, Positie + GdiOmvangGlyfen(DC)^[Byte(Regeltekst[Onderlijn])].Voortgang,
+        Y + Gezicht^.Opstijging + 2), DC.St.TekstKleurVoor);
     end;
     Inc(Y, RegelHoogte);
   end;
@@ -2107,7 +2107,7 @@ end;
 
 { ---------------------------------------------------------------- standaardobjecten }
 
-procedure InitStockObjects;
+procedure InitStandaardObjecten;
 const
   Sys: array[0..28] of COLORREF = (
     $C8D0D4, $808000, $800000, $808080, $C0C0C0, $FFFFFF, $000000, $000000, $000000,
@@ -2115,19 +2115,19 @@ const
     $000000, $C0C0C0, $FFFFFF, $000000, $DFDFDF, $000000, $E1FFFF, $B5B5B5, $800000,
     $D08410, $C0C0C0);
 var
-  Kwast: TZMBrush;
+  Kwast: TZMKwast;
   Pen: TZMPen;
   Letterdef: TLogFont;
-  Palet: TZMPalette;
+  Palet: TZMPalet;
   I: Integer;
   procedure ZetStock(Nr: Integer; Ding: TZMGdiObj);
   begin
-    Ding.IsStock := True;
-    StockObjects[Nr] := Ding;
+    Ding.IsVoorraadObject := True;
+    StandaardObjecten[Nr] := Ding;
   end;
-  function MaakKwast(Stijl: UINT; Kleur: COLORREF): TZMBrush;
+  function MaakKwast(Stijl: UINT; Kleur: COLORREF): TZMKwast;
   begin
-    Result := TZMBrush.Create;
+    Result := TZMKwast.Create;
     Result.Style := Stijl;
     Result.Color := Kleur;
   end;
@@ -2137,17 +2137,17 @@ var
     Result.Style := Stijl;
     Result.Color := Kleur;
   end;
-  function MaakLetter(Hoogte, Gewicht: Integer; const Naam: AnsiString; Lettersoort: Byte): TZMFontObj;
+  function MaakLetter(Hoogte, Gewicht: Integer; const Naam: AnsiString; Lettersoort: Byte): TZMLetterObj;
   begin
     FillChar(Letterdef, SizeOf(Letterdef), 0);
     Letterdef.lfHeight := Hoogte;
     Letterdef.lfWeight := Gewicht;
     Letterdef.lfPitchAndFamily := Lettersoort;
     StrPLCopy(Letterdef.lfFaceName, Naam, 31);
-    Result := TZMFontObj.Create(Letterdef);
+    Result := TZMLetterObj.Create(Letterdef);
   end;
 begin
-  if StockObjects[0] <> nil then Exit;
+  if StandaardObjecten[0] <> nil then Exit;
   ZetStock(WHITE_BRUSH, MaakKwast(BS_SOLID, $FFFFFF));
   ZetStock(LTGRAY_BRUSH, MaakKwast(BS_SOLID, $C0C0C0));
   ZetStock(GRAY_BRUSH, MaakKwast(BS_SOLID, $808080));
@@ -2163,28 +2163,28 @@ begin
   ZetStock(ANSI_VAR_FONT, MaakLetter(-11, 400, 'MS Sans Serif', VARIABLE_PITCH));
   ZetStock(SYSTEM_FONT, MaakLetter(16, 700, 'System', VARIABLE_PITCH));
   ZetStock(DEVICE_DEFAULT_FONT, MaakLetter(16, 700, 'System', VARIABLE_PITCH));
-  Palet := TZMPalette.Create;
+  Palet := TZMPalet.Create;
   Palet.Count := 20;
   begin
     { de 20 vaste systeemkleuren }
-    HalftoneEntries(Palet.Entries);
+    HalftoneIngangen(Palet.Entries);
     for I := 0 to 9 do Palet.Entries[10 + I] := Palet.Entries[246 + I];
   end;
   ZetStock(DEFAULT_PALETTE, Palet);
   ZetStock(SYSTEM_FIXED_FONT, MaakLetter(-12, 400, 'Courier New', FIXED_PITCH));
   ZetStock(DEFAULT_GUI_FONT, MaakLetter(-11, 400, 'MS Sans Serif', VARIABLE_PITCH));
-  for I := 0 to High(SysColors) do
+  for I := 0 to High(SysteemKleuren) do
   begin
-    if I <= High(Sys) then SysColors[I] := Sys[I] else SysColors[I] := 0;
-    Kwast := MaakKwast(BS_SOLID, SysColors[I]);
-    Kwast.IsStock := True;
-    SysColorBrushes[I] := Kwast;
+    if I <= High(Sys) then SysteemKleuren[I] := Sys[I] else SysteemKleuren[I] := 0;
+    Kwast := MaakKwast(BS_SOLID, SysteemKleuren[I]);
+    Kwast.IsVoorraadObject := True;
+    SysteemKleurKwasten[I] := Kwast;
   end;
   Pen := nil;
   if Pen = nil then ;
 end;
 
 initialization
-  ZMNoAntialias := GetEnvironmentVariable('ZM_NO_AA') = '1';
-  InitStockObjects;
+  ZMGeenAntialias := GetEnvironmentVariable('ZM_NO_AA') = '1';
+  InitStandaardObjecten;
 end.
