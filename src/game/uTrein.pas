@@ -19,13 +19,13 @@ type
   TTrein = class(TObject)
   private
     FSprite: TSprite;              { +0x04  TView.TreinSprite; Data is een TPos met de cel }
-    FWorld: TWorld;                { +0x08 }
-    FCell: TCell;                  { +0x0C  huidige cel (de hoofdcel van een bocht) }
+    FWereld: TWorld;                { +0x08 }
+    FCel: TCell;                  { +0x0C  huidige cel (de hoofdcel van een bocht) }
     FNr: Byte;                     { +0x10  spoorstuk (IsSpoor): 5/10 recht, 3/6/9/12 bocht }
     FRichting: Boolean;            { +0x11  rijrichting }
     FActief: Boolean;              { +0x12  rijdt (False: zoek een nieuw startpunt) }
     FStap: Integer;                { +0x14  stap binnen het pad van de huidige cel }
-    FReserved18: Integer;          { +0x18  ingesteld op 0 / -1, nooit gelezen }
+    FGereserveerd18: Integer;          { +0x18  ingesteld op 0 / -1, nooit gelezen }
     FX: Integer;                   { +0x1C  wereldpositie }
     FY: Integer;                   { +0x20 }
     FWacht: Integer;               { +0x24  stappen voordat de trein weer bij een station mag stoppen }
@@ -37,9 +37,9 @@ type
     procedure Stop;
   public
     constructor Create(ASprite: TSprite; AWorld: TWorld);
-    procedure Tick;
+    procedure Tik;
     property Sprite: TSprite read FSprite;
-    property World: TWorld read FWorld;
+    property Wereld: TWorld read FWereld;
   end;
 
   { Overgang van het ene spoorstuk naar het volgende (16 bytes) }
@@ -125,8 +125,8 @@ var
 begin
   FSprite := ASprite;
   FSprite.Visible := False;
-  FWorld := AWorld;
-  FReserved18 := 0;
+  FWereld := AWorld;
+  FGereserveerd18 := 0;
   FWacht := 0;
   FSprite.Data := TPos.Create(0, 0);
   RechtA[1] := '';
@@ -135,21 +135,21 @@ begin
   RechtB[2] := '';
   for I := 0 to 6 do
   begin
-    RechtA[1] := RechtA[1] + IntStr(Round(-153 + I * 88 / 6)) + ',' +
-      IntStr(Round(-45 - I * 44 / 6)) + ';';
-    RechtA[2] := RechtA[2] + IntStr(Round(-57 - I * 88 / 6)) + ',' +
-      IntStr(Round(-59 - I * 44 / 6)) + ';';
-    RechtB[1] := RechtB[1] + IntStr(Round(-105 - I * 88 / 6)) + ',' +
-      IntStr(Round(-108 + I * 44 / 6)) + ';';
-    RechtB[2] := RechtB[2] + IntStr(Round(-175 + I * 88 / 6)) + ',' +
-      IntStr(Round(-87 + I * 44 / 6)) + ';';
+    RechtA[1] := RechtA[1] + IntTekst(Round(-153 + I * 88 / 6)) + ',' +
+      IntTekst(Round(-45 - I * 44 / 6)) + ';';
+    RechtA[2] := RechtA[2] + IntTekst(Round(-57 - I * 88 / 6)) + ',' +
+      IntTekst(Round(-59 - I * 44 / 6)) + ';';
+    RechtB[1] := RechtB[1] + IntTekst(Round(-105 - I * 88 / 6)) + ',' +
+      IntTekst(Round(-108 + I * 44 / 6)) + ';';
+    RechtB[2] := RechtB[2] + IntTekst(Round(-175 + I * 88 / 6)) + ',' +
+      IntTekst(Round(-87 + I * 44 / 6)) + ';';
   end;
   FTeller := 0;
   FInterval := 40;
 end;
 
 { @00478B44 }
-procedure TTrein.Tick;
+procedure TTrein.Tik;
 begin
   Inc(FTeller);
   if FTeller >= FInterval then
@@ -173,25 +173,25 @@ begin
   begin
     X := Random(44);
     Y := Random(44);
-    if IsOutOfView(X, Y) then
+    if IsBuitenBeeld(X, Y) then
     begin
-      FCell := FWorld.GetCell(X, Y);
-      if IsSpoor(FCell.Contents, FNr) then
+      FCel := FWereld.LeesCel(X, Y);
+      if IsSpoor(FCel.Inhoud, FNr) then
       begin
         if FNr in [5, 10] then
         begin
           if FNr = 5 then
           begin
-            Voor := FCell.Buur(0, 1);
-            Achter := FCell.Buur(0, -1);
+            Voor := FCel.Buur(0, 1);
+            Achter := FCel.Buur(0, -1);
           end
           else
           begin
-            Voor := FCell.Buur(1, 0);
-            Achter := FCell.Buur(-1, 0);
+            Voor := FCel.Buur(1, 0);
+            Achter := FCel.Buur(-1, 0);
           end;
-          if IsSpoor(Voor.Contents, Nr1) and (Nr1 = FNr) and
-             IsSpoor(Achter.Contents, Nr2) and (Nr2 = FNr) then
+          if IsSpoor(Voor.Inhoud, Nr1) and (Nr1 = FNr) and
+             IsSpoor(Achter.Inhoud, Nr2) and (Nr2 = FNr) then
           begin
             FRichting := Random(2) = 0;
             FStap := 0;
@@ -199,7 +199,7 @@ begin
             Break;
           end;
         end
-        else if (FNr in [3, 6, 9, 12]) and (FCell.Hoofd = nil) then
+        else if (FNr in [3, 6, 9, 12]) and (FCel.Hoofd = nil) then
         begin
           FRichting := Random(2) = 0;
           FStap := 0;
@@ -209,9 +209,9 @@ begin
       end;
     end;
   end;
-  FReserved18 := -1;
-  (FSprite.Data as TPos).X := FCell.X;
-  (FSprite.Data as TPos).Y := FCell.Y;
+  FGereserveerd18 := -1;
+  (FSprite.Data as TPos).X := FCel.X;
+  (FSprite.Data as TPos).Y := FCel.Y;
 end;
 
 { @00478CF0  Verplaatst de trein één stap langs het pad van de huidige cel. }
@@ -239,10 +239,10 @@ begin
       Pad := BochtA[FNr div 3];
   end;
   for I := 1 to FStap do
-    Item := SplitFirst(Pad, ';');
+    Item := SplitsEerste(Pad, ';');
   if Pad = '' then
   begin
-    Vorige := FCell.Contents;
+    Vorige := FCel.Inhoud;
     Volgende;
   end
   else
@@ -259,21 +259,21 @@ begin
     end
     else
     begin
-      S := SplitFirst(Item, '=');
-      Sleutel := TrimStr(S);
+      S := SplitsEerste(Item, '=');
+      Sleutel := SnijStr(S);
       if Sleutel[1] = '-' then
       begin
         FSprite.MirrorX := True;
-        Sleutel := DelLeft(Sleutel, 1);
+        Sleutel := VerwijderLinks(Sleutel, 1);
       end
       else
         FSprite.MirrorX := False;
       FSprite.CurrentFrame := 'Trein_' + Copy(Sleutel, 1, 2) + '-' + Copy(Sleutel, 3, 4);
     end;
-    Item := TrimStr(Item);
-    S := SplitFirst(Item, ',');
-    X := StrToIntDef0(S);
-    Y := StrToIntDef0(Item);
+    Item := SnijStr(Item);
+    S := SplitsEerste(Item, ',');
+    X := StrNaarIntDef0(S);
+    Y := StrNaarIntDef0(Item);
     case FNr of
       3:
         begin
@@ -296,13 +296,13 @@ begin
           Y := Y - 175;
         end;
     end;
-    P := GridToWorld(FCell.Pos);
+    P := RasterNaarWereld(FCel.Pos);
     FX := X + P.X;
     FY := P.Y + Y;
-    FSprite.MoveTo3D(FX, FY, -2900);
+    FSprite.VerplaatsNaar3D(FX, FY, -2900);
   end;
-  if (((FCell.Contents = 'Station') and (Vorige = 'Hoofdstation')) or
-      ((FCell.Contents = 'Hoofdstation') and (Vorige = 'Hoofdstation'))) and
+  if (((FCel.Inhoud = 'Station') and (Vorige = 'Hoofdstation')) or
+      ((FCel.Inhoud = 'Hoofdstation') and (Vorige = 'Hoofdstation'))) and
      (FWacht = 0) then
   begin
     FInterval := 20;
@@ -326,10 +326,10 @@ var
   { @00479104 }
   procedure GaNaar(Cel: TCell);
   begin
-    FCell := Cel;
+    FCel := Cel;
     FStap := 0;
-    (FSprite.Data as TPos).X := FCell.X;
-    (FSprite.Data as TPos).Y := FCell.Y;
+    (FSprite.Data as TPos).X := FCel.X;
+    (FSprite.Data as TPos).Y := FCel.Y;
     Step;
   end;
 
@@ -340,12 +340,12 @@ begin
       Bits := FNr and 9
     else
       Bits := FNr and 6;
-    D := Dirs[Round(Log2(Bits))];
-    Buur1 := FCell.Buur(D.X, D.Y);
+    D := Richtingen[Round(Log2(Bits))];
+    Buur1 := FCel.Buur(D.X, D.Y);
     Buur2 := Buur1.Buur(D.X, D.Y);
     if (Buur1 = nil) or (Buur2 = nil) or
-       not IsSpoor(Buur1.Contents + Buur1.Param, Nr1) or
-       not IsSpoor(Buur2.Contents + Buur2.Param, Nr2) then
+       not IsSpoor(Buur1.Inhoud + Buur1.Param, Nr1) or
+       not IsSpoor(Buur2.Inhoud + Buur2.Param, Nr2) then
       Stop
     else if Nr2 in [3, 6, 9, 12] then
     begin
@@ -373,13 +373,13 @@ begin
     for I := 0 to 15 do
     begin
       O := BochtNaarBocht[I];
-      Buur1 := FCell.Buur(O.DX, O.DY);
+      Buur1 := FCel.Buur(O.DX, O.DY);
       if (Buur1 <> nil) and (FNr = O.Nr) and (FRichting = O.Richting) and
-         IsBochtSpoor(Buur1.Contents, Nr1) and (Buur1.Hoofd = nil) and (O.NieuwNr = Nr1) then
+         IsBochtSpoor(Buur1.Inhoud, Nr1) and (Buur1.Hoofd = nil) and (O.NieuwNr = Nr1) then
       begin
         FNr := O.NieuwNr;
         FRichting := O.NieuwRichting;
-        GaNaar(FCell.Buur(O.DX, O.DY));
+        GaNaar(FCel.Buur(O.DX, O.DY));
         Exit;
       end;
     end;
@@ -388,10 +388,10 @@ begin
       O := BochtNaarRecht[I];
       if (FNr = O.Nr) and (FRichting = O.Richting) then
       begin
-        Buur1 := FCell.Buur(O.DX, O.DY);
+        Buur1 := FCel.Buur(O.DX, O.DY);
         if Buur1 <> nil then
         begin
-          if IsSpoor(Buur1.Contents + Buur1.Param, Nr1) and (Nr1 = O.NieuwNr) then
+          if IsSpoor(Buur1.Inhoud + Buur1.Param, Nr1) and (Nr1 = O.NieuwNr) then
           begin
             FNr := Nr1;
             FRichting := O.NieuwRichting;

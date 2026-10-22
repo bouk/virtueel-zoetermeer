@@ -23,6 +23,9 @@ type
     Data: PByte;         { rows of ((W+7) div 8) bytes, MSB = leftmost pixel }
   end;
 
+  TZMGlyphs = array[0..255] of TZMGlyph;
+  PZMGlyphs = ^TZMGlyphs;
+
   PZMFace = ^TZMFace;
   TZMFace = record
     Family: string;      { 'sans', 'serif', 'mono', 'system' }
@@ -32,7 +35,9 @@ type
     Ascent, Descent: Integer;
     IntLeading: Integer; { Height - EmPx }
     AvgWidth, MaxWidth: Integer;
-    Glyphs: array[0..255] of TZMGlyph;
+    Gray: Boolean;       { gasp: anti-alias at this size }
+    Glyphs: TZMGlyphs;     { 1 bpp, hinted mono advances }
+    AAGlyphs: TZMGlyphs;   { 1 byte per pixel, grey level 0..16 }
   end;
 
 { Find the face that best matches a LOGFONT (Windows font mapping, simplified). }
@@ -42,9 +47,12 @@ function ZMFaceByIndex(I: Integer): PZMFace;
 
 implementation
 
-uses SysUtils;
+uses SysUtils, paszlib;
 
 {$I fonts/zmfontdata.inc}
+
+var
+  FontData: array of Byte;
 
 type
   TFaceArray = array of TZMFace;
@@ -57,13 +65,35 @@ procedure LoadFaces;
 var
   I, G, P, N: Integer;
   F: ^TZMFace;
+  DestLen: LongWord;
   function RdW: Integer;
   begin
-    Result := SmallInt(ZMFontData[P] or (ZMFontData[P + 1] shl 8));
+    Result := SmallInt(FontData[P] or (FontData[P + 1] shl 8));
     Inc(P, 2);
+  end;
+  procedure ReadGlyphs(var Glyphs: array of TZMGlyph; AA: Boolean);
+  var
+    G2: Integer;
+  begin
+    for G2 := 0 to 255 do
+    begin
+      Glyphs[G2].Adv := RdW;
+      Glyphs[G2].W := RdW;
+      Glyphs[G2].H := RdW;
+      Glyphs[G2].XOff := RdW;
+      Glyphs[G2].YOff := RdW;
+      if AA then N := Glyphs[G2].W * Glyphs[G2].H
+      else N := ((Glyphs[G2].W + 7) div 8) * Glyphs[G2].H;
+      if N > 0 then Glyphs[G2].Data := @FontData[P] else Glyphs[G2].Data := nil;
+      Inc(P, N);
+    end;
   end;
 begin
   Loaded := True;
+  SetLength(FontData, ZMFontDataSize);
+  DestLen := ZMFontDataSize;
+  if uncompress(@FontData[0], DestLen, @ZMFontDataZ[0], Length(ZMFontDataZ)) <> Z_OK then
+    raise Exception.Create('ZMFonts: cannot inflate the font data');
   SetLength(Faces, ZMFontFaceCount);
   P := 0;
   for I := 0 to ZMFontFaceCount - 1 do
@@ -81,20 +111,9 @@ begin
     if F^.IntLeading < 0 then F^.IntLeading := 0;
     F^.AvgWidth := RdW;
     F^.MaxWidth := RdW;
-    for G := 0 to 255 do
-    begin
-      F^.Glyphs[G].Adv := RdW;
-      F^.Glyphs[G].W := RdW;
-      F^.Glyphs[G].H := RdW;
-      F^.Glyphs[G].XOff := RdW;
-      F^.Glyphs[G].YOff := RdW;
-      N := ((F^.Glyphs[G].W + 7) div 8) * F^.Glyphs[G].H;
-      if N > 0 then
-        F^.Glyphs[G].Data := @ZMFontData[P]
-      else
-        F^.Glyphs[G].Data := nil;
-      Inc(P, N);
-    end;
+    F^.Gray := RdW <> 0;
+    ReadGlyphs(F^.Glyphs, False);
+    ReadGlyphs(F^.AAGlyphs, True);
   end;
 end;
 

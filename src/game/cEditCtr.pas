@@ -17,24 +17,24 @@ const
 type
   TComment = class(TCustomEdit)
   private
-    procedure SetCaption(Waarde: string);
-    function GetCaption: string;
+    procedure ZetOnderschrift(Waarde: string);
+    function LeesOnderschrift: string;
   public
     constructor Create(AOwner: TComponent); override;
   published
-    property Caption: string read GetCaption write SetCaption;
+    property Caption: string read LeesOnderschrift write ZetOnderschrift;
   end;
 
 implementation
 
 { @004693B8 }
-procedure TComment.SetCaption(Waarde: string);
+procedure TComment.ZetOnderschrift(Waarde: string);
 begin
   Text := Waarde;
 end;
 
 { @00469404 }
-function TComment.GetCaption: string;
+function TComment.LeesOnderschrift: string;
 begin
   Result := Text;
 end;

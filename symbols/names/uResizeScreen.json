@@ -2,28 +2,28 @@
   "functions": {
     "00464fdc": "TScrnMode.Create",
     "00465030": "TScrnMode.Destroy",
-    "00465058": "TScrnMode.Apply",
-    "004650d4": "TScrnMode.Matches",
+    "00465058": "TScrnMode.Toepassen",
+    "004650d4": "TScrnMode.Overeenkomt",
     "00465114": "TScrnModeList.Create",
     "004651a0": "TScrnModeList.Destroy",
-    "004651cc": "TScrnModeList.StoreCurrentMode",
+    "004651cc": "TScrnModeList.BewaarHuidigeModus",
     "00465240": "TScrnModeList.Add",
     "00465250": "TScrnModeList.Find",
-    "004652b0": "TScrnModeList.GetMode",
-    "004652d0": "uResizeScreen.SetScreenMode",
-    "00465334": "uResizeScreen.RestoreScreenMode",
-    "00465370": "uResizeScreen.IsScreenChanged"
+    "004652b0": "TScrnModeList.LeesModus",
+    "004652d0": "uResizeScreen.ZetSchermModus",
+    "00465334": "uResizeScreen.HerstelSchermModus",
+    "00465370": "uResizeScreen.IsSchermGewijzigd"
   },
   "globals": {
-    "00488d88": "uResizeScreen.ScreenChanged",
-    "0048a8e8": "uResizeScreen.OriginalMode",
-    "0048a8ec": "uResizeScreen.NewMode",
-    "0048a8f0": "uResizeScreen.ModeList"
+    "00488d88": "uResizeScreen.SchermGewijzigd",
+    "0048a8e8": "uResizeScreen.OrigineleModus",
+    "0048a8ec": "uResizeScreen.NieuweModus",
+    "0048a8f0": "uResizeScreen.ModeLijst"
   },
   "fields": {
     "TScrnMode": {
       "0x4": [
-        "FBitsPerPel",
+        "FKleurdiepte",
         "Integer"
       ],
       "0x8": [

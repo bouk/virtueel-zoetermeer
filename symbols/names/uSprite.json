@@ -1,98 +1,98 @@
 {
   "functions": {
     "00469d70": "TSprite.Create",
-    "00469ecc": "TSprite.CreateCopy",
+    "00469ecc": "TSprite.MaakKopie",
     "0046a150": "TSprite.Destroy",
-    "0046a220": "TSprite.Kill",
+    "0046a220": "TSprite.Verwijder",
     "0046a228": "TSprite.Redraw",
     "0046a2a4": "TSprite.MoveTo",
-    "0046a30c": "TSprite.MoveTo3D",
-    "0046a374": "TSprite.MoveBy",
-    "0046a3b0": "TSprite.PlaySequence",
-    "0046a408": "TSprite.PlaySequenceAt",
-    "0046a5d4": "TSprite.StopSequence",
-    "0046a5ec": "TSprite.DoVisible",
-    "0046a60c": "TSprite.DoMove",
-    "0046a69c": "TSprite.DoFinishSequence",
-    "0046a720": "TSprite.DoHit",
-    "0046a7ec": "TSprite.DoAfterBlit",
-    "0046a924": "TSprite.DoBeforeBlit",
-    "0046a9d4": "TSprite.GetChange",
-    "0046aae8": "TSprite.DoFrameSkipped",
+    "0046a30c": "TSprite.VerplaatsNaar3D",
+    "0046a374": "TSprite.VerplaatsMet",
+    "0046a3b0": "TSprite.SpeelReeks",
+    "0046a408": "TSprite.SpeelReeksVanaf",
+    "0046a5d4": "TSprite.StopReeks",
+    "0046a5ec": "TSprite.VerwerkZichtbaar",
+    "0046a60c": "TSprite.VerwerkVerplaatsing",
+    "0046a69c": "TSprite.VerwerkReeksKlaar",
+    "0046a720": "TSprite.VerwerkRaak",
+    "0046a7ec": "TSprite.VerwerkNaBlit",
+    "0046a924": "TSprite.VerwerkVoorBlit",
+    "0046a9d4": "TSprite.LeesWijziging",
+    "0046aae8": "TSprite.VerwerkOvergeslagenFrame",
     "0046ab14": "TSprite.MouseMove",
-    "0046ab94": "TSprite.MouseLeave",
+    "0046ab94": "TSprite.MuisVerlaten",
     "0046abf0": "TSprite.MouseDown",
     "0046ac78": "TSprite.MouseUp",
-    "0046ad00": "TSprite.DrawDC",
+    "0046ad00": "TSprite.TekenDC",
     "0046ae50": "TSprite.Draw",
-    "0046afe8": "TSprite.TimerSkip",
-    "0046b008": "TSprite.TimerTick",
-    "0046b2d0": "TSprite.GetScale",
-    "0046b2ec": "TSprite.ChangeState",
-    "0046b5a4": "TSprite.GetAbout",
-    "0046b5c8": "TSprite.GetSurface",
-    "0046b5f0": "TSprite.GetSequence",
-    "0046b614": "TSprite.SetSequence",
+    "0046afe8": "TSprite.KlokOverslaan",
+    "0046b008": "TSprite.KlokTik",
+    "0046b2d0": "TSprite.LeesSchaal",
+    "0046b2ec": "TSprite.WijzigToestand",
+    "0046b5a4": "TSprite.LeesVersie",
+    "0046b5c8": "TSprite.LeesOppervlak",
+    "0046b5f0": "TSprite.LeesReeks",
+    "0046b614": "TSprite.ZetReeks",
     "0046b65c": "TSprite.SetMouseCapture",
     "0046b688": "TSprite.SetVisible",
-    "0046b710": "TSprite.SetMirrorX",
-    "0046b724": "TSprite.SetMirrorY",
-    "0046b738": "TSprite.SetX",
-    "0046b7ac": "TSprite.SetY",
+    "0046b710": "TSprite.ZetSpiegelX",
+    "0046b724": "TSprite.ZetSpiegelY",
+    "0046b738": "TSprite.ZetX",
+    "0046b7ac": "TSprite.ZetY",
     "0046b820": "TSprite.SetLeft",
     "0046b84c": "TSprite.SetTop",
-    "0046b878": "TSprite.SetZ",
+    "0046b878": "TSprite.ZetZ",
     "0046b8f8": "TSprite.SetZOrder",
-    "0046b924": "TSprite.SetMarginLeft",
-    "0046b998": "TSprite.SetMarginTop",
-    "0046ba0c": "TSprite.SetMarginRight",
-    "0046ba80": "TSprite.SetMarginBottom",
-    "0046baf4": "TSprite.GetX",
-    "0046bb50": "TSprite.GetY",
+    "0046b924": "TSprite.ZetMargeLinks",
+    "0046b998": "TSprite.ZetMargeBoven",
+    "0046ba0c": "TSprite.ZetMargeRechts",
+    "0046ba80": "TSprite.ZetMargeOnder",
+    "0046baf4": "TSprite.LeesX",
+    "0046bb50": "TSprite.LeesY",
     "0046bbac": "TSprite.GetWidth",
     "0046bbe0": "TSprite.GetHeight",
-    "0046bc14": "TSprite.GetHotSpotX",
-    "0046bc50": "TSprite.GetHotSpotY",
+    "0046bc14": "TSprite.LeesHotSpotX",
+    "0046bc50": "TSprite.LeesHotSpotY",
     "0046bc8c": "TSprite.GetTransparent",
     "0046bc94": "TSprite.SetTransparent",
-    "0046bca0": "TSprite.SetSpriteBox",
-    "0046bd08": "TSprite.SetFrameList",
-    "0046bd18": "TSprite.SetSequenceList",
-    "0046bd24": "TSprite.GetCurrentFrame",
-    "0046bd58": "TSprite.SetCurrentFrame",
-    "0046be60": "TSprite.SetFrameIndex",
-    "0046bf94": "TSprite.SetScale",
-    "0046c010": "TSprite.GetFrozen",
-    "0046c018": "TSprite.SetPriority",
-    "0046c024": "TSprite.GetPriority",
-    "0046c030": "TSprite.GetBehaviour",
-    "0046c084": "TSprite.AddBehaviour",
+    "0046bca0": "TSprite.ZetSpriteVak",
+    "0046bd08": "TSprite.ZetFrameLijst",
+    "0046bd18": "TSprite.ZetReeksLijst",
+    "0046bd24": "TSprite.LeesHuidigFrame",
+    "0046bd58": "TSprite.ZetHuidigFrame",
+    "0046be60": "TSprite.ZetFrameNr",
+    "0046bf94": "TSprite.ZetSchaal",
+    "0046c010": "TSprite.LeesBevroren",
+    "0046c018": "TSprite.ZetPrioriteit",
+    "0046c024": "TSprite.LeesPrioriteit",
+    "0046c030": "TSprite.LeesGedrag",
+    "0046c084": "TSprite.VoegGedragToe",
     "0046c0f0": "TSpriteList.Add",
-    "0046c100": "TSpriteList.SpriteByName",
-    "0046c180": "TSpriteList.GetSprite",
+    "0046c100": "TSpriteList.SpriteOpNaam",
+    "0046c180": "TSpriteList.LeesSprite",
     "0046c1a0": "TBehaviour.Create",
     "0046c1e4": "TBehaviour.Destroy",
-    "0046c218": "TBehaviour.FinishSequence",
-    "0046c21c": "TBehaviour.Hit",
+    "0046c218": "TBehaviour.ReeksKlaar",
+    "0046c21c": "TBehaviour.Raak",
     "0046c220": "TBehaviour.Move",
-    "0046c228": "TBehaviour.AfterBlit",
-    "0046c248": "TBehaviour.BeforeBlit",
+    "0046c228": "TBehaviour.NaBlit",
+    "0046c248": "TBehaviour.VoorBlit",
     "0046c268": "TBehaviour.MouseMove",
-    "0046c270": "TBehaviour.MouseLeave",
+    "0046c270": "TBehaviour.MuisVerlaten",
     "0046c274": "TBehaviour.MouseDown",
     "0046c27c": "TBehaviour.MouseUp",
-    "0046c284": "TBehaviour.VisibleChange",
-    "0046c288": "TBehaviour.SetSprite",
-    "0046c28c": "TBehaviour.Detach",
+    "0046c284": "TBehaviour.ZichtbaarWijziging",
+    "0046c288": "TBehaviour.ZetSprite",
+    "0046c28c": "TBehaviour.Ontkoppel",
     "0046c2ac": "TBehaviour.SetActive",
-    "0046c2b0": "TBehaviour.Finish",
+    "0046c2b0": "TBehaviour.Afronden",
     "0046c2e8": "TBehaviourList.Add",
-    "0046c2f8": "TBehaviourList.GetBehaviour",
+    "0046c2f8": "TBehaviourList.LeesGedrag",
     "0046c318": "TBehaviourList.Find",
     "0046c3a0": "TBehaviourList.Remove",
-    "0046c3c0": "TBehaviourList.ClearItem",
+    "0046c3c0": "TBehaviourList.WisItem",
     "0046c3d4": "TBehaviourList.Pack",
-    "0046c400": "TBehaviourList.IsActive",
+    "0046c400": "TBehaviourList.IsActief",
     "0046c42c": "uSprite.Finalization",
     "0046c470": "uSprite.Initialization"
   },
@@ -103,43 +103,43 @@
   "fields": {
     "TSprite": {
       "0x68": [
-        "FAbout",
+        "FVersie",
         "string"
       ],
       "0x6c": [
-        "FSpriteBox",
+        "FSpriteVak",
         "TSpriteBox"
       ],
       "0x70": [
-        "FFrameList",
+        "FFrameLijst",
         "TFrameList"
       ],
       "0x74": [
-        "FSequenceList",
+        "FReeksLijst",
         "TSequenceList"
       ],
       "0x78": [
-        "FSequence",
+        "FReeks",
         "TSequence"
       ],
       "0x7c": [
-        "FReserved7C",
+        "FGereserveerd7C",
         "Integer"
       ],
       "0x80": [
-        "FPlotmode",
+        "FTekenmodus",
         "TPlotMode"
       ],
       "0x84": [
-        "FFrameIndex",
+        "FFrameNr",
         "Integer"
       ],
       "0x88": [
-        "FTimer",
+        "FKlok",
         "TFastTimer"
       ],
       "0x8c": [
-        "FRepeatCount",
+        "FHerhalingen",
         "Integer"
       ],
       "0x90": [
@@ -147,43 +147,43 @@
         "Integer"
       ],
       "0x94": [
-        "FDynamic",
+        "FDynamisch",
         "Boolean"
       ],
       "0x95": [
-        "FKilled",
+        "FVerwijderd",
         "Boolean"
       ],
       "0x96": [
-        "FHitTest",
+        "FTreffertest",
         "THitTest"
       ],
       "0x98": [
-        "FReserved98",
+        "FGereserveerd98",
         "Integer"
       ],
       "0x9c": [
-        "FMirrorY",
+        "FSpiegelY",
         "Boolean"
       ],
       "0x9d": [
-        "FMirrorX",
+        "FSpiegelX",
         "Boolean"
       ],
       "0x9e": [
-        "FReserved9E",
+        "FGereserveerd9E",
         "Boolean"
       ],
       "0x9f": [
-        "FFrozen",
+        "FBevroren",
         "Boolean"
       ],
       "0xa0": [
-        "FStopped",
+        "FGestopt",
         "Boolean"
       ],
       "0xa8": [
-        "FScale",
+        "FSchaal",
         "Double"
       ],
       "0xb0": [
@@ -191,111 +191,111 @@
         "TObject"
       ],
       "0xb4": [
-        "FMarginLeft",
+        "FMargeLinks",
         "Integer"
       ],
       "0xb8": [
-        "FMarginRight",
+        "FMargeRechts",
         "Integer"
       ],
       "0xbc": [
-        "FMarginTop",
+        "FMargeBoven",
         "Integer"
       ],
       "0xc0": [
-        "FMarginBottom",
+        "FMargeOnder",
         "Integer"
       ],
       "0xc4": [
-        "FLastFrame",
+        "FVorigFrame",
         "string"
       ],
       "0xc8": [
-        "FMouseCapture",
+        "FMuisVast",
         "Boolean"
       ],
       "0xcc": [
-        "FNewX",
+        "FNieuwX",
         "Integer"
       ],
       "0xd0": [
-        "FNewY",
+        "FNieuwY",
         "Integer"
       ],
       "0xd4": [
-        "FNewZ",
+        "FNieuwZ",
         "Integer"
       ],
       "0xd8": [
-        "FNewFrameIndex",
+        "FNieuwFrameNr",
         "Integer"
       ],
       "0xdc": [
-        "FNewVisible",
+        "FNieuwZichtbaar",
         "Boolean"
       ],
       "0xe0": [
-        "FNewScale",
+        "FNieuwSchaal",
         "Double"
       ],
       "0xe8": [
-        "FNewMarginLeft",
+        "FNieuwMargeLinks",
         "Integer"
       ],
       "0xec": [
-        "FNewMarginRight",
+        "FNieuwMargeRechts",
         "Integer"
       ],
       "0xf0": [
-        "FNewMarginTop",
+        "FNieuwMargeBoven",
         "Integer"
       ],
       "0xf4": [
-        "FNewMarginBottom",
+        "FNieuwMargeOnder",
         "Integer"
       ],
       "0xf8": [
-        "FChanging",
+        "FWijzigt",
         "Boolean"
       ],
       "0xf9": [
-        "FForceRedraw",
+        "FForceerHertekenen",
         "Boolean"
       ],
       "0xfc": [
-        "FReservedFC",
+        "FGereserveerdFC",
         "Integer"
       ],
       "0x100": [
-        "FOnVisible",
+        "FOnZichtbaar",
         "TOnVisibleEvent"
       ],
       "0x108": [
-        "FOnMove",
+        "FOnVerplaats",
         "TOnMoveEvent"
       ],
       "0x110": [
-        "FOnFinishSequence",
+        "FOnReeksKlaar",
         "TOnFinishSequence"
       ],
       "0x118": [
-        "FOnHit",
+        "FOnRaak",
         "TOnHitEvent"
       ],
       "0x120": [
-        "FOnBeforeBlit",
+        "FOnVoorBlit",
         "TOnBlitEvent"
       ],
       "0x128": [
-        "FOnAfterBlit",
+        "FOnNaBlit",
         "TOnBlitEvent"
       ],
       "0x130": [
-        "FOnFrameSkipped",
+        "FOnFrameOvergeslagen",
         "TOnSkipFrameEvent"
       ],
       "0x138": [
-        "FBehaviours",
+        "FGedragingen",
         "TBehaviourList"
       ]
     },
@@ -313,11 +313,11 @@
         "Boolean"
       ],
       "0x10": [
-        "FOnFinish",
+        "FOnKlaar",
         "TNotifyEvent"
       ],
       "0x18": [
-        "FNextBehaviour",
+        "FVolgendGedrag",
         "string"
       ]
     }

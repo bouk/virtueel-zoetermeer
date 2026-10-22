@@ -1,7 +1,7 @@
 unit fReport;
 
 { TfrmReport: het jaarrapport ("Rapportage"). Een tabblad per wijk plus de totalen;
-  TWorld.Rapport vult Lists[] (regel 0 van elke lijst is het tabbladopschrift, de
+  TWorld.Rapport vult Tabbladlijsten[] (regel 0 van elke lijst is het tabbladopschrift, de
   overige regels worden in het memo getoond). Elk tabblad heeft zijn eigen memokleur.
   Gedecompileerd uit ROS.exe v1.1, code 0047FD68-00480257. }
 
@@ -26,9 +26,9 @@ type
     procedure tcTabsDrawTab(Besturing: TCustomTabControl; TabNr: Integer;
       const Vlak: TRect; Actief: Boolean);
   private
-    procedure ShowTab(Nr: Integer);
+    procedure ToonTab(Nr: Integer);
   public
-    Lists: array[0..10] of TStrings;   { +0x2DC  gevuld door TWorld.Rapport }
+    Tabbladlijsten: array[0..10] of TStrings;   { +0x2DC  gevuld door TWorld.Rapport }
     function Execute(AantalTabs: Integer): Integer;
   end;
 
@@ -46,11 +46,11 @@ uses
 
 const
   { 0048919C, 004891A8, 004891B4: achtergrondkleur van het memo per tabblad }
-  TabR: array[0..11] of Byte =
+  TabRood: array[0..11] of Byte =
     ($FF, $FF, $A5, $D4, $AA, $E3, $AA, $EF, $D4, $A5, $FF, $90);
-  TabG: array[0..11] of Byte =
+  TabGroen: array[0..11] of Byte =
     ($FF, $E1, $BF, $9A, $D2, $B1, $D2, $E5, $9A, $BF, $E1, $90);
-  TabB: array[0..11] of Byte =
+  TabBlauw: array[0..11] of Byte =
     ($FF, $8B, $74, $8A, $E2, $95, $E2, $D5, $8A, $74, $8B, $90);
 
 { @0047FF5C }
@@ -61,7 +61,7 @@ begin
   Left := frmMain.Left + (852 - Width) div 2;
   Top := frmMain.Top + (767 - Height) div 2;
   for I := 0 to 10 do
-    Lists[I] := TStringList.Create;
+    Tabbladlijsten[I] := TStringList.Create;
 end;
 
 { @0047FFC4 }
@@ -70,7 +70,7 @@ var
   I: Integer;
 begin
   for I := 0 to 10 do
-    Lists[I].Free;
+    Tabbladlijsten[I].Free;
 end;
 
 { @0047FFE0 }
@@ -79,22 +79,22 @@ var
   I: Integer;
 begin
   for I := 0 to AantalTabs - 1 do
-    tcTabs.Tabs.Add(Lists[I][0]);
-  ShowTab(0);
+    tcTabs.Tabs.Add(Tabbladlijsten[I][0]);
+  ToonTab(0);
   ShowModal;
   { LET OP: Result wordt in het origineel nooit toegekend (geeft een willekeurige
     waarde terug); de enige aanroeper negeert het. }
 end;
 
 { @00480074 }
-procedure TfrmReport.ShowTab(Nr: Integer);
+procedure TfrmReport.ToonTab(Nr: Integer);
 var
   I: Integer;
 begin
-  memoTab.Color := RGB(TabR[Nr], TabG[Nr], TabB[Nr]);
+  memoTab.Color := RGB(TabRood[Nr], TabGroen[Nr], TabBlauw[Nr]);
   memoTab.Lines.Clear;
-  for I := 1 to Lists[Nr].Count - 1 do
-    memoTab.Lines.Add(Lists[Nr][I]);
+  for I := 1 to Tabbladlijsten[Nr].Count - 1 do
+    memoTab.Lines.Add(Tabbladlijsten[Nr][I]);
 end;
 
 { @00480144 }
@@ -106,7 +106,7 @@ end;
 { @00480150 }
 procedure TfrmReport.tcTabsChange(Sender: TObject);
 begin
-  ShowTab(tcTabs.TabIndex);
+  ToonTab(tcTabs.TabIndex);
 end;
 
 { @0048016C }
@@ -118,7 +118,7 @@ begin
   R := Vlak;
   Inc(R.Left, 4);   { LET OP: R wordt nooit gebruikt }
   Besturing.Canvas.Font.Color := clWhite;
-  Besturing.Canvas.TextRect(Vlak, Vlak.Left + 4, Vlak.Top + 4, Lists[TabNr][0]);
+  Besturing.Canvas.TextRect(Vlak, Vlak.Left + 4, Vlak.Top + 4, Tabbladlijsten[TabNr][0]);
   Besturing.Canvas.DrawFocusRect(Vlak);
 end;
 

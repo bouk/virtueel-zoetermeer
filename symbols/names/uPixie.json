@@ -1,22 +1,22 @@
 {
   "functions": {
     "004639e4": "TPixie.SetVisible",
-    "004639e8": "TPixie.SetX",
-    "004639f0": "TPixie.SetY",
-    "004639f8": "TPixie.GetX",
-    "00463a00": "TPixie.GetY",
-    "00463a08": "TPixie.GetZ",
-    "00463a10": "TPixie.SetZ",
-    "00463a18": "TPixie.GetLeft",
+    "004639e8": "TPixie.ZetX",
+    "004639f0": "TPixie.ZetY",
+    "004639f8": "TPixie.LeesX",
+    "00463a00": "TPixie.LeesY",
+    "00463a08": "TPixie.LeesZ",
+    "00463a10": "TPixie.ZetZ",
+    "00463a18": "TPixie.LeesLinks",
     "00463a20": "TPixie.SetLeft",
-    "00463a28": "TPixie.GetTop",
+    "00463a28": "TPixie.LeesBoven",
     "00463a30": "TPixie.SetTop",
     "00463a38": "TPixie.GetBoundsRect",
-    "00463a68": "TPixie.Intersects",
-    "00463aa4": "TPixie.GetState",
-    "00463ae4": "TPixie.GetChange",
+    "00463a68": "TPixie.Overlapt",
+    "00463aa4": "TPixie.LeesStaat",
+    "00463ae4": "TPixie.LeesWijziging",
     "00463b68": "TPixie.MouseMove",
-    "00463b94": "TPixie.MouseLeave",
+    "00463b94": "TPixie.MuisVerlaten",
     "00463ba8": "TPixie.MouseDown",
     "00463bb4": "TPixie.MouseUp"
   },
@@ -35,15 +35,15 @@
         "SmallInt"
       ],
       "0x2a": [
-        "FZ",
+        "FZVolgorde",
         "SmallInt"
       ],
       "0x2c": [
         "FState",
-        "TPixieState"
+        "TPixieStaat"
       ],
       "0x44": [
-        "FReserved44",
+        "FGereserveerd44",
         "Integer"
       ],
       "0x48": [
@@ -59,7 +59,7 @@
         "TMouseMoveEvent"
       ],
       "0x60": [
-        "FOnMouseLeave",
+        "FOpMuisVerlaten",
         "TNotifyEvent"
       ]
     }

@@ -1,6 +1,6 @@
 unit fShow;
 
-{ Debugvenster dat een bitmap toont (TSurface.DebugShow).
+{ Debugvenster dat een bitmap toont (TSurface.ToonDebug).
   Gedecompileerd uit ROS.exe v1.1, code 004616A8-00461B0F; formulier in build/dfm-1.1/TFORMDEBUGSHOW.txt. }
 
 {$I zm.inc}
@@ -12,7 +12,7 @@ uses
   StdCtrls, Buttons, ExtCtrls;
 
 type
-  TDebugShowKind = (dkGraphic, dkText);
+  TDebugToonSoort = (dkGraphic, dkText);
 
   TformDebugShow = class(TForm)
     OKBtn: TBitBtn;              { +0x2D0 }
@@ -23,19 +23,19 @@ type
     procedure OKBtnKeyPress(Sender: TObject; var Key: Char);
     procedure FormResize(Sender: TObject);
   private
-    FKind: TDebugShowKind;       { +0x2E0 }
+    FKind: TDebugToonSoort;       { +0x2E0 }
     FGraphic: TGraphic;          { +0x2E4 }
-    FView: TControl;             { +0x2E8  besturing die samen met het formulier van grootte verandert }
+    FWeergave: TControl;             { +0x2E8  besturing die samen met het formulier van grootte verandert }
   public
-    procedure ShowGraphic(AAfbeelding: TGraphic; ATitel: string);
+    procedure ToonAfbeelding(AAfbeelding: TGraphic; ATitel: string);
   end;
 
 var
   formDebugShow: TformDebugShow;   { 0048A8B0 }
 
-procedure CreateDebugShow;
-procedure FreeDebugShow;
-procedure ShowBitmap(AAfbeelding: TGraphic; ATitel: string);
+procedure MaakDebugToon;
+procedure VrijDebugToon;
+procedure ToonBitmap(AAfbeelding: TGraphic; ATitel: string);
 
 implementation
 
@@ -44,11 +44,11 @@ implementation
 {$ENDIF}
 
 { @00461898 }
-procedure TformDebugShow.ShowGraphic(AAfbeelding: TGraphic; ATitel: string);
+procedure TformDebugShow.ToonAfbeelding(AAfbeelding: TGraphic; ATitel: string);
 begin
   FGraphic := AAfbeelding;
   FKind := dkGraphic;
-  FView := PaintBox1;
+  FWeergave := PaintBox1;
   PaintBox1.Visible := True;
   Caption := ATitel;
   ShowModal;
@@ -82,21 +82,21 @@ begin
   { LET OP: gebruikt de globale formDebugShow in plaats van Self }
   Breedte := formDebugShow.Width - 24;
   if Breedte > 25 then
-    FView.Width := Breedte;
+    FWeergave.Width := Breedte;
   Hoogte := formDebugShow.Height - 91;
   if Hoogte > 25 then
-    FView.Height := Hoogte;
+    FWeergave.Height := Hoogte;
 end;
 
 { @00461A3C }
-procedure CreateDebugShow;
+procedure MaakDebugToon;
 begin
   if formDebugShow = nil then
     Application.CreateForm(TformDebugShow, formDebugShow);
 end;
 
 { @00461A60 }
-procedure FreeDebugShow;
+procedure VrijDebugToon;
 begin
   if formDebugShow <> nil then
   begin
@@ -106,11 +106,11 @@ begin
 end;
 
 { @00461A7C }
-procedure ShowBitmap(AAfbeelding: TGraphic; ATitel: string);
+procedure ToonBitmap(AAfbeelding: TGraphic; ATitel: string);
 begin
-  CreateDebugShow;
-  formDebugShow.ShowGraphic(AAfbeelding, ATitel);
-  FreeDebugShow;
+  MaakDebugToon;
+  formDebugShow.ToonAfbeelding(AAfbeelding, ATitel);
+  VrijDebugToon;
 end;
 
 end.

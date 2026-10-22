@@ -15,44 +15,44 @@ uses
 
 type
   { aantal woorden per tekstregel }
-  TLineWords = array[0..99] of Integer;
+  TRegelWoorden = array[0..99] of Integer;
 
   TTextBalloon = class(TPixie)
   private
-    FBalloonText: string;           { +0x68 }
-    FTipX: Integer;                 { +0x6C  punt van de aanwijzer, ten opzichte van Left }
-    FTipY: Integer;                 { +0x70 }
-    FSpriteBox: TSpriteBox;         { +0x74 }
-    FSideColor: TColor;             { +0x78 }
-    FBackGroundColor: TColor;       { +0x7C }
-    FXOffset: Integer;              { +0x80  positie van de ballon ten opzichte van X }
-    FYOffset: Integer;              { +0x84 }
+    FBallonTekst: string;           { +0x68 }
+    FPuntX: Integer;                 { +0x6C  punt van de aanwijzer, ten opzichte van Left }
+    FPuntY: Integer;                 { +0x70 }
+    FSpriteVak: TSpriteBox;         { +0x74 }
+    FZijKleur: TColor;             { +0x78 }
+    FAchtergrondKleur: TColor;       { +0x7C }
+    FXVerschuiving: Integer;              { +0x80  positie van de ballon ten opzichte van X }
+    FYVerschuiving: Integer;              { +0x84 }
     FX: Integer;                    { +0x88  het punt waar de ballon naar wijst }
     FY: Integer;                    { +0x8C }
-    FBodyX: Integer;                { +0x90  ballonlichaam, ten opzichte van Left }
-    FBodyY: Integer;                { +0x94 }
-    FExtentX: Integer;              { +0x98  Width - 1 }
-    FExtentY: Integer;              { +0x9C  Height - 1 }
-    FBalloonLineWidth: Integer;     { +0xA0 }
+    FRompX: Integer;                { +0x90  ballonlichaam, ten opzichte van Left }
+    FRompY: Integer;                { +0x94 }
+    FOmvangX: Integer;              { +0x98  Width - 1 }
+    FOmvangY: Integer;              { +0x9C  Height - 1 }
+    FBallonLijnBreedte: Integer;     { +0xA0 }
     FFont: TFont;                   { +0xA4 }
-    FRoundCorner: Boolean;          { +0xA8 }
+    FAfgerondeHoek: Boolean;          { +0xA8 }
     procedure SetFont(Value: TFont);
     procedure FontChanged(Sender: TObject);
-    procedure SetBalloonText(Value: string);
-    procedure UpdateLayout;
-    procedure SetBalloonLineWidth(Value: Integer);
-    procedure SetRoundCorner(Value: Boolean);
-    procedure SetXOffset(Value: Integer);
-    procedure SetYOffset(Value: Integer);
-    procedure SetSpriteBox(Value: TSpriteBox);
-    procedure SetSideColor(Value: TColor);
-    procedure SetBackGroundColor(Value: TColor);
-    procedure DrawBalloon(Canvas: TCanvas; Left, Top, Right, Bottom, TipX,
-      TipY: Integer);
-    function LineRatio(AantalRegels: Integer; Tekst: string; Canvas: TCanvas;
-      var MaxBreedte: Integer; var Woorden: TLineWords; MaxRegels: Integer): Double;
-    procedure FitText(Tekst: string; Canvas: TCanvas; Left, Top: Integer;
-      var Right, Bottom, AantalRegels, MaxBreedte: Integer; var Woorden: TLineWords;
+    procedure ZetBallonTekst(Value: string);
+    procedure VernieuwIndeling;
+    procedure ZetBallonLijnBreedte(Value: Integer);
+    procedure ZetAfgerondeHoek(Value: Boolean);
+    procedure ZetXVerschuiving(Value: Integer);
+    procedure ZetYVerschuiving(Value: Integer);
+    procedure ZetSpriteVak(Value: TSpriteBox);
+    procedure ZetZijKleur(Value: TColor);
+    procedure ZetAchtergrondKleur(Value: TColor);
+    procedure TekenBallon(Canvas: TCanvas; Left, Top, Right, Bottom, TipX,
+      PuntY: Integer);
+    function RegelVerhouding(AantalRegels: Integer; Tekst: string; Canvas: TCanvas;
+      var MaxBreedte: Integer; var Woorden: TRegelWoorden; MaxRegels: Integer): Double;
+    procedure PastTekst(Tekst: string; Canvas: TCanvas; Left, Top: Integer;
+      var Right, Bottom, AantalRegels, MaxBreedte: Integer; var Woorden: TRegelWoorden;
       MaxRegels: Integer);
   public
     constructor Create(AOwner: TComponent); override;
@@ -60,23 +60,23 @@ type
     function GetWidth: Integer; override;
     function GetHeight: Integer; override;
     procedure Draw(Surface: TSurface; DX, DY: Integer; ClipRect: TRect;
-      Scale: Double); override;
-    procedure DrawDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
-      Scale: Double); override;
-    procedure SetX(Value: Integer); override;
-    procedure SetY(Value: Integer); override;
-    procedure SetZ(Value: Integer); override;
-    function GetX: Integer; override;
-    function GetY: Integer; override;
+      Schaalfactor: Double); override;
+    procedure TekenDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
+      Schaalfactor: Double); override;
+    procedure ZetX(Value: Integer); override;
+    procedure ZetY(Value: Integer); override;
+    procedure ZetZ(Value: Integer); override;
+    function LeesX: Integer; override;
+    function LeesY: Integer; override;
   published
-    property SpriteBox: TSpriteBox read FSpriteBox write SetSpriteBox;
-    property BalloonText: string read FBalloonText write SetBalloonText;
-    property XOffset: Integer read FXOffset write SetXOffset;
-    property YOffset: Integer read FYOffset write SetYOffset;
-    property SideColor: TColor read FSideColor write SetSideColor;
-    property BackGroundColor: TColor read FBackGroundColor write SetBackGroundColor;
-    property BalloonLineWidth: Integer read FBalloonLineWidth write SetBalloonLineWidth;
-    property RoundCorner: Boolean read FRoundCorner write SetRoundCorner;
+    property SpriteBox: TSpriteBox read FSpriteVak write ZetSpriteVak;
+    property BalloonText: string read FBallonTekst write ZetBallonTekst;
+    property XOffset: Integer read FXVerschuiving write ZetXVerschuiving;
+    property YOffset: Integer read FYVerschuiving write ZetYVerschuiving;
+    property SideColor: TColor read FZijKleur write ZetZijKleur;
+    property BackGroundColor: TColor read FAchtergrondKleur write ZetAchtergrondKleur;
+    property BalloonLineWidth: Integer read FBallonLijnBreedte write ZetBallonLijnBreedte;
+    property RoundCorner: Boolean read FAfgerondeHoek write ZetAfgerondeHoek;
     property Font: TFont read FFont write SetFont;
   end;
 
@@ -88,34 +88,34 @@ uses
 type
   { Puntindex van elk van de 8 hoekpunten van de ballon, na de 3 punten van
     de aanwijzer (indices 0..2); de volgorde hangt af van de zijde van de aanwijzer. }
-  TCornerOrder = array[0..7] of Integer;
+  THoekVolgorde = array[0..7] of Integer;
 
 {$J+}
 const
-  CornerOrderLeft: TCornerOrder = (5, 6, 7, 8, 9, 10, 3, 4);     { 00488D8C }
-  CornerOrderRight: TCornerOrder = (9, 10, 3, 4, 5, 6, 7, 8);    { 00488DAC }
-  CornerOrderBottom: TCornerOrder = (3, 4, 5, 6, 7, 8, 9, 10);   { 00488DCC }
-  CornerOrderTop: TCornerOrder = (7, 8, 9, 10, 3, 4, 5, 6);      { 00488DEC }
+  HoekVolgordeLinks: THoekVolgorde = (5, 6, 7, 8, 9, 10, 3, 4);     { 00488D8C }
+  HoekVolgordeRechts: THoekVolgorde = (9, 10, 3, 4, 5, 6, 7, 8);    { 00488DAC }
+  HoekVolgordeOnder: THoekVolgorde = (3, 4, 5, 6, 7, 8, 9, 10);   { 00488DCC }
+  HoekVolgordeBoven: THoekVolgorde = (7, 8, 9, 10, 3, 4, 5, 6);      { 00488DEC }
 {$J-}
 
 { @00465654 }
 constructor TTextBalloon.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  SetXOffset(50);
-  SetYOffset(-100);
-  SetBalloonLineWidth(5);
-  SetSideColor(clBlack);
-  SetBackGroundColor(clWhite);
+  ZetXVerschuiving(50);
+  ZetYVerschuiving(-100);
+  ZetBallonLijnBreedte(5);
+  ZetZijKleur(clBlack);
+  ZetAchtergrondKleur(clWhite);
   FFont := TFont.Create;
-  SetRoundCorner(True);
+  ZetAfgerondeHoek(True);
   FFont.OnChange := FontChanged;
 end;
 
 { @004656F0 }
 destructor TTextBalloon.Destroy;
 begin
-  SetSpriteBox(nil);
+  ZetSpriteVak(nil);
   FFont.Free;
   inherited Destroy;
 end;
@@ -130,176 +130,176 @@ end;
 { @00465748 }
 procedure TTextBalloon.FontChanged(Sender: TObject);
 begin
-  UpdateLayout;
+  VernieuwIndeling;
 end;
 
 { @00465750 }
 function TTextBalloon.GetWidth: Integer;
 begin
-  Result := FExtentX + 1;
+  Result := FOmvangX + 1;
 end;
 
 { @00465758 }
 function TTextBalloon.GetHeight: Integer;
 begin
-  Result := FExtentY + 1;
+  Result := FOmvangY + 1;
 end;
 
 { @00465760 }
-procedure TTextBalloon.SetBalloonText(Value: string);
+procedure TTextBalloon.ZetBallonTekst(Value: string);
 begin
-  if FBalloonText <> Value then
+  if FBallonTekst <> Value then
   begin
-    FBalloonText := Value;
-    UpdateLayout;
+    FBallonTekst := Value;
+    VernieuwIndeling;
   end;
 end;
 
 { @004657C0  berekent grootte, positie, lichaam en aanwijzer van de ballon }
-procedure TTextBalloon.UpdateLayout;
+procedure TTextBalloon.VernieuwIndeling;
 var
   Right, Bottom, MaxBreedte, AantalRegels: Integer;
-  Woorden: TLineWords;
+  Woorden: TRegelWoorden;
   OudeFont: TFont;
 begin
   if csDesigning in ComponentState then
     Exit;
-  if FSpriteBox = nil then
+  if FSpriteVak = nil then
     Exit;
-  OudeFont := FSpriteBox.Canvas.Font;
-  FSpriteBox.Canvas.Font := FFont;
-  FitText(FBalloonText, FSpriteBox.Canvas, 0, 0, Right, Bottom, AantalRegels,
+  OudeFont := FSpriteVak.Canvas.Font;
+  FSpriteVak.Canvas.Font := FFont;
+  PastTekst(FBallonTekst, FSpriteVak.Canvas, 0, 0, Right, Bottom, AantalRegels,
     MaxBreedte, Woorden, 100);
-  if FXOffset > Round(Right / 2) then
+  if FXVerschuiving > Round(Right / 2) then
   begin
-    SetLeft(GetX);
-    FExtentX := Round(Right / 2) + FXOffset;
-    FBodyX := Round((FBalloonLineWidth - Right) / 2) + FXOffset;
-    FTipX := Round(FBalloonLineWidth / 2);
+    SetLeft(LeesX);
+    FOmvangX := Round(Right / 2) + FXVerschuiving;
+    FRompX := Round((FBallonLijnBreedte - Right) / 2) + FXVerschuiving;
+    FPuntX := Round(FBallonLijnBreedte / 2);
   end;
-  if (FXOffset <= Round(Right / 2)) and (FXOffset > -Round(Right / 2)) then
+  if (FXVerschuiving <= Round(Right / 2)) and (FXVerschuiving > -Round(Right / 2)) then
   begin
-    SetLeft(GetX + FXOffset - Round(Right / 2));
-    FExtentX := Right;
-    FBodyX := Round(FBalloonLineWidth / 2);
-    FTipX := Round((Right + FBalloonLineWidth) / 2) - FXOffset;
+    SetLeft(LeesX + FXVerschuiving - Round(Right / 2));
+    FOmvangX := Right;
+    FRompX := Round(FBallonLijnBreedte / 2);
+    FPuntX := Round((Right + FBallonLijnBreedte) / 2) - FXVerschuiving;
   end;
-  if FXOffset <= -Round(Right / 2) then
+  if FXVerschuiving <= -Round(Right / 2) then
   begin
-    SetLeft(GetX + FXOffset - Round(Right / 2));
-    FExtentX := Round(Right / 2) - FXOffset;
-    FBodyX := Round(FBalloonLineWidth / 2);
-    FTipX := Round((Right + FBalloonLineWidth) / 2) - FXOffset;
+    SetLeft(LeesX + FXVerschuiving - Round(Right / 2));
+    FOmvangX := Round(Right / 2) - FXVerschuiving;
+    FRompX := Round(FBallonLijnBreedte / 2);
+    FPuntX := Round((Right + FBallonLijnBreedte) / 2) - FXVerschuiving;
   end;
-  if FYOffset > Bottom then
+  if FYVerschuiving > Bottom then
   begin
-    SetTop(GetY);
-    FExtentY := FYOffset;
-    FBodyY := Round(FBalloonLineWidth / 2) + (FYOffset - Bottom);
-    FTipY := Round(FBalloonLineWidth / 2);
+    SetTop(LeesY);
+    FOmvangY := FYVerschuiving;
+    FRompY := Round(FBallonLijnBreedte / 2) + (FYVerschuiving - Bottom);
+    FPuntY := Round(FBallonLijnBreedte / 2);
   end;
-  if (FYOffset <= Bottom) and (FYOffset > 0) then
+  if (FYVerschuiving <= Bottom) and (FYVerschuiving > 0) then
   begin
-    SetTop(GetY + FYOffset - Bottom);
-    FExtentY := Bottom;
-    FBodyY := Round(FBalloonLineWidth / 2);
-    FTipY := Round(FBalloonLineWidth / 2) + (Bottom - FYOffset);
+    SetTop(LeesY + FYVerschuiving - Bottom);
+    FOmvangY := Bottom;
+    FRompY := Round(FBallonLijnBreedte / 2);
+    FPuntY := Round(FBallonLijnBreedte / 2) + (Bottom - FYVerschuiving);
   end;
-  if FYOffset <= 0 then
+  if FYVerschuiving <= 0 then
   begin
-    SetTop(GetY + FYOffset - Bottom);
-    FExtentY := Bottom - FYOffset;
-    FBodyY := Round(FBalloonLineWidth / 2);
-    FTipY := Round(FBalloonLineWidth / 2) + (Bottom - FYOffset);
+    SetTop(LeesY + FYVerschuiving - Bottom);
+    FOmvangY := Bottom - FYVerschuiving;
+    FRompY := Round(FBallonLijnBreedte / 2);
+    FPuntY := Round(FBallonLijnBreedte / 2) + (Bottom - FYVerschuiving);
   end;
-  SetLeft(GetLeft - Round(FBalloonLineWidth / 2));
-  SetTop(GetTop - Round(FBalloonLineWidth / 2));
-  Inc(FExtentX, FBalloonLineWidth);
-  Inc(FExtentY, FBalloonLineWidth);
-  FSpriteBox.Canvas.Font := OudeFont;
+  SetLeft(LeesLinks - Round(FBallonLijnBreedte / 2));
+  SetTop(LeesBoven - Round(FBallonLijnBreedte / 2));
+  Inc(FOmvangX, FBallonLijnBreedte);
+  Inc(FOmvangY, FBallonLijnBreedte);
+  FSpriteVak.Canvas.Font := OudeFont;
 end;
 
 { @00465C08 }
-procedure TTextBalloon.SetBalloonLineWidth(Value: Integer);
+procedure TTextBalloon.ZetBallonLijnBreedte(Value: Integer);
 begin
-  if Value <> FBalloonLineWidth then
-    FBalloonLineWidth := Value;
+  if Value <> FBallonLijnBreedte then
+    FBallonLijnBreedte := Value;
 end;
 
 { @00465C18 }
-procedure TTextBalloon.SetRoundCorner(Value: Boolean);
+procedure TTextBalloon.ZetAfgerondeHoek(Value: Boolean);
 begin
-  if Value <> FRoundCorner then
-    FRoundCorner := Value;
+  if Value <> FAfgerondeHoek then
+    FAfgerondeHoek := Value;
 end;
 
 { @00465C28 }
-procedure TTextBalloon.SetXOffset(Value: Integer);
+procedure TTextBalloon.ZetXVerschuiving(Value: Integer);
 begin
-  if Value <> FXOffset then
+  if Value <> FXVerschuiving then
   begin
-    FXOffset := Value;
-    UpdateLayout;
+    FXVerschuiving := Value;
+    VernieuwIndeling;
   end;
 end;
 
 { @00465C3C }
-procedure TTextBalloon.SetYOffset(Value: Integer);
+procedure TTextBalloon.ZetYVerschuiving(Value: Integer);
 begin
-  if Value <> FYOffset then
+  if Value <> FYVerschuiving then
   begin
-    FYOffset := Value;
-    UpdateLayout;
+    FYVerschuiving := Value;
+    VernieuwIndeling;
   end;
 end;
 
 { @00465C50 }
-procedure TTextBalloon.SetSpriteBox(Value: TSpriteBox);
+procedure TTextBalloon.ZetSpriteVak(Value: TSpriteBox);
 begin
-  if Value <> FSpriteBox then
+  if Value <> FSpriteVak then
   begin
-    if FSpriteBox <> nil then
-      FSpriteBox.RemovePixie(Self);
-    FSpriteBox := Value;
-    if FSpriteBox <> nil then
-      FSpriteBox.AddPixie(Self);
-    UpdateLayout;
+    if FSpriteVak <> nil then
+      FSpriteVak.VerwijderPixie(Self);
+    FSpriteVak := Value;
+    if FSpriteVak <> nil then
+      FSpriteVak.VoegPixieToe(Self);
+    VernieuwIndeling;
   end;
 end;
 
 { @00465C84 }
-procedure TTextBalloon.SetSideColor(Value: TColor);
+procedure TTextBalloon.ZetZijKleur(Value: TColor);
 begin
-  if Value <> FSideColor then
-    FSideColor := Value;
+  if Value <> FZijKleur then
+    FZijKleur := Value;
 end;
 
 { @00465C90 }
-procedure TTextBalloon.SetBackGroundColor(Value: TColor);
+procedure TTextBalloon.ZetAchtergrondKleur(Value: TColor);
 begin
-  if Value <> FBackGroundColor then
-    FBackGroundColor := Value;
+  if Value <> FAchtergrondKleur then
+    FAchtergrondKleur := Value;
 end;
 
 { @00465C9C  ballonlichaam (Left, Top, Right, Bottom) met een aanwijzer naar
-  (TipX, TipY), als een veelhoek; afgeronde hoeken krijgen elk N extra punten }
-procedure TTextBalloon.DrawBalloon(Canvas: TCanvas; Left, Top, Right, Bottom,
-  TipX, TipY: Integer);
+  (TipX, PuntY), als een veelhoek; afgeronde hoeken krijgen elk N extra punten }
+procedure TTextBalloon.TekenBallon(Canvas: TCanvas; Left, Top, Right, Bottom,
+  TipX, PuntY: Integer);
 var
   Straal, N: Integer;
   HalfBreedte, HalfHoogte: Integer;
   Helling, A, B: Double;
   Spits: TPoint;
-  Volgorde: TCornerOrder;
+  Volgorde: THoekVolgorde;
   Punten: array[0..70] of TPoint;
   I, K: Integer;
 begin
-  Canvas.Pen.Width := FBalloonLineWidth;
-  Canvas.Pen.Color := FSideColor;
-  Canvas.Brush.Color := FBackGroundColor;
+  Canvas.Pen.Width := FBallonLijnBreedte;
+  Canvas.Pen.Color := FZijKleur;
+  Canvas.Brush.Color := FAchtergrondKleur;
   Straal := 10;
-  if FRoundCorner then
-    N := IMin(15, Round(Straal / 2))
+  if FAfgerondeHoek then
+    N := IMinimum(15, Round(Straal / 2))
   else
     N := 0;
   HalfBreedte := Round((Right - Left) / 2);
@@ -309,16 +309,16 @@ begin
   A := Top - Left * Helling;
   B := Bottom + Left * Helling;
   Spits.X := TipX;
-  Spits.Y := TipY;
+  Spits.Y := PuntY;
   Punten[1].X := TipX;
-  Punten[1].Y := TipY;
+  Punten[1].Y := PuntY;
   { aanwijzer aan de linkerzijde }
-  if (TipX * Helling + A < TipY) and (TipY < -Helling * TipX + B) then
+  if (TipX * Helling + A < PuntY) and (PuntY < -Helling * TipX + B) then
   begin
-    Move(CornerOrderLeft, Volgorde, SizeOf(Volgorde));
+    Move(HoekVolgordeLinks, Volgorde, SizeOf(Volgorde));
     Punten[0].X := Left;
     Punten[2].X := Left;
-    if Top + HalfHoogte < TipY then
+    if Top + HalfHoogte < PuntY then
     begin
       Punten[0].Y := Top + HalfHoogte;
       Punten[2].Y := Top + HalfHoogte + Straal;
@@ -330,12 +330,12 @@ begin
     end;
   end;
   { rechterzijde }
-  if (TipY < TipX * Helling + A) and (TipY > -Helling * TipX + B) then
+  if (PuntY < TipX * Helling + A) and (PuntY > -Helling * TipX + B) then
   begin
-    Move(CornerOrderRight, Volgorde, SizeOf(Volgorde));
+    Move(HoekVolgordeRechts, Volgorde, SizeOf(Volgorde));
     Punten[0].X := Right;
     Punten[2].X := Right;
-    if Top + HalfHoogte < TipY then
+    if Top + HalfHoogte < PuntY then
     begin
       Punten[2].Y := Top + HalfHoogte;
       Punten[0].Y := Top + HalfHoogte + Straal;
@@ -347,9 +347,9 @@ begin
     end;
   end;
   { bovenzijde }
-  if ((TipY - A) / Helling <= TipX) and (TipX <= -(TipY - B) / Helling) then
+  if ((PuntY - A) / Helling <= TipX) and (TipX <= -(PuntY - B) / Helling) then
   begin
-    Move(CornerOrderTop, Volgorde, SizeOf(Volgorde));
+    Move(HoekVolgordeBoven, Volgorde, SizeOf(Volgorde));
     Punten[0].Y := Top;
     Punten[2].Y := Top;
     if TipX > Left + HalfBreedte then
@@ -364,9 +364,9 @@ begin
     end;
   end;
   { onderzijde }
-  if (TipX <= (TipY - A) / Helling) and (TipX >= -(TipY - B) / Helling) then
+  if (TipX <= (PuntY - A) / Helling) and (TipX >= -(PuntY - B) / Helling) then
   begin
-    Move(CornerOrderBottom, Volgorde, SizeOf(Volgorde));
+    Move(HoekVolgordeOnder, Volgorde, SizeOf(Volgorde));
     Punten[0].Y := Bottom;
     Punten[2].Y := Bottom;
     if TipX > Left + HalfBreedte then
@@ -432,15 +432,15 @@ end;
 
 { @0046663C }
 procedure TTextBalloon.Draw(Surface: TSurface; DX, DY: Integer; ClipRect: TRect;
-  Scale: Double);
+  Schaalfactor: Double);
 begin
-  DrawDC(Surface.GetCanvas.Handle, DX, DY, ClipRect, Scale);
+  TekenDC(Surface.GetCanvas.Handle, DX, DY, ClipRect, Schaalfactor);
 end;
 
 { @00466688  verdeelt Text in LineCount regels (Words); geeft de verhouding van
   de breedste regel tot de regelhoogte (0: geen tekst, -1: minder woorden dan regels) }
-function TTextBalloon.LineRatio(AantalRegels: Integer; Tekst: string; Canvas: TCanvas;
-  var MaxBreedte: Integer; var Woorden: TLineWords; MaxRegels: Integer): Double;
+function TTextBalloon.RegelVerhouding(AantalRegels: Integer; Tekst: string; Canvas: TCanvas;
+  var MaxBreedte: Integer; var Woorden: TRegelWoorden; MaxRegels: Integer): Double;
 var
   S, Woord: string;
   SpatieBreedte, RegelHoogte, WoordAantal: Integer;
@@ -453,14 +453,14 @@ var
   Verhouding, BesteVerhouding: Double;
   Klaar: Boolean;
 begin
-  { LET OP: MaxLines wordt niet gebruikt }
+  { LET OP: MaxAantalRegels wordt niet gebruikt }
   S := Tekst;
   SpatieBreedte := Canvas.TextWidth(' ');
   RegelHoogte := Round(FFont.Size * (AantalRegels + 0.5 + (AantalRegels - 1) * 0.75));
   WoordAantal := 0;
   while S <> '' do
   begin
-    Woord := SplitFirst(S, ' ');
+    Woord := SplitsEerste(S, ' ');
     WoordBreedtes[WoordAantal] := Canvas.TextWidth(Woord);
     Inc(WoordAantal);
   end;
@@ -566,8 +566,8 @@ end;
 
 { @00466A58  kiest het aantal regels waarvan de blokverhouding het dichtst bij
   sqrt(2) ligt en geeft het ballonlichaam terug (Left, Top)-(Right, Bottom) }
-procedure TTextBalloon.FitText(Tekst: string; Canvas: TCanvas; Left, Top: Integer;
-  var Right, Bottom, AantalRegels, MaxBreedte: Integer; var Woorden: TLineWords;
+procedure TTextBalloon.PastTekst(Tekst: string; Canvas: TCanvas; Left, Top: Integer;
+  var Right, Bottom, AantalRegels, MaxBreedte: Integer; var Woorden: TRegelWoorden;
   MaxRegels: Integer);
 var
   N, Marge: Integer;
@@ -579,7 +579,7 @@ begin
   while Verhouding <> -1 do
   begin
     Inc(N);
-    Verhouding := LineRatio(N, Tekst, Canvas, MaxBreedte, Woorden, MaxRegels);
+    Verhouding := RegelVerhouding(N, Tekst, Canvas, MaxBreedte, Woorden, MaxRegels);
     if Verhouding = 0 then
     begin
       AantalRegels := 0;
@@ -595,22 +595,22 @@ begin
       Break;
     end;
   end;
-  Verhouding := LineRatio(AantalRegels, Tekst, Canvas, MaxBreedte, Woorden, MaxRegels);
+  Verhouding := RegelVerhouding(AantalRegels, Tekst, Canvas, MaxBreedte, Woorden, MaxRegels);
   Marge := 20;
   Right := Round(MaxBreedte + Left + Marge);
   Bottom := Round(MaxBreedte / Verhouding + Top + Marge);
 end;
 
 { @00466DE8 }
-procedure TTextBalloon.DrawDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
-  Scale: Double);
+procedure TTextBalloon.TekenDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
+  Schaalfactor: Double);
 var
-  Woorden: TLineWords;
+  Woorden: TRegelWoorden;
   Canvas: TCanvas;
   MaxBreedte: Integer;
   BodyLeft, BodyTop: Integer;
   BodyRight, BodyBottom, AantalRegels: Integer;
-  TipX, TipY: Integer;
+  TipX, PuntY: Integer;
   OudeFont: TFont;
 
   { @00466BD4 }
@@ -629,12 +629,12 @@ var
       for J := 1 to Woorden[I] do
         if Regel <> '' then
         begin
-          Woord := SplitFirst(S, ' ');
+          Woord := SplitsEerste(S, ' ');
           Regel := Regel + ' ' + Woord;
         end
         else
         begin
-          Woord := SplitFirst(S, ' ');
+          Woord := SplitsEerste(S, ' ');
           Regel := Regel + Woord;
         end;
       Regels.Add(Regel);
@@ -652,53 +652,53 @@ var
 begin
   Canvas := TCanvas.Create;
   Canvas.Handle := DC;
-  BodyLeft := FBodyX + DX;
-  BodyTop := FBodyY + DY;
-  TipX := DX + FTipX;
-  TipY := DY + FTipY;
+  BodyLeft := FRompX + DX;
+  BodyTop := FRompY + DY;
+  TipX := DX + FPuntX;
+  PuntY := DY + FPuntY;
   OudeFont := Canvas.Font;
   Canvas.Font := FFont;
-  FitText(FBalloonText, Canvas, BodyLeft, BodyTop, BodyRight, BodyBottom,
+  PastTekst(FBallonTekst, Canvas, BodyLeft, BodyTop, BodyRight, BodyBottom,
     AantalRegels, MaxBreedte, Woorden, 100);
-  DrawBalloon(Canvas, BodyLeft, BodyTop, BodyRight, BodyBottom, TipX, TipY);
-  DrawLines(AantalRegels, FBalloonText);
+  TekenBallon(Canvas, BodyLeft, BodyTop, BodyRight, BodyBottom, TipX, PuntY);
+  DrawLines(AantalRegels, FBallonTekst);
   Canvas.Font := OudeFont;
   Canvas.Free;
 end;
 
 { @00466F1C }
-procedure TTextBalloon.SetX(Value: Integer);
+procedure TTextBalloon.ZetX(Value: Integer);
 begin
   FX := Value;
-  UpdateLayout;
+  VernieuwIndeling;
 end;
 
 { @00466F28 }
-procedure TTextBalloon.SetY(Value: Integer);
+procedure TTextBalloon.ZetY(Value: Integer);
 begin
   FY := Value;
-  UpdateLayout;
+  VernieuwIndeling;
 end;
 
 { @00466F34 }
-procedure TTextBalloon.SetZ(Value: Integer);
+procedure TTextBalloon.ZetZ(Value: Integer);
 begin
-  if Value <> GetZ then
+  if Value <> LeesZ then
   begin
-    inherited SetZ(Value);
-    if FSpriteBox <> nil then
-      FSpriteBox.UpdateZOrder(Self);
+    inherited ZetZ(Value);
+    if FSpriteVak <> nil then
+      FSpriteVak.VernieuwZVolgorde(Self);
   end;
 end;
 
 { @00466F60 }
-function TTextBalloon.GetX: Integer;
+function TTextBalloon.LeesX: Integer;
 begin
   Result := FX;
 end;
 
 { @00466F68 }
-function TTextBalloon.GetY: Integer;
+function TTextBalloon.LeesY: Integer;
 begin
   Result := FY;
 end;

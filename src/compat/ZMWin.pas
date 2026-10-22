@@ -199,6 +199,8 @@ var
   ExitAt: Integer = -1;
   Injected: array of TZMEvent;
   InIdleHook: Boolean = False;
+  SyntheticMove: Boolean = False;
+  MouseSeen: Boolean = False;
   Script: string;
   ScriptPos: Integer;
 
@@ -733,6 +735,7 @@ begin
   if WasVis then ZMInvalidateScreen(OldScr);
   NewScr := Win.WindowRectScreen;
   if Win.IsVisible then ZMInvalidateScreen(NewScr);
+  if PtInRect(OldScr, MousePos) or PtInRect(NewScr, MousePos) then SyntheticMove := True;
   Moved := (OldR.Left <> Win.R.Left) or (OldR.Top <> Win.R.Top);
   Sized := (OldR.Right - OldR.Left <> Win.R.Right - Win.R.Left) or
     (OldR.Bottom - OldR.Top <> Win.R.Bottom - Win.R.Top);
@@ -1314,6 +1317,7 @@ begin
 end;
 
 function CallMMTimers: Boolean; forward;
+procedure PostMouse(Msg: UINT; P: TPoint; ExtraWP: WPARAM); forward;
 
 function FindPaint(H: HWND; var M: TMsg): Boolean;
   function Scan(const A: TWinArray): TZMWindow;
@@ -1522,6 +1526,13 @@ begin
       if M.message = WM_QUIT then ZMQuitRequested := True;
       Exit(True);
     end;
+  end;
+  { synthetic mouse move (after capture release or window changes under the cursor) }
+  if SyntheticMove and MouseSeen and (QCount = 0) then
+  begin
+    SyntheticMove := False;
+    PostMouse(WM_MOUSEMOVE, MousePos, 0);
+    if QCount > 0 then Exit(ZMPeekMessage(M, H, MinMsg, MaxMsg, Remove));
   end;
   { paint }
   if ((MinMsg = 0) and (MaxMsg = 0)) or ((WM_PAINT >= MinMsg) and (WM_PAINT <= MaxMsg)) then
@@ -1880,7 +1891,13 @@ var
 begin
   Old := CaptureWnd;
   CaptureWnd := 0;
-  if Old <> 0 then ZMSendMessage(Old, WM_CAPTURECHANGED, 0, 0);
+  if Old <> 0 then
+  begin
+    ZMSendMessage(Old, WM_CAPTURECHANGED, 0, 0);
+    { like Windows/Wine: releasing the capture generates a mouse move, so the
+      window under the cursor learns where the pointer is }
+    SyntheticMove := True;
+  end;
 end;
 
 function ZMEnableWindow(H: HWND; Enable: Boolean): Boolean;
@@ -2028,6 +2045,7 @@ begin
       ZMScreen.Dirty := True;
     zeMouseMove:
       begin
+        MouseSeen := True;
         MousePos := Point(E.X, E.Y);
         { coalesce: replace a pending WM_MOUSEMOVE }
         for I := QCount - 1 downto 0 do
@@ -2042,6 +2060,7 @@ begin
       end;
     zeMouseDown, zeMouseUp:
       begin
+        MouseSeen := True;
         MousePos := Point(E.X, E.Y);
         case E.Button of
           1: VK := VK_LBUTTON;

@@ -16,29 +16,29 @@ type
     Het aantal huizen en kantoren dat in een niveau gebouwd moet worden. }
   TTask = class(TObject)
   private
-    FHouses: Integer;              { +0x4 }
-    FOffices: Integer;             { +0x8 }
+    FHuizen: Integer;              { +0x4 }
+    FKantoren: Integer;             { +0x8 }
   public
     constructor Create(AHuizen, AKantoren: Integer);
     procedure Add(Andere: TTask);
     procedure Clear;
-    property Houses: Integer read FHouses write FHouses;
-    property Offices: Integer read FOffices write FOffices;
+    property Woonhuizen: Integer read FHuizen write FHuizen;
+    property Kantoorpanden: Integer read FKantoren write FKantoren;
   end;
 
-  { RTTI 004721C4 'TLevel', grootte $40. Eén [LevelN]-sectie van ZoetermeerLevels.ini. }
-  TLevel = record
+  { RTTI 004721C4 'TNiveau', grootte $40. Eén [LevelN]-sectie van ZoetermeerLevels.ini. }
+  TNiveau = record
     Uitleg: string;                { +0x00 'Uitleg' }
     Laag: TStringList;             { +0x04 'Laag'    (door komma's gescheiden namen) }
     Midden: TStringList;           { +0x08 'Midden' }
     Hoog: TStringList;             { +0x0C 'Hoog' }
     Kantoor: TStringList;          { +0x10 'Kantoor' }
-    Duration: Integer;             { +0x14 'Duration' }
-    Task: TTask;                   { +0x18 'Houses', 'Offices' }
-    StartGeld: Integer;            { +0x1C 'StartGeld' }
+    Duur: Integer;             { +0x14 'Duur' }
+    Taak: TTask;                   { +0x18 'Woonhuizen', 'Kantoorpanden' }
+    Startgeld: Integer;            { +0x1C 'Startgeld' }
     OpenWijk: Integer;             { +0x20 'openwijk' }
                                    { +0x24 (uitlijning) }
-    HappyTreshold: Double;         { +0x28 'HappyTreshold' / 100 }
+    TevredenDrempel: Double;         { +0x28 'TevredenDrempel' / 100 }
     PercKantoren: Double;          { +0x30 'PercKantoren' }
     Huisprijs: Integer;            { +0x38 'Huisprijs' }
                                    { +0x3C (uitlijning) }
@@ -47,31 +47,31 @@ type
   { VMT 0047223C, instantiegrootte $370. }
   TSettings = class(TObject)
   public
-    GameIniFile: string;           { +0x004 <AppPath>ZoetermeerGame.ini }
-    LevelsIniFile: string;         { +0x008 <AppPath><LevelsFile> }
-    HighScore: Integer;            { +0x00C }
+    SpelIniBestand: string;           { +0x004 <AppPad>ZoetermeerGame.ini }
+    NiveauIniBestand: string;         { +0x008 <AppPad><LevelsFile> }
+    HoogsteScore: Integer;            { +0x00C }
     Startgeld: Integer;            { +0x010 }
     NiveauTekst: string;           { +0x014 }
     NiveauKop: string;             { +0x018 }
     IntroTekst: string;            { +0x01C }
     IntroKop: string;              { +0x020 }
     AcceptabeleReistijd: Integer;  { +0x024 }
-    Levels: array[0..11] of TLevel;   { +0x028 (RTTI 004721E0 '.3'); 1..11 worden geladen }
+    Niveaus: array[0..11] of TNiveau;   { +0x028 (RTTI 004721E0 '.3'); 1..11 worden geladen }
     Groen: array[0..11] of Integer;   { +0x328 }
     MaxGroen: Integer;             { +0x358 }
     MaxOverlast: Integer;          { +0x35C }
-    ShowAutos: Boolean;            { +0x360 }
+    ToonAutos: Boolean;            { +0x360 }
     KantorenNaastSnelweg: Boolean;    { +0x361 }
     FabriekenNaastSnelweg: Boolean;   { +0x362 }
     HuizenNaastSnelweg: Boolean;      { +0x363 }
     TerminalsNaastSnelweg: Boolean;   { +0x364 }
-    ScreenChangeLevel: Integer;    { +0x368 }
-    AutosVisible: Boolean;         { +0x36C }
-    KlaverbladAutosVisible: Boolean;  { +0x36D }
+    SchermWisselNiveau: Integer;    { +0x368 }
+    AutosZichtbaar: Boolean;         { +0x36C }
+    KlaverbladAutosZichtbaar: Boolean;  { +0x36D }
     constructor Create(LevelsBestand: string);
     destructor Destroy; override;
-    procedure SaveHighScore;
-    procedure Load;
+    procedure BewaarHoogsteScore;
+    procedure Laden;
   end;
 
   { VMT 004722D4, instantiegrootte $20. }
@@ -79,18 +79,18 @@ type
   private
     FScore: Integer;               { +0x04 }
     FGeld: Integer;                { +0x08 }
-    FReserved0C: Integer;          { +0x0C nooit benaderd }
+    FGereserveerd0C: Integer;          { +0x0C nooit benaderd }
     FOnChange: TNotifyEvent;       { +0x10 Code, +0x14 Data }
-    FTask: TTask;                  { +0x18 huizen/kantoren gebouwd in dit niveau }
-    FLevel: Integer;               { +0x1C }
+    FOpdracht: TTask;                  { +0x18 huizen/kantoren gebouwd in dit niveau }
+    FNiveau: Integer;               { +0x1C }
   public
     constructor Create;
-    procedure SetGeld(Waarde: Integer);
+    procedure ZetGeld(Waarde: Integer);
     property Score: Integer read FScore write FScore;
-    property Geld: Integer read FGeld write SetGeld;
+    property Geld: Integer read FGeld write ZetGeld;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property Task: TTask read FTask write FTask;
-    property Level: Integer read FLevel write FLevel;
+    property Taak: TTask read FOpdracht write FOpdracht;
+    property Speelniveau: Integer read FNiveau write FNiveau;
   end;
 
 implementation
@@ -102,33 +102,33 @@ uses
 constructor TSettings.Create(LevelsBestand: string);
 begin
   inherited Create;
-  GameIniFile := AddPath(AppPath, 'ZoetermeerGame.ini');
-  LevelsIniFile := AddPath(AppPath, LevelsBestand);
-  Load;
+  SpelIniBestand := VoegPadToe(AppPad, 'ZoetermeerGame.ini');
+  NiveauIniBestand := VoegPadToe(AppPad, LevelsBestand);
+  Laden;
 end;
 
 { @004723B8 }
 destructor TSettings.Destroy;
 begin
-  SaveHighScore;
+  BewaarHoogsteScore;
   inherited Destroy;
 end;
 
 { @004723E4 }
-procedure TSettings.SaveHighScore;
+procedure TSettings.BewaarHoogsteScore;
 var
   Ini: TIniFile;
 begin
   try
-    Ini := TIniFile.Create(LevelsIniFile);
-    Ini.WriteInteger('General', 'HighScore', HighScore);
+    Ini := TIniFile.Create(NiveauIniBestand);
+    Ini.WriteInteger('General', 'HighScore', HoogsteScore);
     Ini.Free;
   except
   end;
 end;
 
 { @00472514 }
-procedure TSettings.Load;
+procedure TSettings.Laden;
 var
   NiveauIni: TIniFile;   { EBP-4 }
   SpelIni: TIniFile;     { EBP-0xC }
@@ -146,21 +146,21 @@ var
     Result := TStringList.Create;
     while S <> '' do
     begin
-      Item := SplitFirst(S, ',');
+      Item := SplitsEerste(S, ',');
       Result.Add(Item);
     end;
   end;
 
 begin
-  SpelIni := TIniFile.Create(GameIniFile);
-  NiveauIni := TIniFile.Create(LevelsIniFile);
+  SpelIni := TIniFile.Create(SpelIniBestand);
+  NiveauIni := TIniFile.Create(NiveauIniBestand);
 
   I := 1;
   IntroTekst := '';
   repeat
     S := SpelIni.ReadString('General', 'IntroTekst' + IntToStr(I), '<eoi>');
     if S <> '<eoi>' then
-      IntroTekst := IntroTekst + ReplaceStr(S + ' ', '~', #13#10);
+      IntroTekst := IntroTekst + VervangStr(S + ' ', '~', #13#10);
     Inc(I);
   until (S = '<eoi>') or (I > 100);
   IntroKop := SpelIni.ReadString('General', 'IntroKop', 'Geen Intro KopTekst');
@@ -170,37 +170,37 @@ begin
   repeat
     S := SpelIni.ReadString('General', 'NiveauTekst' + IntToStr(I), '<eoi>');
     if S <> '<eoi>' then
-      NiveauTekst := NiveauTekst + ReplaceStr(S + ' ', '~', #13#10);
+      NiveauTekst := NiveauTekst + VervangStr(S + ' ', '~', #13#10);
     Inc(I);
   until (S = '<eoi>') or (I > 100);
   NiveauKop := SpelIni.ReadString('General', 'NiveauKop', 'Geen Niveau KopTekst');
 
-  HighScore := NiveauIni.ReadInteger('General', 'HighScore', 0);
+  HoogsteScore := NiveauIni.ReadInteger('General', 'HighScore', 0);
   MaxGroen := NiveauIni.ReadInteger('General', 'MaxGroen', 100);
-  ScreenChangeLevel := NiveauIni.ReadInteger('General', 'ScreenChangeLevel', 1);
+  SchermWisselNiveau := NiveauIni.ReadInteger('General', 'ScreenChangeLevel', 1);
   AcceptabeleReistijd := NiveauIni.ReadInteger('General', 'AcceptabeleReistijd', 8);
-  AutosVisible := NiveauIni.ReadBool('General', 'AutosVisible', False);
+  AutosZichtbaar := NiveauIni.ReadBool('General', 'AutosVisible', False);
   KantorenNaastSnelweg := NiveauIni.ReadBool('General', 'KantorenNaastSnelwegToegestaan', False);
   FabriekenNaastSnelweg := NiveauIni.ReadBool('General', 'FabriekenNaastSnelwegToegestaan', False);
   HuizenNaastSnelweg := NiveauIni.ReadBool('General', 'HuizenNaastSnelwegToegestaan', False);
   TerminalsNaastSnelweg := NiveauIni.ReadBool('General', 'TerminalsNaastSnelwegToegestaan', False);
-  KlaverbladAutosVisible := NiveauIni.ReadBool('General', 'KlaverbladAutosVisible', False);
+  KlaverbladAutosZichtbaar := NiveauIni.ReadBool('General', 'KlaverbladAutosVisible', False);
   Startgeld := NiveauIni.ReadInteger('General', 'Startgeld', 1000);
 
   for I := 1 to 11 do
   begin
     Sectie := 'Level' + IntToStr(I);
     Groen[I] := NiveauIni.ReadInteger(Sectie, 'Groen', 10);
-    with Levels[I] do
+    with Niveaus[I] do
     begin
       Uitleg := NiveauIni.ReadString(Sectie, 'Uitleg', 'Geen Uitleg');
-      Duration := NiveauIni.ReadInteger(Sectie, 'Duration', 3600);
+      Duur := NiveauIni.ReadInteger(Sectie, 'Duration', 3600);
       Huizen := NiveauIni.ReadInteger(Sectie, 'Houses', 3600);
       Kantoren := NiveauIni.ReadInteger(Sectie, 'Offices', 3600);
-      StartGeld := NiveauIni.ReadInteger(Sectie, 'StartGeld', 10000);
+      Startgeld := NiveauIni.ReadInteger(Sectie, 'StartGeld', 10000);
       OpenWijk := NiveauIni.ReadInteger(Sectie, 'openwijk', 0);
-      HappyTreshold := NiveauIni.ReadInteger(Sectie, 'HappyTreshold', 0) / 100;
-      Task := TTask.Create(Huizen, Kantoren);
+      TevredenDrempel := NiveauIni.ReadInteger(Sectie, 'HappyTreshold', 0) / 100;
+      Taak := TTask.Create(Huizen, Kantoren);
       Laag := LeesLijst(Sectie, 'Laag');
       Midden := LeesLijst(Sectie, 'Midden');
       Hoog := LeesLijst(Sectie, 'Hoog');
@@ -211,7 +211,7 @@ begin
   end;
 
   MaxOverlast := NiveauIni.ReadInteger('General', 'MaxOverlast', 10000);
-  ShowAutos := NiveauIni.ReadBool('General', 'ShowAutos', True);
+  ToonAutos := NiveauIni.ReadBool('General', 'ShowAutos', True);
   SpelIni.Free;
   NiveauIni.Free;
 end;
@@ -226,7 +226,7 @@ begin
 end;
 
 { @00472DEC }
-procedure TStatus.SetGeld(Waarde: Integer);
+procedure TStatus.ZetGeld(Waarde: Integer);
 begin
   if Waarde <> FGeld then
   begin
@@ -240,22 +240,22 @@ end;
 constructor TTask.Create(AHuizen, AKantoren: Integer);
 begin
   { LET OP: geen inherited Create in het origineel. }
-  FHouses := AHuizen;
-  FOffices := AKantoren;
+  FHuizen := AHuizen;
+  FKantoren := AKantoren;
 end;
 
 { @00472E38 }
 procedure TTask.Add(Andere: TTask);
 begin
-  Inc(FHouses, Andere.FHouses);
-  Inc(FOffices, Andere.FOffices);
+  Inc(FHuizen, Andere.FHuizen);
+  Inc(FKantoren, Andere.FKantoren);
 end;
 
 { @00472E48 }
 procedure TTask.Clear;
 begin
-  FHouses := 0;
-  FOffices := 0;
+  FHuizen := 0;
+  FKantoren := 0;
 end;
 
 end.

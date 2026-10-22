@@ -8,41 +8,41 @@ unit uString;
 interface
 
 var
-  StrConvError: Boolean;   { 0048A898: wordt gezet door StrToIntDef0/StrToFloatDef0 }
+  StrConvFout: Boolean;   { 0048A898: wordt gezet door StrNaarIntDef0/StrNaarFloatDef0 }
 
-function ReplaceStr(S, Find, Replace: string): string;
-function UpStr(S: string): string;
-function LowStr(S: string): string;
-function SplitFirst(var S: string; Sep: string): string;
-function ByteToHex(B: Byte): string;
-function WordToHex(W: Word): string;
-function LongToHex(L: Longint): string;
-function IntStr(I: Longint): string;
-function LeftStr(S: string; N: Word): string;
-function RealToStr(R: Double): string;
-function IsDigit(C: Char): Boolean;
-function RepeatStr(S: string; N: Word): string;
-procedure UpChar(var C: Char);
-procedure LowChar(var C: Char);
-procedure MakeUpper(var S: string);
-procedure MakeLower(var S: string);
-procedure TrimLeftV(var S: string);
-procedure TrimRightV(var S: string);
-procedure TrimV(var S: string);
-function TrimStr(S: string): string;
-function AddPath(Dir, Name: string): string;
-function DelLeft(S: string; N: Word): string;
-function StartsWith(S, Prefix: string): Boolean;
-function PadRight(S: string; N: Word): string;
-function PadLeft(S: string; N: Word): string;
-function ZeroPad(S: string; N: Integer): string;
-function StrToIntDef0(S: string): Integer;
-function StrToFloatDef0(S: string): Double;
-function CountChar(S: string; C: Char): Integer;
-function EndsWith(S, Suffix: string): Boolean;
-function SameText2(A, B: string): Boolean;
-function LongToStr(L: Longint): string;
-function FloatToStrT(R: Double): string;
+function VervangStr(S, Find, Replace: string): string;
+function HoofdStr(S: string): string;
+function KleinStr(S: string): string;
+function SplitsEerste(var S: string; Sep: string): string;
+function ByteNaarHex(B: Byte): string;
+function WoordNaarHex(W: Word): string;
+function LongNaarHex(L: Longint): string;
+function IntTekst(I: Longint): string;
+function LinksStr(S: string; N: Word): string;
+function RealNaarStr(R: Double): string;
+function IsCijfer(C: Char): Boolean;
+function HerhaalStr(S: string; N: Word): string;
+procedure HoofdChar(var C: Char);
+procedure KleinChar(var C: Char);
+procedure MaakHoofdletters(var S: string);
+procedure MaakKleinletters(var S: string);
+procedure SnijLinksV(var S: string);
+procedure SnijRechtsV(var S: string);
+procedure SnijV(var S: string);
+function SnijStr(S: string): string;
+function VoegPadToe(Dir, Name: string): string;
+function VerwijderLinks(S: string; N: Word): string;
+function BegintMet(S, NaamVoorvoegsel: string): Boolean;
+function VulRechts(S: string; N: Word): string;
+function VulLinks(S: string; N: Word): string;
+function NulVul(S: string; N: Integer): string;
+function StrNaarIntDef0(S: string): Integer;
+function StrNaarFloatDef0(S: string): Double;
+function TelTeken(S: string; C: Char): Integer;
+function EindigtMet(S, Suffix: string): Boolean;
+function GelijkTekst2(A, B: string): Boolean;
+function LongNaarStr(L: Longint): string;
+function FloatNaarStrT(R: Double): string;
 
 implementation
 
@@ -55,37 +55,37 @@ const
   WhiteSpace: set of Char = [#8, #9, #10, #13, ' ', #127];               { 00488CE4 }
 
 { @0045F98C }
-function ReplaceStr(S, Find, Replace: string): string;
+function VervangStr(S, Find, Replace: string): string;
 var
   Stuk: string;
 begin
   S := S + Find;
   Result := '';
-  Stuk := SplitFirst(S, Find);
+  Stuk := SplitsEerste(S, Find);
   while S <> '' do
   begin
     Result := Result + Stuk + Replace;
-    Stuk := SplitFirst(S, Find);
+    Stuk := SplitsEerste(S, Find);
   end;
   Result := Result + Stuk;
 end;
 
 { @0045FA48 }
-function UpStr(S: string): string;
+function HoofdStr(S: string): string;
 begin
-  MakeUpper(S);
+  MaakHoofdletters(S);
   Result := S;
 end;
 
 { @0045FA9C }
-function LowStr(S: string): string;
+function KleinStr(S: string): string;
 begin
-  MakeLower(S);
+  MaakKleinletters(S);
   Result := S;
 end;
 
 { @0045FAF0 }
-function SplitFirst(var S: string; Sep: string): string;
+function SplitsEerste(var S: string; Sep: string): string;
 var
   P: Word;
 begin
@@ -103,25 +103,25 @@ begin
 end;
 
 { @0045FB88 }
-function ByteToHex(B: Byte): string;
+function ByteNaarHex(B: Byte): string;
 begin
   Result := Digits[B shr 4] + Digits[B and $F];
 end;
 
 { @0045FBEC }
-function WordToHex(W: Word): string;
+function WoordNaarHex(W: Word): string;
 begin
-  Result := ByteToHex(W shr 8) + ByteToHex(W and $FF);
+  Result := ByteNaarHex(W shr 8) + ByteNaarHex(W and $FF);
 end;
 
 { @0045FC58 }
-function LongToHex(L: Longint): string;
+function LongNaarHex(L: Longint): string;
 begin
-  Result := WordToHex(L shr 16) + WordToHex(L and $FFFF);
+  Result := WoordNaarHex(L shr 16) + WoordNaarHex(L and $FFFF);
 end;
 
 { @0045FCC8 }
-function IntStr(I: Longint): string;
+function IntTekst(I: Longint): string;
 var
   S: string;
 begin
@@ -130,7 +130,7 @@ begin
 end;
 
 { @0045FD34 }
-function LeftStr(S: string; N: Word): string;
+function LinksStr(S: string; N: Word): string;
 begin
   if Length(S) < N then
     Result := S
@@ -139,7 +139,7 @@ begin
 end;
 
 { @0045FDA8 }
-function RealToStr(R: Double): string;
+function RealNaarStr(R: Double): string;
 var
   S: string;
   Lengte: Word;
@@ -158,13 +158,13 @@ begin
 end;
 
 { @0045FE74 }
-function IsDigit(C: Char): Boolean;
+function IsCijfer(C: Char): Boolean;
 begin
   Result := C in ['0'..'9'];
 end;
 
 { @0045FE84 }
-function RepeatStr(S: string; N: Word): string;
+function HerhaalStr(S: string; N: Word): string;
 var
   Tekst: string;
 begin
@@ -178,38 +178,38 @@ begin
 end;
 
 { @0045FF00 }
-procedure UpChar(var C: Char);
+procedure HoofdChar(var C: Char);
 begin
   C := UpCase(C);
 end;
 
 { @0045FF10 }
-procedure LowChar(var C: Char);
+procedure KleinChar(var C: Char);
 begin
   if C in UpperChars then
     C := Chr(Ord(C) + 32);
 end;
 
 { @0045FF2C }
-procedure MakeUpper(var S: string);
+procedure MaakHoofdletters(var S: string);
 var
   I: Word;
 begin
   for I := 1 to Length(S) do
-    UpChar(S[I]);
+    HoofdChar(S[I]);
 end;
 
 { @0045FF60 }
-procedure MakeLower(var S: string);
+procedure MaakKleinletters(var S: string);
 var
   I: Word;
 begin
   for I := 1 to Length(S) do
-    LowChar(S[I]);
+    KleinChar(S[I]);
 end;
 
 { @0045FF94 }
-procedure TrimLeftV(var S: string);
+procedure SnijLinksV(var S: string);
 var
   I: Word;
 begin
@@ -231,7 +231,7 @@ begin
 end;
 
 { @0045FFEC }
-procedure TrimRightV(var S: string);
+procedure SnijRechtsV(var S: string);
 var
   L: Integer;
 begin
@@ -254,21 +254,21 @@ begin
 end;
 
 { @0046002C }
-procedure TrimV(var S: string);
+procedure SnijV(var S: string);
 begin
-  TrimLeftV(S);
-  TrimRightV(S);
+  SnijLinksV(S);
+  SnijRechtsV(S);
 end;
 
 { @00460040 }
-function TrimStr(S: string): string;
+function SnijStr(S: string): string;
 begin
-  TrimV(S);
+  SnijV(S);
   Result := S;
 end;
 
 { @00460094 }
-function AddPath(Dir, Name: string): string;
+function VoegPadToe(Dir, Name: string): string;
 var
   Sep: string[1];
 begin
@@ -280,7 +280,7 @@ begin
 end;
 
 { @00460154 }
-function DelLeft(S: string; N: Word): string;
+function VerwijderLinks(S: string; N: Word): string;
 begin
   if Length(S) > N then
   begin
@@ -292,62 +292,62 @@ begin
 end;
 
 { @004601CC }
-function StartsWith(S, Prefix: string): Boolean;
+function BegintMet(S, NaamVoorvoegsel: string): Boolean;
 begin
-  if Length(S) < Length(Prefix) then
+  if Length(S) < Length(NaamVoorvoegsel) then
     Result := False
   else
   begin
-    SetLength(S, Length(Prefix));
-    Result := S = Prefix;
+    SetLength(S, Length(NaamVoorvoegsel));
+    Result := S = NaamVoorvoegsel;
   end;
 end;
 
 { @0046025C }
-function PadRight(S: string; N: Word): string;
+function VulRechts(S: string; N: Word): string;
 begin
   if Length(S) > N then
     Result := Copy(S, 1, N)
   else
-    Result := S + RepeatStr(' ', N - Length(S));
+    Result := S + HerhaalStr(' ', N - Length(S));
 end;
 
 { @00460304 }
-function PadLeft(S: string; N: Word): string;
+function VulLinks(S: string; N: Word): string;
 begin
   if Length(S) >= N then
     Result := Copy(S, Length(S) + 1 - N, N)
   else
-    Result := RepeatStr(' ', N - Length(S)) + S;
+    Result := HerhaalStr(' ', N - Length(S)) + S;
 end;
 
 { @004603B8 }
-function ZeroPad(S: string; N: Integer): string;
+function NulVul(S: string; N: Integer): string;
 begin
   if N <= Length(S) then
     Result := S
   else
-    Result := RepeatStr('0', N - Length(S)) + S;
+    Result := HerhaalStr('0', N - Length(S)) + S;
 end;
 
 { @00460458 }
-function StrToIntDef0(S: string): Integer;
+function StrNaarIntDef0(S: string): Integer;
 var
   I: Integer;
   Teken: Char;
   Fout: Word;
 begin
-  TrimV(S);
+  SnijV(S);
   for I := 1 to Length(S) do
   begin
     Teken := S[I];
-    if (Teken <> '-') and not IsDigit(Teken) then
+    if (Teken <> '-') and not IsCijfer(Teken) then
     begin
       SetLength(S, I - 1);
       Break;
     end;
   end;
-  TrimV(S);
+  SnijV(S);
   if S = '' then
     Result := 0
   else
@@ -358,22 +358,22 @@ begin
     except
       Fout := 1;
     end;
-    StrConvError := Fout <> 0;
-    if StrConvError then
+    StrConvFout := Fout <> 0;
+    if StrConvFout then
       I := 0;
     Result := I;
   end;
 end;
 
 { @00460554 }
-function StrToFloatDef0(S: string): Double;
+function StrNaarFloatDef0(S: string): Double;
 var
   Negatief, HadScheiding: Boolean;
   I: Integer;
   Getal: Double;
   Fout: Word;
 begin
-  TrimV(S);
+  SnijV(S);
   if Length(S) = 0 then
     Result := 0
   else
@@ -386,7 +386,7 @@ begin
     end;
     HadScheiding := False;
     for I := 1 to Length(S) do
-      if not IsDigit(S[I]) then
+      if not IsCijfer(S[I]) then
       begin
         if HadScheiding or (S[I] <> DecimalSeparator) then
         begin
@@ -395,7 +395,7 @@ begin
         end;
         HadScheiding := True;
       end;
-    TrimV(S);
+    SnijV(S);
     if S = '' then
       Result := 0
     else
@@ -409,14 +409,14 @@ begin
         Fout := 1;
         Getal := 0;
       end;
-      StrConvError := Fout <> 0;
+      StrConvFout := Fout <> 0;
       Result := Getal;
     end;
   end;
 end;
 
 { @004606C4 }
-function CountChar(S: string; C: Char): Integer;
+function TelTeken(S: string; C: Char): Integer;
 var
   I, Aantal: Integer;
 begin
@@ -428,19 +428,19 @@ begin
 end;
 
 { @0046072C }
-function EndsWith(S, Suffix: string): Boolean;
+function EindigtMet(S, Suffix: string): Boolean;
 begin
   Result := Copy(S, Length(S) - Length(Suffix) + 1, Length(Suffix)) = Suffix;
 end;
 
 { @004607C0 }
-function SameText2(A, B: string): Boolean;
+function GelijkTekst2(A, B: string): Boolean;
 begin
   Result := UpperCase(A) = UpperCase(B);
 end;
 
 { @00460844 }
-function LongToStr(L: Longint): string;
+function LongNaarStr(L: Longint): string;
 var
   S: string;
 begin
@@ -449,7 +449,7 @@ begin
 end;
 
 { @004608B0 }
-function FloatToStrT(R: Double): string;
+function FloatNaarStrT(R: Double): string;
 var
   S: string;
   Lengte: Word;

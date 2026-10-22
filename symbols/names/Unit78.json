@@ -1,6 +1,8 @@
 {
   "functions": {},
-  "globals": { "00488e9c": "Unit78.WavFiles" },
+  "globals": {
+    "00488e9c": "Unit78.WavBestanden"
+  },
   "fields": {},
   "notes": "Real unit name unknown; probably uDebug (see src/game/Unit78.pas). Identical array in Unit49 at 00488D20."
 }

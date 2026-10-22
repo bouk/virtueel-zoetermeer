@@ -15,18 +15,18 @@ uses
 type
   { Framenamen en reeksnamen. De RTTI van TSprite.CurrentFrame plaatst dit
     type in Sprframe (tkString, maximale lengte 80); Sprframe.pas noemt het
-    TFrameName, dus het wordt hier onder de oorspronkelijke naam gedeclareerd. }
+    TFrameNaam, dus het wordt hier onder de oorspronkelijke naam gedeclareerd. }
   TName = string[80];
 
   TFrameRef = class(TPersistent)
   private
-    FFrameName: TName;           { +0x04 }
-    FOwner: TComponent;          { +0x58  de TSprite }
-    FDX: SmallInt;               { +0x5C }
-    FDY: SmallInt;               { +0x5E }
-    FDZ: SmallInt;               { +0x60  gestreamd sinds versie 1.1b }
-    FDelay: Real48;              { +0x68  seconden }
-    procedure SetFrameName(Value: TName);
+    FFrameNaam: TName;           { +0x04 }
+    FEigenaar: TComponent;          { +0x58  de TSprite }
+    FVersX: SmallInt;               { +0x5C }
+    FVersY: SmallInt;               { +0x5E }
+    FVersZ: SmallInt;               { +0x60  gestreamd sinds versie 1.1b }
+    FVertraging: Real48;              { +0x68  seconden }
+    procedure ZetFrameNaam(Value: TName);
     procedure ReadData(Stream: TStream);
     procedure WriteData(Stream: TStream);
   protected
@@ -34,20 +34,20 @@ type
   public
     constructor Create(AOwner: TComponent);
     procedure Assign(Source: TPersistent); override;
-    function GetFrameIndex: Integer;
-    function GetDX: Integer;
-    function GetDY: Integer;
-    function GetDZ: Integer;
-    property FrameName: TName read FFrameName write SetFrameName;
-    property Owner: TComponent read FOwner;
-    property Delay: Real48 read FDelay write FDelay;
+    function LeesFrameIndex: Integer;
+    function LeesVersX: Integer;
+    function LeesVersY: Integer;
+    function LeesVersZ: Integer;
+    property FrameNaam: TName read FFrameNaam write ZetFrameNaam;
+    property Owner: TComponent read FEigenaar;
+    property Delay: Real48 read FVertraging write FVertraging;
   end;
 
   TSequence = class(TPersistentList)
   private
     FName: TName;                { +0x08 }
-    FTime: Double;               { +0x60  op 0 gezet en gekopieerd, nooit gelezen }
-    FOwner: TComponent;          { +0x68  de TSprite }
+    FTijd: Double;               { +0x60  op 0 gezet en gekopieerd, nooit gelezen }
+    FEigenaar: TComponent;          { +0x68  de TSprite }
     procedure ReadData(Stream: TStream);
     procedure WriteData(Stream: TStream);
   protected
@@ -55,17 +55,17 @@ type
   public
     constructor Create(AOwner: TComponent);
     procedure Assign(Source: TPersistent); override;
-    procedure GetStep(Nr: Integer; var FrameIndex, DX, DY, DZ: Integer;
+    procedure LeesStap(Nr: Integer; var FrameIndex, DX, DY, DZ: Integer;
       var Delay: Double);
-    function GetFrameRef(Nr: Integer): TFrameRef;
+    function LeesFrameVerwijzing(Nr: Integer): TFrameRef;
     property Name: TName read FName write FName;
-    property Owner: TComponent read FOwner;
-    property FrameRefs[Nr: Integer]: TFrameRef read GetFrameRef; default;
+    property Owner: TComponent read FEigenaar;
+    property FrameVerwijzingen[Nr: Integer]: TFrameRef read LeesFrameVerwijzing; default;
   end;
 
   TSequenceList = class(TPersistentList)
   private
-    FOwner: TComponent;          { +0x08  de TSprite }
+    FEigenaar: TComponent;          { +0x08  de TSprite }
     procedure ReadData(Stream: TStream);
     procedure WriteData(Stream: TStream);
   protected
@@ -73,12 +73,12 @@ type
   public
     constructor Create(AOwner: TComponent);
     procedure Assign(Source: TPersistent); override;
-    function GetSequence(Nr: Integer): TSequence;
-    function SequenceByName(Name: TName): TSequence;
+    function LeesReeks(Nr: Integer): TSequence;
+    function ReeksOpNaam(Name: TName): TSequence;
     function IndexOf(Name: TName): Integer;
     function Add(Reeks: TSequence): Integer;
-    property Owner: TComponent read FOwner;
-    property Sequences[Nr: Integer]: TSequence read GetSequence; default;
+    property Owner: TComponent read FEigenaar;
+    property Reeksen[Nr: Integer]: TSequence read LeesReeks; default;
   end;
 
 implementation
@@ -92,37 +92,37 @@ uses
 constructor TFrameRef.Create(AOwner: TComponent);
 begin
   inherited Create;
-  FOwner := AOwner;
+  FEigenaar := AOwner;
 end;
 
 { @0046EC34 }
-procedure TFrameRef.SetFrameName(Value: TName);
+procedure TFrameRef.ZetFrameNaam(Value: TName);
 begin
-  FFrameName := Value;
+  FFrameNaam := Value;
 end;
 
 { @0046EC68 }
-function TFrameRef.GetFrameIndex: Integer;
+function TFrameRef.LeesFrameIndex: Integer;
 begin
-  Result := (FOwner as TSprite).FrameList.IndexOf(FFrameName);
+  Result := (FEigenaar as TSprite).FrameList.IndexOf(FFrameNaam);
 end;
 
 { @0046EC88 }
-function TFrameRef.GetDX: Integer;
+function TFrameRef.LeesVersX: Integer;
 begin
-  Result := FDX;
+  Result := FVersX;
 end;
 
 { @0046EC90 }
-function TFrameRef.GetDY: Integer;
+function TFrameRef.LeesVersY: Integer;
 begin
-  Result := FDY;
+  Result := FVersY;
 end;
 
 { @0046EC98 }
-function TFrameRef.GetDZ: Integer;
+function TFrameRef.LeesVersZ: Integer;
 begin
-  Result := FDZ;
+  Result := FVersZ;
 end;
 
 { @0046ECA0  record: naam (81) DX (2) DY (2) [DZ (2)] Delay (6, Real48) }
@@ -131,29 +131,29 @@ var
   Versie: string;
   S: TName;
 begin
-  if FOwner <> nil then
-    Versie := (FOwner as TSprite).Version
+  if FEigenaar <> nil then
+    Versie := (FEigenaar as TSprite).Versienummer
   else
     Versie := '';
   Stream.ReadBuffer(S, SizeOf(TName));
-  SetFrameName(S);
-  Stream.ReadBuffer(FDX, 2);
-  Stream.ReadBuffer(FDY, 2);
+  ZetFrameNaam(S);
+  Stream.ReadBuffer(FVersX, 2);
+  Stream.ReadBuffer(FVersY, 2);
   if Versie >= '1.1b' then
-    Stream.ReadBuffer(FDZ, 2)
+    Stream.ReadBuffer(FVersZ, 2)
   else
-    FDZ := 0;
-  Stream.ReadBuffer(FDelay, 6);
+    FVersZ := 0;
+  Stream.ReadBuffer(FVertraging, 6);
 end;
 
 { @0046ED8C }
 procedure TFrameRef.WriteData(Stream: TStream);
 begin
-  Stream.WriteBuffer(FFrameName, SizeOf(TName));
-  Stream.WriteBuffer(FDX, 2);
-  Stream.WriteBuffer(FDY, 2);
-  Stream.WriteBuffer(FDZ, 2);
-  Stream.WriteBuffer(FDelay, 6);
+  Stream.WriteBuffer(FFrameNaam, SizeOf(TName));
+  Stream.WriteBuffer(FVersX, 2);
+  Stream.WriteBuffer(FVersY, 2);
+  Stream.WriteBuffer(FVersZ, 2);
+  Stream.WriteBuffer(FVertraging, 6);
 end;
 
 { @0046EDE0 }
@@ -173,12 +173,12 @@ begin
   else
   begin
     Verwijzing := Source as TFrameRef;
-    FFrameName := Verwijzing.FFrameName;
-    FOwner := Verwijzing.FOwner;
-    FDX := Verwijzing.FDX;
-    FDY := Verwijzing.FDY;
-    FDZ := Verwijzing.FDZ;
-    FDelay := Verwijzing.FDelay;
+    FFrameNaam := Verwijzing.FFrameNaam;
+    FEigenaar := Verwijzing.FEigenaar;
+    FVersX := Verwijzing.FVersX;
+    FVersY := Verwijzing.FVersY;
+    FVersZ := Verwijzing.FVersZ;
+    FVertraging := Verwijzing.FVertraging;
   end;
 end;
 
@@ -189,8 +189,8 @@ constructor TSequence.Create(AOwner: TComponent);
 begin
   inherited Create;
   FName := 'New Sequence';
-  FTime := 0;
-  FOwner := AOwner;
+  FTijd := 0;
+  FEigenaar := AOwner;
 end;
 
 { @0046EEF4 }
@@ -206,20 +206,20 @@ begin
   begin
     Reeks := Source as TSequence;
     FName := Reeks.FName;
-    FTime := Reeks.FTime;
-    FOwner := Reeks.FOwner;
+    FTijd := Reeks.FTijd;
+    FEigenaar := Reeks.FEigenaar;
     Clear;
     for I := 0 to Reeks.Count - 1 do
     begin
-      Verwijzing := TFrameRef.Create(FOwner);
-      Verwijzing.Assign(Reeks.GetFrameRef(I));
+      Verwijzing := TFrameRef.Create(FEigenaar);
+      Verwijzing.Assign(Reeks.LeesFrameVerwijzing(I));
       List.Add(Verwijzing);
     end;
   end;
 end;
 
 { @0046EFA0  frame-index, verschuiving en vertraging van stap Index (-1: eerste frame, geen verschuiving) }
-procedure TSequence.GetStep(Nr: Integer; var FrameIndex, DX, DY, DZ: Integer;
+procedure TSequence.LeesStap(Nr: Integer; var FrameIndex, DX, DY, DZ: Integer;
   var Delay: Double);
 begin
   if Nr = -1 then
@@ -228,20 +228,20 @@ begin
     DY := 0;
     DZ := 0;
     Delay := 0;
-    FrameIndex := GetFrameRef(0).GetFrameIndex;
+    FrameIndex := LeesFrameVerwijzing(0).LeesFrameIndex;
   end
   else
   begin
-    DX := GetFrameRef(Nr).GetDX;
-    DY := GetFrameRef(Nr).GetDY;
-    DZ := GetFrameRef(Nr).GetDZ;
-    Delay := GetFrameRef(Nr).FDelay;
-    FrameIndex := GetFrameRef(Nr).GetFrameIndex;
+    DX := LeesFrameVerwijzing(Nr).LeesVersX;
+    DY := LeesFrameVerwijzing(Nr).LeesVersY;
+    DZ := LeesFrameVerwijzing(Nr).LeesVersZ;
+    Delay := LeesFrameVerwijzing(Nr).FVertraging;
+    FrameIndex := LeesFrameVerwijzing(Nr).LeesFrameIndex;
   end;
 end;
 
 { @0046F04C }
-function TSequence.GetFrameRef(Nr: Integer): TFrameRef;
+function TSequence.LeesFrameVerwijzing(Nr: Integer): TFrameRef;
 begin
   Result := TObject(List[Nr]) as TFrameRef;
 end;
@@ -256,7 +256,7 @@ begin
   Stream.ReadBuffer(N, 2);
   for I := 0 to N - 1 do
   begin
-    Verwijzing := TFrameRef.Create(FOwner);
+    Verwijzing := TFrameRef.Create(FEigenaar);
     Verwijzing.ReadData(Stream);
     List.Add(Verwijzing);
   end;
@@ -271,7 +271,7 @@ begin
   N := List.Count;
   Stream.WriteBuffer(N, 2);
   for I := 0 to N - 1 do
-    GetFrameRef(I).WriteData(Stream);
+    LeesFrameVerwijzing(I).WriteData(Stream);
 end;
 
 { @0046F128 }
@@ -287,7 +287,7 @@ end;
 constructor TSequenceList.Create(AOwner: TComponent);
 begin
   inherited Create;
-  FOwner := AOwner;
+  FEigenaar := AOwner;
 end;
 
 { @0046F1A0 }
@@ -302,32 +302,32 @@ begin
   else
   begin
     Lijst := Source as TSequenceList;
-    FOwner := Lijst.FOwner;
+    FEigenaar := Lijst.FEigenaar;
     Clear;
     for I := 0 to Lijst.Count - 1 do
     begin
-      Reeks := TSequence.Create(FOwner);
-      Reeks.Assign(Lijst.GetSequence(I));
+      Reeks := TSequence.Create(FEigenaar);
+      Reeks.Assign(Lijst.LeesReeks(I));
       Add(Reeks);
     end;
   end;
 end;
 
 { @0046F230 }
-function TSequenceList.GetSequence(Nr: Integer): TSequence;
+function TSequenceList.LeesReeks(Nr: Integer): TSequence;
 begin
   Result := TObject(List[Nr]) as TSequence;
 end;
 
 { @0046F250 }
-function TSequenceList.SequenceByName(Name: TName): TSequence;
+function TSequenceList.ReeksOpNaam(Name: TName): TSequence;
 var
   Nr: Integer;
 begin
   Nr := IndexOf(Name);
   if Nr < 0 then
     raise ESprite.Create('SequenceByName: ' + Name + ' not found');
-  Result := GetSequence(Nr);
+  Result := LeesReeks(Nr);
 end;
 
 { @0046F34C  hoofdletterongevoelig }
@@ -336,7 +336,7 @@ var
   I: Integer;
 begin
   for I := 0 to Count - 1 do
-    if UpperCase(GetSequence(I).FName) = UpperCase(Name) then
+    if UpperCase(LeesReeks(I).FName) = UpperCase(Name) then
     begin
       Result := I;
       Exit;
@@ -366,7 +366,7 @@ begin
   Stream.ReadBuffer(N, 2);
   for I := 0 to N - 1 do
   begin
-    Reeks := TSequence.Create(FOwner);
+    Reeks := TSequence.Create(FEigenaar);
     Reeks.ReadData(Stream);
     List.Add(Reeks);
   end;
@@ -380,7 +380,7 @@ begin
   N := List.Count;
   Stream.WriteBuffer(N, 2);
   for I := 0 to N - 1 do
-    GetSequence(I).WriteData(Stream);
+    LeesReeks(I).WriteData(Stream);
 end;
 
 end.

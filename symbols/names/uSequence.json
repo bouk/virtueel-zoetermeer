@@ -1,26 +1,26 @@
 {
   "functions": {
     "0046ebf8": "TFrameRef.Create",
-    "0046ec34": "TFrameRef.SetFrameName",
-    "0046ec68": "TFrameRef.GetFrameIndex",
-    "0046ec88": "TFrameRef.GetDX",
-    "0046ec90": "TFrameRef.GetDY",
-    "0046ec98": "TFrameRef.GetDZ",
+    "0046ec34": "TFrameRef.ZetFrameNaam",
+    "0046ec68": "TFrameRef.LeesFrameIndex",
+    "0046ec88": "TFrameRef.LeesVersX",
+    "0046ec90": "TFrameRef.LeesVersY",
+    "0046ec98": "TFrameRef.LeesVersZ",
     "0046eca0": "TFrameRef.ReadData",
     "0046ed8c": "TFrameRef.WriteData",
     "0046ede0": "TFrameRef.DefineProperties",
     "0046ee1c": "TFrameRef.Assign",
     "0046ee8c": "TSequence.Create",
     "0046eef4": "TSequence.Assign",
-    "0046efa0": "TSequence.GetStep",
-    "0046f04c": "TSequence.GetFrameRef",
+    "0046efa0": "TSequence.LeesStap",
+    "0046f04c": "TSequence.LeesFrameVerwijzing",
     "0046f06c": "TSequence.ReadData",
     "0046f0cc": "TSequence.WriteData",
     "0046f128": "TSequence.DefineProperties",
     "0046f164": "TSequenceList.Create",
     "0046f1a0": "TSequenceList.Assign",
-    "0046f230": "TSequenceList.GetSequence",
-    "0046f250": "TSequenceList.SequenceByName",
+    "0046f230": "TSequenceList.LeesReeks",
+    "0046f250": "TSequenceList.ReeksOpNaam",
     "0046f34c": "TSequenceList.IndexOf",
     "0046f410": "TSequenceList.Add",
     "0046f41c": "TSequenceList.DefineProperties",
@@ -33,27 +33,27 @@
   "fields": {
     "TFrameRef": {
       "0x4": [
-        "FFrameName",
+        "FFrameNaam",
         "TName"
       ],
       "0x58": [
-        "FOwner",
+        "FEigenaar",
         "TComponent"
       ],
       "0x5c": [
-        "FDX",
+        "FVersX",
         "SmallInt"
       ],
       "0x5e": [
-        "FDY",
+        "FVersY",
         "SmallInt"
       ],
       "0x60": [
-        "FDZ",
+        "FVersZ",
         "SmallInt"
       ],
       "0x68": [
-        "FDelay",
+        "FVertraging",
         "Real48"
       ]
     },
@@ -63,17 +63,17 @@
         "TName"
       ],
       "0x60": [
-        "FTime",
+        "FTijd",
         "Double"
       ],
       "0x68": [
-        "FOwner",
+        "FEigenaar",
         "TComponent"
       ]
     },
     "TSequenceList": {
       "0x8": [
-        "FOwner",
+        "FEigenaar",
         "TComponent"
       ]
     }

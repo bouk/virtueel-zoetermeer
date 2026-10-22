@@ -13,27 +13,27 @@ uses
 type
   TGoblin = class(TPixie)
   private
-    FArea: TRect;                   { +0x68  bedekt gebied (wordt nooit gezet in ROS.exe) }
-    FSurface: TSurface;             { +0x78  tegel }
-    FSpriteBox: TSpriteBox;         { +0x7C }
-    FChanged: Boolean;              { +0x80  oppervlak gewijzigd: forceer een hertekening }
-    procedure SetSpriteBox(Value: TSpriteBox);
-    procedure SetSurface(Value: TSurface);
+    FGebied: TRect;                   { +0x68  bedekt gebied (wordt nooit gezet in ROS.exe) }
+    FOppervlak: TSurface;             { +0x78  tegel }
+    FSpriteVak: TSpriteBox;         { +0x7C }
+    FGewijzigd: Boolean;              { +0x80  oppervlak gewijzigd: forceer een hertekening }
+    procedure ZetSpriteVak(Value: TSpriteBox);
+    procedure ZetOppervlak(Value: TSurface);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure GetChange(var OldState, NewState: TPixieState); override;
+    procedure LeesWijziging(var OldState, NewState: TPixieStaat); override;
     function GetWidth: Integer; override;
     function GetHeight: Integer; override;
     procedure Draw(Surface: TSurface; DX, DY: Integer; ClipRect: TRect;
-      Scale: Double); override;
-    procedure DrawDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
-      Scale: Double); override;
-    procedure SetZ(Value: Integer); override;
-    property Area: TRect read FArea write FArea;
+      Schaalfactor: Double); override;
+    procedure TekenDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
+      Schaalfactor: Double); override;
+    procedure ZetZ(Value: Integer); override;
+    property Gebied: TRect read FGebied write FGebied;
   published
-    property SpriteBox: TSpriteBox read FSpriteBox write SetSpriteBox;
-    property Surface: TSurface read FSurface write SetSurface;
+    property SpriteBox: TSpriteBox read FSpriteVak write ZetSpriteVak;
+    property Surface: TSurface read FOppervlak write ZetOppervlak;
   end;
 
 implementation
@@ -41,74 +41,74 @@ implementation
 { @0046C5BC }
 constructor TGoblin.Create(AOwner: TComponent);
 begin
-  FSurface := NewSurface;
+  FOppervlak := NieuwOppervlak;
   inherited Create(AOwner);
 end;
 
 { @0046C600 }
 destructor TGoblin.Destroy;
 begin
-  FSurface.Free;
-  SetSpriteBox(nil);
+  FOppervlak.Free;
+  ZetSpriteVak(nil);
   inherited Destroy;
 end;
 
 { @0046C638 }
-procedure TGoblin.GetChange(var OldState, NewState: TPixieState);
+procedure TGoblin.LeesWijziging(var OldState, NewState: TPixieStaat);
 begin
-  inherited GetChange(OldState, NewState);
-  if FChanged and not OldState.Visible and not NewState.Visible then
+  inherited LeesWijziging(OldState, NewState);
+  if FGewijzigd and not OldState.Visible and not NewState.Visible then
   begin
     OldState.Visible := True;
     NewState.Visible := True;
   end;
-  FChanged := False;
+  FGewijzigd := False;
 end;
 
 { @0046C674 }
-procedure TGoblin.SetSpriteBox(Value: TSpriteBox);
+procedure TGoblin.ZetSpriteVak(Value: TSpriteBox);
 begin
-  if Value <> FSpriteBox then
+  if Value <> FSpriteVak then
   begin
-    if FSpriteBox <> nil then
-      FSpriteBox.RemovePixie(Self);
-    FSpriteBox := Value;
-    if FSpriteBox <> nil then
-      FSpriteBox.AddPixie(Self);
+    if FSpriteVak <> nil then
+      FSpriteVak.VerwijderPixie(Self);
+    FSpriteVak := Value;
+    if FSpriteVak <> nil then
+      FSpriteVak.VoegPixieToe(Self);
   end;
 end;
 
 { @0046C6A0 }
-procedure TGoblin.SetSurface(Value: TSurface);
+procedure TGoblin.ZetOppervlak(Value: TSurface);
 begin
-  if Value <> FSurface then
+  if Value <> FOppervlak then
   begin
-    FSurface.Assign(Value);
-    FChanged := True;
+    FOppervlak.Assign(Value);
+    FGewijzigd := True;
   end;
 end;
 
 { @0046C6B8 }
 function TGoblin.GetWidth: Integer;
 begin
-  Result := FArea.Right - FArea.Left;
+  Result := FGebied.Right - FGebied.Left;
 end;
 
 { @0046C6C4 }
 function TGoblin.GetHeight: Integer;
 begin
-  Result := FArea.Bottom - FArea.Top;
+  Result := FGebied.Bottom - FGebied.Top;
 end;
 
 { @0046C6D0 }
 procedure TGoblin.Draw(Surface: TSurface; DX, DY: Integer; ClipRect: TRect;
-  Scale: Double);
+  Schaalfactor: Double);
 begin
-  DrawDC(Surface.GetCanvas.Handle, DX, DY, ClipRect, Scale);
+  TekenDC(Surface.GetCanvas.Handle, DX, DY, ClipRect, Schaalfactor);
 end;
 
-{ @0046C71C  tegelt FSurface over FArea; ClipRect en Scale worden genegeerd }
-procedure TGoblin.DrawDC(DC: HDC; DX, DY: Integer; ClipRect: TRect; Scale: Double);
+{ @0046C71C  tegelt FOppervlak over FGebied; ClipRect en Schaalfactor worden genegeerd }
+procedure TGoblin.TekenDC(DC: HDC; DX, DY: Integer; ClipRect: TRect; Schaalfactor: Double);
 var
   Kader: TRect;
   VersX, VersY: Integer;
@@ -116,30 +116,30 @@ var
   BeginX, BeginY, EindX, EindY: Integer;
   PosX, PosY: Integer;
 begin
-  VersX := FArea.Left - FArea.Left mod FSurface.Width;
-  VersY := FArea.Top - FArea.Top mod FSurface.Height;
-  Kader := Rect(FArea.Left - VersX, FArea.Top - VersY, FArea.Right - VersX,
-    FArea.Bottom - VersY);
+  VersX := FGebied.Left - FGebied.Left mod FOppervlak.Width;
+  VersY := FGebied.Top - FGebied.Top mod FOppervlak.Height;
+  Kader := Rect(FGebied.Left - VersX, FGebied.Top - VersY, FGebied.Right - VersX,
+    FGebied.Bottom - VersY);
   repeat
     if Kader.Left < 0 then
     begin
-      Inc(Kader.Left, FSurface.Width);
-      Inc(Kader.Right, FSurface.Width);
+      Inc(Kader.Left, FOppervlak.Width);
+      Inc(Kader.Right, FOppervlak.Width);
     end;
     if Kader.Top < 0 then
     begin
-      Inc(Kader.Top, FSurface.Height);
-      Inc(Kader.Bottom, FSurface.Height);
+      Inc(Kader.Top, FOppervlak.Height);
+      Inc(Kader.Bottom, FOppervlak.Height);
     end;
   until (Kader.Top >= 0) and (Kader.Left >= 0);
   AantalX := 0;
   repeat
     Inc(AantalX);
-  until FSurface.Width * AantalX >= Kader.Right;
+  until FOppervlak.Width * AantalX >= Kader.Right;
   AantalY := 0;
   repeat
     Inc(AantalY);
-  until FSurface.Height * AantalY >= Kader.Bottom;
+  until FOppervlak.Height * AantalY >= Kader.Bottom;
   PosX := 0;
   for NrX := 1 to AantalX do
   begin
@@ -148,9 +148,9 @@ begin
     else
       BeginX := 0;
     if NrX = AantalX then
-      EindX := Kader.Right - FSurface.Width * (NrX - 1)
+      EindX := Kader.Right - FOppervlak.Width * (NrX - 1)
     else
-      EindX := FSurface.Width;
+      EindX := FOppervlak.Width;
     PosY := 0;
     for NrY := 1 to AantalY do
     begin
@@ -159,10 +159,10 @@ begin
       else
         BeginY := 0;
       if NrY = AantalY then
-        EindY := Kader.Bottom - FSurface.Height * (NrY - 1)
+        EindY := Kader.Bottom - FOppervlak.Height * (NrY - 1)
       else
-        EindY := FSurface.Height;
-      FSurface.DrawTo(DC, Rect(BeginX, BeginY, EindX, EindY),
+        EindY := FOppervlak.Height;
+      FOppervlak.TekenNaar(DC, Rect(BeginX, BeginY, EindX, EindY),
         Bounds(PosX + DX, PosY + DY, EindX - BeginX, EindY - BeginY), False, False);
       PosY := EindY + PosY - BeginY;
     end;
@@ -171,13 +171,13 @@ begin
 end;
 
 { @0046C968 }
-procedure TGoblin.SetZ(Value: Integer);
+procedure TGoblin.ZetZ(Value: Integer);
 begin
-  if Value <> GetZ then
+  if Value <> LeesZ then
   begin
-    inherited SetZ(Value);
-    if FSpriteBox <> nil then
-      FSpriteBox.UpdateZOrder(Self);
+    inherited ZetZ(Value);
+    if FSpriteVak <> nil then
+      FSpriteVak.VernieuwZVolgorde(Self);
   end;
 end;
 

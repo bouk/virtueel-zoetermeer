@@ -1,7 +1,7 @@
 {
   "functions": {
-    "004693b8": "TComment.SetCaption",
-    "00469404": "TComment.GetCaption",
+    "004693b8": "TComment.ZetOnderschrift",
+    "00469404": "TComment.LeesOnderschrift",
     "00469418": "TComment.Create",
     "004694fc": "cEditCtr.Initialization"
   }

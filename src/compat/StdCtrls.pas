@@ -940,7 +940,7 @@ type
 
 implementation
 
-uses Math, ZMWin;
+uses Math, ZMWin, ZMGdi;
 
 const
   SB_TIMER_ID = 77;
@@ -1979,52 +1979,121 @@ begin
     Result := Rect(0, 0, 0, 0);
 end;
 
+{ Het opmaakrechthoek van de edit-control, zoals Wine het berekent (EDIT_SetRectNP en
+  EDIT_EM_SetMargins met EC_USEFONTINFO): het clientgebied zonder scrollbalk, 1 pixel
+  naar binnen per kant bij WS_EX_CLIENTEDGE (2 bij WS_BORDER) en voor TrueType-fonts
+  aan beide kanten een marge van een halve gemiddelde tekenbreedte
+  (GdiGetCharDimensions). }
 function TCustomMemo.TextRectM: TRect;
+var
+  LineH, AvgW, M, CW: Integer;
 begin
   Result := ClientRect;
   if FScrollBars in [ssVertical, ssBoth] then Dec(Result.Right, ZMScrollBarSize);
-  InflateRect(Result, -1, 0);
+  if FScrollBars in [ssHorizontal, ssBoth] then Dec(Result.Bottom, ZMScrollBarSize);
+  CW := Result.Right - Result.Left;
+  if GEditCanvas = nil then GEditCanvas := TCanvas.Create;
+  GEditCanvas.Font := Font;
+  LineH := GEditCanvas.TextHeight('Ag');
+  if FBorderStyle = bsSingle then
+    if NewStyleControls and Ctl3D then
+    begin
+      Inc(Result.Left); Dec(Result.Right);
+      if Result.Bottom - Result.Top >= LineH + 2 then
+      begin
+        Inc(Result.Top); Dec(Result.Bottom);
+      end;
+    end
+    else
+    begin
+      InflateRect(Result, -2, 0);
+      if Result.Bottom - Result.Top >= LineH + 4 then InflateRect(Result, 0, -2);
+    end;
+  M := 0;
+  if not IsBitmapFontName(Font.Name) then
+  begin
+    AvgW := (GEditCanvas.TextWidth('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+      div 26 + 1) div 2;
+    M := AvgW div 2;
+    if CW < 2 * M + 2 * AvgW then M := 0;
+  end;
+  Inc(Result.Left, M);
+  Dec(Result.Right, M);
 end;
 
+{ Regels afbreken zoals EDIT_BuildLineDefs_ML van Wine: is de rest van de alinea breder
+  dan het opmaakrechthoek, dan wordt een breekpunt geschat uit de verhouding van de
+  breedtes en van daaruit naar links de eerste woordgrens gezocht die past. De schatting
+  kan ruim voor het laatste passende woord liggen, dus regels zijn vaak korter dan
+  nodig; de originele schermen laten precies deze afbrekingen zien. }
 procedure TCustomMemo.BuildDisplay;
+
+  function SoftBreak(const S: string; Idx: Integer): Boolean;   { breekmogelijkheid voor S[Idx] }
+  begin
+    Result := (Idx > 1) and not (S[Idx] in [' ', #9]) and
+      ((S[Idx - 1] in [' ', #9]) or ((S[Idx - 1] = '-') and not (S[Idx] in ['0'..'9', '-'])));
+  end;
+
 var
-  I, P, LineStart, LastBreak, W, MaxW, N: Integer;
-  S: string;
+  I, LineStart, N, W, FW, CharW, Prev, Next, Idx, Len: Integer;
+  D: Single;
+  S, Rest: string;
+  TM: TTextMetric;
 begin
   FDispValid := True;
   SetLength(FDisp, 0);
   if GEditCanvas = nil then GEditCanvas := TCanvas.Create;
   Canvas_Font;
+  FW := TextRectM.Right - TextRectM.Left;
   GEditCanvas.Font := Font;
-  MaxW := TextRectM.Right - TextRectM.Left;
+  CharW := 0;
+  if GetTextMetrics(GEditCanvas.Handle, TM) then CharW := TM.tmAveCharWidth;
   N := 0;
   for I := 0 to TMemoStrings(FLines).FRaw.Count - 1 do
   begin
     S := TMemoStrings(FLines).FRaw[I];
-    if not FWordWrap or (MaxW <= 0) then
-    begin
-      SetLength(FDisp, N + 1);
-      FDisp[N].Line := I; FDisp[N].Start := 1; FDisp[N].Len := Length(S);
-      Inc(N);
-      Continue;
-    end;
     LineStart := 1;
     repeat
-      W := 0;
-      LastBreak := 0;
-      P := LineStart;
-      while P <= Length(S) do
+      Rest := Copy(S, LineStart, MaxInt);
+      Len := Length(Rest);
+      if FWordWrap and (FScrollBars in [ssNone, ssVertical]) and (Len > 0) then
       begin
-        Inc(W, GEditCanvas.TextWidth(S[P]));
-        if (W > MaxW) and (P > LineStart) then Break;
-        if S[P] = ' ' then LastBreak := P;
-        Inc(P);
+        W := GEditCanvas.TextWidth(Rest);
+        if (W > FW) and (FW > CharW) then
+        begin
+          Prev := Len - 1;
+          D := W / FW;
+          if D > 1.2 then D := D - 0.2;
+          Next := Trunc(Prev / D);
+          if Next >= Prev then Next := Prev - 1;
+          repeat
+            { WB_LEFT: een terug, dan terug naar een breekmogelijkheid (Idx telt vanaf 0) }
+            Idx := Next;
+            if Idx > 0 then Dec(Idx);
+            while (Idx > 0) and not SoftBreak(Rest, Idx + 1) do Dec(Idx);
+            if Idx < 0 then Idx := 0;
+            Prev := Idx;
+            if Prev > 0 then W := GEditCanvas.TextWidth(Copy(Rest, 1, Prev));
+            Next := Prev - 1;
+          until (Prev = 0) or (W <= FW);
+          if Prev = 0 then
+          begin
+            { geen woordgrens: tekens van het eind afhalen tot het past }
+            W := GEditCanvas.TextWidth(Rest);
+            Prev := Len - 1;
+            repeat
+              Dec(W, GEditCanvas.TextWidth(Rest[Prev + 1]));
+              Dec(Prev);
+            until (Prev <= 0) or (W <= FW);
+            if Prev <= 0 then Prev := 1;
+          end;
+          Len := Prev;
+        end;
       end;
-      if (P <= Length(S)) and (LastBreak >= LineStart) then P := LastBreak + 1;
       SetLength(FDisp, N + 1);
-      FDisp[N].Line := I; FDisp[N].Start := LineStart; FDisp[N].Len := P - LineStart;
+      FDisp[N].Line := I; FDisp[N].Start := LineStart; FDisp[N].Len := Len;
       Inc(N);
-      LineStart := P;
+      Inc(LineStart, Len);
     until LineStart > Length(S);
   end;
   if N = 0 then

@@ -30,7 +30,7 @@ type
 var
   Actions: array of TAction;
   Next: Integer;
-  StartTime: Int64 = -1;
+  StartTijd: Int64 = -1;
   OutDir: string;
 
 const
@@ -167,18 +167,18 @@ var
 begin
   Fmt := DefaultFormatSettings;
   Fmt.DecimalSeparator := '.';
-  W := frmMain.FWorld;
+  W := frmMain.FWereld;
   S := TStringList.Create;
   try
-    S.Add(Format('level %d', [frmMain.FStatus.Level]));
+    S.Add(Format('level %d', [frmMain.FStatus.Speelniveau]));
     S.Add(Format('geld %d', [frmMain.FStatus.Geld]));
     S.Add(Format('score %d', [frmMain.FStatus.Score]));
     S.Add(Format('reistijd %.6f', [W.Reistijd], Fmt));
-    for X := 0 to WorldSize - 1 do
-      for Y := 0 to WorldSize - 1 do
+    for X := 0 to WereldGrootte - 1 do
+      for Y := 0 to WereldGrootte - 1 do
       begin
         C := W.Cells[X, Y];
-        S.Add(Format('cell %d %d %s %s %d %d %d', [X, Y, Dash(C.Contents), Dash(C.Param),
+        S.Add(Format('cell %d %d %s %s %d %d %d', [X, Y, Dash(C.Inhoud), Dash(C.Param),
           C.Wijk, C.Wegen, Ord(C.Bereikbaar)]));
       end;
     S.LineBreak := #10;
@@ -194,7 +194,7 @@ var
   S: TStringList;
   I: Integer;
   Sp: TSprite;
-  Frames: Integer;
+  Beelden: Integer;
 begin
   S := TStringList.Create;
   try
@@ -202,11 +202,11 @@ begin
       if frmMain.Components[I] is TSprite then
       begin
         Sp := TSprite(frmMain.Components[I]);
-        Frames := -1;
+        Beelden := -1;
         if Sp.FrameList <> nil then
-          Frames := Sp.FrameList.Count;
+          Beelden := Sp.FrameList.Count;
         S.Add(Format('%s visible=%d pos=%d,%d frame=%s index=%d frames=%d',
-          [Sp.Name, Ord(Sp.Visible), Sp.Left, Sp.Top, Sp.CurrentFrame, Sp.FrameIndex, Frames]));
+          [Sp.Name, Ord(Sp.Visible), Sp.Left, Sp.Top, Sp.CurrentFrame, Sp.FrameIndex, Beelden]));
       end;
     S.LineBreak := #10;
     Result := S.Text;
@@ -228,15 +228,15 @@ begin
   end;
 end;
 
-procedure Tick;
+procedure Tik;
 var
   Now: Int64;
   A: TAction;
 begin
   Now := GetTickCount64;
-  if StartTime < 0 then
-    StartTime := Now;
-  while (Next < Length(Actions)) and (Now - StartTime >= Actions[Next].At) do
+  if StartTijd < 0 then
+    StartTijd := Now;
+  while (Next < Length(Actions)) and (Now - StartTijd >= Actions[Next].At) do
   begin
     A := Actions[Next];
     Inc(Next);
@@ -272,6 +272,6 @@ initialization
       OutDir := '.';
     ForceDirectories(OutDir);
     LoadScript(GetEnvironmentVariable('ZM_TESTSCRIPT'));
-    ZMIdleHook := Tick;
+    ZMIdleHook := Tik;
   end;
 end.

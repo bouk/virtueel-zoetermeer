@@ -1,7 +1,7 @@
 {
   "functions": {
     "00478874": "TTrein.Create",
-    "00478b44": "TTrein.Tick",
+    "00478b44": "TTrein.Tik",
     "00478b68": "TTrein.Start",
     "00478cf0": "TTrein.Step",
     "00479104": "TTrein.Volgende.GaNaar",
@@ -22,22 +22,63 @@
   },
   "fields": {
     "TTrein": {
-      "0x4": ["FSprite", "TSprite"],
-      "0x8": ["FWorld", "TWorld"],
-      "0xc": ["FCell", "TCell"],
-      "0x10": ["FNr", "Byte"],
-      "0x11": ["FRichting", "Boolean"],
-      "0x12": ["FActief", "Boolean"],
-      "0x14": ["FStap", "Integer"],
-      "0x18": ["FReserved18", "Integer"],
-      "0x1c": ["FX", "Integer"],
-      "0x20": ["FY", "Integer"],
-      "0x24": ["FWacht", "Integer"],
-      "0x28": ["FInterval", "Integer"],
-      "0x2c": ["FTeller", "Integer"]
+      "0x4": [
+        "FSprite",
+        "TSprite"
+      ],
+      "0x8": [
+        "FWereld",
+        "TWorld"
+      ],
+      "0xc": [
+        "FCel",
+        "TCell"
+      ],
+      "0x10": [
+        "FNr",
+        "Byte"
+      ],
+      "0x11": [
+        "FRichting",
+        "Boolean"
+      ],
+      "0x12": [
+        "FActief",
+        "Boolean"
+      ],
+      "0x14": [
+        "FStap",
+        "Integer"
+      ],
+      "0x18": [
+        "FGereserveerd18",
+        "Integer"
+      ],
+      "0x1c": [
+        "FX",
+        "Integer"
+      ],
+      "0x20": [
+        "FY",
+        "Integer"
+      ],
+      "0x24": [
+        "FWacht",
+        "Integer"
+      ],
+      "0x28": [
+        "FInterval",
+        "Integer"
+      ],
+      "0x2c": [
+        "FTeller",
+        "Integer"
+      ]
     }
   },
   "assumes": {
-    "Fmain": ["TfrmMain creates Trein := TTrein.Create(View.TreinSprite, World) and calls Trein.Tick (0047EA30)"]
+    "Fmain": [
+      "TfrmMain creates Trein := TTrein.Create(View.TreinSprite, World) and calls Trein.Tick (0047EA30)"
+    ]
   }
 }

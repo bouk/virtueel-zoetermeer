@@ -17,7 +17,7 @@ type
     FBitmap: TBitmap;            { +0x30 }
     FMask: TBitmap;              { +0x34  wit waar transparant; nil wanneer geen transparante kleur is ingesteld }
     FTransparentColor: TColor;   { +0x38 }
-    procedure CreateMask;
+    procedure MaakMasker;
     class procedure StretchDraw(DC: HDC; Mask, Bitmap: TBitmap; SrcRect, DestRect: TRect;
       MirrorX, MirrorY: Boolean);
   protected
@@ -32,21 +32,21 @@ type
     function GetPixel(X, Y: Integer): Integer; override;             { +0x64 }
     procedure SetPixel(X, Y: Integer; Index: Byte); override;        { +0x68 }
     function GetCanvas: TCanvas; override;                           { +0x6C }
-    function GetPaletteColor(Index: Integer): TRGBQuad; override;    { +0x70 }
-    procedure SetPaletteColor(Index: Integer; Color: TRGBQuad); override; { +0x74 }
+    function LeesPaletKleur(Index: Integer): TRGBQuad; override;    { +0x70 }
+    procedure ZetPaletKleur(Index: Integer; Color: TRGBQuad); override; { +0x74 }
     function GetTransparentColor: TColor; override;                  { +0x78 }
     procedure SetTransparentColor(Value: TColor); override;          { +0x7C }
-    function GetPaletteHandle: HPALETTE; override;                   { +0x80 }
+    function LeesPaletHandle: HPALETTE; override;                   { +0x80 }
     function GetHandle: HBITMAP; override;                           { +0x84 }
-    class function GetScreen: TSurfaceScreen; override;              { +0x88 }
-    function GetPaletteCount: Integer; override;                     { +0x8C }
-    procedure DebugShow(Caption: string); override;                  { +0x90 }
-    procedure SavePalette(FileName: string); override;               { +0x94 }
-    procedure ConvertTo(Target: TSurface); override;                 { +0x98 }
+    class function LeesScherm: TOppervlakScherm; override;              { +0x88 }
+    function LeesPaletAantal: Integer; override;                     { +0x8C }
+    procedure ToonDebug(Caption: string); override;                  { +0x90 }
+    procedure BewaarPalet(FileName: string); override;               { +0x94 }
+    procedure ConverteerNaar(Target: TSurface); override;                 { +0x98 }
     procedure CopyPalette(Source: TSurface); override;               { +0x9C }
-    procedure CopyFrom(Source: TSurface; SrcRect, DestRect: TRect;
+    procedure KopieerVan(Source: TSurface; SrcRect, DestRect: TRect;
       MirrorX, MirrorY: Boolean); override;                          { +0xA0 }
-    procedure DrawTo(DC: HDC; SrcRect, DestRect: TRect;
+    procedure TekenNaar(DC: HDC; SrcRect, DestRect: TRect;
       MirrorX, MirrorY: Boolean); override;                          { +0xA4 }
     procedure SetSize(AWidth, AHeight: Integer; Stretch: Boolean); override; { +0xA8 }
     procedure TextOut(X, Y: Integer; AFont: TFont; Text: string); override;  { +0xAC }
@@ -58,28 +58,28 @@ type
   end;
 
   { msimg32.TransparentBlt. LET OP: in het origineel zonder stdcall gedeclareerd; hij wordt nooit
-    aangeroepen omdat de DLL nooit geladen wordt (HasTransparentBlt blijft False). }
-  TTransparentBltProc = function(DC: HDC; X, Y, W, H: Integer; SrcDC: HDC;
+    aangeroepen omdat de DLL nooit geladen wordt (HeeftTransparantBlt blijft False). }
+  TTransparantBltProc = function(DC: HDC; X, Y, W, H: Integer; SrcDC: HDC;
     SX, SY, SW, SH: Integer; Color: UINT): BOOL;
 
 const
-  HandleCheck: Integer = 0;        { 00488D40: handles worden erin gemengd om hun aanmaak af te dwingen }
-  BmpSurfaceCount: Integer = 0;    { 00488D44: aantal levende TBmpSurface-instanties }
+  HandleControle: Integer = 0;        { 00488D40: handles worden erin gemengd om hun aanmaak af te dwingen }
+  BmpOppervlakAantal: Integer = 0;    { 00488D44: aantal levende TBmpSurface-instanties }
   { 00488D48: BITMAPFILEHEADER + BITMAPINFOHEADER van een 256x100 8-bit bitmap }
-  PaletteBmpHeader: array[0..$35] of Byte = (
+  PaletBmpHeader: array[0..$35] of Byte = (
     $42, $4D, $36, $68, $00, $00, $00, $00, $00, $00, $36, $04, $00, $00,
     $28, $00, $00, $00, $00, $01, $00, $00, $64, $00, $00, $00, $01, $00,
     $08, $00, $00, $00, $00, $00, $00, $64, $00, $00, $C4, $0E, $00, $00,
     $C4, $0E, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00);
 
 var
-  BmpScreen: TSurfaceScreen;               { 0048A8BC: is altijd nil }
-  TransparentBltProc: TTransparentBltProc; { 0048A8C4 }
-  HasTransparentBlt: Boolean;              { 0048A8C8 }
+  BmpScherm: TOppervlakScherm;               { 0048A8BC: is altijd nil }
+  TransparantBltProc: TTransparantBltProc; { 0048A8C4 }
+  HeeftTransparantBlt: Boolean;              { 0048A8C8 }
 
-procedure SetupBitmap(Bmp: TBitmap);
-procedure RealizeBitmap(Bmp: TBitmap);
-procedure SwapInt(var A, B: Integer);
+procedure StelBitmapIn(Bmp: TBitmap);
+procedure RealiseerBitmap(Bmp: TBitmap);
+procedure WisselInt(var A, B: Integer);
 
 implementation
 
@@ -90,16 +90,16 @@ var
   MsImgHandle: HMODULE;
 
 { @00461D3C }
-procedure SetupBitmap(Bmp: TBitmap);
+procedure StelBitmapIn(Bmp: TBitmap);
 var
-  Versie: TWinVersion;
+  Versie: TWinVersie;
 begin
   Bmp.HandleType := bmDIB;
   Bmp.PixelFormat := pf24bit;
   Exit;
   { LET OP: in het origineel ook onbereikbaar }
-  GetWinVersion(Versie);
-  if (Versie.IsNT and (Versie.Major < 4)) or (Versie.Major = $5F) or (Versie.Minor = 0) then
+  LeesWinVersie(Versie);
+  if (Versie.IsNT and (Versie.Hoofdversie < 4)) or (Versie.Hoofdversie = $5F) or (Versie.Subversie = 0) then
     Bmp.HandleType := bmDDB
   else
   begin
@@ -110,10 +110,10 @@ begin
 end;
 
 { @00461DA4 }
-procedure RealizeBitmap(Bmp: TBitmap);
+procedure RealiseerBitmap(Bmp: TBitmap);
 begin
-  HandleCheck := HandleCheck xor Integer(Bmp.Handle);
-  HandleCheck := HandleCheck xor Integer(Bmp.Canvas.Handle);
+  HandleControle := HandleControle xor Integer(Bmp.Handle);
+  HandleControle := HandleControle xor Integer(Bmp.Canvas.Handle);
 end;
 
 { @00461DC8 }
@@ -123,17 +123,17 @@ var
 begin
   inherited CreateSize(AWidth, AHeight);
   FBitmap := TBitmap.Create;
-  SetupBitmap(FBitmap);
+  StelBitmapIn(FBitmap);
   FBitmap.Width := AWidth;
   FBitmap.Height := AHeight;
   BitBlt(FBitmap.Canvas.Handle, 0, 0, AWidth, AHeight, FBitmap.Canvas.Handle, 0, 0, BLACKNESS);
   Formulier := TForm.Create(nil);
   Formulier.Canvas.Draw(0, 0, FBitmap);
   Formulier.Free;
-  Blank := True;
+  Leeg := True;
   FMask := nil;
-  FTransparentColor := clNoTransparent;
-  Inc(BmpSurfaceCount);
+  FTransparentColor := clGeenTransparant;
+  Inc(BmpOppervlakAantal);
 end;
 
 { @00461EAC }
@@ -145,20 +145,20 @@ begin
     FMask.Free;
     FMask := nil;
   end;
-  Dec(BmpSurfaceCount);
+  Dec(BmpOppervlakAantal);
   inherited Destroy;
 end;
 
 { @00461EF0 }
-class function TBmpSurface.GetScreen: TSurfaceScreen;
+class function TBmpSurface.LeesScherm: TOppervlakScherm;
 begin
-  Result := BmpScreen;
+  Result := BmpScherm;
 end;
 
 { @00461EF8 }
 function TBmpSurface.GetPixel(X, Y: Integer): Integer;
 begin
-  Result := ColorToIndex(FBitmap.Canvas.Pixels[X, Y]);
+  Result := KleurNaarIndex(FBitmap.Canvas.Pixels[X, Y]);
 end;
 
 { @00461F20 }
@@ -166,7 +166,7 @@ procedure TBmpSurface.SetPixel(X, Y: Integer; Index: Byte);
 var
   Kleur: TRGBQuad;
 begin
-  Kleur := GetPaletteColor(Index);
+  Kleur := LeesPaletKleur(Index);
   FBitmap.Canvas.Pixels[X, Y] := (Kleur.rgbBlue shl 16) + (Kleur.rgbGreen shl 8) + Kleur.rgbRed;
 end;
 
@@ -177,7 +177,7 @@ begin
 end;
 
 { @00461F80 }
-function TBmpSurface.GetPaletteColor(Index: Integer): TRGBQuad;
+function TBmpSurface.LeesPaletKleur(Index: Integer): TRGBQuad;
 var
   Invoer: TPaletteEntry;
 begin
@@ -189,7 +189,7 @@ begin
 end;
 
 { @00461FC0 }
-procedure TBmpSurface.SetPaletteColor(Index: Integer; Color: TRGBQuad);
+procedure TBmpSurface.ZetPaletKleur(Index: Integer; Color: TRGBQuad);
 var
   Invoer: TPaletteEntry;
 begin
@@ -207,7 +207,7 @@ begin
 end;
 
 { @00462008 }
-procedure TBmpSurface.CreateMask;
+procedure TBmpSurface.MaakMasker;
 begin
   FMask := TBitmap.Create;
   FMask.HandleType := bmDIB;
@@ -230,12 +230,12 @@ var
 begin
   if Value = FTransparentColor then
     Exit;
-  if HasTransparentBlt then
+  if HeeftTransparantBlt then
   begin
     FTransparentColor := Value;
     Exit;
   end;
-  if (FTransparentColor <> 0) and (FTransparentColor <> clNoTransparent) then
+  if (FTransparentColor <> 0) and (FTransparentColor <> clGeenTransparant) then
   begin
     { geef de transparante pixels (zwart gemaakt door SRCAND hieronder) hun kleur terug }
     OudePenKleur := FMask.Canvas.Pen.Color;
@@ -246,10 +246,10 @@ begin
     SetBkColor(FBitmap.Canvas.Handle, OudAchtergrond);
     FBitmap.Canvas.Pen.Color := OudePenKleur;
   end;
-  if FTransparentColor = clNoTransparent then
-    CreateMask;
+  if FTransparentColor = clGeenTransparant then
+    MaakMasker;
   FTransparentColor := Value;
-  if Value = clNoTransparent then
+  if Value = clGeenTransparant then
   begin
     FMask.Free;
     FMask := nil;
@@ -311,7 +311,7 @@ begin
   FMask.Monochrome := True;
   Tijdelijk.Free;
   SetBkColor(FBitmap.Canvas.Handle, OudAchtergrond);
-  if (Value <> 0) and (FTransparentColor <> clNoTransparent) then
+  if (Value <> 0) and (FTransparentColor <> clGeenTransparant) then
   begin
     if FBitmap.PixelFormat = pf8bit then
     begin
@@ -337,7 +337,7 @@ begin
 end;
 
 { @0046250C }
-function TBmpSurface.GetPaletteHandle: HPALETTE;
+function TBmpSurface.LeesPaletHandle: HPALETTE;
 begin
   Result := FBitmap.Palette;
 end;
@@ -361,13 +361,13 @@ begin
 end;
 
 { @0046253C }
-function TBmpSurface.GetPaletteCount: Integer;
+function TBmpSurface.LeesPaletAantal: Integer;
 begin
   Result := 256;
 end;
 
 { @00462544 }
-procedure TBmpSurface.ConvertTo(Target: TSurface);
+procedure TBmpSurface.ConverteerNaar(Target: TSurface);
 begin
 end;
 
@@ -376,25 +376,25 @@ procedure TBmpSurface.CopyPalette(Source: TSurface);
 var
   I: Integer;
 begin
-  for I := 0 to GetPaletteCount - 1 do
-    SetPaletteColor(I, Source.GetPaletteColor(I));
+  for I := 0 to LeesPaletAantal - 1 do
+    ZetPaletKleur(I, Source.LeesPaletKleur(I));
 end;
 
 { @00462588  Schrijft het palet als een 256x100 bitmapbestand (een kolom per item). }
-procedure TBmpSurface.SavePalette(FileName: string);
+procedure TBmpSurface.BewaarPalet(FileName: string);
 var
   Bestand: file;
   Buffer: array[0..$6835] of Byte;
   I, Y: Integer;
 begin
   for I := 0 to $35 do
-    Buffer[I] := PaletteBmpHeader[I];
+    Buffer[I] := PaletBmpHeader[I];
   for I := 0 to 255 do
   begin
     { LET OP: het origineel leest de kleur als Longint: byte 0, shr 8, shr 16 }
-    Buffer[$36 + I * 4] := GetPaletteColor(I).rgbBlue;
-    Buffer[$36 + I * 4 + 1] := GetPaletteColor(I).rgbGreen;
-    Buffer[$36 + I * 4 + 2] := GetPaletteColor(I).rgbRed;
+    Buffer[$36 + I * 4] := LeesPaletKleur(I).rgbBlue;
+    Buffer[$36 + I * 4 + 1] := LeesPaletKleur(I).rgbGreen;
+    Buffer[$36 + I * 4 + 2] := LeesPaletKleur(I).rgbRed;
     Buffer[$36 + I * 4 + 3] := 0;
     for Y := 0 to 99 do
       Buffer[$436 + I + Y * 256] := I;
@@ -406,7 +406,7 @@ begin
 end;
 
 { @004626C0 }
-procedure TBmpSurface.CopyFrom(Source: TSurface; SrcRect, DestRect: TRect;
+procedure TBmpSurface.KopieerVan(Source: TSurface; SrcRect, DestRect: TRect;
   MirrorX, MirrorY: Boolean);
 var
   Bron: TBmpSurface;
@@ -415,28 +415,28 @@ begin
   if not (Source is TBmpSurface) then
     raise Exception.Create('Can only copy from BmpSurfaces');
   Bron := Source as TBmpSurface;
-  HandleCheck := HandleCheck + Integer(FBitmap.Handle);
-  HandleCheck := HandleCheck + Integer(FBitmap.Canvas.Handle);
+  HandleControle := HandleControle + Integer(FBitmap.Handle);
+  HandleControle := HandleControle + Integer(FBitmap.Canvas.Handle);
   A := Bron;
   B := Self;
-  if A.Blank and B.Blank then
+  if A.Leeg and B.Leeg then
     Exit;
-  if B.Blank <> A.Blank then
+  if B.Leeg <> A.Leeg then
   begin
     { de lege neemt het palet van de andere over }
-    if B.Blank then
+    if B.Leeg then
     begin
       A := Self;
       B := Bron;
     end;
-    A.Blank := False;
+    A.Leeg := False;
     A.FBitmap.Palette := B.FBitmap.Palette;
   end;
-  Bron.DrawTo(FBitmap.Canvas.Handle, SrcRect, DestRect, MirrorX, MirrorY);
+  Bron.TekenNaar(FBitmap.Canvas.Handle, SrcRect, DestRect, MirrorX, MirrorY);
 end;
 
 { @004627D4 }
-procedure SwapInt(var A, B: Integer);
+procedure WisselInt(var A, B: Integer);
 var
   Hulp: Integer;
 begin
@@ -457,13 +457,13 @@ begin
   HeeftMasker := Mask <> nil;
   if MirrorX then
   begin
-    SwapInt(DestRect.Left, DestRect.Right);
+    WisselInt(DestRect.Left, DestRect.Right);
     Dec(DestRect.Left);
     Dec(DestRect.Right);
   end;
   if MirrorY then
   begin
-    SwapInt(DestRect.Top, DestRect.Bottom);
+    WisselInt(DestRect.Top, DestRect.Bottom);
     Dec(DestRect.Top);
     Dec(DestRect.Bottom);
   end;
@@ -495,28 +495,28 @@ begin
 end;
 
 { @00462980 }
-procedure TBmpSurface.DrawTo(DC: HDC; SrcRect, DestRect: TRect; MirrorX, MirrorY: Boolean);
+procedure TBmpSurface.TekenNaar(DC: HDC; SrcRect, DestRect: TRect; MirrorX, MirrorY: Boolean);
 begin
-  if HasTransparentBlt and (GetTransparentColor <> clNoTransparent) then
+  if HeeftTransparantBlt and (GetTransparentColor <> clGeenTransparant) then
   begin
     if MirrorX then
     begin
-      SwapInt(DestRect.Left, DestRect.Right);
+      WisselInt(DestRect.Left, DestRect.Right);
       Dec(DestRect.Left);
       Dec(DestRect.Right);
     end;
     if MirrorY then
     begin
-      SwapInt(DestRect.Top, DestRect.Bottom);
+      WisselInt(DestRect.Top, DestRect.Bottom);
       Dec(DestRect.Top);
       Dec(DestRect.Bottom);
     end;
-    TransparentBltProc(DC, DestRect.Left, DestRect.Top, DestRect.Right - DestRect.Left,
+    TransparantBltProc(DC, DestRect.Left, DestRect.Top, DestRect.Right - DestRect.Left,
       DestRect.Bottom - DestRect.Top, FBitmap.Canvas.Handle, SrcRect.Left, SrcRect.Top,
       SrcRect.Right - SrcRect.Left, SrcRect.Bottom - SrcRect.Top, FTransparentColor);
     GetLastError;
   end
-  else if GetTransparentColor <> clNoTransparent then
+  else if GetTransparentColor <> clGeenTransparant then
     StretchDraw(DC, FMask, FBitmap, SrcRect, DestRect, MirrorX, MirrorY)
   else
     StretchDraw(DC, nil, FBitmap, SrcRect, DestRect, MirrorX, MirrorY);
@@ -530,15 +530,15 @@ begin
   if Source is TBmpSurface then
   begin
     Bron := Source as TBmpSurface;
-    Blank := Bron.Blank;
+    Leeg := Bron.Leeg;
     FBitmap.Assign(Bron.FBitmap);
     FTransparentColor := Bron.GetTransparentColor;
-    if FTransparentColor <> clNoTransparent then
+    if FTransparentColor <> clGeenTransparant then
     begin
       if FMask = nil then
-        CreateMask;
+        MaakMasker;
       FMask.Assign(Bron.FMask);
-      RealizeBitmap(FMask);
+      RealiseerBitmap(FMask);
     end
     else
     begin
@@ -570,16 +570,16 @@ begin
   FBitmap.Free;
   FBitmap := TBitmap.Create;
   FBitmap.LoadFromStream(Stream);
-  RealizeBitmap(FBitmap);
-  FTransparentColor := clNoTransparent;
-  Blank := False;
+  RealiseerBitmap(FBitmap);
+  FTransparentColor := clGeenTransparant;
+  Leeg := False;
 end;
 
 { @00462BD4 }
 procedure TBmpSurface.SaveToStream(Stream: TStream);
 begin
   FBitmap.SaveToStream(Stream);
-  FTransparentColor := clNoTransparent;
+  FTransparentColor := clGeenTransparant;
 end;
 
 { @00462BF0 }
@@ -590,45 +590,45 @@ var
 begin
   if not Stretch then
   begin
-    RealizeBitmap(FBitmap);
+    RealiseerBitmap(FBitmap);
     FBitmap.Width := AWidth;
-    RealizeBitmap(FBitmap);
+    RealiseerBitmap(FBitmap);
     FBitmap.Height := AHeight;
     if FMask <> nil then
     begin
-      RealizeBitmap(FMask);
+      RealiseerBitmap(FMask);
       FMask.Width := AWidth;
-      RealizeBitmap(FMask);
+      RealiseerBitmap(FMask);
       FMask.Height := AHeight;
     end;
   end
   else
   begin
     Tijdelijk := TBitmap.Create;
-    SetupBitmap(Tijdelijk);
+    StelBitmapIn(Tijdelijk);
     Tijdelijk.Assign(FBitmap);
-    RealizeBitmap(Tijdelijk);
+    RealiseerBitmap(Tijdelijk);
     Tijdelijk.Width := AWidth;
-    RealizeBitmap(Tijdelijk);
+    RealiseerBitmap(Tijdelijk);
     Tijdelijk.Height := AHeight;
-    RealizeBitmap(Tijdelijk);
+    RealiseerBitmap(Tijdelijk);
     OudModus := SetStretchBltMode(Tijdelijk.Canvas.Handle, COLORONCOLOR);
     StretchBlt(Tijdelijk.Canvas.Handle, 0, 0, AWidth, AHeight, FBitmap.Canvas.Handle, 0, 0,
       FBitmap.Width, FBitmap.Height, SRCCOPY);
     SetStretchBltMode(Tijdelijk.Canvas.Handle, OudModus);
-    RealizeBitmap(FBitmap);
+    RealiseerBitmap(FBitmap);
     FBitmap.Width := AWidth;
-    RealizeBitmap(FBitmap);
+    RealiseerBitmap(FBitmap);
     FBitmap.Height := AHeight;
-    RealizeBitmap(FBitmap);
+    RealiseerBitmap(FBitmap);
     BitBlt(FBitmap.Canvas.Handle, 0, 0, AWidth, AHeight, Tijdelijk.Canvas.Handle, 0, 0, SRCCOPY);
-    RealizeBitmap(FBitmap);
+    RealiseerBitmap(FBitmap);
     if FMask <> nil then
     begin
       Tijdelijk.Assign(FMask);
-      RealizeBitmap(Tijdelijk);
+      RealiseerBitmap(Tijdelijk);
       Tijdelijk.Width := AWidth;
-      RealizeBitmap(Tijdelijk);
+      RealiseerBitmap(Tijdelijk);
       Tijdelijk.Height := AHeight;
       OudModus := SetStretchBltMode(Tijdelijk.Canvas.Handle, COLORONCOLOR);
       { LET OP: rekt FBitmap (al vergroot), niet het oude masker, naar het nieuwe masker }
@@ -647,7 +647,7 @@ var
   OudTransparant: TColor;
   OudLettertype: TFont;
 begin
-  if GetTransparentColor <> clNoTransparent then
+  if GetTransparentColor <> clGeenTransparant then
   begin
     OudTransparant := GetTransparentColor;
     SetTransparentColor(0);
@@ -658,14 +658,14 @@ begin
   FBitmap.Canvas.TextOut(X, Y, Text);
   FBitmap.Canvas.Font.Assign(OudLettertype);
   OudLettertype.Free;
-  if GetTransparentColor <> clNoTransparent then
+  if GetTransparentColor <> clGeenTransparant then
     SetTransparentColor(OudTransparant);
 end;
 
 { @00462F24 }
-procedure TBmpSurface.DebugShow(Caption: string);
+procedure TBmpSurface.ToonDebug(Caption: string);
 begin
-  ShowBitmap(FBitmap, Caption);
+  ToonBitmap(FBitmap, Caption);
 end;
 
 { @00462F70 }
@@ -673,7 +673,7 @@ function TBmpSurface.TextWidth(AFont: TFont; Text: string): Integer;
 var
   Vlak: TSurface;
 begin
-  Vlak := NewSurface;
+  Vlak := NieuwOppervlak;
   Vlak.GetCanvas.Font := AFont;
   Result := Vlak.GetCanvas.TextWidth(Text);
   Vlak.Free;
@@ -684,7 +684,7 @@ function TBmpSurface.TextHeight(AFont: TFont; Text: string): Integer;
 var
   Vlak: TSurface;
 begin
-  Vlak := NewSurface;
+  Vlak := NieuwOppervlak;
   Vlak.GetCanvas.Font := AFont;
   Result := Vlak.GetCanvas.TextHeight(Text);
   Vlak.Free;
@@ -711,8 +711,8 @@ begin
   end
   else
   begin
-    Waarde := IndexToColor(Waarde);
-    RealizeBitmap(FBitmap);
+    Waarde := IndexNaarKleur(Waarde);
+    RealiseerBitmap(FBitmap);
     OudeStijl := FBitmap.Canvas.Brush.Style;
     OudeKwastKleur := FBitmap.Canvas.Brush.Color;
     OudePenKleur := FBitmap.Canvas.Pen.Color;
@@ -728,18 +728,18 @@ end;
 
 { @004631D4 }
 initialization
-  if SurfaceClass <> nil then
-    SurfaceClass := TBmpSurface;
-  BmpScreen := nil;
+  if OppervlakKlasse <> nil then
+    OppervlakKlasse := TBmpSurface;
+  BmpScherm := nil;
   { LET OP: msimg32.dll wordt nooit geladen (de handle is in het origineel een constante 0, die in een
     register bewaard wordt), dus TransparentBlt wordt nooit gebruikt }
   MsImgHandle := 0;
   if MsImgHandle <> 0 then
   begin
-    @TransparentBltProc := GetProcAddress(MsImgHandle, 'TransparentBlt');
-    HasTransparentBlt := True;
+    @TransparantBltProc := GetProcAddress(MsImgHandle, 'TransparentBlt');
+    HeeftTransparantBlt := True;
   end
   else
-    HasTransparentBlt := False;
+    HeeftTransparantBlt := False;
 
 end.

@@ -1,6 +1,7 @@
 """Hernoem zelfbedachte identifiers in alle Pascal-bronnen volgens de vertaalvoorstellen.
 
-Leest build/vertaling/*.json ({"OudeNaam": "NieuweNaam"}), controleert ze en past ze toe op
+Leest build/vertaling/*.json ({"OudeNaam": "NieuweNaam"}; _keuzes.json met handmatige
+beslissingen gaat voor), controleert ze en past ze toe op
 src/game, src/tests en src/web, en op symbols/names/*.json (zodat de Ghidra-symbolen meegaan).
 
 * In code wordt hoofdletterongevoelig hernoemd (Pascal), nooit binnen stringliterals.
@@ -29,24 +30,43 @@ TOKEN = re.compile(r"'(?:[^']|'')*'|\{[^}]*\}|\(\*.*?\*\)|//[^\n]*|[A-Za-z_][A-Z
 
 
 def laad_voorstellen(map_):
-    voorstel, bron = {}, {}
-    conflicten = []
+    """Voeg de voorstellen samen. _keuzes.json (handmatige beslissingen) gaat voor; verder wint
+    per naam het voorstel dat de meeste units deden (bij gelijke stand het eerste)."""
+    stemmen, oorspronkelijk = {}, {}
+    meldingen = []
     for pad in sorted(glob.glob(os.path.join(map_, '*.json'))):
         unit = os.path.splitext(os.path.basename(pad))[0]
+        if unit == '_keuzes':
+            continue
         try:
             d = json.load(open(pad))
         except ValueError as e:
-            conflicten.append('%s: geen geldige JSON (%s)' % (pad, e))
+            meldingen.append('%s: geen geldige JSON (%s)' % (pad, e))
             continue
         for oud, nieuw in d.items():
             k = oud.lower()
-            if k in voorstel and voorstel[k][1].lower() != nieuw.lower():
-                conflicten.append('%s: %s -> %s (%s) en %s (%s); eerste gekozen' % (
-                    oud, oud, voorstel[k][1], bron[k], nieuw, unit))
-                continue
-            voorstel.setdefault(k, (oud, nieuw))
-            bron.setdefault(k, unit)
-    return voorstel, conflicten
+            oorspronkelijk.setdefault(k, oud)
+            stemmen.setdefault(k, []).append((nieuw, unit))
+    keuzes = {}
+    pad = os.path.join(map_, '_keuzes.json')
+    if os.path.exists(pad):
+        keuzes = {k.lower(): v for k, v in json.load(open(pad)).items()}
+    voorstel = {}
+    for k, lijst in stemmen.items():
+        if k in keuzes:
+            voorstel[k] = (oorspronkelijk[k], keuzes[k])
+            continue
+        telling = {}
+        for nieuw, _ in lijst:
+            telling[nieuw.lower()] = telling.get(nieuw.lower(), 0) + 1
+        beste = max(lijst, key=lambda nu: (telling[nu[0].lower()], -lijst.index(nu)))[0]
+        if len(telling) > 1:
+            meldingen.append('%s: %s; gekozen %s' % (oorspronkelijk[k], ', '.join(
+                '%s (%s)' % nu for nu in lijst), beste))
+        voorstel[k] = (oorspronkelijk[k], beste)
+    for k, v in keuzes.items():
+        voorstel.setdefault(k, (k, v))
+    return voorstel, meldingen
 
 
 def bestaande_identifiers(paden):

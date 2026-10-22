@@ -1145,6 +1145,8 @@ function OutputDebugString(lpOutputString: PAnsiChar): BOOL;
 function GetPrivateProfileString(lpAppName, lpKeyName, lpDefault: PAnsiChar;
   lpReturnedString: PAnsiChar; nSize: DWORD; lpFileName: PAnsiChar): DWORD;
 function WritePrivateProfileString(lpAppName, lpKeyName, lpString, lpFileName: PAnsiChar): BOOL;
+function GetPrivateProfileInt(lpAppName, lpKeyName: PAnsiChar; nDefault: Integer;
+  lpFileName: PAnsiChar): UINT;
 
 { Resources (only the original ROS.exe and built-in resources are searched) }
 function FindResource(hModule: HMODULE; lpName, lpType: PAnsiChar): HRSRC;

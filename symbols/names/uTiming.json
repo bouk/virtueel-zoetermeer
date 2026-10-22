@@ -1,56 +1,56 @@
 {
   "functions": {
-    "0046f7f4": "uTiming.FreeWinMM",
-    "0046f810": "uTiming.ReleaseMMTimer",
-    "0046f838": "uTiming.GetTime",
-    "0046f86c": "uTiming.SetMaxMessageLoops",
+    "0046f7f4": "uTiming.BevrijdWinMM",
+    "0046f810": "uTiming.GeefMMTimerVrij",
+    "0046f838": "uTiming.LeesTijd",
+    "0046f86c": "uTiming.ZetMaxBerichtLussen",
     "0046f874": "TCustomFastTimer.Create",
     "0046f928": "TCustomFastTimer.Destroy",
     "0046f988": "TCustomFastTimer.WndProc",
     "0046fa0c": "TCustomFastTimer.UpdateTimer",
-    "0046fac4": "TCustomFastTimer.GetAbout",
+    "0046fac4": "TCustomFastTimer.LeesVersie",
     "0046fae4": "TCustomFastTimer.SetEnabled",
-    "0046faf4": "TCustomFastTimer.GetRealInterval",
+    "0046faf4": "TCustomFastTimer.LeesWerkelijkInterval",
     "0046fb34": "TCustomFastTimer.SetInterval",
     "0046fb44": "TCustomFastTimer.SetOnTimer",
-    "0046fb5c": "TCustomFastTimer.DoTimer",
+    "0046fb5c": "TCustomFastTimer.DoeTimer",
     "0046fbc8": "TCustomFastTimer.Timer",
-    "0046fbd4": "TCustomFastTimer.SkipTimer",
-    "0046fbe0": "TCustomFastTimer.GetTimerMode",
+    "0046fbd4": "TCustomFastTimer.OverslaanTimer",
+    "0046fbe0": "TCustomFastTimer.LeesTimerModus",
     "0046fc08": "TFastTimerList.Add",
-    "0046fc18": "TFastTimerList.GetTimer",
-    "0046fc38": "TFastTimerList.NextDue",
-    "0046fca4": "uTiming.FastTimerLoop",
-    "0046fe10": "uTiming.WaitRetrace",
-    "0046fe2c": "uTiming.GetRetraceTime",
-    "0046fe40": "uTiming.MeasureRetrace",
-    "0046fe8c": "uTiming.CheckWinNT",
+    "0046fc18": "TFastTimerList.LeesTimer",
+    "0046fc38": "TFastTimerList.VolgendeTimer",
+    "0046fca4": "uTiming.SnelleTimerLus",
+    "0046fe10": "uTiming.WachtOpRetrace",
+    "0046fe2c": "uTiming.LeesRetraceTijd",
+    "0046fe40": "uTiming.MeetRetrace",
+    "0046fe8c": "uTiming.ControleerWinNT",
     "0046fec8": "uTiming.Finalization",
     "0046fef8": "uTiming.Initialization"
   },
   "globals": {
-    "00488e7c": "uTiming.NoMMTimers",
-    "00488e80": "uTiming.MaxLoopTime",
-    "00488e84": "uTiming.IdleLoopTime",
-    "00488e88": "uTiming.InTimerLoop",
-    "00488e8c": "uTiming.MaxMessageLoops",
-    "00488e90": "uTiming.TimerCount",
-    "00488e94": "uTiming.TimeScale",
-    "0048a948": "uTiming.FastTimers",
-    "0048a94c": "uTiming.RetraceTime",
+    "00488e7c": "uTiming.GeenMMTimers",
+    "00488e80": "uTiming.MaxLusTijd",
+    "00488e84": "uTiming.InactieveLusTijd",
+    "00488e88": "uTiming.InTimerLus",
+    "00488e8c": "uTiming.MaxBerichtLussen",
+    "00488e90": "uTiming.TimerAantal",
+    "00488e94": "uTiming.TijdSchaal",
+    "0048a948": "uTiming.SnelleTimers",
+    "0048a94c": "uTiming.RetraceTijd",
     "0048a950": "uTiming.IsWinNT",
-    "0048a958": "uTiming.MMSetEventProc",
-    "0048a95c": "uTiming.MMGetDevCapsProc",
-    "0048a960": "uTiming.MMKillEventProc",
-    "0048a964": "uTiming.MMTimerUsers",
-    "0048a968": "uTiming.WinMMLoaded",
-    "0048a96c": "uTiming.WinMMHandle",
-    "0048a970": "uTiming.StartTime"
+    "0048a958": "uTiming.MMZetGebeurtenisProc",
+    "0048a95c": "uTiming.MMLeesApparaatProc",
+    "0048a960": "uTiming.MMStopGebeurtenisProc",
+    "0048a964": "uTiming.MMTimerGebruikers",
+    "0048a968": "uTiming.WinMMGeladen",
+    "0048a96c": "uTiming.WinMMHandvat",
+    "0048a970": "uTiming.StartTijd"
   },
   "fields": {
     "TCustomFastTimer": {
       "0x24": [
-        "FAbout",
+        "FVersie",
         "string"
       ],
       "0x28": [
@@ -62,7 +62,7 @@
         "Integer"
       ],
       "0x30": [
-        "FReserved30",
+        "FGereserveerd30",
         "Integer"
       ],
       "0x34": [
@@ -70,11 +70,11 @@
         "HWND"
       ],
       "0x38": [
-        "FTimerWnd",
+        "FTimerVenster",
         "HWND"
       ],
       "0x3c": [
-        "FReserved3C",
+        "FGereserveerd3C",
         "Integer"
       ],
       "0x40": [
@@ -82,43 +82,43 @@
         "TNotifyEvent"
       ],
       "0x48": [
-        "FOnSkipTimer",
+        "FBijOverslaan",
         "TNotifyEvent"
       ],
       "0x50": [
-        "FUseMMTimer",
+        "FGebruikMMTimer",
         "Boolean"
       ],
       "0x54": [
-        "FMMTimerID",
+        "FMMTimerNr",
         "Integer"
       ],
       "0x58": [
-        "FID",
+        "FVolgNr",
         "Integer"
       ],
       "0x5c": [
-        "FNextTime",
+        "FVolgendeTijd",
         "Integer"
       ],
       "0x60": [
-        "FLastTime",
+        "FLaatsteTijd",
         "Integer"
       ],
       "0x64": [
-        "FPrevTime",
+        "FVorigeTijd",
         "Integer"
       ],
       "0x68": [
-        "FPriority",
+        "FPrioriteit",
         "Integer"
       ],
       "0x6c": [
-        "FSyncRetrace",
+        "FSynchroonRetrace",
         "Boolean"
       ],
       "0x6d": [
-        "FUpdated",
+        "FBijgewerkt",
         "Boolean"
       ]
     }

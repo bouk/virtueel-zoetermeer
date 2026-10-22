@@ -13,16 +13,16 @@ uses
 type
   TScrnMode = class(TObject)
   private
-    FBitsPerPel: Integer;     { +0x04 }
+    FKleurdiepte: Integer;     { +0x04 }
     FWidth: Integer;          { +0x08 }
     FHeight: Integer;         { +0x0C }
     FFrequency: Integer;      { +0x10 }
   public
     constructor Create(AWidth, AHeight, ABitsPerPel, AFrequency: Integer);
     destructor Destroy; override;
-    function Apply: Boolean;
-    function Matches(AWidth, AHeight, ABitsPerPel, AFrequency: Integer): Boolean;
-    property BitsPerPel: Integer read FBitsPerPel;
+    function Toepassen: Boolean;
+    function Overeenkomt(AWidth, AHeight, ABitsPerPel, AFrequency: Integer): Boolean;
+    property KleurBits: Integer read FKleurdiepte;
     property Width: Integer read FWidth;
     property Height: Integer read FHeight;
     property Frequency: Integer read FFrequency;
@@ -33,24 +33,24 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    procedure StoreCurrentMode;
+    procedure BewaarHuidigeModus;
     function Add(Mode: TScrnMode): TScrnMode;
     function Find(AWidth, AHeight, ABitsPerPel, AFrequency: Integer): TScrnMode;
-    function GetMode(Index: Integer): TScrnMode;
-    property Modes[Index: Integer]: TScrnMode read GetMode; default;
+    function LeesModus(Index: Integer): TScrnMode;
+    property Modi[Index: Integer]: TScrnMode read LeesModus; default;
   end;
 
 const
-  ScreenChanged: Boolean = False;   { 00488D88 }
+  SchermGewijzigd: Boolean = False;   { 00488D88 }
 
 var
-  OriginalMode: TScrnMode;          { 0048A8E8 }
-  NewMode: TScrnMode;               { 0048A8EC }
-  ModeList: TScrnModeList;          { 0048A8F0 }
+  OrigineleModus: TScrnMode;          { 0048A8E8 }
+  NieuweModus: TScrnMode;               { 0048A8EC }
+  ModeLijst: TScrnModeList;          { 0048A8F0 }
 
-function SetScreenMode(AWidth, AHeight, ABitsPerPel: Integer): Boolean;
-procedure RestoreScreenMode;
-function IsScreenChanged: Boolean;
+function ZetSchermModus(AWidth, AHeight, ABitsPerPel: Integer): Boolean;
+procedure HerstelSchermModus;
+function IsSchermGewijzigd: Boolean;
 
 implementation
 
@@ -61,7 +61,7 @@ uses
 constructor TScrnMode.Create(AWidth, AHeight, ABitsPerPel, AFrequency: Integer);
 begin
   inherited Create;
-  FBitsPerPel := ABitsPerPel;
+  FKleurdiepte := ABitsPerPel;
   FWidth := AWidth;
   FHeight := AHeight;
   FFrequency := AFrequency;
@@ -74,12 +74,12 @@ begin
 end;
 
 { @00465058 }
-function TScrnMode.Apply: Boolean;
+function TScrnMode.Toepassen: Boolean;
 var
   Modus: TDeviceMode;
 begin
   Modus.dmSize := SizeOf(Modus);
-  Modus.dmBitsPerPel := FBitsPerPel;
+  Modus.dmBitsPerPel := FKleurdiepte;
   Modus.dmPelsWidth := FWidth;
   Modus.dmPelsHeight := FHeight;
   Modus.dmDisplayFlags := 0;
@@ -103,9 +103,9 @@ begin
 end;
 
 { @004650D4  AFrequency = -1 komt overeen met elke verversingsfrequentie. }
-function TScrnMode.Matches(AWidth, AHeight, ABitsPerPel, AFrequency: Integer): Boolean;
+function TScrnMode.Overeenkomt(AWidth, AHeight, ABitsPerPel, AFrequency: Integer): Boolean;
 begin
-  Result := (FBitsPerPel = ABitsPerPel) and (AWidth = FWidth) and (AHeight = FHeight);
+  Result := (FKleurdiepte = ABitsPerPel) and (AWidth = FWidth) and (AHeight = FHeight);
   if AFrequency <> -1 then
     Result := Result and (AFrequency = FFrequency);
 end;
@@ -125,18 +125,18 @@ begin
       Modus.dmBitsPerPel, Modus.dmDisplayFrequency));
     Inc(I);
   until not Meer;
-  StoreCurrentMode;
+  BewaarHuidigeModus;
 end;
 
 { @004651A0 }
 destructor TScrnModeList.Destroy;
 begin
-  FreeList(Self);
+  LijstVrijgeven(Self);
   inherited Destroy;
 end;
 
 { @004651CC }
-procedure TScrnModeList.StoreCurrentMode;
+procedure TScrnModeList.BewaarHuidigeModus;
 var
   Breedte, Hoogte: Integer;
   DC: HDC;
@@ -148,7 +148,7 @@ begin
   Kleurdiepte := GetDeviceCaps(DC, BITSPIXEL);
   Ververs := GetDeviceCaps(DC, VREFRESH);
   ReleaseDC(0, DC);
-  OriginalMode := Find(Screen.Width, Screen.Height, Kleurdiepte, Ververs);
+  OrigineleModus := Find(Screen.Width, Screen.Height, Kleurdiepte, Ververs);
 end;
 
 { @00465240 }
@@ -165,54 +165,54 @@ var
 begin
   Result := nil;
   for I := 0 to Count - 1 do
-    if GetMode(I).Matches(AWidth, AHeight, ABitsPerPel, AFrequency) then
+    if LeesModus(I).Overeenkomt(AWidth, AHeight, ABitsPerPel, AFrequency) then
     begin
-      Result := GetMode(I);
+      Result := LeesModus(I);
       Break;
     end;
 end;
 
 { @004652B0 }
-function TScrnModeList.GetMode(Index: Integer): TScrnMode;
+function TScrnModeList.LeesModus(Index: Integer): TScrnMode;
 begin
   Result := TObject(Get(Index)) as TScrnMode;
 end;
 
 { @004652D0 }
-function SetScreenMode(AWidth, AHeight, ABitsPerPel: Integer): Boolean;
+function ZetSchermModus(AWidth, AHeight, ABitsPerPel: Integer): Boolean;
 begin
   { LET OP: Result wordt in het origineel nooit toegekend (geeft terug wat er in EBX stond) }
-  ModeList := TScrnModeList.Create;
-  if OriginalMode <> nil then
+  ModeLijst := TScrnModeList.Create;
+  if OrigineleModus <> nil then
   begin
-    NewMode := ModeList.Find(AWidth, AHeight, ABitsPerPel, -1);
-    if NewMode <> nil then
+    NieuweModus := ModeLijst.Find(AWidth, AHeight, ABitsPerPel, -1);
+    if NieuweModus <> nil then
     begin
-      ScreenChanged := True;
-      if not NewMode.Apply then
-        RestoreScreenMode;
+      SchermGewijzigd := True;
+      if not NieuweModus.Toepassen then
+        HerstelSchermModus;
     end;
   end;
 end;
 
 { @00465334 }
-procedure RestoreScreenMode;
+procedure HerstelSchermModus;
 begin
-  if ScreenChanged then
+  if SchermGewijzigd then
   begin
-    OriginalMode.Apply;
-    ModeList.Free;
-    ModeList := nil;
-    OriginalMode := nil;
-    NewMode := nil;
-    ScreenChanged := False;
+    OrigineleModus.Toepassen;
+    ModeLijst.Free;
+    ModeLijst := nil;
+    OrigineleModus := nil;
+    NieuweModus := nil;
+    SchermGewijzigd := False;
   end;
 end;
 
 { @00465370 }
-function IsScreenChanged: Boolean;
+function IsSchermGewijzigd: Boolean;
 begin
-  Result := ScreenChanged;
+  Result := SchermGewijzigd;
 end;
 
 end.

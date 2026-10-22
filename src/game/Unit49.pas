@@ -19,7 +19,7 @@ unit Unit49;
 interface
 
 const
-  WavFiles: array[0..7] of string = (       { 00488D20 }
+  WavBestanden: array[0..7] of string = (       { 00488D20 }
     'ambul.WAV', 'dduck.WAV', 'dicerll.WAV', 'dkbell.WAV',
     'frogs.WAV', 'gbell.WAV', 'houst.WAV', 'wdcat.WAV');
 

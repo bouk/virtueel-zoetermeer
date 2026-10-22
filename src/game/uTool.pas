@@ -28,21 +28,21 @@ type
     FHeight: Integer;    { +0x10 }
   public
     constructor Create(AX, AY, AWidth, AHeight: Integer);
-    constructor CreateRect(R: TRect);
-    function GetRect: TRect;
+    constructor MaakRect(R: TRect);
+    function LeesRect: TRect;
     procedure SetRect(R: TRect);
-    function Intersects(ARect: TRectPos): Boolean;
-    procedure Union(ARect: TRectPos);
+    function Overlapt(ARect: TRectPos): Boolean;
+    procedure Vereniging(ARect: TRectPos);
     property Width: Integer read FWidth write FWidth;
     property Height: Integer read FHeight write FHeight;
-    property Rect: TRect read GetRect write SetRect;
+    property Rect: TRect read LeesRect write SetRect;
   end;
 
   { Lijst van TPos, optioneel gesorteerd op (X, Y) voor binair zoeken }
   TPosList = class(TList)
   private
     FSorted: Boolean;      { +0x10  lijst is momenteel gesorteerd }
-    FKeepSorted: Boolean;  { +0x11  invoegen in sorteervolgorde / opnieuw sorteren na Insert }
+    FSorteerBehouden: Boolean;  { +0x11  invoegen in sorteervolgorde / opnieuw sorteren na Insert }
   public
     constructor Create;
     procedure Sort;
@@ -53,46 +53,46 @@ type
     function IndexOf(X, Y: Integer): Integer;
     property Items[Index: Integer]: TPos read GetItem; default;
     property Sorted: Boolean read FSorted write FSorted;
-    property KeepSorted: Boolean read FKeepSorted write FKeepSorted;
+    property SorteerBehouden: Boolean read FSorteerBehouden write FSorteerBehouden;
   end;
 
   TRectPosList = class(TPosList)
   public
     function GetItem(Index: Integer): TRectPos;
     function Add(Item: TRectPos): TRectPos;
-    function AddRect(R: TRect): TRectPos;
+    function VoegRectToe(R: TRect): TRectPos;
     property Items[Index: Integer]: TRectPos read GetItem; default;
   end;
 
-  TWinVersion = record
-    Major: Integer;
-    Minor: Integer;
-    Valid: Boolean;
+  TWinVersie = record
+    Hoofdversie: Integer;
+    Subversie: Integer;
+    Geldig: Boolean;
     IsNT: Boolean;
   end;
 
 const
-  DayNames: array[0..6] of string = (            { 00488D04 }
+  DagNamen: array[0..6] of string = (            { 00488D04 }
     'zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag');
 
 var
-  AppPath: string;   { 0048A8A0: map van het programma, met een afsluitende '\' }
-  AppName: string;   { 0048A8A4: bestandsnaam van het programma }
+  AppPad: string;   { 0048A8A0: map van het programma, met een afsluitende '\' }
+  AppNaam: string;   { 0048A8A4: bestandsnaam van het programma }
 
-function IMax(A, B: Integer): Integer;
-function IMin(A, B: Integer): Integer;
+function IMaximum(A, B: Integer): Integer;
+function IMinimum(A, B: Integer): Integer;
 function FMax(A, B: Double): Double;
 function FMin(A, B: Double): Double;
-function Interpolate(F, A, B: Double): Double;
-procedure FreeList(List: TList);
-function RandomString(List: TStrings): string;
-function IsEven(N: Integer): Boolean;
-function RectWidth(R: TRect): Integer;
-function RectHeight(R: TRect): Integer;
-function RoundUp(X: Double): Integer;
-function InPort(Port: Word): Byte;
-procedure GetWinVersion(var V: TWinVersion);
-procedure FindFiles(Path: string; Attr: Integer; List: TStrings);
+function Interpoleer(F, A, B: Double): Double;
+procedure LijstVrijgeven(List: TList);
+function WillekeurigeTekst(List: TStrings): string;
+function IsPaar(N: Integer): Boolean;
+function RechthoekBreedte(R: TRect): Integer;
+function RechthoekHoogte(R: TRect): Integer;
+function RondOmhoog(X: Double): Integer;
+function LeesPoort(Port: Word): Byte;
+procedure LeesWinVersie(var V: TWinVersie);
+procedure ZoekBestanden(Path: string; Attr: Integer; List: TStrings);
 
 implementation
 
@@ -101,7 +101,7 @@ uses
   {$IFDEF FPC}, ZMRandom{$ENDIF}  { PORT: Delphi's Random };
 
 { @00460B34 }
-function IMax(A, B: Integer): Integer;
+function IMaximum(A, B: Integer): Integer;
 begin
   if B < A then
     Result := A
@@ -110,7 +110,7 @@ begin
 end;
 
 { @00460B3C }
-function IMin(A, B: Integer): Integer;
+function IMinimum(A, B: Integer): Integer;
 begin
   if B > A then
     Result := A
@@ -137,13 +137,13 @@ begin
 end;
 
 { @00460BAC }
-function Interpolate(F, A, B: Double): Double;
+function Interpoleer(F, A, B: Double): Double;
 begin
   Result := F * A + (1 - F) * B;
 end;
 
 { @00460C54  Geeft alle objecten van een lijst vrij (elk verschillend object een keer) en leegt hem. }
-procedure FreeList(List: TList);
+procedure LijstVrijgeven(List: TList);
 var
   I, J: Integer;
   P: TObject;
@@ -162,7 +162,7 @@ begin
 end;
 
 { @00460CD0 }
-function RandomString(List: TStrings): string;
+function WillekeurigeTekst(List: TStrings): string;
 begin
   Result := List[Random(List.Count)];
 end;
@@ -184,13 +184,13 @@ begin
 end;
 
 { @00460D6C }
-constructor TRectPos.CreateRect(R: TRect);
+constructor TRectPos.MaakRect(R: TRect);
 begin
   Create(R.Left, R.Top, R.Right - R.Left, R.Bottom - R.Top);
 end;
 
 { @00460DD0 }
-function TRectPos.GetRect: TRect;
+function TRectPos.LeesRect: TRect;
 begin
   Result := Bounds(FX, FY, FWidth, FHeight);
 end;
@@ -205,19 +205,19 @@ begin
 end;
 
 { @00460E28 }
-function TRectPos.Intersects(ARect: TRectPos): Boolean;
+function TRectPos.Overlapt(ARect: TRectPos): Boolean;
 var
   Doel: TRect;
 begin
-  Result := IntersectRect(Doel, ARect.GetRect, GetRect);
+  Result := IntersectRect(Doel, ARect.LeesRect, LeesRect);
 end;
 
 { @00460E64 }
-procedure TRectPos.Union(ARect: TRectPos);
+procedure TRectPos.Vereniging(ARect: TRectPos);
 var
   R: TRect;
 begin
-  UnionRect(R, ARect.GetRect, GetRect);
+  UnionRect(R, ARect.LeesRect, LeesRect);
   SetRect(R);
 end;
 
@@ -225,7 +225,7 @@ end;
 constructor TPosList.Create;
 begin
   inherited Create;
-  FKeepSorted := False;
+  FSorteerBehouden := False;
   FSorted := False;
 end;
 
@@ -287,16 +287,16 @@ function TPosList.Add(Item: TPos): TPos;
 var
   I: Integer;
 begin
-  if FKeepSorted and (Count > 0) then
+  if FSorteerBehouden and (Count > 0) then
   begin
     I := Find(Item.FX, Item.FY);
     if I < Count then
     begin
       if I >= 0 then
       begin
-        FKeepSorted := False;
+        FSorteerBehouden := False;
         Insert(I, Item);
-        FKeepSorted := True;
+        FSorteerBehouden := True;
         FSorted := True;
       end
       else
@@ -325,7 +325,7 @@ begin
 end;
 
 { @004610EC }
-function IsEven(N: Integer): Boolean;
+function IsPaar(N: Integer): Boolean;
 begin
   if N mod 2 = 1 then
     Result := False
@@ -376,7 +376,7 @@ begin
       I := 0;
     if I >= Count then
       I := Count - 1;
-    if IsEven(Stap) then
+    if IsPaar(Stap) then
       Stap := Stap div 2
     else if Stap = 1 then
       Laatste := True
@@ -389,7 +389,7 @@ end;
 procedure TPosList.Insert(Index: Integer; Item: TPos);
 begin
   inherited Insert(Index, Item);
-  if FKeepSorted then
+  if FSorteerBehouden then
     Sort
   else
     FSorted := False;
@@ -433,25 +433,25 @@ begin
 end;
 
 { @00461324 }
-function TRectPosList.AddRect(R: TRect): TRectPos;
+function TRectPosList.VoegRectToe(R: TRect): TRectPos;
 begin
-  Result := Add(TRectPos.CreateRect(R));
+  Result := Add(TRectPos.MaakRect(R));
 end;
 
 { @00461358 }
-function RectWidth(R: TRect): Integer;
+function RechthoekBreedte(R: TRect): Integer;
 begin
   Result := R.Right - R.Left;
 end;
 
 { @00461378 }
-function RectHeight(R: TRect): Integer;
+function RechthoekHoogte(R: TRect): Integer;
 begin
   Result := R.Bottom - R.Top;
 end;
 
 { @00461398 }
-function RoundUp(X: Double): Integer;
+function RondOmhoog(X: Double): Integer;
 begin
   { LET OP: Round(X + 1) is geen afronding naar boven voor breuken >= 0.5 (2.7 -> 4); behouden zoals in het origineel }
   Result := Round(X + 1);
@@ -460,7 +460,7 @@ begin
 end;
 
 { @004613D0 }
-function InPort(Port: Word): Byte;
+function LeesPoort(Port: Word): Byte;
 var
   B: Byte;
 begin
@@ -482,20 +482,20 @@ begin
 end;
 
 { @004613EC }
-procedure GetWinVersion(var V: TWinVersion);
+procedure LeesWinVersie(var V: TWinVersie);
 var
   VersieInfo: TOSVersionInfo;
 begin
   VersieInfo.dwOSVersionInfoSize := SizeOf(VersieInfo);
   GetVersionEx(VersieInfo);
-  V.Major := VersieInfo.dwMajorVersion;
-  V.Minor := VersieInfo.dwMinorVersion;
-  V.Valid := True;
+  V.Hoofdversie := VersieInfo.dwMajorVersion;
+  V.Subversie := VersieInfo.dwMinorVersion;
+  V.Geldig := True;
   V.IsNT := VersieInfo.dwPlatformId = VER_PLATFORM_WIN32_NT;
 end;
 
 { @00461428 }
-procedure FindFiles(Path: string; Attr: Integer; List: TStrings);
+procedure ZoekBestanden(Path: string; Attr: Integer; List: TStrings);
 var
   Zoekrecord: TSearchRec;
 begin
@@ -508,9 +508,9 @@ end;
 
 { @0046152C }
 initialization
-  AppPath := ExtractFilePath(ParamStr(0));
-  if AppPath[Length(AppPath)] <> '\' then
-    AppPath := AppPath + '\';
-  AppName := ExtractFileName(ParamStr(0));
+  AppPad := ExtractFilePath(ParamStr(0));
+  if AppPad[Length(AppPad)] <> '\' then
+    AppPad := AppPad + '\';
+  AppNaam := ExtractFileName(ParamStr(0));
 
 end.

@@ -1,7 +1,7 @@
 {
   "functions": {
-    "00485bbc": "Uconst.AddContents",
-    "00485cd8": "Uconst.LoadContents",
+    "00485bbc": "Uconst.VoegInhoudToe",
+    "00485cd8": "Uconst.LaadInhoud",
     "0048619c": "Uconst.IsSnelweg",
     "00486270": "Uconst.IsGewoneWeg",
     "0048638c": "Uconst.IsWeg",
@@ -11,49 +11,123 @@
     "00486584": "Uconst.IsStation",
     "0048664c": "Uconst.IsTreinBestemming",
     "004866c8": "Uconst.IsBebouwing",
-    "004867b8": "Uconst.GridToWorld",
-    "004867f4": "Uconst.WorldToScreen",
-    "00486848": "Uconst.GridToScreen",
-    "00486880": "Uconst.ScreenToWorld",
-    "004868c4": "Uconst.WorldToGrid",
-    "00486950": "Uconst.ScreenToGrid",
-    "00486988": "Uconst.ContentsInfoByContents",
-    "00486a78": "Uconst.ContentsDescription",
-    "00486aec": "Uconst.IsOutOfView",
-    "00486b20": "Uconst.InMap",
+    "004867b8": "Uconst.RasterNaarWereld",
+    "004867f4": "Uconst.WereldNaarScherm",
+    "00486848": "Uconst.RasterNaarScherm",
+    "00486880": "Uconst.SchermNaarWereld",
+    "004868c4": "Uconst.WereldNaarRaster",
+    "00486950": "Uconst.SchermNaarRaster",
+    "00486988": "Uconst.InhoudInfoOpNaam",
+    "00486a78": "Uconst.InhoudOmschrijving",
+    "00486aec": "Uconst.IsBuitenBeeld",
+    "00486b20": "Uconst.InKaart",
     "00486b44": "Uconst.Fout"
   },
   "globals": {
     "00485a38": "Uconst.TypeInfo_TContentsInfo",
     "00485bac": "Uconst.TypeInfo_TContentsInfoArray",
     "004892a0": "Uconst.Criteria",
-    "004892bc": "Uconst.ViewRect",
+    "004892bc": "Uconst.BeeldRect",
     "004892cc": "Uconst.Waarderingen",
     "004892e0": "Uconst.Hoeveelheden",
     "004892f4": "Uconst.Zoom",
-    "004892fc": "Uconst.ScrollX",
-    "00489300": "Uconst.ScrollY",
-    "0048b178": "Uconst.Contents",
-    "0048b17c": "Uconst.ContentsCount",
-    "0048b180": "Uconst.PerfStart",
-    "0048b184": "Uconst.PerfView",
-    "0048b188": "Uconst.PerfAutos",
-    "0048b18c": "Uconst.PerfSprites",
-    "0048b190": "Uconst.PerfOther"
+    "004892fc": "Uconst.VerschuivingX",
+    "00489300": "Uconst.VerschuivingY",
+    "0048b178": "Uconst.Inhoud",
+    "0048b17c": "Uconst.AantalInhoud",
+    "0048b180": "Uconst.ProfStart",
+    "0048b184": "Uconst.ProfBeeld",
+    "0048b188": "Uconst.ProfAutos",
+    "0048b18c": "Uconst.ProfSprites",
+    "0048b190": "Uconst.ProfOverig"
   },
   "fields": {
-    "TContentsInfo": {
-      "0x0": ["Name", "string"], "0x4": ["Description", "string"], "0x8": ["IsGround", "Integer"],
-      "0xc": ["Singleton", "Boolean"], "0x10": ["Page", "string"], "0x14": ["Level", "Integer"],
-      "0x18": ["Prijs", "Integer"], "0x1c": ["Onderhoud", "Integer"], "0x20": ["Capaciteit", "Integer"],
-      "0x24": ["MaxSpeed", "Integer"], "0x28": ["GrondvlakX", "Integer"], "0x2c": ["GrondvlakY", "Integer"],
-      "0x30": ["Hoofdrubriek", "string"], "0x34": ["BaseScore", "Integer"], "0x38": ["Value", "Integer"],
-      "0x3c": ["Afstand", "Integer"], "0x40": ["Wens", "string"], "0x44": ["SpritesLoaded", "Boolean"],
-      "0x45": ["KnopGemaakt", "Boolean"]
+    "TInhoudInfo": {
+      "0x0": [
+        "Name",
+        "string"
+      ],
+      "0x4": [
+        "Beschrijving",
+        "string"
+      ],
+      "0x8": [
+        "IsGrond",
+        "Integer"
+      ],
+      "0xc": [
+        "Uniek",
+        "Boolean"
+      ],
+      "0x10": [
+        "Page",
+        "string"
+      ],
+      "0x14": [
+        "Speelniveau",
+        "Integer"
+      ],
+      "0x18": [
+        "Prijs",
+        "Integer"
+      ],
+      "0x1c": [
+        "Onderhoud",
+        "Integer"
+      ],
+      "0x20": [
+        "Capaciteit",
+        "Integer"
+      ],
+      "0x24": [
+        "Topsnelheid",
+        "Integer"
+      ],
+      "0x28": [
+        "GrondvlakX",
+        "Integer"
+      ],
+      "0x2c": [
+        "GrondvlakY",
+        "Integer"
+      ],
+      "0x30": [
+        "Hoofdrubriek",
+        "string"
+      ],
+      "0x34": [
+        "Basisscore",
+        "Integer"
+      ],
+      "0x38": [
+        "Value",
+        "Integer"
+      ],
+      "0x3c": [
+        "Afstand",
+        "Integer"
+      ],
+      "0x40": [
+        "Wens",
+        "string"
+      ],
+      "0x44": [
+        "SpritesGeladen",
+        "Boolean"
+      ],
+      "0x45": [
+        "KnopGemaakt",
+        "Boolean"
+      ]
     }
   },
   "assumes": {
-    "uTool": ["AppPath: string", "IMax (00460B34)"],
-    "Fmain": ["frmMain: TfrmMain (0048B168)"]
+    "uTool": [
+      "AppPath: string",
+      "IMax (00460B34)"
+    ],
+    "Fmain": [
+      "frmMain: TfrmMain (0048B168)"
+    ]
   }
 }

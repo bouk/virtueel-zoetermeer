@@ -1773,7 +1773,7 @@ procedure TGraphic.SaveToFile(const Filename: string);
 var
   Stream: TStream;
 begin
-  Stream := TFileStream.Create(ZMResolvePath(Filename), fmCreate);
+  Stream := TFileStream.Create(ZMWritePath(ZMResolvePath(Filename)), fmCreate);
   try
     SaveToStream(Stream);
   finally
@@ -2186,7 +2186,7 @@ begin
   inherited Create;
   FTransparentColor := clDefault;
   FPixelFormat := pfDevice;
-  FHandleType := bmDIB;
+  FHandleType := bmDDB;   { like Delphi: a new bitmap is a DDB until a pixel format or DIB is asked for }
 end;
 
 destructor TBitmap.Destroy;
@@ -2273,6 +2273,7 @@ begin
       end;
     end;
   end;
+  New.IsDIB := (FHandleType = bmDIB) or (FPixelFormat <> pfDevice) or (ABPP <> 32);
   ReselectInCanvas;
   OldH := FHandle;
   FHandle := New.Handle;
@@ -2332,8 +2333,11 @@ end;
 
 procedure TBitmap.SetHandleType(Value: TBitmapHandleType);
 begin
-  { all bitmaps are DIBs here; a DDB keeps the device (32 bpp) format }
+  { the pixels stay as they are; only the DIB/DDB nature changes (it matters for
+    text anti-aliasing, see ZMGdi.GdiUseAA) }
   FHandleType := Value;
+  if Img <> nil then
+    TZMBitmap(Img).IsDIB := (Value = bmDIB) or (FPixelFormat <> pfDevice);
 end;
 
 function TBitmap.GetMaskHandle: HBITMAP;
@@ -2404,6 +2408,7 @@ var
 begin
   if (Value = FPixelFormat) and (FHandle <> 0) then Exit;
   if Value = pfCustom then Exit;
+  if Value <> pfDevice then FHandleType := bmDIB;
   B := TZMBitmap(Img);
   if B <> nil then
     NewImage(B.Width, B.Height, BPPOf(Value), True)
@@ -2655,6 +2660,7 @@ begin
       if S <> nil then
       begin
         B := TZMBitmap.Create(S.Width, S.Height, S.BPP);
+        B.IsDIB := S.IsDIB;
         if (S.Bits <> nil) then Move(S.Bits^, B.Bits^, S.Stride * S.Height);
         B.NumColors := S.NumColors;
         B.Colors := S.Colors;
@@ -2883,8 +2889,10 @@ begin
     raise;
   end;
   FreeImage;
+  B.IsDIB := True;
   FHandle := B.Handle;
   FImgHandle := 0;
+  FHandleType := bmDIB;
   FPixelFormat := PFOf(BPP);
   FMonochrome := BPP = 1;
   Changed(Self);

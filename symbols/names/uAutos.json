@@ -1,8 +1,8 @@
 {
   "functions": {
-    "004750e8": "uAutos.CreateAutos",
+    "004750e8": "uAutos.MaakAutos",
     "00475178": "uAutos.Verkeer",
-    "0047519c": "uAutos.SegmentPos",
+    "0047519c": "uAutos.SegmentPositie",
     "00475314": "TAutoSprite.Draw.PlotAuto",
     "00475440": "TAutoSprite.Draw.DrawAutos",
     "00475914": "TAutoSprite.Draw.Beide",
@@ -32,23 +32,59 @@
   },
   "fields": {
     "TAutoSprite": {
-      "0x13c": ["FReserved13C", "Integer"],
-      "0x140": ["FWorld", "TWorld"],
-      "0x144": ["FView", "TView"],
-      "0x148": ["FSettings", "TSettings"],
-      "0x14c": ["FDrawn", "Boolean"],
-      "0x150": ["FStartTick", "Integer"],
-      "0x154": ["FFase", "Integer"]
+      "0x13c": [
+        "FGereserveerd13C",
+        "Integer"
+      ],
+      "0x140": [
+        "FWereld",
+        "TWorld"
+      ],
+      "0x144": [
+        "FWeergave",
+        "TView"
+      ],
+      "0x148": [
+        "FInstellingen",
+        "TSettings"
+      ],
+      "0x14c": [
+        "FGetekend",
+        "Boolean"
+      ],
+      "0x150": [
+        "FStartTik",
+        "Integer"
+      ],
+      "0x154": [
+        "FFase",
+        "Integer"
+      ]
     },
     "TSegment": {
-      "0x4": ["FVan", "TPoint"],
-      "0xc": ["FNaar", "TPoint"],
-      "0x14": ["FRichting", "Char"]
+      "0x4": [
+        "FVan",
+        "TPoint"
+      ],
+      "0xc": [
+        "FNaar",
+        "TPoint"
+      ],
+      "0x14": [
+        "FRichting",
+        "Char"
+      ]
     }
   },
   "assumes": {
-    "Fmain": ["TfrmMain calls CreateAutos(sbStage, spriteAuto, World +0x424, View +0x428, Settings) and keeps the result in +0x470"],
-    "SprBmp": ["TBmpSurface.Bitmap (field +0x30)"],
-    "Uview": ["TView.Autos (field +0x88) is written by CreateAutos"]
+    "Fmain": [
+      "TfrmMain calls CreateAutos(sbStage, spriteAuto, World +0x424, View +0x428, Settings) and keeps the result in +0x470"
+    ],
+    "SprBmp": [
+      "TBmpSurface.Bitmap (field +0x30)"
+    ],
+    "Uview": [
+      "TView.Autos (field +0x88) is written by CreateAutos"
+    ]
   }
 }

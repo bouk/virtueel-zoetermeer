@@ -2,54 +2,54 @@
   "functions": {
     "0046d1a8": "TSpriteBox.Create",
     "0046d2d4": "TSpriteBox.Destroy",
-    "0046d410": "TSpriteBox.NoPicture",
-    "0046d41c": "TSpriteBox.GetPixie",
-    "0046d440": "TSpriteBox.PixieCount",
+    "0046d410": "TSpriteBox.GeenAfbeelding",
+    "0046d41c": "TSpriteBox.LeesPixie",
+    "0046d440": "TSpriteBox.PixieAantal",
     "0046d44c": "TSpriteBox.WMEraseBkgnd",
-    "0046d460": "TSpriteBox.WMStarted",
+    "0046d460": "TSpriteBox.WMGestart",
     "0046d4bc": "TSpriteBox.SetAutoSize",
-    "0046d504": "TThreeD.Project",
+    "0046d504": "TThreeD.Projecteer",
     "0046d564": "TThreeD.Assign",
     "0046d5b8": "TSpriteBox.MouseDown",
     "0046d620": "TSpriteBox.MouseMove",
     "0046d6a8": "TSpriteBox.MouseUp",
     "0046d714": "TSpriteBox.Paint",
-    "0046d800": "TSpriteBox.AddUpdateRect",
-    "0046d858": "TSpriteBox.SetAutoFlip",
-    "0046d880": "TSpriteBox.MergeRects",
-    "0046d900": "TSpriteBox.GetDrawWindow",
-    "0046d914": "TSpriteBox.FullFlip",
-    "0046db0c": "TSpriteBox.DirtyFlip",
-    "0046de00": "TSpriteBox.GDIFlip",
-    "0046dea8": "TSpriteBox.InvalidateState",
+    "0046d800": "TSpriteBox.VoegVernieuwingToe",
+    "0046d858": "TSpriteBox.ZetAutoWissel",
+    "0046d880": "TSpriteBox.VoegRechthoekenSamen",
+    "0046d900": "TSpriteBox.LeesTekenVenster",
+    "0046d914": "TSpriteBox.VolledigeWissel",
+    "0046db0c": "TSpriteBox.GewijzigdeWissel",
+    "0046de00": "TSpriteBox.GDIWissel",
+    "0046dea8": "TSpriteBox.MaakStaatOngeldig",
     "0046df60": "TSpriteBox.Flip",
     "0046e0b0": "TSpriteBox.InvalidateRect",
-    "0046e0f0": "TSpriteBox.InvalidateArea",
-    "0046e1e4": "TSpriteBox.PaintBackground",
-    "0046e294": "TSpriteBox.DrawRegion",
-    "0046e690": "TSpriteBox.FindPixie",
-    "0046e700": "TSpriteBox.PixieAt",
-    "0046e718": "TSpriteBox.AddPixie",
-    "0046e734": "TSpriteBox.RemovePixie",
+    "0046e0f0": "TSpriteBox.MaakGebiedOngeldig",
+    "0046e1e4": "TSpriteBox.TekenAchtergrond",
+    "0046e294": "TSpriteBox.TekenGebied",
+    "0046e690": "TSpriteBox.ZoekPixie",
+    "0046e700": "TSpriteBox.PixieOp",
+    "0046e718": "TSpriteBox.VoegPixieToe",
+    "0046e734": "TSpriteBox.VerwijderPixie",
     "0046e78c": "TSpriteBox.SetPicture",
-    "0046e7a4": "TSpriteBox.SetPaletteImage",
-    "0046e7d0": "TSpriteBox.UpdateZOrder",
-    "0046e7f0": "TSpriteBox.ZOrderDirection",
-    "0046e870": "TSpriteBox.UpdateZOrderAt",
-    "0046e8a0": "TSpriteBox.UpdatePalette",
-    "0046e928": "TSpriteBox.SetCapturePixie",
+    "0046e7a4": "TSpriteBox.ZetPaletAfbeelding",
+    "0046e7d0": "TSpriteBox.VernieuwZVolgorde",
+    "0046e7f0": "TSpriteBox.ZRichting",
+    "0046e870": "TSpriteBox.VernieuwZVolgordeOp",
+    "0046e8a0": "TSpriteBox.VernieuwPalet",
+    "0046e928": "TSpriteBox.ZetVastlegPixie",
     "0046e94c": "TSpriteBoxList.Add",
-    "0046e95c": "TSpriteBoxList.GetSpriteBox",
-    "0046e97c": "TSpriteBoxList.FlipAll",
-    "0046e9b4": "uSpritebox.SpriteBoxExit",
+    "0046e95c": "TSpriteBoxList.LeesSpriteBox",
+    "0046e97c": "TSpriteBoxList.AlleWisselen",
+    "0046e9b4": "uSpritebox.SpriteBoxAfsluiting",
     "0046e9d8": "uSpritebox.Finalization",
     "0046ea08": "uSpritebox.Initialization"
   },
   "globals": {
-    "00488e78": "uSpritebox.DrawDepth",
-    "0048a934": "uSpritebox.TempSurface",
-    "0048a938": "uSpritebox.SpriteBoxes",
-    "0048a940": "uSpritebox.OldExitProc"
+    "00488e78": "uSpritebox.TekenDiepte",
+    "0048a934": "uSpritebox.TijdelijkVlak",
+    "0048a938": "uSpritebox.SpriteBoxen",
+    "0048a940": "uSpritebox.OudeExitProc"
   },
   "fields": {
     "TThreeD": {
@@ -58,41 +58,41 @@
         "Boolean"
       ],
       "0x8": [
-        "FXDis",
+        "FXAfstand",
         "Integer"
       ],
       "0xc": [
-        "FYDis",
+        "FYAfstand",
         "Integer"
       ],
       "0x10": [
-        "FZDis",
+        "FZAfstand",
         "Integer"
       ],
       "0x14": [
-        "FDiaF",
+        "FBrandpunt",
         "Integer"
       ]
     },
     "TSpriteBox": {
       "0x1f4": [
-        "FReserved1F4",
+        "FGereserveerd1F4",
         "Integer"
       ],
       "0x1f8": [
-        "FBackRects",
+        "FAchterRechthoeken",
         "TRectPosList"
       ],
       "0x1fc": [
-        "FDirtyRects",
+        "FGewijzigdeRechthoeken",
         "TRectPosList"
       ],
       "0x200": [
-        "FAutoFlip",
+        "FAutoWissel",
         "Boolean"
       ],
       "0x201": [
-        "FFrozen",
+        "FBevroren",
         "Boolean"
       ],
       "0x202": [
@@ -112,7 +112,7 @@
         "TSurface"
       ],
       "0x20c": [
-        "FPaletteImage",
+        "FPaletAfbeelding",
         "TSurface"
       ],
       "0x210": [
@@ -120,7 +120,7 @@
         "HPALETTE"
       ],
       "0x214": [
-        "FReserved214",
+        "FGereserveerd214",
         "Boolean"
       ],
       "0x218": [
@@ -128,35 +128,35 @@
         "TList"
       ],
       "0x21c": [
-        "FReserved21C",
+        "FGereserveerd21C",
         "TRect"
       ],
       "0x22c": [
-        "FFlipMode",
+        "FWisselModus",
         "Byte"
       ],
       "0x230": [
-        "FDrawWindow",
+        "FTekenVenster",
         "HWND"
       ],
       "0x234": [
-        "FThreeD",
+        "FDrieD",
         "TThreeD"
       ],
       "0x238": [
-        "FReload",
+        "FHerladen",
         "string"
       ],
       "0x23c": [
-        "FStarted",
+        "FGestart",
         "Boolean"
       ],
       "0x240": [
-        "FOnFlip",
+        "FOnWissel",
         "TNotifyEvent"
       ],
       "0x248": [
-        "FOnStarted",
+        "FOnGestart",
         "TNotifyEvent"
       ],
       "0x250": [
@@ -164,31 +164,31 @@
         "TNotifyEvent"
       ],
       "0x258": [
-        "FScale",
+        "FSchaal",
         "Double"
       ],
       "0x260": [
-        "FCapturePixie",
+        "FVastlegPixie",
         "TPixie"
       ],
       "0x264": [
-        "FMousePixie",
+        "FMuisPixie",
         "TPixie"
       ],
       "0x268": [
-        "FFrameTime",
+        "FFrameTijd",
         "Integer"
       ],
       "0x26c": [
-        "FLastTick",
+        "FLaatsteTik",
         "Integer"
       ],
       "0x270": [
-        "FHandleBackGround",
+        "FAchtergrondModus",
         "THandleBackGround"
       ],
       "0x274": [
-        "FBackGroundColor",
+        "FAchtergrondKleur",
         "TColor"
       ]
     }

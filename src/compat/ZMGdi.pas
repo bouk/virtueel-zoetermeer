@@ -50,6 +50,7 @@ type
     Colors: array[0..255] of LongWord;  { $00RRGGBB }
     ColorStamp: LongWord;               { incremented when Colors change }
     Dirty: Boolean;                     { set by drawing (used for the screen) }
+    IsDIB: Boolean;                     { DIB section (vs. device-dependent bitmap) }
     SelectedIn: TObject;                { DC the bitmap is selected into }
     constructor Create(AWidth, AHeight, ABPP: Integer);
     destructor Destroy; override;
@@ -86,6 +87,7 @@ type
   public
     LF: TLogFont;
     Face: PZMFace;
+    BitmapFont: Integer;   { -1 unknown, 0 TrueType, 1 bitmap font }
     constructor Create(const ALF: TLogFont);
   end;
 
@@ -143,6 +145,8 @@ type
   end;
 
 var
+  { ZM_NO_AA=1: never anti-alias text }
+  ZMNoAntialias: Boolean = False;
   { window DCs recompute their visible region when the window layout changes }
   ZMVisGeneration: Integer = 1;
   ZMVisProvider: procedure(DC: TObject) = nil;
@@ -198,7 +202,10 @@ procedure GdiFloodFill(DC: TZMDC; X, Y: Integer; C: COLORREF; Surface: Boolean);
 
 { text }
 function GdiFace(DC: TZMDC): PZMFace;
-function GdiTextWidth(Face: PZMFace; S: PAnsiChar; Count: Integer; CharExtra: Integer = 0): Integer;
+function GdiUseAA(DC: TZMDC): Boolean;
+function GdiGlyphs(DC: TZMDC): PZMGlyphs;
+function GdiTextWidth(DC: TZMDC; S: PAnsiChar; Count: Integer): Integer;
+function IsBitmapFontName(const Name: string): Boolean;
 procedure GdiTextOut(DC: TZMDC; X, Y: Integer; S: PAnsiChar; Count: Integer;
   DoOpaque: Boolean; ClipR: PRect; OpaqueR: PRect);
 function GdiDrawText(DC: TZMDC; S: PAnsiChar; Count: Integer; var R: TRect; Format: UINT): Integer;
@@ -319,6 +326,7 @@ begin
   inherited Create(OBJ_FONT);
   LF := ALF;
   Face := ZMFindFace(LF);
+  BitmapFont := -1;
 end;
 
 constructor TZMRegion.Create;
@@ -572,6 +580,7 @@ begin
   BC := BI.bmiHeader.biBitCount;
   if not (BC in [1, 4, 8, 16, 24, 32]) then BC := 24;
   Result := TZMBitmap.Create(W, H, BC);
+  Result.IsDIB := True;
   if BC <= 8 then
   begin
     N := BI.bmiHeader.biClrUsed;
@@ -1727,14 +1736,124 @@ begin
     Result := TZMFontObj(StockObjects[SYSTEM_FONT]).Face;
 end;
 
-function GdiTextWidth(Face: PZMFace; S: PAnsiChar; Count: Integer; CharExtra: Integer): Integer;
+{ Like Wine's DIB engine: TrueType fonts are anti-aliased (GGO_GRAY4) on DIBs
+  deeper than 8 bpp; bitmap fonts (MS Sans Serif, System, ...) and <= 8 bpp
+  targets get 1-bit glyphs. The glyph advances differ between the two. }
+function IsBitmapFontName(const Name: string): Boolean;
+var
+  N: string;
+begin
+  N := LowerCase(Trim(Name));
+  Result := (N = 'ms sans serif') or (N = 'ms serif') or (N = 'system') or (N = 'fixedsys') or
+    (N = 'terminal') or (N = 'small fonts') or (N = 'courier') or (N = 'modern') or
+    (N = 'roman') or (N = 'script') or (N = '');
+end;
+
+function GdiUseAA(DC: TZMDC): Boolean;
+var
+  F: TZMFontObj;
+begin
+  Result := False;
+  { anti-aliasing needs a > 8 bpp target and a size the font's gasp table marks
+    for grey-scale rendering (as Windows/Wine do) }
+  if (DC.Target = nil) or (DC.Target.BPP <= 8) then Exit;
+  F := DC.St.Font;
+  if (F = nil) or (F.LF.lfQuality = NONANTIALIASED_QUALITY) then Exit;
+  if F.BitmapFont < 0 then
+    if IsBitmapFontName(StrPas(F.LF.lfFaceName)) then F.BitmapFont := 1 else F.BitmapFont := 0;
+  Result := (F.BitmapFont = 0) and not ZMNoAntialias and GdiFace(DC)^.Gray;
+end;
+
+function GdiGlyphs(DC: TZMDC): PZMGlyphs;
+begin
+  if GdiUseAA(DC) then Result := @GdiFace(DC)^.AAGlyphs else Result := @GdiFace(DC)^.Glyphs;
+end;
+
+{ Text extents use the normally hinted advances of TrueType fonts even where the
+  glyphs are drawn 1-bit with the (narrower or wider) mono advances: Wine measures
+  with GGO_METRICS (FT_LOAD_DEFAULT) and renders with FT_LOAD_TARGET_MONO. }
+function GdiExtentGlyphs(DC: TZMDC): PZMGlyphs;
+var
+  F: TZMFontObj;
+begin
+  F := DC.St.Font;
+  if F <> nil then
+  begin
+    if F.BitmapFont < 0 then
+      if IsBitmapFontName(StrPas(F.LF.lfFaceName)) then F.BitmapFont := 1 else F.BitmapFont := 0;
+    if (F.BitmapFont = 0) and not ZMNoAntialias then Exit(@GdiFace(DC)^.AAGlyphs);
+  end;
+  Result := @GdiFace(DC)^.Glyphs;
+end;
+
+function GdiTextWidth(DC: TZMDC; S: PAnsiChar; Count: Integer): Integer;
 var
   I: Integer;
+  G: PZMGlyphs;
 begin
   Result := 0;
   if S = nil then Exit;
+  G := GdiExtentGlyphs(DC);
   for I := 0 to Count - 1 do
-    Inc(Result, Face^.Glyphs[Byte(S[I])].Adv + CharExtra);
+    Inc(Result, G^[Byte(S[I])].Adv + DC.St.CharExtra);
+end;
+
+{ Wine dibdrv: anti-aliased glyph pixels blend with a gamma ramp }
+const
+  AARamp: array[0..16] of Byte = (0, $4d, $68, $7c, $8c, $9a, $a7, $b2, $bd, $c7, $d0, $d9,
+    $e1, $e9, $f0, $f8, $ff);
+
+function AAComp(Dst, Text, Level: Integer): Integer; inline;
+var
+  MinC, MaxC: Integer;
+begin
+  MinC := (AARamp[Level] * Text) div $FF;
+  MaxC := AARamp[16 - Level] + (($FF - AARamp[16 - Level]) * Text) div $FF;
+  if Dst = Text then Result := Dst
+  else if Dst > Text then Result := Text + ((Dst - Text) * (MaxC - Text)) div ($FF - Text)
+  else Result := Text - ((Text - Dst) * (Text - MinC)) div Text;
+end;
+
+procedure DrawGlyphAA(DC: TZMDC; const G: TZMGlyph; X, Y: Integer; RGB: LongWord; const Clip: TZMRects);
+var
+  I, PX, PY, L: Integer;
+  GR, CR: TRect;
+  Row: PByte;
+  T: TZMBitmap;
+  D: LongWord;
+  TR, TG, TB: Integer;
+begin
+  if (G.W <= 0) or (G.H <= 0) or (G.Data = nil) then Exit;
+  T := DC.Target;
+  TR := (RGB shr 16) and $FF; TG := (RGB shr 8) and $FF; TB := RGB and $FF;
+  GR := Rect(X + G.XOff, Y + G.YOff, X + G.XOff + G.W, Y + G.YOff + G.H);
+  for I := 0 to High(Clip) do
+  begin
+    CR := Clip[I];
+    if CR.Left < GR.Left then CR.Left := GR.Left;
+    if CR.Top < GR.Top then CR.Top := GR.Top;
+    if CR.Right > GR.Right then CR.Right := GR.Right;
+    if CR.Bottom > GR.Bottom then CR.Bottom := GR.Bottom;
+    if (CR.Right <= CR.Left) or (CR.Bottom <= CR.Top) then Continue;
+    for PY := CR.Top to CR.Bottom - 1 do
+    begin
+      Row := G.Data + (PY - GR.Top) * G.W;
+      for PX := CR.Left to CR.Right - 1 do
+      begin
+        L := Row[PX - GR.Left];
+        if L <= 1 then Continue;   { zoals Wine: niveau 0 en 1 laten de pixel staan }
+        if L >= 16 then
+          T.SetNative(PX, PY, T.RGBToNative(RGB))
+        else
+        begin
+          D := T.NativeToRGB(T.GetNative(PX, PY));
+          D := (LongWord(AAComp((D shr 16) and $FF, TR, L)) shl 16) or
+            (LongWord(AAComp((D shr 8) and $FF, TG, L)) shl 8) or LongWord(AAComp(D and $FF, TB, L));
+          T.SetNative(PX, PY, T.RGBToNative(D));
+        end;
+      end;
+    end;
+  end;
 end;
 
 procedure DrawGlyph(DC: TZMDC; const G: TZMGlyph; X, Y: Integer; V: LongWord; const Clip: TZMRects);
@@ -1780,10 +1899,14 @@ var
   BG: TRect;
   Align: UINT;
   LF: TLogFont;
+  Glyphs: PZMGlyphs;
+  AA: Boolean;
 begin
   if (DC.Target = nil) or (DC.Target.Bits = nil) then Exit;
   Face := GdiFace(DC);
-  W := GdiTextWidth(Face, S, Count, DC.St.CharExtra);
+  Glyphs := GdiGlyphs(DC);
+  AA := GdiUseAA(DC);
+  W := GdiTextWidth(DC, S, Count);
   Align := DC.St.TextAlign;
   if Align and TA_UPDATECP <> 0 then
   begin
@@ -1817,8 +1940,11 @@ begin
   TY := Y + OY;
   for I := 0 to Count - 1 do
   begin
-    DrawGlyph(DC, Face^.Glyphs[Byte(S[I])], TX, TY, V, Clip);
-    Inc(TX, Face^.Glyphs[Byte(S[I])].Adv + DC.St.CharExtra);
+    if AA then
+      DrawGlyphAA(DC, Glyphs^[Byte(S[I])], TX, TY, DC.ColorToRGB(DC.St.TextColor), Clip)
+    else
+      DrawGlyph(DC, Glyphs^[Byte(S[I])], TX, TY, V, Clip);
+    Inc(TX, Glyphs^[Byte(S[I])].Adv + DC.St.CharExtra);
   end;
   if DC.St.Font <> nil then
   begin
@@ -1852,7 +1978,7 @@ var
   end;
   function CW(Idx: Integer): Integer;
   begin
-    Result := Face^.Glyphs[Byte(Txt[Idx])].Adv;
+    Result := GdiExtentGlyphs(DC)^[Byte(Txt[Idx])].Adv + DC.St.CharExtra;
   end;
   procedure StripPrefix(var Line: AnsiString; var UL: Integer);
   var J: Integer;
@@ -1940,7 +2066,7 @@ begin
     begin
       Buf := Copy(Txt, Lines[I].Start, Lines[I].Len);
       StripPrefix(Buf, ULPos);
-      W := GdiTextWidth(Face, PAnsiChar(Buf), Length(Buf));
+      W := GdiTextWidth(DC, PAnsiChar(Buf), Length(Buf));
       if W > MaxW then MaxW := W;
     end;
     if not Wrap or (MaxW > R.Right - R.Left) or True then
@@ -1960,7 +2086,7 @@ begin
   begin
     Buf := Copy(Txt, Lines[I].Start, Lines[I].Len);
     StripPrefix(Buf, ULPos);
-    W := GdiTextWidth(Face, PAnsiChar(Buf), Length(Buf));
+    W := GdiTextWidth(DC, PAnsiChar(Buf), Length(Buf));
     if Format and DT_CENTER <> 0 then X := R.Left + (R.Right - R.Left - W) div 2
     else if Format and DT_RIGHT <> 0 then X := R.Right - W
     else X := R.Left;
@@ -1970,8 +2096,8 @@ begin
       GdiTextOut(DC, X, Y, PAnsiChar(Buf), Length(Buf), True, @R, nil);
     if ULPos > 0 then
     begin
-      P := X + GdiTextWidth(Face, PAnsiChar(Buf), ULPos - 1);
-      GdiFillSolid(DC, Rect(P, Y + Face^.Ascent + 1, P + Face^.Glyphs[Byte(Buf[ULPos])].Adv,
+      P := X + GdiTextWidth(DC, PAnsiChar(Buf), ULPos - 1);
+      GdiFillSolid(DC, Rect(P, Y + Face^.Ascent + 1, P + GdiExtentGlyphs(DC)^[Byte(Buf[ULPos])].Adv,
         Y + Face^.Ascent + 2), DC.St.TextColor);
     end;
     Inc(Y, LineH);
@@ -2059,5 +2185,6 @@ begin
 end;
 
 initialization
+  ZMNoAntialias := GetEnvironmentVariable('ZM_NO_AA') = '1';
   InitStockObjects;
 end.

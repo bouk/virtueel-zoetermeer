@@ -1,6 +1,6 @@
 { Implementation of the Windows unit (included by Windows.pas). }
 
-uses SysUtils, Classes, Math, ZMHandles, ZMGdi, ZMFonts, ZMWin, ZMPlatform, ZMData;
+uses SysUtils, Classes, Math, ZMHandles, ZMGdi, ZMFonts, ZMWin, ZMPlatform, ZMData, ZMProfile;
 
 var
   LastErr: DWORD;
@@ -1569,7 +1569,7 @@ begin
   D := GdiDC(DC);
   if D = nil then Exit(False);
   F := GdiFace(D);
-  Size.cx := GdiTextWidth(F, Str, Count, D.St.CharExtra);
+  Size.cx := GdiTextWidth(D, Str, Count);
   Size.cy := F^.Height;
   Result := True;
 end;
@@ -3198,47 +3198,23 @@ begin
   Result := True;
 end;
 
+{ INI-bestanden: zie ZMProfile (bewerkt ter plekke, schrijft naar de overlay) }
 function GetPrivateProfileString(lpAppName, lpKeyName, lpDefault: PAnsiChar;
   lpReturnedString: PAnsiChar; nSize: DWORD; lpFileName: PAnsiChar): DWORD;
-var
-  L: TStringList;
-  I: Integer;
-  Sec, S, Def: string;
-  InSec: Boolean;
 begin
-  if lpDefault <> nil then Def := StrPas(lpDefault) else Def := '';
-  StrPLCopy(lpReturnedString, Def, nSize - 1);
-  Result := StrLen(lpReturnedString);
-  if (lpAppName = nil) or (lpKeyName = nil) then Exit;
-  L := TStringList.Create;
-  try
-    try
-      L.LoadFromFile(ZMResolvePath(StrPas(lpFileName)));
-    except
-      Exit;
-    end;
-    InSec := False;
-    Sec := '[' + StrPas(lpAppName) + ']';
-    for I := 0 to L.Count - 1 do
-    begin
-      S := Trim(L[I]);
-      if (S <> '') and (S[1] = '[') then
-        InSec := SameText(S, Sec)
-      else if InSec and SameText(Trim(Copy(S, 1, Pos('=', S) - 1)), StrPas(lpKeyName)) and (Pos('=', S) > 0) then
-      begin
-        StrPLCopy(lpReturnedString, Trim(Copy(S, Pos('=', S) + 1, MaxInt)), nSize - 1);
-        Result := StrLen(lpReturnedString);
-        Exit;
-      end;
-    end;
-  finally
-    L.Free;
-  end;
+  Result := ZMGetPrivateProfileString(lpAppName, lpKeyName, lpDefault, lpReturnedString,
+    nSize, lpFileName);
 end;
 
 function WritePrivateProfileString(lpAppName, lpKeyName, lpString, lpFileName: PAnsiChar): BOOL;
 begin
-  Result := False;
+  Result := ZMWritePrivateProfileString(lpAppName, lpKeyName, lpString, lpFileName);
+end;
+
+function GetPrivateProfileInt(lpAppName, lpKeyName: PAnsiChar; nDefault: Integer;
+  lpFileName: PAnsiChar): UINT;
+begin
+  Result := ZMGetPrivateProfileInt(lpAppName, lpKeyName, nDefault, lpFileName);
 end;
 
 { ---------------------------------------------------------------- resources }

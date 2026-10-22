@@ -597,6 +597,12 @@ begin
     Start := '';
     if FFileName <> '' then Start := ExtractFilePath(ZMResolvePath(FFileName));
     if (Start = '') and (FInitialDir <> '') then Start := ZMResolvePath(FInitialDir);
+    { Zonder beginmap (of als die in de datamap ligt, zoals de spelmap op Windows)
+      begint de dialoog in de overlay, waar bewaarde spellen staan. }
+    if (Start <> '') and (ZMSaveDir <> '') and
+      ZMInDataDir(IncludeTrailingPathDelimiter(ExpandFileName(Start)) + 'x') then
+      Start := ZMSaveDir;
+    if (Start = '') and (ZMSaveDir <> '') then Start := ZMSaveDir;
     if (Start = '') or not DirectoryExists(Start) then Start := GetCurrentDir;
     F.Dir := ExcludeTrailingPathDelimiter(ExpandFileName(Start));
     if F.Dir = '' then F.Dir := PathDelim;
@@ -660,6 +666,8 @@ begin
     if F.ShowModal = mrOk then
     begin
       FFilterIndex := F.Types.ItemIndex + 1;
+      { opslaan in de datamap wordt opslaan in de overlay }
+      if FIsSave then FFileName := ZMWritePath(FFileName);
       FFiles.Clear;
       FFiles.Add(FFileName);
       Result := DoCanClose;

@@ -2,9 +2,9 @@ unit Uview;
 
 { TView: de pixie die de stad tekent. De grondlaag (wegen, sporen, gras,
   stoepen) wordt per gewijzigde cel op een groot oppervlak ter grootte van de wereld geschilderd
-  (FTile, opgebouwd uit images\8bits\Tile.bmp); gebouwen en stations zijn
+  (FTegel, opgebouwd uit images\8bits\Tile.bmp); gebouwen en stations zijn
   TViewSprite-kopieën van de sjabloon-sprites, van achter naar voren getekend door Draw.
-  Bevat ook de scroll/zoom-status (Uconst.ScrollX/ScrollY/Zoom).
+  Bevat ook de scroll/zoom-status (Uconst.VerschuivingX/VerschuivingY/Zoom).
   Gedecompileerd uit ROS.exe v1.1, code 00472F7C-00474EEF. }
 
 {$I zm.inc}
@@ -18,16 +18,16 @@ type
   { VMT 00472FC8, instantiegrootte $150. Een gebouw- of stationssprite op de kaart. }
   TViewSprite = class(TSprite)
   private
-    FReserved13C: Integer;           { +0x13C  niet gebruikt }
-    FPos: TPos;                      { +0x140  linkerbovencel van het grondvlak; X = -1: de trein }
-    FAnimated: Boolean;              { +0x144  frames <FAnimName>_0, _1, ... worden doorlopen (Molen, Siemens2) }
-    FAnimFrame: Integer;             { +0x148 }
-    FAnimName: string;               { +0x14C }
+    FGereserveerd13C: Integer;           { +0x13C  niet gebruikt }
+    FPositie: TPos;                      { +0x140  linkerbovencel van het grondvlak; X = -1: de trein }
+    FGeanimeerd: Boolean;              { +0x144  frames <FAnimatieNaam>_0, _1, ... worden doorlopen (Molen, Siemens2) }
+    FAnimatieFrame: Integer;             { +0x148 }
+    FAnimatieNaam: string;               { +0x14C }
   public
-    property Pos: TPos read FPos write FPos;
-    property Animated: Boolean read FAnimated write FAnimated;
-    property AnimFrame: Integer read FAnimFrame write FAnimFrame;
-    property AnimName: string read FAnimName write FAnimName;
+    property Pos: TPos read FPositie write FPositie;
+    property Geanimeerd: Boolean read FGeanimeerd write FGeanimeerd;
+    property AnimatieFrame: Integer read FAnimatieFrame write FAnimatieFrame;
+    property AnimatieNaam: string read FAnimatieNaam write FAnimatieNaam;
   end;
 
   { VMT 00473110, instantiegrootte $10. }
@@ -41,44 +41,44 @@ type
   { VMT 0047317C, instantiegrootte $90. }
   TView = class(TPixie)
   private
-    FSettings: TSettings;            { +0x68 }
+    FInstellingen: TSettings;            { +0x68 }
     FStatus: TStatus;                { +0x6C }
-    FTile: TSurface;                 { +0x70  de grondlaag van de hele kaart (4048 x 2112) }
-    FCleanTile: TSurface;            { +0x74  kopie van de lege geteegelde kaart, daarna niet meer gebruikt }
-    FSpriteBox: TSpriteBox;          { +0x78 }
+    FTegel: TSurface;                 { +0x70  de grondlaag van de hele kaart (4048 x 2112) }
+    FSchoonTegel: TSurface;            { +0x74  kopie van de lege geteegelde kaart, daarna niet meer gebruikt }
+    FSpriteVak: TSpriteBox;          { +0x78 }
     FSprites: TSpriteList;           { +0x7C  sjabloon-sprites, één per objecttype }
-    FWorld: TWorld;                  { +0x80 }
-    FViewSprites: TSpriteList;       { +0x84  TViewSprite per gebouw (Data = TPos van de cel) }
+    FWereld: TWorld;                  { +0x80 }
+    FZichtSprites: TSpriteList;       { +0x84  TViewSprite per gebouw (Data = TPos van de cel) }
     FAutos: TSprite;                 { +0x88  de auto's (TAutoSprite), ingesteld door uAutos }
     FTreinSprite: TViewSprite;       { +0x8C  de trein, altijd bovenop getekend }
-    procedure PlaceSprite(Sprite: TSprite; AX, AY: Integer);
+    procedure PlaatsSprite(Sprite: TSprite; AX, AY: Integer);
     procedure Redraw;
-    procedure PaintCell(AX, AY: Integer);
-    procedure UpdateSprite(AX, AY: Integer);
+    procedure SchilderCel(AX, AY: Integer);
+    procedure VerversSprite(AX, AY: Integer);
   public
     constructor Create(ASprites: TSpriteList; ASpriteBox: TSpriteBox; AWorld: TWorld;
-      ASettings: TSettings; AStatus: TStatus);
+      AOpties: TSettings; AStatus: TStatus);
     destructor Destroy; override;
-    function GetX: Integer; override;                                  { +0x40 }
-    function GetY: Integer; override;                                  { +0x44 }
-    function GetLeft: Integer; override;                               { +0x4C }
-    function GetTop: Integer; override;                                { +0x54 }
+    function LeesX: Integer; override;                                  { +0x40 }
+    function LeesY: Integer; override;                                  { +0x44 }
+    function LeesLinks: Integer; override;                               { +0x4C }
+    function LeesBoven: Integer; override;                                { +0x54 }
     function GetWidth: Integer; override;                              { +0x5C }
     function GetHeight: Integer; override;                             { +0x60 }
     procedure Draw(Surface: TSurface; DX, DY: Integer; ClipRect: TRect;
-      Scale: Double); override;                                        { +0x64 }
-    procedure DrawDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
-      Scale: Double); override;                                        { +0x68 }
-    procedure ProcessChanges;
-    function GetCenter: TPoint;
+      Schaalfactor: Double); override;                                        { +0x64 }
+    procedure TekenDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
+      Schaalfactor: Double); override;                                        { +0x68 }
+    procedure VerwerkWijzigingen;
+    function LeesMidden: TPoint;
     procedure ScrollTo(AX, AY: Integer; AZoom: Double);
-    property Settings: TSettings read FSettings;
+    property Instellingen: TSettings read FInstellingen;
     property Status: TStatus read FStatus;
-    property Tile: TSurface read FTile;
-    property SpriteBox: TSpriteBox read FSpriteBox;
+    property Tile: TSurface read FTegel;
+    property SpriteBox: TSpriteBox read FSpriteVak;
     property Sprites: TSpriteList read FSprites;
-    property World: TWorld read FWorld;
-    property ViewSprites: TSpriteList read FViewSprites;
+    property Wereld: TWorld read FWereld;
+    property ZichtSprites: TSpriteList read FZichtSprites;
     property Autos: TSprite read FAutos write FAutos;
     property TreinSprite: TViewSprite read FTreinSprite;
   end;
@@ -95,66 +95,66 @@ const
 
 { @0047322C }
 constructor TView.Create(ASprites: TSpriteList; ASpriteBox: TSpriteBox; AWorld: TWorld;
-  ASettings: TSettings; AStatus: TStatus);
+  AOpties: TSettings; AStatus: TStatus);
 var
   I, J, TW, TH, W, H: Integer;
   Map: string;
 begin
   { LET OP: er wordt geen inherited constructor aangeroepen }
   Name := 'ZoetermeerViewer';
-  Map := AddPath(AddPath(AppPath, 'images'), '8bits');
-  FSettings := ASettings;
+  Map := VoegPadToe(VoegPadToe(AppPad, 'images'), '8bits');
+  FInstellingen := AOpties;
   FStatus := AStatus;
   FSprites := ASprites;
-  FSpriteBox := ASpriteBox;
-  FSpriteBox.AddPixie(Self);
+  FSpriteVak := ASpriteBox;
+  FSpriteVak.VoegPixieToe(Self);
   FTreinSprite := TViewSprite.Create(Self);
-  FTreinSprite.SpriteBox := FSpriteBox;
-  FTreinSprite.FPos := TPos.Create(-1, 0);
+  FTreinSprite.SpriteBox := FSpriteVak;
+  FTreinSprite.FPositie := TPos.Create(-1, 0);
   Visible := True;
-  FViewSprites := TSpriteList.Create;
-  FWorld := AWorld;
+  FZichtSprites := TSpriteList.Create;
+  FWereld := AWorld;
   W := 4048;
   H := 2112;
-  FTile := NewSurface;
-  FCleanTile := NewSurface;
-  FTile.LoadFromFile(AddPath(Map, 'Tile.bmp'));
-  TW := FTile.Width;
-  TH := FTile.Height;
-  FTile.Width := W;
-  FTile.Height := H;
-  for J := 0 to FTile.Height div TH do
-    for I := 0 to FTile.Width div TW do
-      BitBlt(FTile.Canvas.Handle, I * TW, J * TH, TW, TH, FTile.Canvas.Handle, 0, 0, SRCCOPY);
-  FCleanTile.Assign(FTile);
+  FTegel := NieuwOppervlak;
+  FSchoonTegel := NieuwOppervlak;
+  FTegel.LoadFromFile(VoegPadToe(Map, 'Tile.bmp'));
+  TW := FTegel.Width;
+  TH := FTegel.Height;
+  FTegel.Width := W;
+  FTegel.Height := H;
+  for J := 0 to FTegel.Height div TH do
+    for I := 0 to FTegel.Width div TW do
+      BitBlt(FTegel.Canvas.Handle, I * TW, J * TH, TW, TH, FTegel.Canvas.Handle, 0, 0, SRCCOPY);
+  FSchoonTegel.Assign(FTegel);
 end;
 
 { @00473498 }
 destructor TView.Destroy;
 begin
-  FSpriteBox.RemovePixie(Self);
-  FreeList(FViewSprites);
-  FViewSprites.Free;
+  FSpriteVak.VerwijderPixie(Self);
+  LijstVrijgeven(FZichtSprites);
+  FZichtSprites.Free;
   inherited Destroy;
 end;
 
-{ @004734E0  Tekent elke cel in FWorld.Changes opnieuw. }
-procedure TView.ProcessChanges;
+{ @004734E0  Tekent elke cel in FWereld.Wijzigingen opnieuw. }
+procedure TView.VerwerkWijzigingen;
 var
   X, Y: Integer;
 begin
-  while FWorld.Changes.Count <> 0 do
+  while FWereld.Wijzigingen.Count <> 0 do
   begin
-    FWorld.PopChanged(X, Y);
-    PaintCell(X, Y);
-    UpdateSprite(X, Y);
+    FWereld.NeemWijziging(X, Y);
+    SchilderCel(X, Y);
+    VerversSprite(X, Y);
   end;
   Redraw;
 end;
 
 { @00473530  Knipt de schermrechthoek Doel bij tot het zichtgebied en verkleint de
   wereldrechthoek Bron dienovereenkomstig. }
-procedure ClipToView(var Bron, Doel: TRect);
+procedure KnipNaarZicht(var Bron, Doel: TRect);
 begin
   if Doel.Left < 30 then
   begin
@@ -179,12 +179,12 @@ begin
 end;
 
 { @004735EC }
-procedure TView.PlaceSprite(Sprite: TSprite; AX, AY: Integer);
+procedure TView.PlaatsSprite(Sprite: TSprite; AX, AY: Integer);
 var
   P: TPoint;
 begin
-  P := GridToWorld(Point(AX, AY));
-  Sprite.MoveTo3D(P.X, P.Y, -P.Y - Sprite.Height + TileW);
+  P := RasterNaarWereld(Point(AX, AY));
+  Sprite.VerplaatsNaar3D(P.X, P.Y, -P.Y - Sprite.Height + TegelBreedte);
 end;
 
 { @00473638 }
@@ -195,28 +195,28 @@ var
   Pos: TPos;
 begin
   R := Rect(30, 81, 822, 686);
-  FSpriteBox.InvalidateRect(R);
+  FSpriteVak.InvalidateRect(R);
   Exit;
   { LET OP: de rest is dode code in het origineel (blijft staan na de Exit) }
-  FWorld.Changes.Clear;
-  Bron := Bounds(0, 0, FTile.Width, FTile.Height);
-  Doel.TopLeft := WorldToScreen(Bron.TopLeft);
-  Doel.BottomRight := WorldToScreen(Bron.BottomRight);
-  ClipToView(Bron, Doel);
-  FSpriteBox.Picture.CopyFrom(FTile, Bron, Doel, False, False);
-  FSpriteBox.InvalidateRect(Doel);
-  for I := 0 to FViewSprites.Count - 1 do
+  FWereld.Wijzigingen.Clear;
+  Bron := Bounds(0, 0, FTegel.Width, FTegel.Height);
+  Doel.TopLeft := WereldNaarScherm(Bron.TopLeft);
+  Doel.BottomRight := WereldNaarScherm(Bron.BottomRight);
+  KnipNaarZicht(Bron, Doel);
+  FSpriteVak.Picture.KopieerVan(FTegel, Bron, Doel, False, False);
+  FSpriteVak.InvalidateRect(Doel);
+  for I := 0 to FZichtSprites.Count - 1 do
   begin
-    Pos := FViewSprites[I].Data as TPos;
-    PlaceSprite(FViewSprites[I], Pos.X, Pos.Y);
+    Pos := FZichtSprites[I].Data as TPos;
+    PlaatsSprite(FZichtSprites[I], Pos.X, Pos.Y);
   end;
 end;
 
-{ @0047376C  Wereldpositie van het midden van het zicht (omgekeerd, zoals ScrollX/ScrollY). }
-function TView.GetCenter: TPoint;
+{ @0047376C  Wereldpositie van het midden van het zicht (omgekeerd, zoals VerschuivingX/VerschuivingY). }
+function TView.LeesMidden: TPoint;
 begin
-  Result.X := ScrollX - Round(396 / Zoom);      { 396 = (822 - 30) / 2 }
-  Result.Y := ScrollY - Round(302.5 / Zoom);    { 302.5 = (686 - 81) / 2 }
+  Result.X := VerschuivingX - Round(396 / Zoom);      { 396 = (822 - 30) / 2 }
+  Result.Y := VerschuivingY - Round(302.5 / Zoom);    { 302.5 = (686 - 81) / 2 }
 end;
 
 { @004737B8  Centreert het zicht op (-AX, -AY) bij de gegeven zoom, binnen de kaart gehouden. }
@@ -226,12 +226,12 @@ begin
   AZoom := FMin(AZoom, 1);
   AX := AX + Round(396 / AZoom);
   AY := AY + Round(302.5 / AZoom);
-  AX := IMin(AX, Round(30 / AZoom));
-  AY := IMin(AY, Round(81 / AZoom));
-  AX := IMax(AX, -Round(FTile.Width - 822 / AZoom));
-  AY := IMax(AY, -Round(FTile.Height - 686 / AZoom));
-  ScrollX := AX;
-  ScrollY := AY;
+  AX := IMinimum(AX, Round(30 / AZoom));
+  AY := IMinimum(AY, Round(81 / AZoom));
+  AX := IMaximum(AX, -Round(FTegel.Width - 822 / AZoom));
+  AY := IMaximum(AY, -Round(FTegel.Height - 686 / AZoom));
+  VerschuivingX := AX;
+  VerschuivingY := AY;
   Zoom := AZoom;
   Redraw;
 end;
@@ -247,65 +247,65 @@ begin
     Masker := Masker or $62;
   if Masker and 4 <> 0 then
     Masker := Masker or $C4;
-  Result := 'Stoep_' + ZeroPad(IntStr(Masker), 3);
+  Result := 'Stoep_' + NulVul(IntTekst(Masker), 3);
 end;
 
-{ @00473988  Schildert het grondbeeld van een cel (en de stoepen) op FTile. }
-procedure TView.PaintCell(AX, AY: Integer);
+{ @00473988  Schildert het grondbeeld van een cel (en de stoepen) op FTegel. }
+procedure TView.SchilderCel(AX, AY: Integer);
 var
   Cell: TCell;
   P: TPoint;
-  Info: TContentsInfo;
-  SpriteName, FrameName: string;
+  Info: TInhoudInfo;
+  SpriteName, FrameNaam: string;
   Sprite, StoepSprite: TSprite;
   Frame: TFrame;
   Nr, X1, Y1, Masker, N, Vanaf, I, Bits: Integer;
   R, R2: TRect;
 begin
-  Cell := FWorld.GetCell(AX, AY);
-  if (Cell <> nil) and (Cell.Contents <> 'AndereStad') then
+  Cell := FWereld.LeesCel(AX, AY);
+  if (Cell <> nil) and (Cell.Inhoud <> 'AndereStad') then
   begin
-    P := GridToWorld(Point(AX, AY));
-    Info := ContentsInfoByContents(Cell.Contents);
-    if (Info.IsGround <> 0) or (Info.Name = 'Hoofdstation') then
+    P := RasterNaarWereld(Point(AX, AY));
+    Info := InhoudInfoOpNaam(Cell.Inhoud);
+    if (Info.IsGrond <> 0) or (Info.Name = 'Hoofdstation') then
     begin
       SpriteName := Info.Name;
-      FrameName := SpriteName;
+      FrameNaam := SpriteName;
       if (SpriteName <> '') and ((Cell.Hoofd = nil) or (Info.Name = 'Sloop')) then
       begin
-        if IsSnelweg(Cell.Contents, 'X') then
+        if IsSnelweg(Cell.Inhoud, 'X') then
         begin
           if Cell.Param = '00' then
-            FrameName := FrameName + '_05'
+            FrameNaam := FrameNaam + '_05'
           else
           begin
-            Nr := StrToIntDef0(Cell.Param);
+            Nr := StrNaarIntDef0(Cell.Param);
             if Nr in [1, 2, 4, 8] then
               Nr := ((Nr shl 2) or Nr or (Nr shr 2)) and $F;
             if Nr in [3, 6, 9, 12] then
-              FrameName := ContentsInfoByContents('Snel').Name;
-            FrameName := FrameName + '_' + ZeroPad(IntStr(Nr), 2);
+              FrameNaam := InhoudInfoOpNaam('Snel').Name;
+            FrameNaam := FrameNaam + '_' + NulVul(IntTekst(Nr), 2);
           end;
         end
-        else if IsWeg(Cell.Contents, 'X') then
-          FrameName := FrameName + '_' + ZeroPad(IntStr(Cell.Wegen), 2)
-        else if Cell.Contents = 'Hoofdstation' then
-          FrameName := FrameName + '_grondvlak'
-        else if Cell.Contents = 'Station' then
-          FrameName := FrameName + '_' + Cell.Param + '_grondvlak'
-        else if (Cell.Param <> '') and (Cell.Contents <> 'Klaver') then
-          FrameName := FrameName + '_' + Cell.Param;
+        else if IsWeg(Cell.Inhoud, 'X') then
+          FrameNaam := FrameNaam + '_' + NulVul(IntTekst(Cell.Wegen), 2)
+        else if Cell.Inhoud = 'Hoofdstation' then
+          FrameNaam := FrameNaam + '_grondvlak'
+        else if Cell.Inhoud = 'Station' then
+          FrameNaam := FrameNaam + '_' + Cell.Param + '_grondvlak'
+        else if (Cell.Param <> '') and (Cell.Inhoud <> 'Klaver') then
+          FrameNaam := FrameNaam + '_' + Cell.Param;
 
-        Sprite := FSprites.SpriteByName(SpriteName);
+        Sprite := FSprites.SpriteOpNaam(SpriteName);
         if Sprite = nil then
           Fout('Sprite niet gevonden: ' + SpriteName);
-        if Sprite.FrameList.IndexOf(FrameName) = -1 then
-          Fout('PaintCell: could not find frame ' + FrameName + ' in sprite ' + SpriteName);
-        Frame := Sprite.FrameList.FrameByName(FrameName);
+        if Sprite.FrameList.IndexOf(FrameNaam) = -1 then
+          Fout('PaintCell: could not find frame ' + FrameNaam + ' in sprite ' + SpriteName);
+        Frame := Sprite.FrameList.FrameOpNaam(FrameNaam);
         X1 := P.X - Frame.HotSpotX;
         Y1 := P.Y - Frame.HotSpotY;
         R := Bounds(X1, Y1, Frame.Width, Frame.Height);
-        Frame.Draw(FTile, R, False, False, True);
+        Frame.Draw(FTegel, R, False, False, True);
 
         Masker := Cell.Bebouwing;
         if Masker <> 0 then
@@ -318,39 +318,39 @@ begin
               if Masker and Bits = Bits then
               begin
                 { LET OP: loopt één voorbij de laatste pixie }
-                for I := 0 to FSpriteBox.PixieCount do
-                  if FSpriteBox.GetPixie(I).Name = 'spriteStoep' then
+                for I := 0 to FSpriteVak.PixieAantal do
+                  if FSpriteVak.LeesPixie(I).Name = 'spriteStoep' then
                   begin
-                    StoepSprite := TSprite(FSpriteBox.GetPixie(I));
+                    StoepSprite := TSprite(FSpriteVak.LeesPixie(I));
                     Break;
                   end;
                 if StoepSprite.FrameList.IndexOf(StoepFrame(Bits)) = -1 then
                   Fout('PaintCell: could not find frame ' + StoepFrame(Bits) + ' in spriteStoep');
-                Frame := StoepSprite.FrameList.FrameByName(StoepFrame(Bits));
+                Frame := StoepSprite.FrameList.FrameOpNaam(StoepFrame(Bits));
                 R := Bounds(X1, Y1, Frame.Width, Frame.Height);
-                Frame.Draw(FTile, R, False, False, True);
+                Frame.Draw(FTegel, R, False, False, True);
                 Masker := Masker xor Bits;
               end;
             end;
 
         R2 := R;
-        R.TopLeft := WorldToScreen(R2.TopLeft);
-        R.BottomRight := WorldToScreen(R2.BottomRight);
-        ClipToView(R2, R);
-        FSpriteBox.InvalidateRect(R);
+        R.TopLeft := WereldNaarScherm(R2.TopLeft);
+        R.BottomRight := WereldNaarScherm(R2.BottomRight);
+        KnipNaarZicht(R2, R);
+        FSpriteVak.InvalidateRect(R);
       end;
     end;
   end;
 end;
 
 { @004740A8 }
-procedure TView.DrawDC(DC: HDC; DX, DY: Integer; ClipRect: TRect; Scale: Double);
+procedure TView.TekenDC(DC: HDC; DX, DY: Integer; ClipRect: TRect; Schaalfactor: Double);
 begin
 end;
 
 { @00474420  Tekent het zichtbare deel van de kaart, de auto's en de gebouwen. }
 procedure TView.Draw(Surface: TSurface; DX, DY: Integer; ClipRect: TRect;
-  Scale: Double);
+  Schaalfactor: Double);
 var
   Lijst: TViewSpriteList;
   P: TPoint;
@@ -377,103 +377,103 @@ var
     while I < Lijst.Count - 1 do
     begin
       Inc(I);
-      if (Lijst[I] <> Sprite) and (Lijst[I].FPos.X <= MijnX) and (Lijst[I].FPos.Y <= MijnY) then
+      if (Lijst[I] <> Sprite) and (Lijst[I].FPositie.X <= MijnX) and (Lijst[I].FPositie.Y <= MijnY) then
       begin
-        DrawSprite(Lijst[I], Lijst[I].FPos.X, Lijst[I].FPos.Y,
+        DrawSprite(Lijst[I], Lijst[I].FPositie.X, Lijst[I].FPositie.Y,
           (Lijst[I].Data as TPos).X, (Lijst[I].Data as TPos).Y);
-        I := IMax(0, I - N + Lijst.Count);
+        I := IMaximum(0, I - N + Lijst.Count);
       end;
     end;
-    P := WorldToScreen(Point(Sprite.Left, Sprite.Top));
-    Inc(PerfView, GetTickCount);
-    Dec(PerfSprites, GetTickCount);
-    if Sprite.FAnimated then
+    P := WereldNaarScherm(Point(Sprite.Left, Sprite.Top));
+    Inc(ProfBeeld, GetTickCount);
+    Dec(ProfSprites, GetTickCount);
+    if Sprite.FGeanimeerd then
     begin
-      Inc(Sprite.FAnimFrame);
-      if Sprite.FrameList.IndexOf(Sprite.FAnimName + '_' + LongToStr(Sprite.FAnimFrame)) = -1 then
-        Sprite.FAnimFrame := 0;
+      Inc(Sprite.FAnimatieFrame);
+      if Sprite.FrameList.IndexOf(Sprite.FAnimatieNaam + '_' + LongNaarStr(Sprite.FAnimatieFrame)) = -1 then
+        Sprite.FAnimatieFrame := 0;
       Sprite.FrameIndex :=
-        Sprite.FrameList.IndexOf(Sprite.FAnimName + '_' + LongToStr(Sprite.FAnimFrame));
+        Sprite.FrameList.IndexOf(Sprite.FAnimatieNaam + '_' + LongNaarStr(Sprite.FAnimatieFrame));
     end;
-    Sprite.DrawDC(DC, P.X + DX - 30, P.Y + DY - 81, Bounds(0, 0, 1, 1), Zoom);
-    Inc(PerfSprites, GetTickCount);
-    Dec(PerfView, GetTickCount);
+    Sprite.TekenDC(DC, P.X + DX - 30, P.Y + DY - 81, Bounds(0, 0, 1, 1), Zoom);
+    Inc(ProfSprites, GetTickCount);
+    Dec(ProfBeeld, GetTickCount);
     Lijst.Remove(Sprite);
   end;
 
 begin
-  if PerfStart = 0 then
-    PerfStart := GetTickCount;
-  Dec(PerfView, GetTickCount);
+  if ProfStart = 0 then
+    ProfStart := GetTickCount;
+  Dec(ProfBeeld, GetTickCount);
   R := ClipRect;
   OffsetRect(R, 30 - DX, 81 - DY);
   IntersectRect(R, R, Rect(30, 81, 822, 686));
-  Bron.TopLeft := ScreenToWorld(R.TopLeft);
-  Bron.BottomRight := ScreenToWorld(R.BottomRight);
+  Bron.TopLeft := SchermNaarWereld(R.TopLeft);
+  Bron.BottomRight := SchermNaarWereld(R.BottomRight);
   ClipRect := R;
   OffsetRect(ClipRect, DX - 30, DY - 81);
-  FTile.CopyTo(Surface, Bron, ClipRect, False, False);
-  P := WorldToScreen(Point(FAutos.Left, FAutos.Top));
+  FTegel.KopieerNaar(Surface, Bron, ClipRect, False, False);
+  P := WereldNaarScherm(Point(FAutos.Left, FAutos.Top));
   FAutos.Draw(Surface, DX, DY, ClipRect, 1);
   DC := Surface.Canvas.Handle;
   Rgn := CreateRectRgn(ClipRect.Left, ClipRect.Top, ClipRect.Right, ClipRect.Bottom);
   SelectClipRgn(DC, Rgn);
   Lijst := TViewSpriteList.Create;
   Laatste := nil;
-  if ((GetTickCount div 500) mod 2 = 0) and (FWorld.Reistijd < 0) then
+  if ((GetTickCount div 500) mod 2 = 0) and (FWereld.Reistijd < 0) then
   begin
     { knipperen: verberg de gebouwen en stations die niet bereikbaar zijn }
-    for I := 0 to FSpriteBox.PixieCount - 1 do
-      if FSpriteBox.GetPixie(I) is TViewSprite then
+    for I := 0 to FSpriteVak.PixieAantal - 1 do
+      if FSpriteVak.LeesPixie(I) is TViewSprite then
       begin
-        if (FSpriteBox.GetPixie(I) as TViewSprite).FPos.X <> -1 then
+        if (FSpriteVak.LeesPixie(I) as TViewSprite).FPositie.X <> -1 then
         begin
-          Pos := (FSpriteBox.GetPixie(I) as TSprite).Data as TPos;
+          Pos := (FSpriteVak.LeesPixie(I) as TSprite).Data as TPos;
           Gevonden := False;
-          for J := 0 to FWorld.Bestemmingen.Count - 1 do
-            if (FWorld.Bestemmingen[J].X = Pos.X) and (FWorld.Bestemmingen[J].Y = Pos.Y) then
+          for J := 0 to FWereld.Bestemmingen.Count - 1 do
+            if (FWereld.Bestemmingen[J].X = Pos.X) and (FWereld.Bestemmingen[J].Y = Pos.Y) then
             begin
               Gevonden := True;
-              if FWorld.Bestemmingen[J].Bereikbaar then
-                Lijst.Add(FSpriteBox.GetPixie(I) as TViewSprite);
+              if FWereld.Bestemmingen[J].Bereikbaar then
+                Lijst.Add(FSpriteVak.LeesPixie(I) as TViewSprite);
             end;
-          for J := 0 to FWorld.Bebouwing.Count - 1 do
-            if (FWorld.Bebouwing[J].X = Pos.X) and (FWorld.Bebouwing[J].Y = Pos.Y) then
+          for J := 0 to FWereld.Bebouwing.Count - 1 do
+            if (FWereld.Bebouwing[J].X = Pos.X) and (FWereld.Bebouwing[J].Y = Pos.Y) then
             begin
               Gevonden := True;
-              if FWorld.Bebouwing[J].Bereikbaar then
-                Lijst.Add(FSpriteBox.GetPixie(I) as TViewSprite);
+              if FWereld.Bebouwing[J].Bereikbaar then
+                Lijst.Add(FSpriteVak.LeesPixie(I) as TViewSprite);
             end;
           if not Gevonden then
-            Lijst.Add(FSpriteBox.GetPixie(I) as TViewSprite);
+            Lijst.Add(FSpriteVak.LeesPixie(I) as TViewSprite);
         end
         else
-          Laatste := FSpriteBox.GetPixie(I) as TViewSprite;
+          Laatste := FSpriteVak.LeesPixie(I) as TViewSprite;
       end;
   end
   else
   begin
-    for I := 0 to FSpriteBox.PixieCount - 1 do
-      if FSpriteBox.GetPixie(I) is TViewSprite then
+    for I := 0 to FSpriteVak.PixieAantal - 1 do
+      if FSpriteVak.LeesPixie(I) is TViewSprite then
       begin
-        if (FSpriteBox.GetPixie(I) as TViewSprite).FPos.X <> -1 then
-          Lijst.Add(FSpriteBox.GetPixie(I) as TViewSprite)
+        if (FSpriteVak.LeesPixie(I) as TViewSprite).FPositie.X <> -1 then
+          Lijst.Add(FSpriteVak.LeesPixie(I) as TViewSprite)
         else
-          Laatste := FSpriteBox.GetPixie(I) as TViewSprite;
+          Laatste := FSpriteVak.LeesPixie(I) as TViewSprite;
       end;
   end;
   if Laatste <> nil then
   begin
-    P := WorldToScreen(Point(Laatste.Left, Laatste.Top));
-    Laatste.DrawDC(DC, P.X + DX - 30, P.Y + DY - 81, Bounds(0, 0, 1, 1), Zoom);
+    P := WereldNaarScherm(Point(Laatste.Left, Laatste.Top));
+    Laatste.TekenDC(DC, P.X + DX - 30, P.Y + DY - 81, Bounds(0, 0, 1, 1), Zoom);
   end;
   while Lijst.Count <> 0 do
-    DrawSprite(Lijst[0], Lijst[0].FPos.X, Lijst[0].FPos.Y,
+    DrawSprite(Lijst[0], Lijst[0].FPositie.X, Lijst[0].FPositie.Y,
       (Lijst[0].Data as TPos).X, (Lijst[0].Data as TPos).Y);
   Lijst.Free;
   SelectClipRgn(Surface.Canvas.Handle, 0);
   DeleteObject(Rgn);
-  Inc(PerfView, GetTickCount);
+  Inc(ProfBeeld, GetTickCount);
 end;
 
 { @004749BC }
@@ -489,75 +489,75 @@ begin
 end;
 
 { @004749CC }
-function TView.GetX: Integer;
+function TView.LeesX: Integer;
 begin
   Result := 30;
 end;
 
 { @004749D4 }
-function TView.GetY: Integer;
+function TView.LeesY: Integer;
 begin
   Result := 81;
 end;
 
 { @004749DC  Maakt de gebouwsprite van een cel opnieuw aan. }
-procedure TView.UpdateSprite(AX, AY: Integer);
+procedure TView.VerversSprite(AX, AY: Integer);
 var
   Cell: TCell;
-  Info: TContentsInfo;
-  SpriteName, FrameName: string;
+  Info: TInhoudInfo;
+  SpriteName, FrameNaam: string;
   Sprite: TSprite;
   Pos: TPos;
   I: Integer;
 begin
-  Cell := FWorld.GetCell(AX, AY);
+  Cell := FWereld.LeesCel(AX, AY);
   if (Cell <> nil) and (Cell.Hoofd = nil) then
   begin
-    for I := 0 to FViewSprites.Count - 1 do
+    for I := 0 to FZichtSprites.Count - 1 do
     begin
-      Pos := FViewSprites[I].Data as TPos;
+      Pos := FZichtSprites[I].Data as TPos;
       if (Pos <> nil) and (Pos.X = AX) and (Pos.Y = AY) then
       begin
-        FViewSprites[I].Kill;
-        FViewSprites.Delete(I);
+        FZichtSprites[I].Verwijder;
+        FZichtSprites.Delete(I);
         Break;
       end;
     end;
-    Info := ContentsInfoByContents(Cell.Contents);
-    if (Info.IsGround <> 1) or (Info.Name = 'Hoofdstation') or (Info.Name = 'Station') then
+    Info := InhoudInfoOpNaam(Cell.Inhoud);
+    if (Info.IsGrond <> 1) or (Info.Name = 'Hoofdstation') or (Info.Name = 'Station') then
     begin
       SpriteName := Info.Name;
       if SpriteName = '' then
         Fout('UpdateSprite: FrameName is empty');
-      Sprite := FSprites.SpriteByName(SpriteName);
+      Sprite := FSprites.SpriteOpNaam(SpriteName);
       if Sprite = nil then
         Fout('UpdateSprite: Sprite niet gevonden: ' + SpriteName)
       else
       begin
-        if Cell.Contents = 'Hoofdstation' then
-          FrameName := SpriteName + '_kap'
-        else if Cell.Contents = 'Station' then
-          FrameName := SpriteName + '_' + Cell.Param + '_kap'
+        if Cell.Inhoud = 'Hoofdstation' then
+          FrameNaam := SpriteName + '_kap'
+        else if Cell.Inhoud = 'Station' then
+          FrameNaam := SpriteName + '_' + Cell.Param + '_kap'
         else if Cell.Param <> '' then
-          FrameName := SpriteName + '_' + Cell.Param
+          FrameNaam := SpriteName + '_' + Cell.Param
         else
-          FrameName := SpriteName;
-        Sprite := TViewSprite.CreateCopy(Sprite);
-        if (Cell.Contents = 'Molen') or (Cell.Contents = 'Siemens2') then
+          FrameNaam := SpriteName;
+        Sprite := TViewSprite.MaakKopie(Sprite);
+        if (Cell.Inhoud = 'Molen') or (Cell.Inhoud = 'Siemens2') then
         begin
-          (Sprite as TViewSprite).FAnimated := True;
-          (Sprite as TViewSprite).FAnimFrame := 0;
-          (Sprite as TViewSprite).FAnimName := FrameName;
-          FrameName := FrameName + '_0';
+          (Sprite as TViewSprite).FGeanimeerd := True;
+          (Sprite as TViewSprite).FAnimatieFrame := 0;
+          (Sprite as TViewSprite).FAnimatieNaam := FrameNaam;
+          FrameNaam := FrameNaam + '_0';
         end;
-        if Sprite.FrameList.IndexOf(FrameName) = -1 then
-          Fout('PaintCell: could not find frame ' + FrameName + ' in sprite ' + SpriteName);
-        Sprite.CurrentFrame := FrameName;
-        PlaceSprite(Sprite, AX, AY);
+        if Sprite.FrameList.IndexOf(FrameNaam) = -1 then
+          Fout('PaintCell: could not find frame ' + FrameNaam + ' in sprite ' + SpriteName);
+        Sprite.CurrentFrame := FrameNaam;
+        PlaatsSprite(Sprite, AX, AY);
         Sprite.Data := TPos.Create(AX, AY);
-        (Sprite as TViewSprite).FPos := TPos.Create(AX - Info.GrondvlakX + 1,
+        (Sprite as TViewSprite).FPositie := TPos.Create(AX - Info.GrondvlakX + 1,
           AY - Info.GrondvlakY + 1);
-        FViewSprites.Add(Sprite);
+        FZichtSprites.Add(Sprite);
         Sprite.Visible := False;
       end;
     end;
@@ -565,15 +565,15 @@ begin
 end;
 
 { @00474E78 }
-function TView.GetLeft: Integer;
+function TView.LeesLinks: Integer;
 begin
-  Result := GetX;
+  Result := LeesX;
 end;
 
 { @00474E80 }
-function TView.GetTop: Integer;
+function TView.LeesBoven: Integer;
 begin
-  Result := GetY;
+  Result := LeesY;
 end;
 
 { @00474E88 }

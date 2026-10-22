@@ -6,59 +6,119 @@
     "00465748": "TTextBalloon.FontChanged",
     "00465750": "TTextBalloon.GetWidth",
     "00465758": "TTextBalloon.GetHeight",
-    "00465760": "TTextBalloon.SetBalloonText",
-    "004657c0": "TTextBalloon.UpdateLayout",
-    "00465c08": "TTextBalloon.SetBalloonLineWidth",
-    "00465c18": "TTextBalloon.SetRoundCorner",
-    "00465c28": "TTextBalloon.SetXOffset",
-    "00465c3c": "TTextBalloon.SetYOffset",
-    "00465c50": "TTextBalloon.SetSpriteBox",
-    "00465c84": "TTextBalloon.SetSideColor",
-    "00465c90": "TTextBalloon.SetBackGroundColor",
-    "00465c9c": "TTextBalloon.DrawBalloon",
+    "00465760": "TTextBalloon.ZetBallonTekst",
+    "004657c0": "TTextBalloon.VernieuwIndeling",
+    "00465c08": "TTextBalloon.ZetBallonLijnBreedte",
+    "00465c18": "TTextBalloon.ZetAfgerondeHoek",
+    "00465c28": "TTextBalloon.ZetXVerschuiving",
+    "00465c3c": "TTextBalloon.ZetYVerschuiving",
+    "00465c50": "TTextBalloon.ZetSpriteVak",
+    "00465c84": "TTextBalloon.ZetZijKleur",
+    "00465c90": "TTextBalloon.ZetAchtergrondKleur",
+    "00465c9c": "TTextBalloon.TekenBallon",
     "0046663c": "TTextBalloon.Draw",
-    "00466688": "TTextBalloon.LineRatio",
-    "00466a58": "TTextBalloon.FitText",
-    "00466bd4": "TTextBalloon.DrawDC.DrawLines",
-    "00466de8": "TTextBalloon.DrawDC",
-    "00466f1c": "TTextBalloon.SetX",
-    "00466f28": "TTextBalloon.SetY",
-    "00466f34": "TTextBalloon.SetZ",
-    "00466f60": "TTextBalloon.GetX",
-    "00466f68": "TTextBalloon.GetY",
+    "00466688": "TTextBalloon.RegelVerhouding",
+    "00466a58": "TTextBalloon.PastTekst",
+    "00466bd4": "TTextBalloon.TekenDC.DrawLines",
+    "00466de8": "TTextBalloon.TekenDC",
+    "00466f1c": "TTextBalloon.ZetX",
+    "00466f28": "TTextBalloon.ZetY",
+    "00466f34": "TTextBalloon.ZetZ",
+    "00466f60": "TTextBalloon.LeesX",
+    "00466f68": "TTextBalloon.LeesY",
     "00466f70": "uTextBalloon.Finalization",
     "00466fa0": "uTextBalloon.Initialization"
   },
   "globals": {
-    "00488d8c": "uTextBalloon.CornerOrderLeft",
-    "00488dac": "uTextBalloon.CornerOrderRight",
-    "00488dcc": "uTextBalloon.CornerOrderBottom",
-    "00488dec": "uTextBalloon.CornerOrderTop"
+    "00488d8c": "uTextBalloon.HoekVolgordeLinks",
+    "00488dac": "uTextBalloon.HoekVolgordeRechts",
+    "00488dcc": "uTextBalloon.HoekVolgordeOnder",
+    "00488dec": "uTextBalloon.HoekVolgordeBoven"
   },
   "fields": {
     "TTextBalloon": {
-      "0x68": ["FBalloonText", "string"],
-      "0x6c": ["FTipX", "Integer"],
-      "0x70": ["FTipY", "Integer"],
-      "0x74": ["FSpriteBox", "TSpriteBox"],
-      "0x78": ["FSideColor", "TColor"],
-      "0x7c": ["FBackGroundColor", "TColor"],
-      "0x80": ["FXOffset", "Integer"],
-      "0x84": ["FYOffset", "Integer"],
-      "0x88": ["FX", "Integer"],
-      "0x8c": ["FY", "Integer"],
-      "0x90": ["FBodyX", "Integer"],
-      "0x94": ["FBodyY", "Integer"],
-      "0x98": ["FExtentX", "Integer"],
-      "0x9c": ["FExtentY", "Integer"],
-      "0xa0": ["FBalloonLineWidth", "Integer"],
-      "0xa4": ["FFont", "TFont"],
-      "0xa8": ["FRoundCorner", "Boolean"]
+      "0x68": [
+        "FBallonTekst",
+        "string"
+      ],
+      "0x6c": [
+        "FPuntX",
+        "Integer"
+      ],
+      "0x70": [
+        "FPuntY",
+        "Integer"
+      ],
+      "0x74": [
+        "FSpriteVak",
+        "TSpriteBox"
+      ],
+      "0x78": [
+        "FZijKleur",
+        "TColor"
+      ],
+      "0x7c": [
+        "FAchtergrondKleur",
+        "TColor"
+      ],
+      "0x80": [
+        "FXVerschuiving",
+        "Integer"
+      ],
+      "0x84": [
+        "FYVerschuiving",
+        "Integer"
+      ],
+      "0x88": [
+        "FX",
+        "Integer"
+      ],
+      "0x8c": [
+        "FY",
+        "Integer"
+      ],
+      "0x90": [
+        "FRompX",
+        "Integer"
+      ],
+      "0x94": [
+        "FRompY",
+        "Integer"
+      ],
+      "0x98": [
+        "FOmvangX",
+        "Integer"
+      ],
+      "0x9c": [
+        "FOmvangY",
+        "Integer"
+      ],
+      "0xa0": [
+        "FBallonLijnBreedte",
+        "Integer"
+      ],
+      "0xa4": [
+        "FFont",
+        "TFont"
+      ],
+      "0xa8": [
+        "FAfgerondeHoek",
+        "Boolean"
+      ]
     }
   },
   "assumes": {
-    "TSpriteBox": ["AddPixie (0046E718)", "RemovePixie (0046E734)", "UpdateZOrder (0046E7D0)", "Canvas (public, FCanvas +0x1F0)"],
-    "uTool": ["IMin (00460B3C)"],
-    "uString": ["SplitFirst (0045FAF0)"]
+    "TSpriteBox": [
+      "AddPixie (0046E718)",
+      "RemovePixie (0046E734)",
+      "UpdateZOrder (0046E7D0)",
+      "Canvas (public, FCanvas +0x1F0)"
+    ],
+    "uTool": [
+      "IMin (00460B3C)"
+    ],
+    "uString": [
+      "SplitFirst (0045FAF0)"
+    ]
   }
 }

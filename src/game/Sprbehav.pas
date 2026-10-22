@@ -3,7 +3,7 @@ unit Sprbehav;
 { Spritegedragingen waarmee een sprite zich gedraagt als een standaardbesturing:
   een drukknop, selectievakje, keuzerondje, meerregelig memo of statische tekst,
   plus een gedrag dat de muiscursor wisselt zolang de muis boven een sprite staat.
-  TCtrlForm (Uctrl) gebruikt ControlToBehaviour om de besturingen op een formulier
+  TCtrlForm (Uctrl) gebruikt BesturingNaarGedrag om de besturingen op een formulier
   te vervangen door sprites met deze gedragingen.
   Gedecompileerd uit ROS.exe v1.1, code 0046FFC8-0047216C. }
 
@@ -22,78 +22,78 @@ type
     gaat die ook een TBehavCursor heeft). }
   TBehavCursor = class(TBehaviour)
   private
-    FOldCursor: TCursor;                    { +0x20 }
+    FOudeCursor: TCursor;                    { +0x20 }
     FCursor: TCursor;                       { +0x22 }
-    FInside: Boolean;                       { +0x24 }
+    FBinnen: Boolean;                       { +0x24 }
   public
     constructor Create(ACursor: TCursor);
     procedure MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer); override;
-    procedure MouseLeave(Sender: TObject); override;
+    procedure MuisVerlaten(Sender: TObject); override;
     property Cursor: TCursor read FCursor write FCursor;
-    property OldCursor: TCursor read FOldCursor;
-    property Inside: Boolean read FInside;
+    property OudeCursor: TCursor read FOudeCursor;
+    property Binnen: Boolean read FBinnen;
   end;
 
-  { Gemeenschappelijke basis: een sprite met StateCount toestanden die per toestand
+  { Gemeenschappelijke basis: een sprite met ToestandAantal toestanden die per toestand
     een van vier beelden toont (zweven, normaal, ingedrukt, ingedrukt met de muis
     erbuiten) en OnClick afvuurt wanneer de muis erover wordt losgelaten. Optionele
     sequenties (animaties) kunnen worden afgespeeld bij binnenkomst, verlaten,
     indrukken of loslaten van de muis, in plaats van een beeldwisseling. }
   TBehavControl = class(TBehaviour)
   private
-    FFrames: TStringList;                   { +0x20  4 beeldnamen per toestand }
+    FBeelden: TStringList;                   { +0x20  4 beeldnamen per toestand }
     FPressed: Boolean;                      { +0x24 }
-    FSeqHover: string;                      { +0x28  herhaald zolang de muis erboven is }
-    FSeqLeave: string;                      { +0x2C  een keer afgespeeld wanneer de muis weggaat }
-    FSeqEnter: string;                      { +0x30  een keer afgespeeld wanneer de muis binnenkomt }
-    FSeqDown: string;                       { +0x34  een keer afgespeeld bij muis omlaag }
-    FSeqUp: string;                         { +0x38  een keer afgespeeld bij muis omhoog }
-    FEnterPlayed: Boolean;                  { +0x3C  FSeqEnter is gestart }
+    FSeqZweef: string;                      { +0x28  herhaald zolang de muis erboven is }
+    FSeqVerlaat: string;                      { +0x2C  een keer afgespeeld wanneer de muis weggaat }
+    FSeqBinnen: string;                      { +0x30  een keer afgespeeld wanneer de muis binnenkomt }
+    FSeqIndruk: string;                       { +0x34  een keer afgespeeld bij muis omlaag }
+    FSeqLos: string;                         { +0x38  een keer afgespeeld bij muis omhoog }
+    FBinnenGespeeld: Boolean;                  { +0x3C  FSeqBinnen is gestart }
     FDown: Boolean;                         { +0x3D }
-    FHover: Boolean;                        { +0x3E }
+    FZweef: Boolean;                        { +0x3E }
     FState: Integer;                        { +0x40 }
-    FStateCount: Integer;                   { +0x44 }
+    FToestandAantal: Integer;                   { +0x44 }
     FOnClick: TNotifyEvent;                 { +0x48 }
     procedure SetDown(Value: Boolean);
-    procedure SetHover(Value: Boolean);
-    function GetFrameName: string;
-    procedure UpdateFrame;
+    procedure ZetZweef(Value: Boolean);
+    function LeesBeeldnaam: string;
+    procedure VernieuwBeeld;
   protected
     procedure SetState(Value: Integer); virtual;
   public
-    constructor Create(AStateCount: Integer; Frames: array of string);
-    procedure FinishSequence(Sender: TObject; var RepeatCount: Integer); override;
+    constructor Create(AStateCount: Integer; Beelden: array of string);
+    procedure ReeksKlaar(Sender: TObject; var Herhalingen: Integer); override;
     procedure MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); override;
     procedure MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); override;
     procedure MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer); override;
-    procedure MouseLeave(Sender: TObject); override;
+    procedure MuisVerlaten(Sender: TObject); override;
     procedure SetActive(Value: Boolean); override;
-    property Frames: TStringList read FFrames;
+    property Beelden: TStringList read FBeelden;
     property Pressed: Boolean read FPressed;
     property Down: Boolean read FDown;
-    property Hover: Boolean read FHover;
+    property Zweef: Boolean read FZweef;
     property State: Integer read FState write SetState;
-    property StateCount: Integer read FStateCount;
-    property SeqHover: string read FSeqHover write FSeqHover;
-    property SeqLeave: string read FSeqLeave write FSeqLeave;
-    property SeqEnter: string read FSeqEnter write FSeqEnter;
-    property SeqDown: string read FSeqDown write FSeqDown;
-    property SeqUp: string read FSeqUp write FSeqUp;
+    property ToestandAantal: Integer read FToestandAantal;
+    property SeqZweef: string read FSeqZweef write FSeqZweef;
+    property SeqVerlaat: string read FSeqVerlaat write FSeqVerlaat;
+    property SeqBinnen: string read FSeqBinnen write FSeqBinnen;
+    property SeqIndruk: string read FSeqIndruk write FSeqIndruk;
+    property SeqLos: string read FSeqLos write FSeqLos;
     property OnClick: TNotifyEvent read FOnClick write FOnClick;
   end;
 
   { Twee toestanden: niet aangevinkt (0) en aangevinkt (1). }
   TBehavCheckBox = class(TBehavControl)
   private
-    FReserved50: Integer;                   { +0x50  wordt nooit gebruikt }
-    FReserved54: Integer;                   { +0x54  wordt nooit gebruikt }
+    FGereserveerd50: Integer;                   { +0x50  wordt nooit gebruikt }
+    FGereserveerd54: Integer;                   { +0x54  wordt nooit gebruikt }
     procedure SetChecked(Value: Boolean);
     function GetChecked: Boolean;
   public
     constructor Create(AUnchecked, AChecked, AUncheckedDown, ACheckedDown: string);
-    procedure CheckBoxClick(Sender: TObject);
+    procedure VakjeKlik(Sender: TObject);
     property Checked: Boolean read GetChecked write SetChecked;
   end;
 
@@ -101,15 +101,15 @@ type
     spritebox uitvinkt, en dat niet door klikken kan worden uitgevinkt. }
   TBehavRadioButton = class(TBehavCheckBox)
   private
-    FGroup: string;                         { +0x58  naam van de oorspronkelijke bovenliggende besturing }
+    FGroep: string;                         { +0x58  naam van de oorspronkelijke bovenliggende besturing }
   protected
     procedure SetState(Value: Integer); override;
   public
     constructor Create(AUnchecked, AChecked, AUncheckedDown, ACheckedDown,
-      AGroup: string);
+      AGroep: string);
     procedure MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); override;
-    property Group: string read FGroup write FGroup;
+    property Groep: string read FGroep write FGroep;
   end;
 
   { Een toestand; beelden Up/Down en optioneel Over (muis erboven). }
@@ -124,21 +124,21 @@ type
   TBehavMemo = class(TBehavControl)
   private
     FMemo: TMemo;                           { +0x50 }
-    FReserved54: Integer;                   { +0x54  wordt nooit gebruikt }
-    FReserved58: Integer;                   { +0x58  wordt nooit gebruikt }
-    FScrollBar: TScrollBar;                 { +0x5C }
-    FOffset: TPoint;                        { +0x60 }
+    FGereserveerd54: Integer;                   { +0x54  wordt nooit gebruikt }
+    FGereserveerd58: Integer;                   { +0x58  wordt nooit gebruikt }
+    FSchuifbalk: TScrollBar;                 { +0x5C }
+    FVerschuiving: TPoint;                        { +0x60 }
   public
     constructor Create(AMemo: TMemo);
     destructor Destroy; override;
     procedure SetActive(Value: Boolean); override;
     procedure Move(Sender: TObject; var X, Y, Z: Integer); override;
-    procedure MemoChange(Sender: TObject);
-    procedure AfterBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
+    procedure MemoWijziging(Sender: TObject);
+    procedure NaBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
       Where: TRect; Size: Real); override;
     property Memo: TMemo read FMemo;
-    property ScrollBar: TScrollBar read FScrollBar;
-    property Offset: TPoint read FOffset write FOffset;
+    property ScrollBar: TScrollBar read FSchuifbalk;
+    property Verschuiving: TPoint read FVerschuiving write FVerschuiving;
   end;
 
   { Een tekst die door TBehavText wordt getekend. Align is 'l', 'r' of 'c'. }
@@ -160,24 +160,24 @@ type
   end;
 
   { Tekent een onderschrift op de sprite nadat deze is geblit. Onderschriften kunnen
-    per beeldnaam worden ingesteld (Captions); anders wordt het onderschrift Default getekend. }
+    per beeldnaam worden ingesteld (Onderschriften); anders wordt het onderschrift Default getekend. }
   TBehavText = class(TBehaviour)
   private
-    FCaptions: TStringList;                 { +0x20  beeldnaam -> TCaption, gesorteerd }
+    FOnderschriften: TStringList;                 { +0x20  beeldnaam -> TCaption, gesorteerd }
     FDefault: TCaption;                     { +0x24 }
   public
     constructor Create(AFontName: string; ASize: Integer; AColor: TColor);
     destructor Destroy; override;
-    procedure SetCaption(Beeldnaam, Tekst: string);
-    procedure AfterBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
+    procedure ZetOnderschrift(Beeldnaam, Tekst: string);
+    procedure NaBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
       Where: TRect; Size: Real); override;
-    property Captions: TStringList read FCaptions;
-    property DefaultCaption: TCaption read FDefault;
+    property Onderschriften: TStringList read FOnderschriften;
+    property StandaardOnderschrift: TCaption read FDefault;
   end;
 
-function AddTextBehaviour(Sprite: TSprite; Tekst: string; X, Y: Integer;
+function VoegTekstGedragToe(Sprite: TSprite; Tekst: string; X, Y: Integer;
   Lettertype: TFont): TCaption;
-procedure ControlToBehaviour(Sprite: TSprite; Control: TControl);
+procedure BesturingNaarGedrag(Sprite: TSprite; Control: TControl);
 
 implementation
 
@@ -187,19 +187,19 @@ uses
 { ---------------------------------------------------------------- TBehavControl }
 
 { @0047048C }
-constructor TBehavControl.Create(AStateCount: Integer; Frames: array of string);
+constructor TBehavControl.Create(AStateCount: Integer; Beelden: array of string);
 var
   I: Integer;
 begin
   inherited Create;
   FOnClick := OnClick;   { LET OP: wijst de gebeurtenis aan zichzelf toe (geen effect in het origineel) }
-  FStateCount := AStateCount;
-  FFrames := TStringList.Create;
-  for I := 0 to High(Frames) do
-    FFrames.Add(Frames[I]);
+  FToestandAantal := AStateCount;
+  FBeelden := TStringList.Create;
+  for I := 0 to High(Beelden) do
+    FBeelden.Add(Beelden[I]);
   FPressed := False;
   FDown := False;
-  FHover := False;
+  FZweef := False;
   FState := 0;
 end;
 
@@ -207,15 +207,15 @@ end;
 procedure TBehavControl.MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
   if not PtInRect(Rect(0, 0, Sprite.Width, Sprite.Height), Point(X, Y)) then
-    SetHover(False)
+    ZetZweef(False)
   else
-    SetHover(True);
+    ZetZweef(True);
 end;
 
 { @004705F4 }
-procedure TBehavControl.MouseLeave(Sender: TObject);
+procedure TBehavControl.MuisVerlaten(Sender: TObject);
 begin
-  SetHover(False);
+  ZetZweef(False);
 end;
 
 { @004705FC }
@@ -236,12 +236,12 @@ begin
   Sprite.SetMouseCapture(False);
   if PtInRect(Rect(0, 0, Sprite.Width, Sprite.Height), Point(X, Y)) then
   begin
-    SetState((FState + 1) mod FStateCount);
+    SetState((FState + 1) mod FToestandAantal);
     if Assigned(FOnClick) then
       FOnClick(Self);
   end
   else
-    SetHover(False);
+    ZetZweef(False);
 end;
 
 { @004706B4 }
@@ -249,7 +249,7 @@ procedure TBehavControl.SetActive(Value: Boolean);
 begin
   inherited SetActive(Value);
   if Value then
-    UpdateFrame;
+    VernieuwBeeld;
 end;
 
 { @004706D4 }
@@ -258,47 +258,47 @@ begin
   if Value <> FDown then
   begin
     FDown := Value;
-    Sprite.StopSequence;
-    if FDown and (FSeqDown <> '') then
-      Sprite.PlaySequence(FSeqDown, 1)
-    else if not FDown and (FSeqUp <> '') then
-      Sprite.PlaySequence(FSeqUp, 1)
+    Sprite.StopReeks;
+    if FDown and (FSeqIndruk <> '') then
+      Sprite.SpeelReeks(FSeqIndruk, 1)
+    else if not FDown and (FSeqLos <> '') then
+      Sprite.SpeelReeks(FSeqLos, 1)
     else
-      UpdateFrame;
+      VernieuwBeeld;
   end;
 end;
 
 { @0047072C }
-procedure TBehavControl.SetHover(Value: Boolean);
+procedure TBehavControl.ZetZweef(Value: Boolean);
 begin
-  if Value <> FHover then
+  if Value <> FZweef then
   begin
-    FHover := Value;
-    Sprite.StopSequence;
-    if FHover and (FSeqHover + FSeqEnter <> '') then
+    FZweef := Value;
+    Sprite.StopReeks;
+    if FZweef and (FSeqZweef + FSeqBinnen <> '') then
     begin
-      if FSeqEnter <> '' then
+      if FSeqBinnen <> '' then
       begin
-        Sprite.PlaySequence(FSeqEnter, 1);
-        FEnterPlayed := True;
+        Sprite.SpeelReeks(FSeqBinnen, 1);
+        FBinnenGespeeld := True;
       end
       else
-        Sprite.PlaySequence(FSeqHover, -1);
+        Sprite.SpeelReeks(FSeqZweef, -1);
     end
-    else if not FHover and (FSeqLeave <> '') then
-      Sprite.PlaySequence(FSeqLeave, 1)
+    else if not FZweef and (FSeqVerlaat <> '') then
+      Sprite.SpeelReeks(FSeqVerlaat, 1)
     else
-      UpdateFrame;
+      VernieuwBeeld;
   end;
 end;
 
 { @004707E0 }
-procedure TBehavControl.FinishSequence(Sender: TObject; var RepeatCount: Integer);
+procedure TBehavControl.ReeksKlaar(Sender: TObject; var Herhalingen: Integer);
 begin
-  { LET OP: FEnterPlayed wordt nooit teruggezet }
-  if FEnterPlayed then
-    if (Sprite.CurSequence.Name = FSeqEnter) and (FSeqHover <> '') then
-      Sprite.PlaySequence(FSeqHover, -1);
+  { LET OP: FBinnenGespeeld wordt nooit teruggezet }
+  if FBinnenGespeeld then
+    if (Sprite.HuidigeReeks.Name = FSeqBinnen) and (FSeqZweef <> '') then
+      Sprite.SpeelReeks(FSeqZweef, -1);
 end;
 
 { @00470850 }
@@ -307,32 +307,32 @@ begin
   if Value <> FState then
   begin
     FState := Value;
-    UpdateFrame;
+    VernieuwBeeld;
   end;
 end;
 
 { @00470860 }
-function TBehavControl.GetFrameName: string;
+function TBehavControl.LeesBeeldnaam: string;
 var
   Nr: Integer;
 begin
   Nr := FState * 4;
   if FDown then
   begin
-    if FHover then
+    if FZweef then
       Inc(Nr, 2)
     else
       Inc(Nr, 3);
   end
-  else if not FHover then
+  else if not FZweef then
     Inc(Nr);
-  Result := FFrames[Nr];
+  Result := FBeelden[Nr];
 end;
 
 { @0047089C }
-procedure TBehavControl.UpdateFrame;
+procedure TBehavControl.VernieuwBeeld;
 begin
-  Sprite.CurrentFrame := GetFrameName;
+  Sprite.CurrentFrame := LeesBeeldnaam;
   Sprite.Redraw;
 end;
 
@@ -347,7 +347,7 @@ begin
 end;
 
 { @004709F4 }
-procedure TBehavCheckBox.CheckBoxClick(Sender: TObject);
+procedure TBehavCheckBox.VakjeKlik(Sender: TObject);
 begin
   SetChecked((Sender as TCheckBox).Checked);
 end;
@@ -371,10 +371,10 @@ end;
 
 { @00470A3C }
 constructor TBehavRadioButton.Create(AUnchecked, AChecked, AUncheckedDown,
-  ACheckedDown, AGroup: string);
+  ACheckedDown, AGroep: string);
 begin
   inherited Create(AUnchecked, AChecked, AUncheckedDown, ACheckedDown);
-  FGroup := AGroup;
+  FGroep := AGroep;
 end;
 
 { @00470AF8 }
@@ -400,11 +400,11 @@ begin
   inherited SetState(Value);
   if GetChecked then
   begin
-    { LET OP: FGroup wordt niet gebruikt; elk keuzerondje in de spritebox wordt uitgeschakeld }
+    { LET OP: FGroep wordt niet gebruikt; elk keuzerondje in de spritebox wordt uitgeschakeld }
     Vak := Sprite.SpriteBox;
     for I := 0 to Vak.Count - 1 do
     begin
-      Gedragingen := (Vak.Items[I] as TSprite).Behaviours;
+      Gedragingen := (Vak.Items[I] as TSprite).Gedragslijst;
       for J := 0 to Gedragingen.Count - 1 do
       begin
         B := Gedragingen.Items[J];
@@ -422,25 +422,25 @@ constructor TBehavCursor.Create(ACursor: TCursor);
 begin
   inherited Create;
   FCursor := ACursor;
-  FInside := False;
+  FBinnen := False;
 end;
 
 { @00470C4C }
 procedure TBehavCursor.MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
-  if Active and not FInside then
+  if Active and not FBinnen then
   begin
-    FInside := True;
+    FBinnen := True;
     if Sprite.SpriteBox <> nil then
-      FOldCursor := Sprite.SpriteBox.Cursor
+      FOudeCursor := Sprite.SpriteBox.Cursor
     else
-      FOldCursor := Screen.Cursor;
+      FOudeCursor := Screen.Cursor;
     Screen.Cursor := FCursor;
   end;
 end;
 
 { @00470C9C }
-procedure TBehavCursor.MouseLeave(Sender: TObject);
+procedure TBehavCursor.MuisVerlaten(Sender: TObject);
 var
   AnderBinnen: Boolean;
   Vak: TSpriteBox;
@@ -450,23 +450,23 @@ var
 begin
   if Active then
   begin
-    FInside := False;
+    FBinnen := False;
     AnderBinnen := False;
     Vak := Sprite.SpriteBox;
     for I := 0 to Vak.Count - 1 do
       if Vak.Items[I] is TSprite then
       begin
-        Gedragingen := (Vak.Items[I] as TSprite).Behaviours;
+        Gedragingen := (Vak.Items[I] as TSprite).Gedragslijst;
         for J := 0 to Gedragingen.Count - 1 do
         begin
           B := Gedragingen.Items[J];
           if (B is TBehavCursor) and (B <> Self) then
-            if (B as TBehavCursor).FInside then
+            if (B as TBehavCursor).FBinnen then
               AnderBinnen := True;
         end;
       end;
     if not AnderBinnen then
-      Screen.Cursor := FOldCursor;
+      Screen.Cursor := FOudeCursor;
   end;
 end;
 
@@ -515,34 +515,34 @@ constructor TBehavText.Create(AFontName: string; ASize: Integer; AColor: TColor)
 begin
   inherited Create;
   FDefault := TCaption.Create('', AFontName, ASize, AColor, 0, 0, 'l');
-  FCaptions := TStringList.Create;
-  FCaptions.Sorted := True;
+  FOnderschriften := TStringList.Create;
+  FOnderschriften.Sorted := True;
 end;
 
 { @004710C4 }
 destructor TBehavText.Destroy;
 begin
-  { LET OP: de TCaption-objecten in FCaptions (en hun lettertypen) worden niet vrijgegeven }
-  FCaptions.Free;
+  { LET OP: de TCaption-objecten in FOnderschriften (en hun lettertypen) worden niet vrijgegeven }
+  FOnderschriften.Free;
   FDefault.Free;
   inherited Destroy;
 end;
 
 { @004710FC }
-procedure TBehavText.SetCaption(Beeldnaam, Tekst: string);
+procedure TBehavText.ZetOnderschrift(Beeldnaam, Tekst: string);
 var
   Nr: Integer;
 begin
-  if FCaptions.Find(Beeldnaam, Nr) then
-    (FCaptions.Objects[Nr] as TCaption).FText := Tekst
+  if FOnderschriften.Find(Beeldnaam, Nr) then
+    (FOnderschriften.Objects[Nr] as TCaption).FText := Tekst
   else
-    FCaptions.AddObject(Beeldnaam, TCaption.Create(Tekst, FDefault.FFont.Name,
+    FOnderschriften.AddObject(Beeldnaam, TCaption.Create(Tekst, FDefault.FFont.Name,
       FDefault.FFont.Size, FDefault.FFont.Color, FDefault.FLeft, FDefault.FTop,
       FDefault.FAlign));
 end;
 
 { @004711E0 }
-procedure TBehavText.AfterBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
+procedure TBehavText.NaBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
   Where: TRect; Size: Real);
 var
   Spr: TSprite;
@@ -552,9 +552,9 @@ var
   Cap: TCaption;
 begin
   Spr := Sender as TSprite;
-  Nr := FCaptions.IndexOf(Spr.CurrentFrame);
+  Nr := FOnderschriften.IndexOf(Spr.CurrentFrame);
   if Nr > -1 then
-    Cap := FCaptions.Objects[Nr] as TCaption
+    Cap := FOnderschriften.Objects[Nr] as TCaption
   else
     Cap := FDefault;
   if Cap.FText <> '' then
@@ -578,19 +578,19 @@ end;
 constructor TBehavMemo.Create(AMemo: TMemo);
 begin
   inherited Create(1, ['', '', '', '']);
-  FOffset := Point(0, 0);
+  FVerschuiving := Point(0, 0);
   FMemo := AMemo;
-  FMemo.OnChange := MemoChange;
+  FMemo.OnChange := MemoWijziging;
 end;
 
 { @004713E4 }
 destructor TBehavMemo.Destroy;
 begin
-  if FScrollBar <> nil then
+  if FSchuifbalk <> nil then
   begin
-    FScrollBar.Visible := False;
-    FScrollBar.Free;
-    FScrollBar := nil;
+    FSchuifbalk.Visible := False;
+    FSchuifbalk.Free;
+    FSchuifbalk := nil;
   end;
   FMemo.OnChange := nil;
   inherited Destroy;
@@ -601,18 +601,18 @@ procedure TBehavMemo.SetActive(Value: Boolean);
 begin
   if Value then
   begin
-    FScrollBar := TScrollBar.Create(Sprite.SpriteBox);
-    FScrollBar.Left := Screen.Width + 1;
-    FScrollBar.Top := Screen.Height + 1;
-    FScrollBar.Parent := Sprite.SpriteBox;
-    FScrollBar.Kind := sbVertical;
-    FScrollBar.OnChange := MemoChange;
-    FScrollBar.Visible := False;
+    FSchuifbalk := TScrollBar.Create(Sprite.SpriteBox);
+    FSchuifbalk.Left := Screen.Width + 1;
+    FSchuifbalk.Top := Screen.Height + 1;
+    FSchuifbalk.Parent := Sprite.SpriteBox;
+    FSchuifbalk.Kind := sbVertical;
+    FSchuifbalk.OnChange := MemoWijziging;
+    FSchuifbalk.Visible := False;
   end
   else
   begin
-    FScrollBar.Free;
-    FScrollBar := nil;
+    FSchuifbalk.Free;
+    FSchuifbalk := nil;
   end;
   inherited SetActive(Value);
 end;
@@ -621,20 +621,20 @@ end;
 procedure TBehavMemo.Move(Sender: TObject; var X, Y, Z: Integer);
 begin
   if not Sprite.Showing then
-    FScrollBar.Visible := False;
-  FScrollBar.BoundsRect := Bounds(X - Sprite.HotSpotX + Sprite.Width,
-    Y - Sprite.HotSpotY, FScrollBar.Width, Sprite.Height);
+    FSchuifbalk.Visible := False;
+  FSchuifbalk.BoundsRect := Bounds(X - Sprite.HotSpotX + Sprite.Width,
+    Y - Sprite.HotSpotY, FSchuifbalk.Width, Sprite.Height);
 end;
 
 { @00471554 }
-procedure TBehavMemo.MemoChange(Sender: TObject);
+procedure TBehavMemo.MemoWijziging(Sender: TObject);
 begin
   with Sprite do
     SpriteBox.InvalidateRect(BoundsRect);
 end;
 
 { @004715E8 }
-procedure TBehavMemo.AfterBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
+procedure TBehavMemo.NaBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
   Where: TRect; Size: Real);
 var
   HuidigeX, I, EersteRegel, RegelHoogte, MaxPositie, GroteStap, ZichtbareRegels: Integer;
@@ -667,8 +667,8 @@ begin
 
   if FMemo.Lines.Count * RegelHoogte > Sprite.Height then
   begin
-    FScrollBar.Visible := True;
-    with FScrollBar do
+    FSchuifbalk.Visible := True;
+    with FSchuifbalk do
     begin
       MaxPositie := ((FMemo.Lines.Count + 1) * RegelHoogte - Sprite.Height - 1) div RegelHoogte;
       Min := 0;
@@ -685,7 +685,7 @@ begin
   end
   else
   begin
-    FScrollBar.Visible := False;
+    FSchuifbalk.Visible := False;
     EersteRegel := 0;
     ZichtbareRegels := FMemo.Lines.Count;
   end;
@@ -697,7 +697,7 @@ begin
   begin
     { werk de vetstatus bij voor de regels die buiten beeld zijn gescrold }
     for I := 0 to EersteRegel - 1 do
-      if Odd(CountChar(FMemo.Lines[I], '^')) then
+      if Odd(TelTeken(FMemo.Lines[I], '^')) then
         VetWisselen;
     for I := 0 to ZichtbareRegels - 1 do
     begin
@@ -707,7 +707,7 @@ begin
       begin
         if Pos('^', Regel) > 0 then
         begin
-          Deel := SplitFirst(Regel, '^');
+          Deel := SplitsEerste(Regel, '^');
           Wissel := True;
         end
         else
@@ -716,8 +716,8 @@ begin
           Regel := '';
           Wissel := False;
         end;
-        Surface.TextOut(FOffset.X + Where.Left + X + HuidigeX,
-          FOffset.Y + Where.Top + Y + I * RegelHoogte, FMemo.Font, Deel);
+        Surface.TextOut(FVerschuiving.X + Where.Left + X + HuidigeX,
+          FVerschuiving.Y + Where.Top + Y + I * RegelHoogte, FMemo.Font, Deel);
         DC := GetDC(FMemo.Handle);
         OudLettertype := SelectObject(DC, FMemo.Font.Handle);
         Deel := Deel + #0;
@@ -737,13 +737,13 @@ end;
 { ------------------------------------------------------------------- routines }
 
 { @00471A1C  Geeft de sprite een TBehavText die Tekst op (X, Y) in Lettertype tekent. }
-function AddTextBehaviour(Sprite: TSprite; Tekst: string; X, Y: Integer;
+function VoegTekstGedragToe(Sprite: TSprite; Tekst: string; X, Y: Integer;
   Lettertype: TFont): TCaption;
 var
   Gedrag: TBehavText;
 begin
   Gedrag := TBehavText.Create(Lettertype.Name, Lettertype.Size, Lettertype.Color);
-  Sprite.AddBehaviour('CONTROL_BEHAV', Gedrag);
+  Sprite.VoegGedragToe('CONTROL_BEHAV', Gedrag);
   Gedrag.SetActive(True);
   Result := Gedrag.FDefault;
   Result.FLeft := X;
@@ -756,7 +756,7 @@ end;
   van de sprite worden gevonden op hun naamachtervoegsel: _UP/_DN/_OR voor een
   knop, _EM/_FL/_EG/_FG (leeg/vol, gedrukt = ingedrukt) voor selectievakjes en
   keuzerondjes. }
-procedure ControlToBehaviour(Sprite: TSprite; Control: TControl);
+procedure BesturingNaarGedrag(Sprite: TSprite; Control: TControl);
 var
   Gedrag: TBehavControl;
 
@@ -766,7 +766,7 @@ var
     I: Integer;
   begin
     for I := 0 to Sprite.FrameList.Count - 1 do
-      if EndsWith(UpStr(Sprite.FrameList[I].Name), UpStr(Achtervoegsel)) then
+      if EindigtMet(HoofdStr(Sprite.FrameList[I].Name), HoofdStr(Achtervoegsel)) then
       begin
         Result := Sprite.FrameList[I].Name;
         Exit;
@@ -775,7 +775,7 @@ var
   end;
 
   { @00471BBC  LET OP: gebruikt de omsluitende routine niet (wordt aangeroepen zonder
-    statische link), maar staat in het binaire bestand tussen FindFrame en ControlToBehaviour. }
+    statische link), maar staat in het binaire bestand tussen FindFrame en BesturingNaarGedrag. }
   procedure AddCaption(Sprite: TSprite; Uitlijning: TLeftRight; Opschrift: string;
     Lettertype: TFont);
   var
@@ -798,18 +798,18 @@ var
       Cap.FAlign := 'l';
       Cap.FLeft := Sprite.Width + 2;
       Cap.FTop := 0;
-      Sprite.SetMarginRight(Bmp.Canvas.TextWidth(Opschrift) + 2);
+      Sprite.ZetMargeRechts(Bmp.Canvas.TextWidth(Opschrift) + 2);
     end
     else
     begin
       Cap.FAlign := 'r';
       Cap.FLeft := Sprite.Width + 2;
       Cap.FTop := 0;
-      Sprite.SetMarginLeft(Bmp.Canvas.TextWidth(Opschrift) + 2);
+      Sprite.ZetMargeLinks(Bmp.Canvas.TextWidth(Opschrift) + 2);
     end;
     Bmp.Free;
-    Sprite.AddBehaviour('CAPTION', Gedrag);
-    Sprite.GetBehaviour('CAPTION').SetActive(True);
+    Sprite.VoegGedragToe('CAPTION', Gedrag);
+    Sprite.LeesGedrag('CAPTION').SetActive(True);
   end;
 
 begin
@@ -823,7 +823,7 @@ begin
     Gedrag := TBehavCheckBox.Create(FindFrame('_EM'), FindFrame('_FL'),
       FindFrame('_EG'), FindFrame('_FG'));
     Gedrag.OnClick := (Control as TCheckBox).OnClick;
-    (Control as TCheckBox).OnClick := (Gedrag as TBehavCheckBox).CheckBoxClick;
+    (Control as TCheckBox).OnClick := (Gedrag as TBehavCheckBox).VakjeKlik;
     AddCaption(Sprite, (Control as TCheckBox).Alignment,
       (Control as TCheckBox).Caption, (Control as TCheckBox).Font);
   end
@@ -831,8 +831,8 @@ begin
   begin
     Gedrag := TBehavMemo.Create(Control as TMemo);
     Sprite.FrameIndex := -1;
-    Sprite.SetMarginRight(Control.Width - Sprite.Width);
-    Sprite.SetMarginBottom(Control.Height - Sprite.Height);
+    Sprite.ZetMargeRechts(Control.Width - Sprite.Width);
+    Sprite.ZetMargeOnder(Control.Height - Sprite.Height);
   end
   else if Control is TRadioButton then
   begin
@@ -846,8 +846,8 @@ begin
   Sprite.Left := Control.Left;
   Sprite.Top := Control.Top;
   Sprite.Visible := Control.Visible;
-  Sprite.AddBehaviour('CONTROL_BEHAV', Gedrag);
-  Sprite.GetBehaviour('CONTROL_BEHAV').SetActive(True);
+  Sprite.VoegGedragToe('CONTROL_BEHAV', Gedrag);
+  Sprite.LeesGedrag('CONTROL_BEHAV').SetActive(True);
 end;
 
 end.

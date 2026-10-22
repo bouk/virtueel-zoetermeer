@@ -33,6 +33,25 @@ function ZMExeName: string;          { what ParamStr(0)/Application.ExeName repo
   FindFirst. It lives in $XDG_CACHE_HOME/zoetermeer (override: ZM_SHADOW). }
 function ZMShadowDir: string;
 function ZMResolvePath(const Path: string): string;
+
+{ Schrijfbare overlay. Het spel schrijft nooit in de datamap (die kan een alleen-lezen
+  Nix-store-pad zijn). Bestanden die het spel aanmaakt of wijzigt (de highscore in
+  ZoetermeerLevels.Ini, bewaarde steden) komen in een map per gebruiker:
+    ZM_SAVE, anders $XDG_DATA_HOME/zoetermeer (standaard ~/.local/share/zoetermeer),
+    op macOS ~/Library/Application Support/Virtueel Zoetermeer.
+  Bij het lezen wint de kopie in de overlay van het origineel: de schaduwmap verwijst
+  naar de overlaykopie zodra die bestaat.
+  ZMSaveDir geeft de map met afsluitend scheidingsteken ('' als er geen overlay is,
+  zoals in de webversie, die zelf voor opslag zorgt).
+  ZMWritePath geeft voor een pad dat het spel wil schrijven het pad dat echt
+  beschreven moet worden: voor bestanden uit de datamap (of de schaduwmap) is dat de
+  overlaykopie. Een bestaand origineel wordt eerst gekopieerd (copy-on-write), zodat
+  bewerkingen ter plekke (WritePrivateProfileString) op de echte inhoud werken. Paden
+  buiten de datamap blijven ongewijzigd. }
+function ZMSaveDir: string;
+function ZMWritePath(const Path: string): string;
+{ True als Path in de datamap of de schaduwmap ligt (dan schrijft ZMWritePath elders) }
+function ZMInDataDir(const Path: string): Boolean;
 function ZMFileExists(const Path: string): Boolean;
 
 { PE resources of the original ROS.exe }
@@ -91,7 +110,17 @@ begin
   end;
 end;
 
+function ResolveRaw(const Path: string): string; forward;
+
+function OverlayCopy(const Path: string): string; forward;
+
 function ZMResolvePath(const Path: string): string;
+begin
+  Result := ResolveRaw(Path);
+  Result := OverlayCopy(Result);
+end;
+
+function ResolveRaw(const Path: string): string;
 var
   P, Part, Cur, Found: string;
   I, Start: Integer;
@@ -247,11 +276,12 @@ begin
   Result := FpLStat(PChar(P), Info) = 0;
 end;
 
-procedure LinkVariants(const Target, LinkDir, Prefix, Name: string);
+procedure LinkVariants(const Target, LinkDir, Prefix, Name: string; Force: Boolean = False);
 var
   Variants: array[0..3] of string;
   I: Integer;
   L: string;
+  Info: Stat;
 begin
   Variants[0] := Name;
   Variants[1] := LowerCase(Name);
@@ -260,6 +290,9 @@ begin
   for I := 0 to High(Variants) do
   begin
     L := LinkDir + '/' + Prefix + Variants[I];
+    { Force: een bestaande link vervangen (overlaykopie in plaats van origineel) }
+    if Force and (FpLStat(PChar(L), Info) = 0) and fpS_ISLNK(Info.st_mode) then
+      FpUnlink(PChar(L));
     if not Exists(L) then FpSymlink(PChar(Target), PChar(L));
   end;
 end;
@@ -303,6 +336,246 @@ begin
 end;
 {$ENDIF}
 
+{ ---------------------------------------------------------------- overlay }
+
+var
+  GSave: string = '';
+  GSaveKnown: Boolean = False;
+
+function ZMSaveDir: string;
+var
+  D: string;
+begin
+  if GSaveKnown then Exit(GSave);
+  GSaveKnown := True;
+  GSave := '';
+{$IFDEF UNIX}
+  D := GetEnvironmentVariable('ZM_SAVE');
+  if D = '' then
+  begin
+{$IFDEF DARWIN}
+    D := IncludeTrailingPathDelimiter(GetEnvironmentVariable('HOME')) +
+      'Library/Application Support/Virtueel Zoetermeer';
+{$ELSE}
+    D := GetEnvironmentVariable('XDG_DATA_HOME');
+    if D = '' then D := IncludeTrailingPathDelimiter(GetEnvironmentVariable('HOME')) + '.local/share';
+    D := IncludeTrailingPathDelimiter(D) + 'zoetermeer';
+{$ENDIF}
+  end;
+  D := ExpandFileName(D);
+  if ForceDirectories(D) then GSave := IncludeTrailingPathDelimiter(D);
+{$ENDIF}
+  Result := GSave;
+end;
+
+function StartsWith(const S, Prefix: string): Boolean;
+begin
+  Result := (Prefix <> '') and (Copy(S, 1, Length(Prefix)) = Prefix);
+end;
+
+{ Het pad van Path relatief aan de datamap, met '/' als scheidingsteken; '' als Path
+  niet in de datamap of de schaduwmap ligt. In de schaduwmap zijn backslashes gewone
+  tekens in de naam: '<schaduw>/\images\8bits\x.bmp' wordt 'images/8bits/x.bmp'. }
+function DataRelative(const Path: string): string;
+var
+  I: Integer;
+  Full: string;
+begin
+  Result := '';
+  Full := ExpandFileName(Path);
+  if StartsWith(Full, ZMShadowDir) then
+    Result := Copy(Full, Length(ZMShadowDir) + 1, MaxInt)
+  else if StartsWith(Full, ZMDataDir) then
+    Result := Copy(Full, Length(ZMDataDir) + 1, MaxInt)
+  else
+    Exit;
+  for I := 1 to Length(Result) do
+    if Result[I] = '\' then Result[I] := '/';
+  while (Result <> '') and (Result[1] = '/') do Delete(Result, 1, 1);
+end;
+
+{ Laat de schaduwnamen van het databestand Rel naar Target wijzen. }
+procedure LinkShadow(const Rel, Target: string);
+{$IFDEF UNIX}
+var
+  Root, WinRel: string;
+  I: Integer;
+  Info: Stat;
+begin
+  Root := ExcludeTrailingPathDelimiter(ZMShadowDir);
+  if Pos('/', Rel) = 0 then
+  begin
+    LinkVariants(Target, Root, '\', Rel, True);
+    LinkVariants(Target, Root, '', Rel, True);
+  end
+  else
+  begin
+    WinRel := '\' + Rel;
+    for I := 1 to Length(WinRel) do
+      if WinRel[I] = '/' then WinRel[I] := '\';
+    if (FpLStat(PChar(Root + '/' + WinRel), Info) = 0) and fpS_ISLNK(Info.st_mode) then
+      FpUnlink(PChar(Root + '/' + WinRel));
+    if not Exists(Root + '/' + WinRel) then
+      FpSymlink(PChar(Target), PChar(Root + '/' + WinRel));
+  end;
+end;
+{$ELSE}
+begin
+end;
+{$ENDIF}
+
+{$IFDEF UNIX}
+{ Alle bestanden in de overlay krijgen schaduwnamen (lezen gaat voor op het origineel). }
+procedure OverlayTree(const Dir, Rel: string);
+var
+  Names: TStringList;
+  IsDir: TList;
+  I: Integer;
+begin
+  ListDir(Dir, Names, IsDir);
+  try
+    for I := 0 to Names.Count - 1 do
+      if IsDir[I] <> nil then
+        OverlayTree(Dir + '/' + Names[I], Rel + Names[I] + '/')
+      else
+        LinkShadow(Rel + Names[I], Dir + '/' + Names[I]);
+  finally
+    Names.Free;
+    IsDir.Free;
+  end;
+end;
+{$ENDIF}
+
+{ Voor een bestaand pad in de datamap: de overlaykopie als die er is. }
+function OverlayCopy(const Path: string): string;
+var
+  Rel, Ov: string;
+begin
+  Result := Path;
+  if (ZMSaveDir = '') or not StartsWith(Path, ZMDataDir) then Exit;
+  Rel := Copy(Path, Length(ZMDataDir) + 1, MaxInt);
+  Ov := ResolveRaw(ZMSaveDir + Rel);
+  if FileExists(Ov) then Result := Ov;
+end;
+
+function CopyFileContents(const Src, Dst: string): Boolean;
+var
+  A, B: TFileStream;
+begin
+  Result := False;
+  try
+    A := TFileStream.Create(Src, fmOpenRead or fmShareDenyNone);
+    try
+      B := TFileStream.Create(Dst, fmCreate);
+      try
+        if A.Size > 0 then B.CopyFrom(A, A.Size);
+        Result := True;
+      finally
+        B.Free;
+      end;
+    finally
+      A.Free;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
+function ZMInDataDir(const Path: string): Boolean;
+begin
+  Result := DataRelative(Path) <> '';
+end;
+
+function ZMWritePath(const Path: string): string;
+var
+  Rel, Src, Dst: string;
+begin
+  Result := Path;
+  if ZMSaveDir = '' then Exit;
+  if StartsWith(ExpandFileName(Path), ZMSaveDir) then Exit;
+  Rel := DataRelative(Path);
+  if Rel = '' then Exit;
+  { de schrijfwijze van het origineel aanhouden (ZoetermeerLevels.Ini, niet .ini) }
+  Src := ResolveRaw(ZMDataDir + Rel);
+  if FileExists(Src) and StartsWith(Src, ZMDataDir) then
+    Rel := Copy(Src, Length(ZMDataDir) + 1, MaxInt)
+  else
+    Src := '';
+  Dst := ResolveRaw(ZMSaveDir + Rel);
+  if not FileExists(Dst) then
+  begin
+    ForceDirectories(ExtractFileDir(Dst));
+    if Src <> '' then CopyFileContents(Src, Dst);
+  end;
+  LinkShadow(Rel, Dst);
+  Result := Dst;
+end;
+
+{$IFDEF UNIX}
+var
+  GShadowOwned: Boolean = False;
+
+{ Verwijdert een schaduwmap: symlinks en (lege of door het spel gevulde) gewone
+  bestanden; symlinks naar mappen worden nooit gevolgd. }
+procedure RemoveTree(const Dir: string);
+var
+  Names: TStringList;
+  IsDir: TList;
+  I: Integer;
+  P: string;
+  Info: Stat;
+begin
+  if not ListDir(Dir, Names, IsDir) then
+  begin
+    Names.Free;
+    IsDir.Free;
+    Exit;
+  end;
+  try
+    for I := 0 to Names.Count - 1 do
+    begin
+      P := Dir + '/' + Names[I];
+      if (FpLStat(PChar(P), Info) = 0) and fpS_ISDIR(Info.st_mode) then
+        RemoveTree(P)
+      else
+        FpUnlink(PChar(P));
+    end;
+  finally
+    Names.Free;
+    IsDir.Free;
+  end;
+  FpRmdir(PChar(Dir));
+end;
+
+{ Ruimt in Root de schaduwmappen op van processen die niet meer bestaan, en de
+  losse symlinks van oudere versies (die één gedeelde map gebruikten). }
+procedure CleanStale(const Root: string);
+var
+  Names: TStringList;
+  IsDir: TList;
+  I, Pid: Integer;
+  P: string;
+  Info: Stat;
+begin
+  ListDir(Root, Names, IsDir);
+  try
+    for I := 0 to Names.Count - 1 do
+    begin
+      P := Root + '/' + Names[I];
+      if FpLStat(PChar(P), Info) <> 0 then Continue;
+      if fpS_ISLNK(Info.st_mode) then
+        FpUnlink(PChar(P))
+      else if fpS_ISDIR(Info.st_mode) and TryStrToInt(Names[I], Pid) and (Pid > 0) and
+        (FpKill(Pid, 0) <> 0) and (fpGetErrno = ESysESRCH) then
+        RemoveTree(P);
+    end;
+  finally
+    Names.Free;
+    IsDir.Free;
+  end;
+end;
+{$ENDIF}
+
 function ZMShadowDir: string;
 var
   Base: string;
@@ -320,7 +593,19 @@ begin
     H := 5381;
     for I := 1 to Length(D) do H := H * 33 + Ord(D[I]);
     Base := IncludeTrailingPathDelimiter(Base) + 'zoetermeer' + PathDelim + 'root-' + IntToHex(H, 8);
+{$IFDEF UNIX}
+    { Elk proces krijgt een eigen schaduwmap (<root>/<pid>): het opnieuw opbouwen van
+      een gedeelde map haalde de links even weg onder een ander, al draaiend proces
+      (bijvoorbeeld twee testruns tegelijk). Mappen van beëindigde processen worden
+      hier opgeruimd, de eigen map bij het afsluiten. }
+    Base := ExpandFileName(Base);
+    ForceDirectories(Base);
+    CleanStale(Base);
+    Base := Base + PathDelim + IntToStr(FpGetPid);
+    GShadowOwned := True;
+{$ENDIF}
   end;
+  Base := ExpandFileName(Base);
   ForceDirectories(Base);
   GShadow := IncludeTrailingPathDelimiter(Base);
 {$IFDEF UNIX}
@@ -328,6 +613,7 @@ begin
   ShadowTree(D, '\');
   if ZMExeFile <> '' then
     LinkVariants(ZMExeFile, Base, '', 'ROS.exe');
+  if ZMSaveDir <> '' then OverlayTree(ExcludeTrailingPathDelimiter(ZMSaveDir), '');
 {$ENDIF}
   Result := GShadow;
 end;
@@ -547,4 +833,9 @@ begin
   end;
 end;
 
+{$IFDEF UNIX}
+finalization
+  if GShadowOwned and (GShadow <> '') then
+    RemoveTree(ExcludeTrailingPathDelimiter(GShadow));
+{$ENDIF}
 end.

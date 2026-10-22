@@ -13,7 +13,7 @@ uses
 
 type
   { Momentopname van de zichtbare toestand van een pixie, gebruikt om te zien wat opnieuw getekend moet worden }
-  TPixieState = record    { 0x18 bytes }
+  TPixieStaat = record    { 0x18 bytes }
     Left: Integer;
     Top: Integer;
     Z: Integer;
@@ -24,52 +24,52 @@ type
 
   TPixie = class(TComponent)
   protected
-    { protected, niet private: TSprite.GetChange in uSprite leest en schrijft FState }
+    { protected, niet private: TSprite.LeesWijziging in uSprite leest en schrijft FState }
     FVisible: Boolean;               { +0x24 }
     FLeft: SmallInt;                 { +0x26 }
     FTop: SmallInt;                  { +0x28 }
-    FZ: SmallInt;                    { +0x2A }
-    FState: TPixieState;             { +0x2C  toestand bij de laatste GetChange }
-    FReserved44: Integer;            { +0x44  niet gebruikt in ROS.exe }
+    FZVolgorde: SmallInt;                    { +0x2A }
+    FState: TPixieStaat;             { +0x2C  toestand bij de laatste LeesWijziging }
+    FGereserveerd44: Integer;            { +0x44  niet gebruikt in ROS.exe }
     FOnMouseDown: TMouseEvent;       { +0x48 }
     FOnMouseUp: TMouseEvent;         { +0x50 }
     FOnMouseMove: TMouseMoveEvent;   { +0x58 }
-    FOnMouseLeave: TNotifyEvent;     { +0x60 }
+    FOpMuisVerlaten: TNotifyEvent;     { +0x60 }
   public
     procedure SetVisible(Value: Boolean); virtual;                    { +0x30 }
-    procedure SetX(Value: Integer); virtual;                          { +0x34 }
-    procedure SetY(Value: Integer); virtual;                          { +0x38 }
-    procedure SetZ(Value: Integer); virtual;                          { +0x3C }
-    function GetX: Integer; virtual;                                  { +0x40 }
-    function GetY: Integer; virtual;                                  { +0x44 }
-    function GetZ: Integer; virtual;                                  { +0x48 }
-    function GetLeft: Integer; virtual;                               { +0x4C }
+    procedure ZetX(Value: Integer); virtual;                          { +0x34 }
+    procedure ZetY(Value: Integer); virtual;                          { +0x38 }
+    procedure ZetZ(Value: Integer); virtual;                          { +0x3C }
+    function LeesX: Integer; virtual;                                  { +0x40 }
+    function LeesY: Integer; virtual;                                  { +0x44 }
+    function LeesZ: Integer; virtual;                                  { +0x48 }
+    function LeesLinks: Integer; virtual;                               { +0x4C }
     procedure SetLeft(Value: Integer); virtual;                       { +0x50 }
-    function GetTop: Integer; virtual;                                { +0x54 }
+    function LeesBoven: Integer; virtual;                                { +0x54 }
     procedure SetTop(Value: Integer); virtual;                        { +0x58 }
     function GetWidth: Integer; virtual; abstract;                    { +0x5C }
     function GetHeight: Integer; virtual; abstract;                   { +0x60 }
     procedure Draw(Surface: TSurface; DX, DY: Integer; ClipRect: TRect;
-      Scale: Double); virtual; abstract;                              { +0x64 }
-    procedure DrawDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
-      Scale: Double); virtual; abstract;                              { +0x68 }
-    function Intersects(R: TRect): Boolean; virtual;                  { +0x6C }
-    procedure GetState(var State: TPixieState); virtual;              { +0x70 }
-    procedure GetChange(var OldState, NewState: TPixieState); virtual; { +0x74 }
+      Schaalfactor: Double); virtual; abstract;                              { +0x64 }
+    procedure TekenDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
+      Schaalfactor: Double); virtual; abstract;                              { +0x68 }
+    function Overlapt(R: TRect): Boolean; virtual;                  { +0x6C }
+    procedure LeesStaat(var State: TPixieStaat); virtual;              { +0x70 }
+    procedure LeesWijziging(var OldState, NewState: TPixieStaat); virtual; { +0x74 }
     procedure MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); virtual;                                        { +0x78 }
     procedure MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); virtual;                                        { +0x7C }
     procedure MouseMove(Sender: TObject; Shift: TShiftState;
       X, Y: Integer); virtual;                                        { +0x80 }
-    procedure MouseLeave; virtual;                                    { +0x84 }
+    procedure MuisVerlaten; virtual;                                    { +0x84 }
     function GetBoundsRect: TRect;
     property Visible: Boolean read FVisible write SetVisible;
-    property X: Integer read GetX write SetX;
-    property Y: Integer read GetY write SetY;
-    property Z: Integer read GetZ write SetZ;
-    property Left: Integer read GetLeft write SetLeft;
-    property Top: Integer read GetTop write SetTop;
+    property X: Integer read LeesX write ZetX;
+    property Y: Integer read LeesY write ZetY;
+    property Z: Integer read LeesZ write ZetZ;
+    property Left: Integer read LeesLinks write SetLeft;
+    property Top: Integer read LeesBoven write SetTop;
     property Width: Integer read GetWidth;
     property Height: Integer read GetHeight;
     property BoundsRect: TRect read GetBoundsRect;
@@ -77,7 +77,7 @@ type
     property OnMouseDown: TMouseEvent read FOnMouseDown write FOnMouseDown;
     property OnMouseMove: TMouseMoveEvent read FOnMouseMove write FOnMouseMove;
     property OnMouseUp: TMouseEvent read FOnMouseUp write FOnMouseUp;
-    property OnMouseLeave: TNotifyEvent read FOnMouseLeave write FOnMouseLeave;
+    property OnMouseLeave: TNotifyEvent read FOpMuisVerlaten write FOpMuisVerlaten;
   end;
 
 implementation
@@ -89,43 +89,43 @@ begin
 end;
 
 { @004639E8 }
-procedure TPixie.SetX(Value: Integer);
+procedure TPixie.ZetX(Value: Integer);
 begin
   SetLeft(Value);
 end;
 
 { @004639F0 }
-procedure TPixie.SetY(Value: Integer);
+procedure TPixie.ZetY(Value: Integer);
 begin
   SetTop(Value);
 end;
 
 { @004639F8 }
-function TPixie.GetX: Integer;
+function TPixie.LeesX: Integer;
 begin
-  Result := GetLeft;
+  Result := LeesLinks;
 end;
 
 { @00463A00 }
-function TPixie.GetY: Integer;
+function TPixie.LeesY: Integer;
 begin
-  Result := GetTop;
+  Result := LeesBoven;
 end;
 
 { @00463A08 }
-function TPixie.GetZ: Integer;
+function TPixie.LeesZ: Integer;
 begin
-  Result := FZ;
+  Result := FZVolgorde;
 end;
 
 { @00463A10 }
-procedure TPixie.SetZ(Value: Integer);
+procedure TPixie.ZetZ(Value: Integer);
 begin
-  FZ := Value;
+  FZVolgorde := Value;
 end;
 
 { @00463A18 }
-function TPixie.GetLeft: Integer;
+function TPixie.LeesLinks: Integer;
 begin
   Result := FLeft;
 end;
@@ -137,7 +137,7 @@ begin
 end;
 
 { @00463A28 }
-function TPixie.GetTop: Integer;
+function TPixie.LeesBoven: Integer;
 begin
   Result := FTop;
 end;
@@ -151,11 +151,11 @@ end;
 { @00463A38 }
 function TPixie.GetBoundsRect: TRect;
 begin
-  Result := Bounds(GetLeft, GetTop, GetWidth, GetHeight);
+  Result := Bounds(LeesLinks, LeesBoven, GetWidth, GetHeight);
 end;
 
 { @00463A68 }
-function TPixie.Intersects(R: TRect): Boolean;
+function TPixie.Overlapt(R: TRect): Boolean;
 var
   Doel: TRect;
 begin
@@ -163,11 +163,11 @@ begin
 end;
 
 { @00463AA4 }
-procedure TPixie.GetState(var State: TPixieState);
+procedure TPixie.LeesStaat(var State: TPixieStaat);
 begin
-  State.Left := GetLeft;
-  State.Top := GetTop;
-  State.Z := GetZ;
+  State.Left := LeesLinks;
+  State.Top := LeesBoven;
+  State.Z := LeesZ;
   State.Width := GetWidth;
   State.Height := GetHeight;
   State.Visible := FVisible;
@@ -175,12 +175,12 @@ end;
 
 { @00463AE4  Geeft de vorige en de huidige toestand terug; wanneer er niets veranderd is,
   worden beide als onzichtbaar gemarkeerd zodat er niets opnieuw getekend wordt. }
-procedure TPixie.GetChange(var OldState, NewState: TPixieState);
+procedure TPixie.LeesWijziging(var OldState, NewState: TPixieStaat);
 var
-  S: TPixieState;
+  S: TPixieStaat;
 begin
   OldState := FState;
-  GetState(S);
+  LeesStaat(S);
   FState := S;
   NewState := FState;
   if (NewState.Left = OldState.Left) and (NewState.Top = OldState.Top) and
@@ -200,10 +200,10 @@ begin
 end;
 
 { @00463B94 }
-procedure TPixie.MouseLeave;
+procedure TPixie.MuisVerlaten;
 begin
-  if Assigned(FOnMouseLeave) then
-    FOnMouseLeave(Self);
+  if Assigned(FOpMuisVerlaten) then
+    FOpMuisVerlaten(Self);
 end;
 
 { @00463BA8 }

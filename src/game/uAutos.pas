@@ -20,19 +20,19 @@ type
   { VMT 00474F3C, instantiegrootte $158. }
   TAutoSprite = class(TSprite)
   private
-    FReserved13C: Integer;           { +0x13C  niet gebruikt }
-    FWorld: TWorld;                  { +0x140 }
-    FView: TView;                    { +0x144 }
-    FSettings: TSettings;            { +0x148 }
-    FDrawn: Boolean;                 { +0x14C  ingesteld na de eerste Draw, nooit gelezen }
-    FStartTick: Integer;             { +0x150  GetTickCount aan het begin van de huidige periode }
+    FGereserveerd13C: Integer;           { +0x13C  niet gebruikt }
+    FWereld: TWorld;                  { +0x140 }
+    FWeergave: TView;                    { +0x144 }
+    FInstellingen: TSettings;            { +0x148 }
+    FGetekend: Boolean;                 { +0x14C  ingesteld na de eerste Draw, nooit gelezen }
+    FStartTik: Integer;             { +0x150  GetTickCount aan het begin van de huidige periode }
     FFase: Integer;                  { +0x154  periodeteller 0..77, kiest de auto's van een kruispunt }
   public
     procedure Draw(Surface: TSurface; DX, DY: Integer; ClipRect: TRect;
-      Scale: Double); override;                                        { +0x64 }
-    property World: TWorld read FWorld;
-    property View: TView read FView;
-    property Settings: TSettings read FSettings;
+      Schaalfactor: Double); override;                                        { +0x64 }
+    property Wereld: TWorld read FWereld;
+    property Weergave: TView read FWeergave;
+    property Instellingen: TSettings read FInstellingen;
   end;
 
   { VMT 00475070, instantiegrootte $18. Eén recht stuk van een autopad, in wereld-
@@ -57,8 +57,8 @@ type
     property Items[Nr: Integer]: TSegment read GetItem; default;
   end;
 
-function CreateAutos(SpriteBox: TSpriteBox; Sjabloon: TSprite; AWorld: TWorld;
-  AView: TView; ASettings: TSettings): TAutoSprite;
+function MaakAutos(SpriteBox: TSpriteBox; Sjabloon: TSprite; AWorld: TWorld;
+  AView: TView; AOpties: TSettings): TAutoSprite;
 
 implementation
 
@@ -94,20 +94,20 @@ var
   J: Integer;
 
 { @004750E8 }
-function CreateAutos(SpriteBox: TSpriteBox; Sjabloon: TSprite; AWorld: TWorld;
-  AView: TView; ASettings: TSettings): TAutoSprite;
+function MaakAutos(SpriteBox: TSpriteBox; Sjabloon: TSprite; AWorld: TWorld;
+  AView: TView; AOpties: TSettings): TAutoSprite;
 begin
-  Result := TAutoSprite.CreateCopy(Sjabloon);
-  Result.FWorld := AWorld;
+  Result := TAutoSprite.MaakKopie(Sjabloon);
+  Result.FWereld := AWorld;
   AView.Autos := Result;
-  Result.MarginRight := 792;
-  Result.MarginBottom := 605;
-  Result.MoveTo3D(30, 81, 1000);
+  Result.MargeRechts := 792;
+  Result.MargeOnder := 605;
+  Result.VerplaatsNaar3D(30, 81, 1000);
   Result.Visible := True;
-  Result.FView := AView;
+  Result.FWeergave := AView;
   Result.FFase := 0;
-  Result.FStartTick := GetTickCount;
-  Result.FSettings := ASettings;
+  Result.FStartTik := GetTickCount;
+  Result.FInstellingen := AOpties;
 end;
 
 { @00475178 }
@@ -120,7 +120,7 @@ end;
 
 { @0047519C  Positie (X, Y) op breukdeel F van het pad; geeft de autoframenaam terug,
   of '' als er geen pad is. }
-function SegmentPos(Lijst: TSegmentList; var X, Y: Integer; F: Double): string;
+function SegmentPositie(Lijst: TSegmentList; var X, Y: Integer; F: Double): string;
 var
   N, Nr, AX1, AY1, AX2, AY2: Integer;
 begin
@@ -139,8 +139,8 @@ begin
     AX2 := Lijst[Nr].FNaar.X;
     AY2 := Lijst[Nr].FNaar.Y;
     F := (F - Nr / Lijst.Count) * Lijst.Count;
-    X := Round(Interpolate(F, AX2, AX1));
-    Y := Round(Interpolate(F, AY2, AY1));
+    X := Round(Interpoleer(F, AX2, AX1));
+    Y := Round(Interpoleer(F, AY2, AY1));
     { LET OP: de klaverbladpaden gebruiken de richtingen 'a'..'l', die buiten
       AutoFrame vallen (het origineel leest het Punten-geheugen); de naam wordt alleen op '' getest }
     Result := 'auto' + IntToStr(AutoFrame[Lijst[Nr].FRichting]);
@@ -149,7 +149,7 @@ end;
 
 { @00475934 }
 procedure TAutoSprite.Draw(Surface: TSurface; DX, DY: Integer; ClipRect: TRect;
-  Scale: Double);
+  Schaalfactor: Double);
 var
   CurDX, CurDY: Integer;
   K: array[1..7] of Integer;
@@ -177,7 +177,7 @@ var
         SY := Top + AY + J - CurDY;
         if CurDX <> 0 then
           CurDX := CurDX;
-        if PtInRect(ViewRect, Point(SX, SY)) then
+        if PtInRect(BeeldRect, Point(SX, SY)) then
           TBmpSurface(Surface).Bitmap.Canvas.Pixels[AX + I, AY + J] := clWhite;
       end;
   end;
@@ -195,11 +195,11 @@ var
       CurDX := DX;
       CurDY := DY;
       T := N * 2000;
-      F := (GetTickCount - FStartTick) / T;
+      F := (GetTickCount - FStartTik) / T;
       while F >= 1 do
       begin
         F := F - 1;
-        Inc(FStartTick, T);
+        Inc(FStartTik, T);
         FFase := (FFase + 1) mod 78;
       end;
       if Mask = 7 then
@@ -210,18 +210,18 @@ var
         while G > 1 do
           G := G - 1;
 
-        if IsSnelweg(Cell.Contents, 'X') then
-          S := SegmentPos(SnelHeen[Idx], X, Y, G)
-        else if Cell.Contents = 'Klaver' then
+        if IsSnelweg(Cell.Inhoud, 'X') then
+          S := SegmentPositie(SnelHeen[Idx], X, Y, G)
+        else if Cell.Inhoud = 'Klaver' then
         begin
           { LET OP: beide takken zijn gelijk }
           if Piece < 5 then
-            S := SegmentPos(KlaverHeen[Idx, Piece], X, Y, G)
+            S := SegmentPositie(KlaverHeen[Idx, Piece], X, Y, G)
           else
-            S := SegmentPos(KlaverHeen[Idx, Piece], X, Y, G);
+            S := SegmentPositie(KlaverHeen[Idx, Piece], X, Y, G);
         end
         else
-          S := SegmentPos(Heen[Idx], X, Y, G);
+          S := SegmentPositie(Heen[Idx], X, Y, G);
         if S > '' then
           if (Soort < 3) or
              ((Soort = 3) and (((Lane in [1, 2]) and (FFase mod 2 = 0)) or
@@ -231,16 +231,16 @@ var
                               ((Lane in [1, 6]) and (FFase mod 3 = 2)))) then
             PlotAuto(P.X + Round((X + OfsX) * Zoom), P.Y + Round((Y + OfsY) * Zoom));
 
-        if IsSnelweg(Cell.Contents, 'X') then
-          S := SegmentPos(SnelTerug[Idx], X, Y, G)
-        else if Cell.Contents = 'Klaver' then
+        if IsSnelweg(Cell.Inhoud, 'X') then
+          S := SegmentPositie(SnelTerug[Idx], X, Y, G)
+        else if Cell.Inhoud = 'Klaver' then
         begin
           { LET OP: voor stukken 5..9 behoudt S de waarde van de eerste richting }
           if Piece < 5 then
-            S := SegmentPos(KlaverTerug[Idx, Piece], X, Y, G);
+            S := SegmentPositie(KlaverTerug[Idx, Piece], X, Y, G);
         end
         else
-          S := SegmentPos(Terug[Idx], X, Y, G);
+          S := SegmentPositie(Terug[Idx], X, Y, G);
         if S > '' then
           if (Soort < 3) or
              ((Soort = 3) and (((Lane = 3) and (FFase mod 2 = 0)) or
@@ -260,24 +260,24 @@ var
   end;
 
 begin
-  if FWorld.Reistijd <> -1 then
+  if FWereld.Reistijd <> -1 then
   begin
-    Dec(PerfAutos, GetTickCount);
+    Dec(ProfAutos, GetTickCount);
     for X := 0 to 44 do
       for Y := 0 to 44 do
       begin
-        Cell := FWorld.GetCell(X, Y);
+        Cell := FWereld.LeesCel(X, Y);
         if Cell <> nil then
         begin
-          P := GridToScreen(Point(X, Y));
+          P := RasterNaarScherm(Point(X, Y));
           P.X := P.X - (30 - DX);
           P.Y := P.Y - (81 - DY);
-          if IsWeg(Cell.Contents, 'X') then
+          if IsWeg(Cell.Inhoud, 'X') then
           begin
             Mask := Cell.Wegen;
             for I := 0 to 3 do
             begin
-              Buur := Cell.Buur(Dirs[I].X, Dirs[I].Y);
+              Buur := Cell.Buur(Richtingen[I].X, Richtingen[I].Y);
               if (Buur <> nil) and (Buur.Drukte = 0) then
                 Mask := Mask and (15 - (1 shl I));
             end;
@@ -288,14 +288,14 @@ begin
             if BitCount[Mask] = 1 then
               for I := 0 to 3 do
               begin
-                Buur := Cell.Buur(Dirs[I].X, Dirs[I].Y);
-                if (Buur <> nil) and IsBebouwing(Buur.Contents) and
-                   ((Mask in [0, 1, 2, 4, 8]) or not IsSnelweg(Cell.Contents, 'X')) then
+                Buur := Cell.Buur(Richtingen[I].X, Richtingen[I].Y);
+                if (Buur <> nil) and IsBebouwing(Buur.Inhoud) and
+                   ((Mask in [0, 1, 2, 4, 8]) or not IsSnelweg(Cell.Inhoud, 'X')) then
                   Mask := Mask or (1 shl I);
               end;
             if BitCount[Mask] = 2 then
             begin
-              Aantal := IMin(RoundUp(Tijd), 5);
+              Aantal := IMinimum(RondOmhoog(Tijd), 5);
               if (Aantal = 0) and (Cell.DrukteFactor <> 0) then
                 Aantal := 1;
               DrawAutos(P, Aantal, Mask, Fase, 2, 0, Mask, Cell, 0, 0, 0);
@@ -306,9 +306,9 @@ begin
               Som := 0;
               for I := 0 to 3 do
               begin
-                Buur := Cell.Buur(Dirs[I].X, Dirs[I].Y);
+                Buur := Cell.Buur(Richtingen[I].X, Richtingen[I].Y);
                 if Buur <> nil then
-                  Som := Som + RoundUp(Buur.DrukteFactor);
+                  Som := Som + RondOmhoog(Buur.DrukteFactor);
               end;
               { LET OP: verlaat de Y-lus en slaat de rest van de kolom over }
               if Som = 0 then
@@ -318,11 +318,11 @@ begin
                 for L := I + 1 to 3 do
                 begin
                   Bits := (1 shl I) + (1 shl L);
-                  Buur := Cell.Buur(Dirs[I].X, Dirs[I].Y);
-                  Buur2 := Cell.Buur(Dirs[L].X, Dirs[L].Y);
+                  Buur := Cell.Buur(Richtingen[I].X, Richtingen[I].Y);
+                  Buur2 := Cell.Buur(Richtingen[L].X, Richtingen[L].Y);
                   if (Buur <> nil) and (Buur2 <> nil) and (Bits and Mask = Bits) then
                   begin
-                    Aantal := RoundUp(Cell.Reistijd);
+                    Aantal := RondOmhoog(Cell.Reistijd);
                     if (Buur.Drukte = 0) or (Buur2.Drukte = 0) then
                       Aantal := 0
                     else if (Aantal = 0) and (Buur.Drukte <> 0) and (Buur2.Drukte <> 0) then
@@ -339,8 +339,8 @@ begin
                 end;
             end;
           end
-          else if (Cell.Contents = 'Klaver') and (Cell.Hoofd = nil) and
-            FSettings.KlaverbladAutosVisible then
+          else if (Cell.Inhoud = 'Klaver') and (Cell.Hoofd = nil) and
+            FInstellingen.KlaverbladAutosZichtbaar then
           begin
             { de hoofdcel van een klaverblad is de onderste hoek; ze beslaat 3x3 cellen }
             K[1] := Verkeer(Cell.Buur(-1, 1));
@@ -369,8 +369,8 @@ begin
           end;
         end;
       end;
-    FDrawn := True;
-    Inc(PerfAutos, GetTickCount);
+    FGetekend := True;
+    Inc(ProfAutos, GetTickCount);
   end;
 end;
 

@@ -8,40 +8,40 @@
     "00463534": "TSurface.SetWidth",
     "00463560": "TSurface.SetHeight",
     "0046358c": "TSurface.GetEmpty",
-    "004635b0": "TSurface.GetScreen",
-    "004635b4": "TSurface.DrawSurface",
-    "00463628": "TSurface.CopyTo",
+    "004635b0": "TSurface.LeesScherm",
+    "004635b4": "TSurface.TekenOppervlak",
+    "00463628": "TSurface.KopieerNaar",
     "00463674": "TSurface.Clear",
-    "004636b0": "TSurface.ColorToIndex",
-    "0046377c": "TSurface.IndexToColor",
-    "004637b4": "uSurface.NewSurface",
-    "004637d8": "uSurface.NewSurfaceSize",
-    "00463800": "uSurface.SurfaceScreen",
+    "004636b0": "TSurface.KleurNaarIndex",
+    "0046377c": "TSurface.IndexNaarKleur",
+    "004637b4": "uSurface.NieuwOppervlak",
+    "004637d8": "uSurface.NieuwOppervlakGrootte",
+    "00463800": "uSurface.OppervlakScherm",
     "0046383c": "uSurface.Initialization"
   },
   "globals": {
-    "0048a8cc": "uSurface.SurfaceClass"
+    "0048a8cc": "uSurface.OppervlakKlasse"
   },
   "fields": {
     "TSurface": {
       "0x1c": [
-        "FReserved1C",
+        "FGereserveerd1C",
         "Integer"
       ],
       "0x20": [
-        "FBlank",
+        "FLeeg",
         "Boolean"
       ],
       "0x24": [
-        "FReserved24",
+        "FGereserveerd24",
         "Integer"
       ],
       "0x28": [
-        "FReserved28",
+        "FGereserveerd28",
         "Integer"
       ],
       "0x2c": [
-        "FReserved2C",
+        "FGereserveerd2C",
         "Integer"
       ]
     }

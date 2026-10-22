@@ -2,18 +2,18 @@
   "functions": {
     "0047048c": "TBehavControl.Create",
     "0047058c": "TBehavControl.MouseMove",
-    "004705f4": "TBehavControl.MouseLeave",
+    "004705f4": "TBehavControl.MuisVerlaten",
     "004705fc": "TBehavControl.MouseDown",
     "00470620": "TBehavControl.MouseUp",
     "004706b4": "TBehavControl.SetActive",
     "004706d4": "TBehavControl.SetDown",
-    "0047072c": "TBehavControl.SetHover",
-    "004707e0": "TBehavControl.FinishSequence",
+    "0047072c": "TBehavControl.ZetZweef",
+    "004707e0": "TBehavControl.ReeksKlaar",
     "00470850": "TBehavControl.SetState",
-    "00470860": "TBehavControl.GetFrameName",
-    "0047089c": "TBehavControl.UpdateFrame",
+    "00470860": "TBehavControl.LeesBeeldnaam",
+    "0047089c": "TBehavControl.VernieuwBeeld",
     "0047091c": "TBehavCheckBox.Create",
-    "004709f4": "TBehavCheckBox.CheckBoxClick",
+    "004709f4": "TBehavCheckBox.VakjeKlik",
     "00470a1c": "TBehavCheckBox.SetChecked",
     "00470a34": "TBehavCheckBox.GetChecked",
     "00470a3c": "TBehavRadioButton.Create",
@@ -21,74 +21,167 @@
     "00470b48": "TBehavRadioButton.SetState",
     "00470c08": "TBehavCursor.Create",
     "00470c4c": "TBehavCursor.MouseMove",
-    "00470c9c": "TBehavCursor.MouseLeave",
+    "00470c9c": "TBehavCursor.MuisVerlaten",
     "00470da0": "TBehavButton.Create",
     "00470e4c": "TBehavButton.Create",
     "00470f3c": "TCaption.Create",
     "00471010": "TBehavText.Create",
     "004710c4": "TBehavText.Destroy",
-    "004710fc": "TBehavText.SetCaption",
-    "004711e0": "TBehavText.AfterBlit",
+    "004710fc": "TBehavText.ZetOnderschrift",
+    "004711e0": "TBehavText.NaBlit",
     "00471354": "TBehavMemo.Create",
     "004713e4": "TBehavMemo.Destroy",
     "00471438": "TBehavMemo.SetActive",
     "004714d8": "TBehavMemo.Move",
-    "00471554": "TBehavMemo.MemoChange",
-    "00471578": "TBehavMemo.AfterBlit.ToggleBold",
-    "004715e8": "TBehavMemo.AfterBlit",
-    "00471a1c": "Sprbehav.AddTextBehaviour",
-    "00471ae8": "Sprbehav.ControlToBehaviour.FindFrame",
-    "00471bbc": "Sprbehav.ControlToBehaviour.AddCaption",
-    "00471d70": "Sprbehav.ControlToBehaviour",
+    "00471554": "TBehavMemo.MemoWijziging",
+    "00471578": "TBehavMemo.NaBlit.ToggleBold",
+    "004715e8": "TBehavMemo.NaBlit",
+    "00471a1c": "Sprbehav.VoegTekstGedragToe",
+    "00471ae8": "Sprbehav.BesturingNaarGedrag.FindFrame",
+    "00471bbc": "Sprbehav.BesturingNaarGedrag.AddCaption",
+    "00471d70": "Sprbehav.BesturingNaarGedrag",
     "00472134": "Sprbehav.Finalization",
     "00472164": "Sprbehav.Initialization"
   },
   "globals": {},
   "fields": {
     "TBehavCursor": {
-      "0x20": ["FOldCursor", "TCursor"],
-      "0x22": ["FCursor", "TCursor"],
-      "0x24": ["FInside", "Boolean"]
+      "0x20": [
+        "FOudeCursor",
+        "TCursor"
+      ],
+      "0x22": [
+        "FCursor",
+        "TCursor"
+      ],
+      "0x24": [
+        "FBinnen",
+        "Boolean"
+      ]
     },
     "TBehavControl": {
-      "0x20": ["FFrames", "TStringList"],
-      "0x24": ["FPressed", "Boolean"],
-      "0x28": ["FSeqHover", "string"],
-      "0x2c": ["FSeqLeave", "string"],
-      "0x30": ["FSeqEnter", "string"],
-      "0x34": ["FSeqDown", "string"],
-      "0x38": ["FSeqUp", "string"],
-      "0x3c": ["FEnterPlayed", "Boolean"],
-      "0x3d": ["FDown", "Boolean"],
-      "0x3e": ["FHover", "Boolean"],
-      "0x40": ["FState", "Integer"],
-      "0x44": ["FStateCount", "Integer"],
-      "0x48": ["FOnClick", "TNotifyEvent"]
+      "0x20": [
+        "FBeelden",
+        "TStringList"
+      ],
+      "0x24": [
+        "FPressed",
+        "Boolean"
+      ],
+      "0x28": [
+        "FSeqZweef",
+        "string"
+      ],
+      "0x2c": [
+        "FSeqVerlaat",
+        "string"
+      ],
+      "0x30": [
+        "FSeqBinnen",
+        "string"
+      ],
+      "0x34": [
+        "FSeqIndruk",
+        "string"
+      ],
+      "0x38": [
+        "FSeqLos",
+        "string"
+      ],
+      "0x3c": [
+        "FBinnenGespeeld",
+        "Boolean"
+      ],
+      "0x3d": [
+        "FDown",
+        "Boolean"
+      ],
+      "0x3e": [
+        "FZweef",
+        "Boolean"
+      ],
+      "0x40": [
+        "FState",
+        "Integer"
+      ],
+      "0x44": [
+        "FToestandAantal",
+        "Integer"
+      ],
+      "0x48": [
+        "FOnClick",
+        "TNotifyEvent"
+      ]
     },
     "TBehavCheckBox": {
-      "0x50": ["FReserved50", "Integer"],
-      "0x54": ["FReserved54", "Integer"]
+      "0x50": [
+        "FGereserveerd50",
+        "Integer"
+      ],
+      "0x54": [
+        "FGereserveerd54",
+        "Integer"
+      ]
     },
     "TBehavRadioButton": {
-      "0x58": ["FGroup", "string"]
+      "0x58": [
+        "FGroep",
+        "string"
+      ]
     },
     "TBehavMemo": {
-      "0x50": ["FMemo", "TMemo"],
-      "0x54": ["FReserved54", "Integer"],
-      "0x58": ["FReserved58", "Integer"],
-      "0x5c": ["FScrollBar", "TScrollBar"],
-      "0x60": ["FOffset", "TPoint"]
+      "0x50": [
+        "FMemo",
+        "TMemo"
+      ],
+      "0x54": [
+        "FGereserveerd54",
+        "Integer"
+      ],
+      "0x58": [
+        "FGereserveerd58",
+        "Integer"
+      ],
+      "0x5c": [
+        "FSchuifbalk",
+        "TScrollBar"
+      ],
+      "0x60": [
+        "FVerschuiving",
+        "TPoint"
+      ]
     },
     "TCaption": {
-      "0x4": ["FText", "string"],
-      "0x8": ["FFont", "TFont"],
-      "0xc": ["FLeft", "Integer"],
-      "0x10": ["FTop", "Integer"],
-      "0x14": ["FAlign", "Char"]
+      "0x4": [
+        "FText",
+        "string"
+      ],
+      "0x8": [
+        "FFont",
+        "TFont"
+      ],
+      "0xc": [
+        "FLeft",
+        "Integer"
+      ],
+      "0x10": [
+        "FTop",
+        "Integer"
+      ],
+      "0x14": [
+        "FAlign",
+        "Char"
+      ]
     },
     "TBehavText": {
-      "0x20": ["FCaptions", "TStringList"],
-      "0x24": ["FDefault", "TCaption"]
+      "0x20": [
+        "FOnderschriften",
+        "TStringList"
+      ],
+      "0x24": [
+        "FDefault",
+        "TCaption"
+      ]
     }
   },
   "assumes": {}

@@ -1,19 +1,19 @@
 {
   "functions": {
-    "00463e78": "Sprframe.DoProgress",
-    "00463ea8": "TFrame.Init",
+    "00463e78": "Sprframe.MeldVoortgang",
+    "00463ea8": "TFrame.Initialiseer",
     "00463f24": "TFrame.Create",
-    "00464004": "TFrame.CreateEmpty",
+    "00464004": "TFrame.MaakLeeg",
     "004640bc": "TFrame.Destroy",
     "004640f8": "TFrame.Assign",
-    "00464194": "TFrame.FreeData",
+    "00464194": "TFrame.GeefDataVrij",
     "004641ac": "TFrame.GetWidth",
     "004641b4": "TFrame.SetWidth",
     "004641bc": "TFrame.GetHeight",
     "004641c4": "TFrame.SetHeight",
-    "004641cc": "TFrame.IncCount",
-    "004641d4": "TFrame.GetSurface",
-    "004641dc": "TFrame.DrawDC",
+    "004641cc": "TFrame.VerhoogAantal",
+    "004641d4": "TFrame.LeesOppervlak",
+    "004641dc": "TFrame.TekenDC",
     "00464274": "TFrame.Draw",
     "00464310": "TFrame.ReadData",
     "00464440": "TFrame.WriteData",
@@ -23,35 +23,35 @@
     "00464578": "TPersistentList.GetCount",
     "00464580": "TFrameList.Create",
     "004645d0": "TFrameList.Destroy",
-    "00464604": "TFrameList.RemoveFrame",
-    "0046470c": "TFrameList.AddImage",
+    "00464604": "TFrameList.VerwijderFrame",
+    "0046470c": "TFrameList.VoegBeeldToe",
     "00464854": "TFrameList.Clear",
     "00464894": "TFrameList.IndexOf",
     "00464940": "TFrameList.Assign",
-    "004649f4": "TFrameList.FrameByName",
-    "00464b38": "TFrameList.GetFrame",
+    "004649f4": "TFrameList.FrameOpNaam",
+    "00464b38": "TFrameList.LeesFrame",
     "00464b58": "TFrameList.Add",
-    "00464ba4": "TFrameList.AddFrame",
+    "00464ba4": "TFrameList.VoegFrameToe",
     "00464c10": "TFrameList.SetTransparentColor",
     "00464c28": "TFrameList.DefineProperties",
     "00464c64": "TFrameList.ReadData",
-    "00464d28": "Sprframe.DebugStr",
+    "00464d28": "Sprframe.DebugTekst",
     "00464d80": "TFrameList.WriteData",
     "00464f00": "Sprframe.Initialization"
   },
   "globals": {
-    "00488d80": "Sprframe.ElrondMode",
-    "00488d84": "Sprframe.FrameCount",
-    "0048a8d8": "Sprframe.OnFrameProgress"
+    "00488d80": "Sprframe.ElrondModus",
+    "00488d84": "Sprframe.FrameAantal",
+    "0048a8d8": "Sprframe.OnFrameVoortgang"
   },
   "fields": {
     "TFrame": {
       "0x4": [
         "FName",
-        "TFrameName"
+        "TFrameNaam"
       ],
       "0x58": [
-        "FFrameList",
+        "FFrameLijst",
         "TFrameList"
       ],
       "0x5c": [
@@ -71,11 +71,11 @@
         "SmallInt"
       ],
       "0x64": [
-        "FHotSpotX",
+        "FHotpuntX",
         "SmallInt"
       ],
       "0x66": [
-        "FHotSpotY",
+        "FHotpuntY",
         "SmallInt"
       ],
       "0x68": [
@@ -85,7 +85,7 @@
     },
     "TPersistentList": {
       "0x4": [
-        "FList",
+        "FLijst",
         "TList"
       ]
     },
@@ -95,15 +95,15 @@
         "TColor"
       ],
       "0xc": [
-        "FSurface",
+        "FOppervlak",
         "TSurface"
       ],
       "0x10": [
-        "FClearing",
+        "FLeegmaken",
         "Boolean"
       ],
       "0x11": [
-        "FFormat",
+        "FFormaat",
         "string[127]"
       ]
     }

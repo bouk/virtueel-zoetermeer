@@ -3,7 +3,7 @@ unit uSprite;
 { TSprite: een geanimeerde bitmap op een TSpriteBox. Een sprite bezit een TFrameList (de
   beelden) en een TSequenceList (animaties); een TFastTimer doorloopt de
   huidige reeks. Alle wijzigingen van positie, frame, zichtbaarheid, marges en
-  schaal lopen via ChangeState, dat ook OnMove en de trefcontrole aanroept.
+  schaal lopen via WijzigToestand, dat ook OnMove en de trefcontrole aanroept.
   TBehaviour-objecten die aan een sprite zijn gekoppeld, krijgen eerst de
   gebeurtenissen van de sprite.
   Gedecompileerd uit ROS.exe v1.1, code 0046956C-0046C478. }
@@ -26,16 +26,16 @@ type
 
   THitTest = (htNone, htRect, htPixel);
 
-  { De RTTI plaatst TPlot/TPlotMode in Sprframe, dat ze niet declareert. }
-  TPlot = (BufferBackground, PlotTransparent);
-  TPlotMode = set of TPlot;
+  { De RTTI plaatst TTekenOptie/TPlotMode in Sprframe, dat ze niet declareert. }
+  TTekenOptie = (BufferBackground, PlotTransparent);
+  TPlotMode = set of TTekenOptie;
 
-  { Wat een aanroep van ChangeState wijzigt terwijl er al een wijziging bezig is }
-  TSpriteChange = (scX, scY, scZ, scMarginLeft, scMarginTop, scMarginRight,
+  { Wat een aanroep van WijzigToestand wijzigt terwijl er al een wijziging bezig is }
+  TSpriteWijziging = (scX, scY, scZ, scMarginLeft, scMarginTop, scMarginRight,
     scMarginBottom, scFrameIndex, scVisible, scScale);
-  TSpriteChanges = set of TSpriteChange;
+  TSpriteWijzigingen = set of TSpriteWijziging;
 
-  TOnFinishSequence = procedure(Sender: TObject; var RepeatCount: Integer) of object;
+  TOnFinishSequence = procedure(Sender: TObject; var Herhalingen: Integer) of object;
   TOnVisibleEvent = procedure(Sender: TObject; var NewVisible: Boolean) of object;
   TOnMoveEvent = procedure(Sender: TObject; var X, Y, Z: Integer) of object;
   TOnHitEvent = procedure(Sender: TObject; HitWhom: TSprite) of object;
@@ -45,185 +45,185 @@ type
 
   TSprite = class(TPixie)
   private
-    FAbout: string;                    { +0x68  gestreamde versie, bijv. '2.5c' }
-    FSpriteBox: TSpriteBox;            { +0x6C }
-    FFrameList: TFrameList;            { +0x70 }
-    FSequenceList: TSequenceList;      { +0x74 }
-    FSequence: TSequence;              { +0x78  sequence being played }
-    FReserved7C: Integer;              { +0x7C  niet gebruikt }
-    FPlotmode: TPlotMode;              { +0x80 }
-    FFrameIndex: Integer;              { +0x84 }
-    FTimer: TFastTimer;                { +0x88 }
-    FRepeatCount: Integer;             { +0x8C  -1: voor altijd }
-    FStep: Integer;                    { +0x90  stap binnen FSequence }
-    FDynamic: Boolean;                 { +0x94  gemaakt door CreateCopy: lijsten worden gedeeld }
-    FKilled: Boolean;                  { +0x95  vrijgeven bij de eerstvolgende gelegenheid }
-    FHitTest: THitTest;                { +0x96 }
-    FReserved98: Integer;              { +0x98  op 0 gezet, nooit gelezen }
-    FMirrorY: Boolean;                 { +0x9C }
-    FMirrorX: Boolean;                 { +0x9D }
-    FReserved9E: Boolean;              { +0x9E  gekopieerd door CreateCopy, nooit gelezen }
-    FFrozen: Boolean;                  { +0x9F  animatie gepauzeerd }
-    FStopped: Boolean;                 { +0xA0  StopSequence is aangeroepen }
-    FScale: Double;                    { +0xA8 }
+    FVersie: string;                    { +0x68  gestreamde versie, bijv. '2.5c' }
+    FSpriteVak: TSpriteBox;            { +0x6C }
+    FFrameLijst: TFrameList;            { +0x70 }
+    FReeksLijst: TSequenceList;      { +0x74 }
+    FReeks: TSequence;              { +0x78  sequence being played }
+    FGereserveerd7C: Integer;              { +0x7C  niet gebruikt }
+    FTekenmodus: TPlotMode;              { +0x80 }
+    FFrameNr: Integer;              { +0x84 }
+    FKlok: TFastTimer;                { +0x88 }
+    FHerhalingen: Integer;             { +0x8C  -1: voor altijd }
+    FStep: Integer;                    { +0x90  stap binnen FReeks }
+    FDynamisch: Boolean;                 { +0x94  gemaakt door MaakKopie: lijsten worden gedeeld }
+    FVerwijderd: Boolean;                  { +0x95  vrijgeven bij de eerstvolgende gelegenheid }
+    FTreffertest: THitTest;                { +0x96 }
+    FGereserveerd98: Integer;              { +0x98  op 0 gezet, nooit gelezen }
+    FSpiegelY: Boolean;                 { +0x9C }
+    FSpiegelX: Boolean;                 { +0x9D }
+    FGereserveerd9E: Boolean;              { +0x9E  gekopieerd door MaakKopie, nooit gelezen }
+    FBevroren: Boolean;                  { +0x9F  animatie gepauzeerd }
+    FGestopt: Boolean;                 { +0xA0  StopReeks is aangeroepen }
+    FSchaal: Double;                    { +0xA8 }
     FData: TObject;                    { +0xB0  owned user object }
-    FMarginLeft: Integer;              { +0xB4 }
-    FMarginRight: Integer;             { +0xB8 }
-    FMarginTop: Integer;               { +0xBC }
-    FMarginBottom: Integer;            { +0xC0 }
-    FLastFrame: string;                { +0xC4  framenaam bij de laatste GetChange }
-    FMouseCapture: Boolean;            { +0xC8 }
-    FNewX: Integer;                    { +0xCC  pending state of ChangeState }
-    FNewY: Integer;                    { +0xD0 }
-    FNewZ: Integer;                    { +0xD4 }
-    FNewFrameIndex: Integer;           { +0xD8 }
-    FNewVisible: Boolean;              { +0xDC }
-    FNewScale: Double;                 { +0xE0 }
-    FNewMarginLeft: Integer;           { +0xE8 }
-    FNewMarginRight: Integer;          { +0xEC }
-    FNewMarginTop: Integer;            { +0xF0 }
-    FNewMarginBottom: Integer;         { +0xF4 }
-    FChanging: Boolean;                { +0xF8 }
-    FForceRedraw: Boolean;             { +0xF9 }
-    FReservedFC: Integer;              { +0xFC  niet gebruikt }
-    FOnVisible: TOnVisibleEvent;       { +0x100 }
-    FOnMove: TOnMoveEvent;             { +0x108 }
-    FOnFinishSequence: TOnFinishSequence; { +0x110 }
-    FOnHit: TOnHitEvent;               { +0x118 }
-    FOnBeforeBlit: TOnBlitEvent;       { +0x120 }
-    FOnAfterBlit: TOnBlitEvent;        { +0x128 }
-    FOnFrameSkipped: TOnSkipFrameEvent; { +0x130 }
-    FBehaviours: TBehaviourList;       { +0x138 }
-    procedure TimerSkip(Sender: TObject);
-    procedure TimerTick(Sender: TObject);
-    function GetAbout: string;
+    FMargeLinks: Integer;              { +0xB4 }
+    FMargeRechts: Integer;             { +0xB8 }
+    FMargeBoven: Integer;               { +0xBC }
+    FMargeOnder: Integer;            { +0xC0 }
+    FVorigFrame: string;                { +0xC4  framenaam bij de laatste LeesWijziging }
+    FMuisVast: Boolean;            { +0xC8 }
+    FNieuwX: Integer;                    { +0xCC  pending state of WijzigToestand }
+    FNieuwY: Integer;                    { +0xD0 }
+    FNieuwZ: Integer;                    { +0xD4 }
+    FNieuwFrameNr: Integer;           { +0xD8 }
+    FNieuwZichtbaar: Boolean;              { +0xDC }
+    FNieuwSchaal: Double;                 { +0xE0 }
+    FNieuwMargeLinks: Integer;           { +0xE8 }
+    FNieuwMargeRechts: Integer;          { +0xEC }
+    FNieuwMargeBoven: Integer;            { +0xF0 }
+    FNieuwMargeOnder: Integer;         { +0xF4 }
+    FWijzigt: Boolean;                { +0xF8 }
+    FForceerHertekenen: Boolean;             { +0xF9 }
+    FGereserveerdFC: Integer;              { +0xFC  niet gebruikt }
+    FOnZichtbaar: TOnVisibleEvent;       { +0x100 }
+    FOnVerplaats: TOnMoveEvent;             { +0x108 }
+    FOnReeksKlaar: TOnFinishSequence; { +0x110 }
+    FOnRaak: TOnHitEvent;               { +0x118 }
+    FOnVoorBlit: TOnBlitEvent;       { +0x120 }
+    FOnNaBlit: TOnBlitEvent;        { +0x128 }
+    FOnFrameOvergeslagen: TOnSkipFrameEvent; { +0x130 }
+    FGedragingen: TBehaviourList;       { +0x138 }
+    procedure KlokOverslaan(Sender: TObject);
+    procedure KlokTik(Sender: TObject);
+    function LeesVersie: string;
     function GetTransparent: TColor;
     procedure SetTransparent(Value: TColor);
-    procedure SetSpriteBox(Value: TSpriteBox);
-    procedure SetFrameList(Value: TFrameList);
-    procedure SetSequenceList(Value: TSequenceList);
-    function GetCurrentFrame: TName;
-    procedure SetCurrentFrame(Value: TName);
-    procedure SetFrameIndex(Value: Integer);
-    procedure SetMirrorX(Value: Boolean);
-    procedure SetMirrorY(Value: Boolean);
-    procedure SetPriority(Value: Integer);
-    function GetPriority: Integer;
+    procedure ZetSpriteVak(Value: TSpriteBox);
+    procedure ZetFrameLijst(Value: TFrameList);
+    procedure ZetReeksLijst(Value: TSequenceList);
+    function LeesHuidigFrame: TName;
+    procedure ZetHuidigFrame(Value: TName);
+    procedure ZetFrameNr(Value: Integer);
+    procedure ZetSpiegelX(Value: Boolean);
+    procedure ZetSpiegelY(Value: Boolean);
+    procedure ZetPrioriteit(Value: Integer);
+    function LeesPrioriteit: Integer;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     { TPixie }
     procedure SetVisible(Value: Boolean); override;
-    procedure SetX(Value: Integer); override;
-    procedure SetY(Value: Integer); override;
-    procedure SetZ(Value: Integer); override;
-    function GetX: Integer; override;
-    function GetY: Integer; override;
+    procedure ZetX(Value: Integer); override;
+    procedure ZetY(Value: Integer); override;
+    procedure ZetZ(Value: Integer); override;
+    function LeesX: Integer; override;
+    function LeesY: Integer; override;
     procedure SetLeft(Value: Integer); override;
     procedure SetTop(Value: Integer); override;
     function GetWidth: Integer; override;
     function GetHeight: Integer; override;
     procedure Draw(Surface: TSurface; DX, DY: Integer; ClipRect: TRect;
-      Scale: Double); override;
-    procedure DrawDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
-      Scale: Double); override;
-    procedure GetChange(var OldState, NewState: TPixieState); override;
+      Schaalfactor: Double); override;
+    procedure TekenDC(DC: HDC; DX, DY: Integer; ClipRect: TRect;
+      Schaalfactor: Double); override;
+    procedure LeesWijziging(var OldState, NewState: TPixieStaat); override;
     procedure MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); override;
     procedure MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); override;
     procedure MouseMove(Sender: TObject; Shift: TShiftState;
       X, Y: Integer); override;
-    procedure MouseLeave; override;
+    procedure MuisVerlaten; override;
     { nieuwe virtuele methoden }
-    function GetHotSpotX: Integer; virtual;                             { +0x88 }
-    function GetHotSpotY: Integer; virtual;                             { +0x8C }
-    function GetScale: Double; virtual;                                 { +0x90 }
-    procedure DoVisible(var NewVisible: Boolean); virtual;              { +0x94 }
-    procedure DoMove(var X, Y, Z: Integer); virtual;                    { +0x98 }
-    procedure DoFinishSequence(var RepeatCount: Integer); virtual;      { +0x9C }
-    procedure DoHit; virtual;                                           { +0xA0 }
-    procedure DoFrameSkipped(var Continue: Boolean); virtual;           { +0xA4 }
-    procedure DoAfterBlit(Surface: TSurface; X, Y: Integer; Where: TRect;
+    function LeesHotSpotX: Integer; virtual;                             { +0x88 }
+    function LeesHotSpotY: Integer; virtual;                             { +0x8C }
+    function LeesSchaal: Double; virtual;                                 { +0x90 }
+    procedure VerwerkZichtbaar(var NewVisible: Boolean); virtual;              { +0x94 }
+    procedure VerwerkVerplaatsing(var X, Y, Z: Integer); virtual;                    { +0x98 }
+    procedure VerwerkReeksKlaar(var Herhalingen: Integer); virtual;      { +0x9C }
+    procedure VerwerkRaak; virtual;                                           { +0xA0 }
+    procedure VerwerkOvergeslagenFrame(var Continue: Boolean); virtual;           { +0xA4 }
+    procedure VerwerkNaBlit(Surface: TSurface; X, Y: Integer; Where: TRect;
       Size: Real); virtual;                                             { +0xA8 }
-    procedure DoBeforeBlit(Surface: TSurface; X, Y: Integer; Where: TRect;
+    procedure VerwerkVoorBlit(Surface: TSurface; X, Y: Integer; Where: TRect;
       Size: Real); virtual;                                             { +0xAC }
-    procedure ChangeState(AX, AY, AZ, AMarginLeft, AMarginTop, AMarginRight,
-      AMarginBottom, AFrameIndex: Integer; AVisible: Boolean; AScale: Double;
-      Changes: TSpriteChanges); virtual;                                { +0xB0 }
-    constructor CreateCopy(Source: TSprite); virtual;                   { +0xB4 }
+    procedure WijzigToestand(AX, AY, AZ, AMarginLeft, AMarginTop, AMarginRight,
+      AMargeOnder, AFrameNr: Integer; AVisible: Boolean; AScale: Double;
+      Wijzigingen: TSpriteWijzigingen); virtual;                                { +0xB0 }
+    constructor MaakKopie(Source: TSprite); virtual;                   { +0xB4 }
     { statische methoden }
-    procedure Kill;
+    procedure Verwijder;
     procedure Redraw;
     procedure MoveTo(AX, AY: Integer);
-    procedure MoveTo3D(AX, AY, AZ: Integer);
-    procedure MoveBy(DX, DY, DZ: Integer);
-    procedure PlaySequence(Name: string; RepeatCount: Integer);
-    procedure PlaySequenceAt(Name: string; RepeatCount: Integer; DX, DY: Integer);
-    procedure StopSequence;
-    function GetSurface: TSurface;
-    function GetSequence: TName;
-    procedure SetSequence(Value: TName);
+    procedure VerplaatsNaar3D(AX, AY, AZ: Integer);
+    procedure VerplaatsMet(DX, DY, DZ: Integer);
+    procedure SpeelReeks(Name: string; Herhalingen: Integer);
+    procedure SpeelReeksVanaf(Name: string; Herhalingen: Integer; DX, DY: Integer);
+    procedure StopReeks;
+    function LeesOppervlak: TSurface;
+    function LeesReeks: TName;
+    procedure ZetReeks(Value: TName);
     procedure SetMouseCapture(Value: Boolean);
     procedure SetZOrder(Value: Integer);
-    procedure SetMarginLeft(Value: Integer);
-    procedure SetMarginTop(Value: Integer);
-    procedure SetMarginRight(Value: Integer);
-    procedure SetMarginBottom(Value: Integer);
-    procedure SetScale(Value: Double);
-    function GetFrozen: Boolean;
-    function GetBehaviour(Name: string): TBehaviour;
-    procedure AddBehaviour(Name: string; Behaviour: TBehaviour);
-    property Version: string read FAbout;
-    property CurSequence: TSequence read FSequence;
-    property Sequence: TName read GetSequence write SetSequence;
-    property Timer: TFastTimer read FTimer;
-    property RepeatCount: Integer read FRepeatCount write FRepeatCount;
+    procedure ZetMargeLinks(Value: Integer);
+    procedure ZetMargeBoven(Value: Integer);
+    procedure ZetMargeRechts(Value: Integer);
+    procedure ZetMargeOnder(Value: Integer);
+    procedure ZetSchaal(Value: Double);
+    function LeesBevroren: Boolean;
+    function LeesGedrag(Name: string): TBehaviour;
+    procedure VoegGedragToe(Name: string; Behaviour: TBehaviour);
+    property Versienummer: string read FVersie;
+    property HuidigeReeks: TSequence read FReeks;
+    property Animatiereeks: TName read LeesReeks write ZetReeks;
+    property Timer: TFastTimer read FKlok;
+    property Herhalingen: Integer read FHerhalingen write FHerhalingen;
     property Step: Integer read FStep write FStep;
-    property Dynamic: Boolean read FDynamic;
-    property Killed: Boolean read FKilled;
-    property Frozen: Boolean read GetFrozen write FFrozen;
-    property Stopped: Boolean read FStopped write FStopped;
-    property Scale: Double read GetScale write SetScale;
+    property Dynamic: Boolean read FDynamisch;
+    property Verwijderd: Boolean read FVerwijderd;
+    property Bevroren: Boolean read LeesBevroren write FBevroren;
+    property Gestopt: Boolean read FGestopt write FGestopt;
+    property Schaalfactor: Double read LeesSchaal write ZetSchaal;
     property Data: TObject read FData write FData;
-    property MarginLeft: Integer read FMarginLeft write SetMarginLeft;
-    property MarginTop: Integer read FMarginTop write SetMarginTop;
-    property MarginRight: Integer read FMarginRight write SetMarginRight;
-    property MarginBottom: Integer read FMarginBottom write SetMarginBottom;
-    property MouseCapture: Boolean read FMouseCapture write SetMouseCapture;
-    property Showing: Boolean read FNewVisible;
-    property Changing: Boolean read FChanging;
-    property Behaviours: TBehaviourList read FBehaviours;
+    property MargeLinks: Integer read FMargeLinks write ZetMargeLinks;
+    property MargeBoven: Integer read FMargeBoven write ZetMargeBoven;
+    property MargeRechts: Integer read FMargeRechts write ZetMargeRechts;
+    property MargeOnder: Integer read FMargeOnder write ZetMargeOnder;
+    property MouseCapture: Boolean read FMuisVast write SetMouseCapture;
+    property Showing: Boolean read FNieuwZichtbaar;
+    property Changing: Boolean read FWijzigt;
+    property Gedragslijst: TBehaviourList read FGedragingen;
   published
-    property About: string read GetAbout write FAbout;
+    property About: string read LeesVersie write FVersie;
     property Transparent: TColor read GetTransparent write SetTransparent;
-    property HitTest: THitTest read FHitTest write FHitTest;
-    property Plotmode: TPlotMode read FPlotmode write FPlotmode default [BufferBackground, PlotTransparent];
-    property FrameList: TFrameList read FFrameList write SetFrameList;
-    property Priority: Integer read GetPriority write SetPriority;
-    property SpriteBox: TSpriteBox read FSpriteBox write SetSpriteBox;
-    property SequenceList: TSequenceList read FSequenceList write SetSequenceList;
-    property CurrentFrame: TName read GetCurrentFrame write SetCurrentFrame;
-    property FrameIndex: Integer read FFrameIndex write SetFrameIndex;
-    property MirrorX: Boolean read FMirrorX write SetMirrorX;
-    property MirrorY: Boolean read FMirrorY write SetMirrorY;
-    property HotSpotX: Integer read GetHotSpotX;
-    property HotSpotY: Integer read GetHotSpotY;
-    property OnMove: TOnMoveEvent read FOnMove write FOnMove;
-    property OnFinishSequence: TOnFinishSequence read FOnFinishSequence write FOnFinishSequence;
-    property OnHit: TOnHitEvent read FOnHit write FOnHit;
-    property OnBeforeBlit: TOnBlitEvent read FOnBeforeBlit write FOnBeforeBlit;
-    property OnAfterBlit: TOnBlitEvent read FOnAfterBlit write FOnAfterBlit;
-    property OnVisible: TOnVisibleEvent read FOnVisible write FOnVisible;
-    property OnFrameSkipped: TOnSkipFrameEvent read FOnFrameSkipped write FOnFrameSkipped;
+    property HitTest: THitTest read FTreffertest write FTreffertest;
+    property Plotmode: TPlotMode read FTekenmodus write FTekenmodus default [BufferBackground, PlotTransparent];
+    property FrameList: TFrameList read FFrameLijst write ZetFrameLijst;
+    property Priority: Integer read LeesPrioriteit write ZetPrioriteit;
+    property SpriteBox: TSpriteBox read FSpriteVak write ZetSpriteVak;
+    property SequenceList: TSequenceList read FReeksLijst write ZetReeksLijst;
+    property CurrentFrame: TName read LeesHuidigFrame write ZetHuidigFrame;
+    property FrameIndex: Integer read FFrameNr write ZetFrameNr;
+    property MirrorX: Boolean read FSpiegelX write ZetSpiegelX;
+    property MirrorY: Boolean read FSpiegelY write ZetSpiegelY;
+    property HotSpotX: Integer read LeesHotSpotX;
+    property HotSpotY: Integer read LeesHotSpotY;
+    property OnMove: TOnMoveEvent read FOnVerplaats write FOnVerplaats;
+    property OnFinishSequence: TOnFinishSequence read FOnReeksKlaar write FOnReeksKlaar;
+    property OnHit: TOnHitEvent read FOnRaak write FOnRaak;
+    property OnBeforeBlit: TOnBlitEvent read FOnVoorBlit write FOnVoorBlit;
+    property OnAfterBlit: TOnBlitEvent read FOnNaBlit write FOnNaBlit;
+    property OnVisible: TOnVisibleEvent read FOnZichtbaar write FOnZichtbaar;
+    property OnFrameSkipped: TOnSkipFrameEvent read FOnFrameOvergeslagen write FOnFrameOvergeslagen;
   end;
 
   TSpriteList = class(TList)
   public
     function Add(Sprite: TSprite): TSprite;
-    function SpriteByName(Name: string): TSprite;
-    function GetSprite(Index: Integer): TSprite;
-    property Sprites[Index: Integer]: TSprite read GetSprite; default;
+    function SpriteOpNaam(Name: string): TSprite;
+    function LeesSprite(Index: Integer): TSprite;
+    property Sprites[Index: Integer]: TSprite read LeesSprite; default;
   end;
 
   { Gedrag gekoppeld aan een sprite: ontvangt de gebeurtenissen van de sprite (zolang
@@ -233,46 +233,46 @@ type
     FName: string;                     { +0x04 }
     FSprite: TSprite;                  { +0x08 }
     FActive: Boolean;                  { +0x0C }
-    FOnFinish: TNotifyEvent;           { +0x10 }
-    FNextBehaviour: string;            { +0x18  geactiveerd door Finish }
+    FOnKlaar: TNotifyEvent;           { +0x10 }
+    FVolgendGedrag: string;            { +0x18  geactiveerd door Afronden }
   public
     constructor Create;
     destructor Destroy; override;
-    procedure FinishSequence(Sender: TObject; var RepeatCount: Integer); virtual;   { +0x00 }
-    procedure Hit(Sender: TObject; HitWhom: TSprite); virtual;                      { +0x04 }
+    procedure ReeksKlaar(Sender: TObject; var Herhalingen: Integer); virtual;   { +0x00 }
+    procedure Raak(Sender: TObject; HitWhom: TSprite); virtual;                      { +0x04 }
     procedure Move(Sender: TObject; var X, Y, Z: Integer); virtual;                 { +0x08 }
-    procedure AfterBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
+    procedure NaBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
       Where: TRect; Size: Real); virtual;                                           { +0x0C }
-    procedure BeforeBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
+    procedure VoorBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
       Where: TRect; Size: Real); virtual;                                           { +0x10 }
-    procedure VisibleChange(Sender: TObject; var NewVisible: Boolean); virtual;     { +0x14 }
+    procedure ZichtbaarWijziging(Sender: TObject; var NewVisible: Boolean); virtual;     { +0x14 }
     procedure MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); virtual;                                                      { +0x18 }
     procedure MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState;
       X, Y: Integer); virtual;                                                      { +0x1C }
     procedure MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer); virtual; { +0x20 }
-    procedure MouseLeave(Sender: TObject); virtual;                                 { +0x24 }
-    procedure SetSprite(Value: TSprite); virtual;                                   { +0x28 }
-    procedure Detach; virtual;                                                      { +0x2C }
-    procedure Finish; virtual;                                                      { +0x30 }
+    procedure MuisVerlaten(Sender: TObject); virtual;                                 { +0x24 }
+    procedure ZetSprite(Value: TSprite); virtual;                                   { +0x28 }
+    procedure Ontkoppel; virtual;                                                      { +0x2C }
+    procedure Afronden; virtual;                                                      { +0x30 }
     procedure SetActive(Value: Boolean); virtual;                                   { +0x34 }
     property Name: string read FName write FName;
     property Sprite: TSprite read FSprite;
     property Active: Boolean read FActive write SetActive;
-    property OnFinish: TNotifyEvent read FOnFinish write FOnFinish;
-    property NextBehaviour: string read FNextBehaviour write FNextBehaviour;
+    property OnKlaar: TNotifyEvent read FOnKlaar write FOnKlaar;
+    property VolgendGedrag: string read FVolgendGedrag write FVolgendGedrag;
   end;
 
   TBehaviourList = class(TList)
   public
     function Add(Behaviour: TBehaviour): TBehaviour;
-    function GetBehaviour(Index: Integer): TBehaviour;
+    function LeesGedrag(Index: Integer): TBehaviour;
     function Find(Name: string): TBehaviour;
     function Remove(Behaviour: TBehaviour): Integer;
-    procedure ClearItem(Index: Integer);
+    procedure WisItem(Index: Integer);
     procedure Pack;
-    function IsActive(Index: Integer): Boolean;
-    property Items[Index: Integer]: TBehaviour read GetBehaviour; default;
+    function IsActief(Index: Integer): Boolean;
+    property Items[Index: Integer]: TBehaviour read LeesGedrag; default;
   end;
 
 implementation
@@ -292,70 +292,70 @@ const
 constructor TSprite.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FReserved98 := 0;
-  FFrameList := TFrameList.Create(clBlack);
-  FSequenceList := TSequenceList.Create(Self);
-  FPlotmode := [BufferBackground, PlotTransparent];
-  FFrozen := False;
-  inherited SetX(0);
-  inherited SetY(0);
-  inherited SetZ(0);
-  FFrameIndex := -1;
+  FGereserveerd98 := 0;
+  FFrameLijst := TFrameList.Create(clBlack);
+  FReeksLijst := TSequenceList.Create(Self);
+  FTekenmodus := [BufferBackground, PlotTransparent];
+  FBevroren := False;
+  inherited ZetX(0);
+  inherited ZetY(0);
+  inherited ZetZ(0);
+  FFrameNr := -1;
   SetVisible(False);
-  FTimer := TFastTimer.Create(Self);
-  FTimer.SyncRetrace := True;
-  FSequence := nil;
-  FTimer.Enabled := False;
-  FTimer.OnTimer := TimerTick;
-  FTimer.OnSkipTimer := TimerSkip;
-  FDynamic := False;
-  FKilled := False;
-  FReserved9E := False;
-  FScale := 1.0;
-  FAbout := '2.5c';
+  FKlok := TFastTimer.Create(Self);
+  FKlok.SynchroonRetrace := True;
+  FReeks := nil;
+  FKlok.Enabled := False;
+  FKlok.OnTimer := KlokTik;
+  FKlok.OnSkipTimer := KlokOverslaan;
+  FDynamisch := False;
+  FVerwijderd := False;
+  FGereserveerd9E := False;
+  FSchaal := 1.0;
+  FVersie := '2.5c';
   SetTransparent(clBlue);
-  FBehaviours := TBehaviourList.Create;
+  FGedragingen := TBehaviourList.Create;
 end;
 
 { @00469ECC  een sprite die de frames en reeksen van Source deelt }
-constructor TSprite.CreateCopy(Source: TSprite);
+constructor TSprite.MaakKopie(Source: TSprite);
 var
   S: TName;
 begin
   Create(Source.Owner);
   SetTransparent(Source.GetTransparent);
-  FSequenceList.Free;
-  FFrameList.Free;
-  FSequenceList := Source.FSequenceList;
-  FFrameList := Source.FFrameList;
-  FDynamic := True;
-  SetSpriteBox(Source.FSpriteBox);
-  inherited SetX(Source.GetX);
-  inherited SetY(Source.GetY);
-  SetZOrder(Source.GetZ);
-  FHitTest := Source.FHitTest;
-  S := Source.GetSequence;
-  SetSequence(S);
-  FRepeatCount := Source.FRepeatCount;
-  FAbout := Source.GetAbout;
-  SetFrameIndex(Source.FFrameIndex);
-  SetMirrorX(Source.FMirrorX);
-  SetMirrorY(Source.FMirrorY);
-  FPlotmode := Source.FPlotmode;
-  FFrozen := Source.GetFrozen;
-  FReserved9E := Source.FReserved9E;
-  SetScale(Source.GetScale);
+  FReeksLijst.Free;
+  FFrameLijst.Free;
+  FReeksLijst := Source.FReeksLijst;
+  FFrameLijst := Source.FFrameLijst;
+  FDynamisch := True;
+  ZetSpriteVak(Source.FSpriteVak);
+  inherited ZetX(Source.LeesX);
+  inherited ZetY(Source.LeesY);
+  SetZOrder(Source.LeesZ);
+  FTreffertest := Source.FTreffertest;
+  S := Source.LeesReeks;
+  ZetReeks(S);
+  FHerhalingen := Source.FHerhalingen;
+  FVersie := Source.LeesVersie;
+  ZetFrameNr(Source.FFrameNr);
+  ZetSpiegelX(Source.FSpiegelX);
+  ZetSpiegelY(Source.FSpiegelY);
+  FTekenmodus := Source.FTekenmodus;
+  FBevroren := Source.LeesBevroren;
+  FGereserveerd9E := Source.FGereserveerd9E;
+  ZetSchaal(Source.LeesSchaal);
   Tag := Source.Tag;
-  SetMarginLeft(Source.FMarginLeft);
-  SetMarginRight(Source.FMarginRight);
-  SetMarginTop(Source.FMarginTop);
-  SetMarginBottom(Source.FMarginBottom);
-  FOnMove := Source.FOnMove;
-  FOnFinishSequence := Source.FOnFinishSequence;
-  FOnHit := Source.FOnHit;
-  FOnBeforeBlit := Source.FOnBeforeBlit;
-  FOnAfterBlit := Source.FOnAfterBlit;
-  FOnVisible := Source.FOnVisible;
+  ZetMargeLinks(Source.FMargeLinks);
+  ZetMargeRechts(Source.FMargeRechts);
+  ZetMargeBoven(Source.FMargeBoven);
+  ZetMargeOnder(Source.FMargeOnder);
+  FOnVerplaats := Source.FOnVerplaats;
+  FOnReeksKlaar := Source.FOnReeksKlaar;
+  FOnRaak := Source.FOnRaak;
+  FOnVoorBlit := Source.FOnVoorBlit;
+  FOnNaBlit := Source.FOnNaBlit;
+  FOnZichtbaar := Source.FOnZichtbaar;
   OnMouseDown := Source.OnMouseDown;
   OnMouseUp := Source.OnMouseUp;
   OnMouseMove := Source.OnMouseMove;
@@ -367,37 +367,37 @@ destructor TSprite.Destroy;
 var
   B: TBehaviour;
 begin
-  FKilled := False;
-  if FSpriteBox <> nil then
-    FSpriteBox.RemovePixie(Self);
+  FVerwijderd := False;
+  if FSpriteVak <> nil then
+    FSpriteVak.VerwijderPixie(Self);
   if FData <> nil then
     FData.Free;
-  while FBehaviours.Count <> 0 do
+  while FGedragingen.Count <> 0 do
   begin
-    B := TBehaviour(TList(FBehaviours).Items[FBehaviours.Count - 1]);
-    FBehaviours.ClearItem(FBehaviours.Count - 1);
-    FBehaviours.Pack;
+    B := TBehaviour(TList(FGedragingen).Items[FGedragingen.Count - 1]);
+    FGedragingen.WisItem(FGedragingen.Count - 1);
+    FGedragingen.Pack;
     if B <> nil then
     begin
-      B.Detach;
+      B.Ontkoppel;
       B.Free;
     end;
   end;
-  if not FDynamic then
+  if not FDynamisch then
   begin
-    FFrameList.Free;
-    FSequenceList.Clear;
-    FSequenceList.Free;
+    FFrameLijst.Free;
+    FReeksLijst.Clear;
+    FReeksLijst.Free;
   end;
-  FTimer.Enabled := False;
-  FTimer.Free;
+  FKlok.Enabled := False;
+  FKlok.Free;
   inherited Destroy;
 end;
 
 { @0046A220  de sprite geeft zichzelf vrij bij de volgende timertik of hertekening }
-procedure TSprite.Kill;
+procedure TSprite.Verwijder;
 begin
-  FKilled := True;
+  FVerwijderd := True;
 end;
 
 { @0046A228 }
@@ -405,41 +405,41 @@ procedure TSprite.Redraw;
 begin
   if Visible then
   begin
-    FForceRedraw := True;
-    ChangeState(GetX, GetY, GetZ, FMarginLeft, FMarginTop, FMarginRight,
-      FMarginBottom, FFrameIndex, Visible, GetScale, []);
+    FForceerHertekenen := True;
+    WijzigToestand(LeesX, LeesY, LeesZ, FMargeLinks, FMargeBoven, FMargeRechts,
+      FMargeOnder, FFrameNr, Visible, LeesSchaal, []);
   end;
 end;
 
 { @0046A2A4 }
 procedure TSprite.MoveTo(AX, AY: Integer);
 begin
-  ChangeState(AX, AY, GetZ, FMarginLeft, FMarginTop, FMarginRight,
-    FMarginBottom, FFrameIndex, Visible, GetScale, [scX, scY]);
+  WijzigToestand(AX, AY, LeesZ, FMargeLinks, FMargeBoven, FMargeRechts,
+    FMargeOnder, FFrameNr, Visible, LeesSchaal, [scX, scY]);
 end;
 
 { @0046A30C }
-procedure TSprite.MoveTo3D(AX, AY, AZ: Integer);
+procedure TSprite.VerplaatsNaar3D(AX, AY, AZ: Integer);
 begin
-  ChangeState(AX, AY, AZ, FMarginLeft, FMarginTop, FMarginRight,
-    FMarginBottom, FFrameIndex, Visible, GetScale, [scX, scY, scZ]);
+  WijzigToestand(AX, AY, AZ, FMargeLinks, FMargeBoven, FMargeRechts,
+    FMargeOnder, FFrameNr, Visible, LeesSchaal, [scX, scY, scZ]);
 end;
 
 { @0046A374 }
-procedure TSprite.MoveBy(DX, DY, DZ: Integer);
+procedure TSprite.VerplaatsMet(DX, DY, DZ: Integer);
 begin
-  MoveTo3D(GetX + DX, GetY + DY, GetZ + DZ);
+  VerplaatsNaar3D(LeesX + DX, LeesY + DY, LeesZ + DZ);
 end;
 
 { @0046A3B0 }
-procedure TSprite.PlaySequence(Name: string; RepeatCount: Integer);
+procedure TSprite.SpeelReeks(Name: string; Herhalingen: Integer);
 begin
-  PlaySequenceAt(Name, RepeatCount, 0, 0);
+  SpeelReeksVanaf(Name, Herhalingen, 0, 0);
 end;
 
 { @0046A408  Name mag 'reeks:stap' zijn om bij een gegeven stap te starten;
-  RepeatCount -1 herhaalt voor altijd; DX, DY verschuiven de sprite eenmalig. }
-procedure TSprite.PlaySequenceAt(Name: string; RepeatCount: Integer; DX, DY: Integer);
+  Herhalingen -1 herhaalt voor altijd; DX, DY verschuiven de sprite eenmalig. }
+procedure TSprite.SpeelReeksVanaf(Name: string; Herhalingen: Integer; DX, DY: Integer);
 var
   Rest: string;
   P, StartStep: Integer;
@@ -447,165 +447,165 @@ var
   Delay: Double;
   BaseX, BaseY: Integer;
 begin
-  if FSequenceList.IndexOf(Name) = -1 then
+  if FReeksLijst.IndexOf(Name) = -1 then
   begin
     P := Pos(':', Name);   { LET OP: resultaat wordt niet gebruikt }
     Rest := Name;
-    Name := SplitFirst(Rest, ':');
-    StartStep := StrToIntDef0(Rest);
+    Name := SplitsEerste(Rest, ':');
+    StartStep := StrNaarIntDef0(Rest);
   end
   else
     StartStep := 0;
-  SetSequence(Name);
-  FRepeatCount := RepeatCount;
+  ZetReeks(Name);
+  FHerhalingen := Herhalingen;
   FStep := StartStep;
-  FTimer.Enabled := True;
+  FKlok.Enabled := True;
   { LET OP: de offsets van de stap worden hier niet gebruikt }
-  FSequence.GetStep(FStep, NewFrame, SDX, SDY, SDZ, Delay);
-  if FChanging then
+  FReeks.LeesStap(FStep, NewFrame, SDX, SDY, SDZ, Delay);
+  if FWijzigt then
   begin
-    BaseX := FNewX;
-    BaseY := FNewY;
+    BaseX := FNieuwX;
+    BaseY := FNieuwY;
   end
   else
   begin
-    BaseX := GetX;
-    BaseY := GetY;
+    BaseX := LeesX;
+    BaseY := LeesY;
   end;
-  ChangeState(DX + BaseX, DY + BaseY, GetZ, FMarginLeft, FMarginTop, FMarginRight,
-    FMarginBottom, NewFrame, Visible, GetScale, [scX, scY, scFrameIndex]);
-  FTimer.Interval := Round(Delay * 1000);
+  WijzigToestand(DX + BaseX, DY + BaseY, LeesZ, FMargeLinks, FMargeBoven, FMargeRechts,
+    FMargeOnder, NewFrame, Visible, LeesSchaal, [scX, scY, scFrameIndex]);
+  FKlok.Interval := Round(Delay * 1000);
 end;
 
 { @0046A5D4 }
-procedure TSprite.StopSequence;
+procedure TSprite.StopReeks;
 begin
-  FStopped := True;
-  FTimer.Enabled := False;
+  FGestopt := True;
+  FKlok.Enabled := False;
 end;
 
 { @0046A5EC }
-procedure TSprite.DoVisible(var NewVisible: Boolean);
+procedure TSprite.VerwerkZichtbaar(var NewVisible: Boolean);
 begin
-  if Assigned(FOnVisible) then
-    FOnVisible(Self, NewVisible);
+  if Assigned(FOnZichtbaar) then
+    FOnZichtbaar(Self, NewVisible);
 end;
 
 { @0046A60C }
-procedure TSprite.DoMove(var X, Y, Z: Integer);
+procedure TSprite.VerwerkVerplaatsing(var X, Y, Z: Integer);
 var
   I: Integer;
 begin
-  for I := FBehaviours.Count - 1 downto 0 do
-    if FBehaviours.IsActive(I) then
-      FBehaviours[I].Move(Self, X, Y, Z);
-  if Assigned(FOnMove) then
-    FOnMove(Self, X, Y, Z);
-  FBehaviours.Pack;
+  for I := FGedragingen.Count - 1 downto 0 do
+    if FGedragingen.IsActief(I) then
+      FGedragingen[I].Move(Self, X, Y, Z);
+  if Assigned(FOnVerplaats) then
+    FOnVerplaats(Self, X, Y, Z);
+  FGedragingen.Pack;
 end;
 
 { @0046A69C }
-procedure TSprite.DoFinishSequence(var RepeatCount: Integer);
+procedure TSprite.VerwerkReeksKlaar(var Herhalingen: Integer);
 var
   I: Integer;
 begin
-  for I := FBehaviours.Count - 1 downto 0 do
-    if FBehaviours.IsActive(I) then
-      FBehaviours[I].FinishSequence(Self, RepeatCount);
-  if Assigned(FOnFinishSequence) then
+  for I := FGedragingen.Count - 1 downto 0 do
+    if FGedragingen.IsActief(I) then
+      FGedragingen[I].ReeksKlaar(Self, Herhalingen);
+  if Assigned(FOnReeksKlaar) then
   begin
-    FStopped := False;
-    FOnFinishSequence(Self, FRepeatCount);
-    if FStopped then
+    FGestopt := False;
+    FOnReeksKlaar(Self, FHerhalingen);
+    if FGestopt then
       Exit;
   end;
-  FBehaviours.Pack;
+  FGedragingen.Pack;
 end;
 
 { @0046A720 }
-procedure TSprite.DoHit;
+procedure TSprite.VerwerkRaak;
 var
   I: Integer;
   Other: TSprite;
   R: TRect;
 begin
-  if Assigned(FOnHit) then
+  if Assigned(FOnRaak) then
   begin
-    if FHitTest in [htRect, htPixel] then
-      for I := 0 to FSpriteBox.Count - 1 do
+    if FTreffertest in [htRect, htPixel] then
+      for I := 0 to FSpriteVak.Count - 1 do
       begin
-        if I >= FSpriteBox.Count then
+        if I >= FSpriteVak.Count then
           Break;
-        Other := FSpriteBox.Items[I] as TSprite;
+        Other := FSpriteVak.Items[I] as TSprite;
         if (Self <> Other) and Other.Visible then
           if IntersectRect(R, GetBoundsRect, Other.GetBoundsRect) and
-            (FHitTest = htRect) then
-            FOnHit(Self, Other);
+            (FTreffertest = htRect) then
+            FOnRaak(Self, Other);
       end;
-    FBehaviours.Pack;
+    FGedragingen.Pack;
   end;
 end;
 
 { @0046A7EC }
-procedure TSprite.DoAfterBlit(Surface: TSurface; X, Y: Integer; Where: TRect;
+procedure TSprite.VerwerkNaBlit(Surface: TSurface; X, Y: Integer; Where: TRect;
   Size: Real);
 var
   I: Integer;
 begin
-  for I := FBehaviours.Count - 1 downto 0 do
-    if FBehaviours.IsActive(I) then
-      FBehaviours[I].AfterBlit(Self, Surface, X, Y, Where, Size);
-  if Assigned(FOnAfterBlit) then
-    FOnAfterBlit(Self, Surface, X, Y,
+  for I := FGedragingen.Count - 1 downto 0 do
+    if FGedragingen.IsActief(I) then
+      FGedragingen[I].NaBlit(Self, Surface, X, Y, Where, Size);
+  if Assigned(FOnNaBlit) then
+    FOnNaBlit(Self, Surface, X, Y,
       Rect(Where.Left + X, Where.Top + Y, Where.Left + X + Round(GetWidth * Size),
         Where.Top + Y + Round(GetHeight * Size)), Size);
-  FBehaviours.Pack;
+  FGedragingen.Pack;
 end;
 
 { @0046A924 }
-procedure TSprite.DoBeforeBlit(Surface: TSurface; X, Y: Integer; Where: TRect;
+procedure TSprite.VerwerkVoorBlit(Surface: TSurface; X, Y: Integer; Where: TRect;
   Size: Real);
 var
   I: Integer;
 begin
-  for I := FBehaviours.Count - 1 downto 0 do
-    if FBehaviours.IsActive(I) then
-      FBehaviours[I].BeforeBlit(Self, Surface, X, Y, Where, Size);
-  if Assigned(FOnBeforeBlit) then
-    FOnBeforeBlit(Self, Surface, X, Y, Where, Size);
-  FBehaviours.Pack;
+  for I := FGedragingen.Count - 1 downto 0 do
+    if FGedragingen.IsActief(I) then
+      FGedragingen[I].VoorBlit(Self, Surface, X, Y, Where, Size);
+  if Assigned(FOnVoorBlit) then
+    FOnVoorBlit(Self, Surface, X, Y, Where, Size);
+  FGedragingen.Pack;
 end;
 
-{ @0046A9D4  zoals TPixie.GetChange, maar een gewijzigd frame of Redraw telt ook mee }
-procedure TSprite.GetChange(var OldState, NewState: TPixieState);
+{ @0046A9D4  zoals TPixie.LeesWijziging, maar een gewijzigd frame of Redraw telt ook mee }
+procedure TSprite.LeesWijziging(var OldState, NewState: TPixieStaat);
 var
-  State: TPixieState;
+  State: TPixieStaat;
 begin
   OldState := FState;
-  GetState(State);
+  LeesStaat(State);
   FState := State;
   NewState := FState;
   if (NewState.Left = OldState.Left) and (NewState.Top = OldState.Top) and
     (NewState.Z = OldState.Z) and (NewState.Width = OldState.Width) and
-    (NewState.Height = OldState.Height) and (FLastFrame = GetCurrentFrame) and
-    (NewState.Visible = OldState.Visible) and not FForceRedraw then
+    (NewState.Height = OldState.Height) and (FVorigFrame = LeesHuidigFrame) and
+    (NewState.Visible = OldState.Visible) and not FForceerHertekenen then
   begin
     NewState.Visible := False;
     OldState.Visible := False;
   end;
-  FForceRedraw := False;
-  FLastFrame := GetCurrentFrame;
-  if FKilled then
+  FForceerHertekenen := False;
+  FVorigFrame := LeesHuidigFrame;
+  if FVerwijderd then
     Free;
 end;
 
 { @0046AAE8 }
-procedure TSprite.DoFrameSkipped(var Continue: Boolean);
+procedure TSprite.VerwerkOvergeslagenFrame(var Continue: Boolean);
 begin
-  if Assigned(FOnFrameSkipped) then
+  if Assigned(FOnFrameOvergeslagen) then
   begin
     Continue := True;
-    FOnFrameSkipped(Self, Continue);
+    FOnFrameOvergeslagen(Self, Continue);
     if Continue then
       ;   { LET OP: het resultaat wordt getest maar niet gebruikt }
   end;
@@ -616,25 +616,25 @@ procedure TSprite.MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
   I: Integer;
 begin
-  for I := FBehaviours.Count - 1 downto 0 do
-    if FBehaviours.IsActive(I) then
-      FBehaviours[I].MouseMove(Self, Shift, X, Y);
+  for I := FGedragingen.Count - 1 downto 0 do
+    if FGedragingen.IsActief(I) then
+      FGedragingen[I].MouseMove(Self, Shift, X, Y);
   if Assigned(OnMouseMove) then
     OnMouseMove(Self, Shift, X, Y);
-  FBehaviours.Pack;
+  FGedragingen.Pack;
 end;
 
 { @0046AB94 }
-procedure TSprite.MouseLeave;
+procedure TSprite.MuisVerlaten;
 var
   I: Integer;
 begin
-  for I := FBehaviours.Count - 1 downto 0 do
-    if FBehaviours.IsActive(I) then
-      FBehaviours[I].MouseLeave(Self);
+  for I := FGedragingen.Count - 1 downto 0 do
+    if FGedragingen.IsActief(I) then
+      FGedragingen[I].MuisVerlaten(Self);
   if Assigned(OnMouseLeave) then
     OnMouseLeave(Self);
-  FBehaviours.Pack;
+  FGedragingen.Pack;
 end;
 
 { @0046ABF0 }
@@ -643,12 +643,12 @@ procedure TSprite.MouseDown(Sender: TObject; Button: TMouseButton;
 var
   I: Integer;
 begin
-  for I := FBehaviours.Count - 1 downto 0 do
-    if FBehaviours.IsActive(I) then
-      FBehaviours[I].MouseDown(Self, Button, Shift, X, Y);
+  for I := FGedragingen.Count - 1 downto 0 do
+    if FGedragingen.IsActief(I) then
+      FGedragingen[I].MouseDown(Self, Button, Shift, X, Y);
   if Assigned(OnMouseDown) then
     OnMouseDown(Self, Button, Shift, X, Y);
-  FBehaviours.Pack;
+  FGedragingen.Pack;
 end;
 
 { @0046AC78 }
@@ -657,248 +657,248 @@ procedure TSprite.MouseUp(Sender: TObject; Button: TMouseButton;
 var
   I: Integer;
 begin
-  for I := FBehaviours.Count - 1 downto 0 do
-    if FBehaviours.IsActive(I) then
-      FBehaviours[I].MouseUp(Self, Button, Shift, X, Y);
+  for I := FGedragingen.Count - 1 downto 0 do
+    if FGedragingen.IsActief(I) then
+      FGedragingen[I].MouseUp(Self, Button, Shift, X, Y);
   if Assigned(OnMouseUp) then
     OnMouseUp(Self, Button, Shift, X, Y);
-  FBehaviours.Pack;
+  FGedragingen.Pack;
 end;
 
 { @0046AD00 }
-procedure TSprite.DrawDC(DC: HDC; DX, DY: Integer; ClipRect: TRect; Scale: Double);
+procedure TSprite.TekenDC(DC: HDC; DX, DY: Integer; ClipRect: TRect; Schaalfactor: Double);
 var
   X1, Y1, W, H: Integer;
 begin
-  Scale := GetScale * Scale;
-  X1 := DX + Round(FMarginLeft * Scale);
-  Y1 := DY + Round(FMarginTop * Scale);
+  Schaalfactor := LeesSchaal * Schaalfactor;
+  X1 := DX + Round(FMargeLinks * Schaalfactor);
+  Y1 := DY + Round(FMargeBoven * Schaalfactor);
   { LET OP: anders dan Draw worden alleen de rechter- en bovenmarge afgetrokken }
-  W := Round((GetWidth - FMarginRight) * Scale);
-  H := Round((GetHeight - FMarginTop) * Scale);
-  if FFrameIndex > -1 then
-    FFrameList.Frames[FFrameIndex].DrawDC(DC,
+  W := Round((GetWidth - FMargeRechts) * Schaalfactor);
+  H := Round((GetHeight - FMargeBoven) * Schaalfactor);
+  if FFrameNr > -1 then
+    FFrameLijst.Beelden[FFrameNr].TekenDC(DC,
       Rect(ClipRect.Left + X1, ClipRect.Top + Y1, ClipRect.Left + X1 + W,
         ClipRect.Top + Y1 + H),
-      FMirrorX, FMirrorY, PlotTransparent in FPlotmode);
+      FSpiegelX, FSpiegelY, PlotTransparent in FTekenmodus);
 end;
 
 { @0046AE50 }
 procedure TSprite.Draw(Surface: TSurface; DX, DY: Integer; ClipRect: TRect;
-  Scale: Double);
+  Schaalfactor: Double);
 var
   X1, Y1, W, H: Integer;
 begin
-  Scale := GetScale * Scale;
-  X1 := DX + Round(FMarginLeft * Scale);
-  Y1 := DY + Round(FMarginTop * Scale);
-  W := Round((GetWidth - FMarginRight - FMarginLeft) * Scale);
-  H := Round((GetHeight - FMarginTop - FMarginBottom) * Scale);
-  DoBeforeBlit(Surface, DX, DY, ClipRect, Scale);
-  if FFrameIndex > -1 then
-    FFrameList.Frames[FFrameIndex].Draw(Surface,
+  Schaalfactor := LeesSchaal * Schaalfactor;
+  X1 := DX + Round(FMargeLinks * Schaalfactor);
+  Y1 := DY + Round(FMargeBoven * Schaalfactor);
+  W := Round((GetWidth - FMargeRechts - FMargeLinks) * Schaalfactor);
+  H := Round((GetHeight - FMargeBoven - FMargeOnder) * Schaalfactor);
+  VerwerkVoorBlit(Surface, DX, DY, ClipRect, Schaalfactor);
+  if FFrameNr > -1 then
+    FFrameLijst.Beelden[FFrameNr].Draw(Surface,
       Rect(ClipRect.Left + X1, ClipRect.Top + Y1, ClipRect.Left + X1 + W,
         ClipRect.Top + Y1 + H),
-      FMirrorX, FMirrorY, PlotTransparent in FPlotmode);
-  DoAfterBlit(Surface, DX, DY, ClipRect, Scale);
+      FSpiegelX, FSpiegelY, PlotTransparent in FTekenmodus);
+  VerwerkNaBlit(Surface, DX, DY, ClipRect, Schaalfactor);
 end;
 
-{ @0046AFE8  OnSkipTimer van FTimer }
-procedure TSprite.TimerSkip(Sender: TObject);
+{ @0046AFE8  OnSkipTimer van FKlok }
+procedure TSprite.KlokOverslaan(Sender: TObject);
 var
   Continue: Boolean;
 begin
-  DoFrameSkipped(Continue);
-  TimerTick(Sender);
+  VerwerkOvergeslagenFrame(Continue);
+  KlokTik(Sender);
 end;
 
-{ @0046B008  OnTimer van FTimer: volgende stap van de huidige reeks }
-procedure TSprite.TimerTick(Sender: TObject);
+{ @0046B008  OnTimer van FKlok: volgende stap van de huidige reeks }
+procedure TSprite.KlokTik(Sender: TObject);
 var
   OldWidth, OldHeight: Integer;
   OffsX, OffsY: Integer;
   NewFrame, SDX, SDY, SDZ: Integer;
   Delay: Double;
 begin
-  if FKilled then
+  if FVerwijderd then
   begin
-    FTimer.Enabled := False;
-    FTimer.OnTimer := nil;
+    FKlok.Enabled := False;
+    FKlok.OnTimer := nil;
     Free;
   end
-  else if not FFrozen then
+  else if not FBevroren then
   begin
-    if FMirrorX then
+    if FSpiegelX then
       OldWidth := GetWidth;
-    if FMirrorY then
+    if FSpiegelY then
       OldHeight := GetHeight;
-    if FTimer.Enabled then
+    if FKlok.Enabled then
     begin
-      FSequence.GetStep(FStep, NewFrame, SDX, SDY, SDZ, Delay);
-      if FMirrorX then
+      FReeks.LeesStap(FStep, NewFrame, SDX, SDY, SDZ, Delay);
+      if FSpiegelX then
         SDX := -SDX;
-      if FMirrorY then
+      if FSpiegelY then
         SDY := -SDY;
-      ChangeState(GetX + SDX, GetY + SDY, GetZ + SDZ, FMarginLeft, FMarginTop,
-        FMarginRight, FMarginBottom, FFrameIndex, Visible, GetScale,
+      WijzigToestand(LeesX + SDX, LeesY + SDY, LeesZ + SDZ, FMargeLinks, FMargeBoven,
+        FMargeRechts, FMargeOnder, FFrameNr, Visible, LeesSchaal,
         [scX, scY, scZ]);
     end;
     Inc(FStep);
-    if FSequence.Count = FStep then
+    if FReeks.Count = FStep then
     begin
       FStep := 0;
-      if FRepeatCount <> -1 then
-        Dec(FRepeatCount);
-      DoFinishSequence(FRepeatCount);
-      if FKilled then
+      if FHerhalingen <> -1 then
+        Dec(FHerhalingen);
+      VerwerkReeksKlaar(FHerhalingen);
+      if FVerwijderd then
       begin
-        FTimer.Enabled := False;
-        FTimer.OnTimer := nil;
+        FKlok.Enabled := False;
+        FKlok.OnTimer := nil;
         Free;
         Exit;
       end;
-      if FRepeatCount = 0 then
-        FTimer.Enabled := False;
+      if FHerhalingen = 0 then
+        FKlok.Enabled := False;
     end;
-    if FTimer.Enabled then
+    if FKlok.Enabled then
     begin
       { LET OP: de offsets worden alleen hierboven toegepast, voor de zojuist afgeronde stap }
-      FSequence.GetStep(FStep, NewFrame, SDX, SDY, SDZ, Delay);
-      if FMirrorX then
-        OffsX := FFrameList.Frames[NewFrame].Width - OldWidth
+      FReeks.LeesStap(FStep, NewFrame, SDX, SDY, SDZ, Delay);
+      if FSpiegelX then
+        OffsX := FFrameLijst.Beelden[NewFrame].Width - OldWidth
       else
         OffsX := 0;
-      if FMirrorY then
-        OffsY := FFrameList.Frames[NewFrame].Height - OldHeight
+      if FSpiegelY then
+        OffsY := FFrameLijst.Beelden[NewFrame].Height - OldHeight
       else
         OffsY := 0;
-      ChangeState(GetX - OffsX, GetY - OffsY, GetZ, FMarginLeft, FMarginTop,
-        FMarginRight, FMarginBottom, NewFrame, Visible, GetScale, [scFrameIndex]);
-      FTimer.Interval := Round(Delay * 1000);
+      WijzigToestand(LeesX - OffsX, LeesY - OffsY, LeesZ, FMargeLinks, FMargeBoven,
+        FMargeRechts, FMargeOnder, NewFrame, Visible, LeesSchaal, [scFrameIndex]);
+      FKlok.Interval := Round(Delay * 1000);
     end;
   end;
 end;
 
 { @0046B2D0 }
-function TSprite.GetScale: Double;
+function TSprite.LeesSchaal: Double;
 begin
-  Result := FScale;
+  Result := FSchaal;
 end;
 
 { @0046B2EC  past een nieuwe toestand toe; geneste aanroepen (vanuit gebeurtenis-handlers)
-  werken alleen de wachtende waarden bij die door Changes zijn geselecteerd }
-procedure TSprite.ChangeState(AX, AY, AZ, AMarginLeft, AMarginTop, AMarginRight,
-  AMarginBottom, AFrameIndex: Integer; AVisible: Boolean; AScale: Double;
-  Changes: TSpriteChanges);
+  werken alleen de wachtende waarden bij die door Wijzigingen zijn geselecteerd }
+procedure TSprite.WijzigToestand(AX, AY, AZ, AMarginLeft, AMarginTop, AMarginRight,
+  AMargeOnder, AFrameNr: Integer; AVisible: Boolean; AScale: Double;
+  Wijzigingen: TSpriteWijzigingen);
 begin
   if csDesigning in ComponentState then
     Exit;
-  if FChanging then
+  if FWijzigt then
   begin
-    if scX in Changes then
-      FNewX := AX;
-    if scY in Changes then
-      FNewY := AY;
-    if scZ in Changes then
-      FNewZ := AZ;
-    if scMarginLeft in Changes then
-      FNewMarginLeft := AMarginLeft;
-    if scMarginTop in Changes then
-      FNewMarginTop := AMarginTop;
-    if scMarginRight in Changes then
-      FNewMarginRight := AMarginRight;
-    if scMarginBottom in Changes then
-      FNewMarginBottom := AMarginBottom;
-    if scVisible in Changes then
-      FNewVisible := AVisible;
-    if scScale in Changes then
-      FNewScale := AScale;
-    if scFrameIndex in Changes then
-      FNewFrameIndex := AFrameIndex;
+    if scX in Wijzigingen then
+      FNieuwX := AX;
+    if scY in Wijzigingen then
+      FNieuwY := AY;
+    if scZ in Wijzigingen then
+      FNieuwZ := AZ;
+    if scMarginLeft in Wijzigingen then
+      FNieuwMargeLinks := AMarginLeft;
+    if scMarginTop in Wijzigingen then
+      FNieuwMargeBoven := AMarginTop;
+    if scMarginRight in Wijzigingen then
+      FNieuwMargeRechts := AMarginRight;
+    if scMarginBottom in Wijzigingen then
+      FNieuwMargeOnder := AMargeOnder;
+    if scVisible in Wijzigingen then
+      FNieuwZichtbaar := AVisible;
+    if scScale in Wijzigingen then
+      FNieuwSchaal := AScale;
+    if scFrameIndex in Wijzigingen then
+      FNieuwFrameNr := AFrameNr;
   end
   else
   begin
-    FChanging := True;
-    FNewX := AX;
-    FNewY := AY;
-    FNewZ := AZ;
-    FNewFrameIndex := AFrameIndex;
-    FNewVisible := AVisible;
-    FNewScale := AScale;
-    FNewMarginLeft := AMarginLeft;
-    FNewMarginTop := AMarginTop;
-    FNewMarginRight := AMarginRight;
-    FNewMarginBottom := AMarginBottom;
+    FWijzigt := True;
+    FNieuwX := AX;
+    FNieuwY := AY;
+    FNieuwZ := AZ;
+    FNieuwFrameNr := AFrameNr;
+    FNieuwZichtbaar := AVisible;
+    FNieuwSchaal := AScale;
+    FNieuwMargeLinks := AMarginLeft;
+    FNieuwMargeBoven := AMarginTop;
+    FNieuwMargeRechts := AMarginRight;
+    FNieuwMargeOnder := AMargeOnder;
     { LET OP: het origineel leest hier de oude toestand zonder die te gebruiken }
-    GetLeft;
-    GetTop;
-    GetX;
-    GetY;
-    GetZ;
-    GetScale;
-    DoMove(FNewX, FNewY, FNewZ);
-    if FKilled then
-      FNewVisible := False;
-    inherited SetVisible(FNewVisible);
-    FFrameIndex := FNewFrameIndex;
-    inherited SetLeft(FNewX - Round(GetHotSpotX * FNewScale));
-    inherited SetTop(FNewY - Round(GetHotSpotY * FNewScale));
-    SetZOrder(FNewZ);
-    FScale := FNewScale;
-    FMarginLeft := FNewMarginLeft;
-    FMarginTop := FNewMarginTop;
-    FMarginRight := FNewMarginRight;
-    FMarginBottom := FNewMarginBottom;
-    if not FKilled and Visible then
-      DoHit;
-    FChanging := False;
+    LeesLinks;
+    LeesBoven;
+    LeesX;
+    LeesY;
+    LeesZ;
+    LeesSchaal;
+    VerwerkVerplaatsing(FNieuwX, FNieuwY, FNieuwZ);
+    if FVerwijderd then
+      FNieuwZichtbaar := False;
+    inherited SetVisible(FNieuwZichtbaar);
+    FFrameNr := FNieuwFrameNr;
+    inherited SetLeft(FNieuwX - Round(LeesHotSpotX * FNieuwSchaal));
+    inherited SetTop(FNieuwY - Round(LeesHotSpotY * FNieuwSchaal));
+    SetZOrder(FNieuwZ);
+    FSchaal := FNieuwSchaal;
+    FMargeLinks := FNieuwMargeLinks;
+    FMargeBoven := FNieuwMargeBoven;
+    FMargeRechts := FNieuwMargeRechts;
+    FMargeOnder := FNieuwMargeOnder;
+    if not FVerwijderd and Visible then
+      VerwerkRaak;
+    FWijzigt := False;
   end;
 end;
 
 { @0046B5A4 }
-function TSprite.GetAbout: string;
+function TSprite.LeesVersie: string;
 begin
   Result := '2.5c';
 end;
 
 { @0046B5C8  oppervlak met de frames van het huidige frame }
-function TSprite.GetSurface: TSurface;
+function TSprite.LeesOppervlak: TSurface;
 begin
-  if FFrameIndex = -1 then
+  if FFrameNr = -1 then
     Result := nil
   else
-    Result := FFrameList.Frames[FFrameIndex].Surface;
+    Result := FFrameLijst.Beelden[FFrameNr].Surface;
 end;
 
 { @0046B5F0 }
-function TSprite.GetSequence: TName;
+function TSprite.LeesReeks: TName;
 begin
-  if FSequence = nil then
+  if FReeks = nil then
     Result := ''
   else
-    Result := FSequence.Name;
+    Result := FReeks.Name;
 end;
 
 { @0046B614 }
-procedure TSprite.SetSequence(Value: TName);
+procedure TSprite.ZetReeks(Value: TName);
 begin
   if Value = '' then
-    FSequence := nil
+    FReeks := nil
   else
-    FSequence := FSequenceList.SequenceByName(Value);
+    FReeks := FReeksLijst.ReeksOpNaam(Value);
   FStep := 0;
 end;
 
 { @0046B65C }
 procedure TSprite.SetMouseCapture(Value: Boolean);
 begin
-  if Value <> FMouseCapture then
+  if Value <> FMuisVast then
   begin
-    FMouseCapture := Value;
+    FMuisVast := Value;
     if Value then
-      FSpriteBox.SetCapturePixie(Self)
+      FSpriteVak.ZetVastlegPixie(Self)
     else
-      FSpriteBox.SetCapturePixie(nil);
+      FSpriteVak.ZetVastlegPixie(nil);
   end;
 end;
 
@@ -908,284 +908,284 @@ var
   NewVisible: Boolean;
 begin
   NewVisible := Value;
-  DoVisible(NewVisible);
+  VerwerkZichtbaar(NewVisible);
   if NewVisible <> Visible then
-    ChangeState(GetX, GetY, GetZ, FMarginLeft, FMarginTop, FMarginRight,
-      FMarginBottom, FFrameIndex, NewVisible, GetScale, [scVisible]);
+    WijzigToestand(LeesX, LeesY, LeesZ, FMargeLinks, FMargeBoven, FMargeRechts,
+      FMargeOnder, FFrameNr, NewVisible, LeesSchaal, [scVisible]);
 end;
 
 { @0046B710 }
-procedure TSprite.SetMirrorX(Value: Boolean);
+procedure TSprite.ZetSpiegelX(Value: Boolean);
 begin
-  if Value <> FMirrorX then
+  if Value <> FSpiegelX then
   begin
-    FMirrorX := Value;
+    FSpiegelX := Value;
     Redraw;
   end;
 end;
 
 { @0046B724 }
-procedure TSprite.SetMirrorY(Value: Boolean);
+procedure TSprite.ZetSpiegelY(Value: Boolean);
 begin
-  if Value <> FMirrorY then
+  if Value <> FSpiegelY then
   begin
-    FMirrorY := Value;
+    FSpiegelY := Value;
     Redraw;
   end;
 end;
 
 { @0046B738 }
-procedure TSprite.SetX(Value: Integer);
+procedure TSprite.ZetX(Value: Integer);
 begin
-  if Value <> GetX then
-    ChangeState(Value, GetY, GetZ, FMarginLeft, FMarginTop, FMarginRight,
-      FMarginBottom, FFrameIndex, Visible, GetScale, [scX]);
+  if Value <> LeesX then
+    WijzigToestand(Value, LeesY, LeesZ, FMargeLinks, FMargeBoven, FMargeRechts,
+      FMargeOnder, FFrameNr, Visible, LeesSchaal, [scX]);
 end;
 
 { @0046B7AC }
-procedure TSprite.SetY(Value: Integer);
+procedure TSprite.ZetY(Value: Integer);
 begin
-  if Value <> GetY then
-    ChangeState(GetX, Value, GetZ, FMarginLeft, FMarginTop, FMarginRight,
-      FMarginBottom, FFrameIndex, Visible, GetScale, [scY]);
+  if Value <> LeesY then
+    WijzigToestand(LeesX, Value, LeesZ, FMargeLinks, FMargeBoven, FMargeRechts,
+      FMargeOnder, FFrameNr, Visible, LeesSchaal, [scY]);
 end;
 
 { @0046B820 }
 procedure TSprite.SetLeft(Value: Integer);
 begin
-  if Value <> GetLeft then
-    SetX(GetHotSpotX + Value);
+  if Value <> LeesLinks then
+    ZetX(LeesHotSpotX + Value);
 end;
 
 { @0046B84C }
 procedure TSprite.SetTop(Value: Integer);
 begin
-  if Value <> GetTop then
-    SetY(GetHotSpotY + Value);
+  if Value <> LeesBoven then
+    ZetY(LeesHotSpotY + Value);
 end;
 
 { @0046B878 }
-procedure TSprite.SetZ(Value: Integer);
+procedure TSprite.ZetZ(Value: Integer);
 begin
-  if Value <> GetZ then
+  if Value <> LeesZ then
   begin
     SetZOrder(Value);
-    ChangeState(GetX, GetY, Value, FMarginLeft, FMarginTop, FMarginRight,
-      FMarginBottom, FFrameIndex, Visible, GetScale, [scZ]);
+    WijzigToestand(LeesX, LeesY, Value, FMargeLinks, FMargeBoven, FMargeRechts,
+      FMargeOnder, FFrameNr, Visible, LeesSchaal, [scZ]);
   end;
 end;
 
 { @0046B8F8  sets Z and keeps the sprite box sorted }
 procedure TSprite.SetZOrder(Value: Integer);
 begin
-  if Value <> GetZ then
+  if Value <> LeesZ then
   begin
-    inherited SetZ(Value);
-    if FSpriteBox <> nil then
-      FSpriteBox.UpdateZOrder(Self);
+    inherited ZetZ(Value);
+    if FSpriteVak <> nil then
+      FSpriteVak.VernieuwZVolgorde(Self);
   end;
 end;
 
 { @0046B924 }
-procedure TSprite.SetMarginLeft(Value: Integer);
+procedure TSprite.ZetMargeLinks(Value: Integer);
 begin
-  if Value <> FMarginLeft then
-    ChangeState(GetX, GetY, GetZ, Value, FMarginTop, FMarginRight,
-      FMarginBottom, FFrameIndex, Visible, GetScale, [scMarginLeft]);
+  if Value <> FMargeLinks then
+    WijzigToestand(LeesX, LeesY, LeesZ, Value, FMargeBoven, FMargeRechts,
+      FMargeOnder, FFrameNr, Visible, LeesSchaal, [scMarginLeft]);
 end;
 
 { @0046B998 }
-procedure TSprite.SetMarginTop(Value: Integer);
+procedure TSprite.ZetMargeBoven(Value: Integer);
 begin
-  if Value <> FMarginTop then
-    ChangeState(GetX, GetY, GetZ, FMarginLeft, Value, FMarginRight,
-      FMarginBottom, FFrameIndex, Visible, GetScale, [scMarginTop]);
+  if Value <> FMargeBoven then
+    WijzigToestand(LeesX, LeesY, LeesZ, FMargeLinks, Value, FMargeRechts,
+      FMargeOnder, FFrameNr, Visible, LeesSchaal, [scMarginTop]);
 end;
 
 { @0046BA0C }
-procedure TSprite.SetMarginRight(Value: Integer);
+procedure TSprite.ZetMargeRechts(Value: Integer);
 begin
-  if Value <> FMarginRight then
-    ChangeState(GetX, GetY, GetZ, FMarginLeft, FMarginTop, Value,
-      FMarginBottom, FFrameIndex, Visible, GetScale, [scMarginRight]);
+  if Value <> FMargeRechts then
+    WijzigToestand(LeesX, LeesY, LeesZ, FMargeLinks, FMargeBoven, Value,
+      FMargeOnder, FFrameNr, Visible, LeesSchaal, [scMarginRight]);
 end;
 
 { @0046BA80 }
-procedure TSprite.SetMarginBottom(Value: Integer);
+procedure TSprite.ZetMargeOnder(Value: Integer);
 begin
-  if Value <> FMarginBottom then
-    ChangeState(GetX, GetY, GetZ, FMarginLeft, FMarginTop, FMarginRight,
-      Value, FFrameIndex, Visible, GetScale, [scMarginBottom]);
+  if Value <> FMargeOnder then
+    WijzigToestand(LeesX, LeesY, LeesZ, FMargeLinks, FMargeBoven, FMargeRechts,
+      Value, FFrameNr, Visible, LeesSchaal, [scMarginBottom]);
 end;
 
 { @0046BAF4  X is de positie van het hotspot-punt }
-function TSprite.GetX: Integer;
+function TSprite.LeesX: Integer;
 begin
-  Result := GetLeft + Round(GetHotSpotX * GetScale);
+  Result := LeesLinks + Round(LeesHotSpotX * LeesSchaal);
 end;
 
 { @0046BB50 }
-function TSprite.GetY: Integer;
+function TSprite.LeesY: Integer;
 begin
-  Result := GetTop + Round(GetHotSpotY * GetScale);
+  Result := LeesBoven + Round(LeesHotSpotY * LeesSchaal);
 end;
 
 { @0046BBAC }
 function TSprite.GetWidth: Integer;
 begin
-  Result := FMarginLeft + FMarginRight;
-  if FFrameIndex <> -1 then
-    Inc(Result, FFrameList.Frames[FFrameIndex].Width);
+  Result := FMargeLinks + FMargeRechts;
+  if FFrameNr <> -1 then
+    Inc(Result, FFrameLijst.Beelden[FFrameNr].Width);
 end;
 
 { @0046BBE0 }
 function TSprite.GetHeight: Integer;
 begin
-  Result := FMarginTop + FMarginBottom;
-  if FFrameIndex <> -1 then
-    Inc(Result, FFrameList.Frames[FFrameIndex].Height);
+  Result := FMargeBoven + FMargeOnder;
+  if FFrameNr <> -1 then
+    Inc(Result, FFrameLijst.Beelden[FFrameNr].Height);
 end;
 
 { @0046BC14 }
-function TSprite.GetHotSpotX: Integer;
+function TSprite.LeesHotSpotX: Integer;
 begin
-  if (FFrameIndex = -1) or (FFrameList.Count = 0) then
-    Result := FMarginLeft
+  if (FFrameNr = -1) or (FFrameLijst.Count = 0) then
+    Result := FMargeLinks
   else
-    Result := FFrameList.Frames[FFrameIndex].HotSpotX + FMarginLeft;
+    Result := FFrameLijst.Beelden[FFrameNr].HotSpotX + FMargeLinks;
 end;
 
 { @0046BC50 }
-function TSprite.GetHotSpotY: Integer;
+function TSprite.LeesHotSpotY: Integer;
 begin
-  if (FFrameIndex = -1) or (FFrameList.Count = 0) then
-    Result := FMarginTop
+  if (FFrameNr = -1) or (FFrameLijst.Count = 0) then
+    Result := FMargeBoven
   else
-    Result := FFrameList.Frames[FFrameIndex].HotSpotY + FMarginTop;
+    Result := FFrameLijst.Beelden[FFrameNr].HotSpotY + FMargeBoven;
 end;
 
 { @0046BC8C }
 function TSprite.GetTransparent: TColor;
 begin
-  Result := FFrameList.TransparentColor;
+  Result := FFrameLijst.TransparentColor;
 end;
 
 { @0046BC94 }
 procedure TSprite.SetTransparent(Value: TColor);
 begin
-  FFrameList.SetTransparentColor(Value);
+  FFrameLijst.SetTransparentColor(Value);
 end;
 
 { @0046BCA0 }
-procedure TSprite.SetSpriteBox(Value: TSpriteBox);
+procedure TSprite.ZetSpriteVak(Value: TSpriteBox);
 begin
   try
-    if FSpriteBox <> nil then
-      FSpriteBox.RemovePixie(Self);
-    FSpriteBox := Value;
-    if FSpriteBox <> nil then
+    if FSpriteVak <> nil then
+      FSpriteVak.VerwijderPixie(Self);
+    FSpriteVak := Value;
+    if FSpriteVak <> nil then
     begin
-      FSpriteBox.AddPixie(Self);
-      FFrameList.Surface.ConvertTo(FSpriteBox.Picture);
+      FSpriteVak.VoegPixieToe(Self);
+      FFrameLijst.Surface.ConverteerNaar(FSpriteVak.Picture);
     end;
   finally
   end;
 end;
 
 { @0046BD08 }
-procedure TSprite.SetFrameList(Value: TFrameList);
+procedure TSprite.ZetFrameLijst(Value: TFrameList);
 begin
-  FFrameList.Assign(Value);
+  FFrameLijst.Assign(Value);
 end;
 
 { @0046BD18 }
-procedure TSprite.SetSequenceList(Value: TSequenceList);
+procedure TSprite.ZetReeksLijst(Value: TSequenceList);
 begin
-  FSequenceList.Assign(Value);
+  FReeksLijst.Assign(Value);
 end;
 
 { @0046BD24 }
-function TSprite.GetCurrentFrame: TName;
+function TSprite.LeesHuidigFrame: TName;
 begin
-  if FFrameIndex = -1 then
+  if FFrameNr = -1 then
     Result := ''
   else
-    Result := FFrameList.Frames[FFrameIndex].Name;
+    Result := FFrameLijst.Beelden[FFrameNr].Name;
 end;
 
 { @0046BD58 }
-procedure TSprite.SetCurrentFrame(Value: TName);
+procedure TSprite.ZetHuidigFrame(Value: TName);
 var
   Index: Integer;
 begin
   if (Value = '') and (csDesigning in ComponentState) then
-    SetFrameIndex(-1)
+    ZetFrameNr(-1)
   else if (Value <> '') and (Value <> 'None') then
   begin
-    Index := FFrameList.IndexOf(Value);
+    Index := FFrameLijst.IndexOf(Value);
     if Index <> -1 then
-      SetFrameIndex(Index)
+      ZetFrameNr(Index)
     else
       raise ESprite.Create('Frame not found: ' + Value);
   end;
 end;
 
 { @0046BE60  LET OP: tijdens het uitvoeren wordt FrameIndex -1 genegeerd }
-procedure TSprite.SetFrameIndex(Value: Integer);
+procedure TSprite.ZetFrameNr(Value: Integer);
 begin
   if csDesigning in ComponentState then
   begin
-    if (Value >= -1) and (Value < FFrameList.Count) then
-      FFrameIndex := Value
+    if (Value >= -1) and (Value < FFrameLijst.Count) then
+      FFrameNr := Value
     else
       raise ESprite.Create('Frameindex should be between -1 and ' +
-        IntToStr(FFrameList.Count - 1));
+        IntToStr(FFrameLijst.Count - 1));
   end
   else if Value <> -1 then
-    ChangeState(GetX, GetY, GetZ, FMarginLeft, FMarginTop, FMarginRight,
-      FMarginBottom, Value, Visible, GetScale, [scFrameIndex]);
+    WijzigToestand(LeesX, LeesY, LeesZ, FMargeLinks, FMargeBoven, FMargeRechts,
+      FMargeOnder, Value, Visible, LeesSchaal, [scFrameIndex]);
 end;
 
 { @0046BF94 }
-procedure TSprite.SetScale(Value: Double);
+procedure TSprite.ZetSchaal(Value: Double);
 begin
-  if GetScale <> Value then
-    ChangeState(GetX, GetY, GetZ, FMarginLeft, FMarginTop, FMarginRight,
-      FMarginBottom, FFrameIndex, Visible, Value, [scScale]);
+  if LeesSchaal <> Value then
+    WijzigToestand(LeesX, LeesY, LeesZ, FMargeLinks, FMargeBoven, FMargeRechts,
+      FMargeOnder, FFrameNr, Visible, Value, [scScale]);
 end;
 
 { @0046C010 }
-function TSprite.GetFrozen: Boolean;
+function TSprite.LeesBevroren: Boolean;
 begin
-  Result := FFrozen;
+  Result := FBevroren;
 end;
 
 { @0046C018 }
-procedure TSprite.SetPriority(Value: Integer);
+procedure TSprite.ZetPrioriteit(Value: Integer);
 begin
-  FTimer.Priority := Value;
+  FKlok.Priority := Value;
 end;
 
 { @0046C024 }
-function TSprite.GetPriority: Integer;
+function TSprite.LeesPrioriteit: Integer;
 begin
-  Result := FTimer.Priority;
+  Result := FKlok.Priority;
 end;
 
 { @0046C030 }
-function TSprite.GetBehaviour(Name: string): TBehaviour;
+function TSprite.LeesGedrag(Name: string): TBehaviour;
 begin
-  Result := FBehaviours.Find(Name);
+  Result := FGedragingen.Find(Name);
 end;
 
 { @0046C084 }
-procedure TSprite.AddBehaviour(Name: string; Behaviour: TBehaviour);
+procedure TSprite.VoegGedragToe(Name: string; Behaviour: TBehaviour);
 begin
   if Behaviour <> nil then
   begin
     Behaviour.FName := Name;
-    Behaviour.SetSprite(Self);
-    FBehaviours.Add(Behaviour);
+    Behaviour.ZetSprite(Self);
+    FGedragingen.Add(Behaviour);
   end;
 end;
 
@@ -1199,21 +1199,21 @@ begin
 end;
 
 { @0046C100 }
-function TSpriteList.SpriteByName(Name: string): TSprite;
+function TSpriteList.SpriteOpNaam(Name: string): TSprite;
 var
   I: Integer;
 begin
   for I := 0 to Count - 1 do
-    if SameText2(GetSprite(I).Name, Name) then
+    if GelijkTekst2(LeesSprite(I).Name, Name) then
     begin
-      Result := GetSprite(I);
+      Result := LeesSprite(I);
       Exit;
     end;
   Result := nil;
 end;
 
 { @0046C180 }
-function TSpriteList.GetSprite(Index: Integer): TSprite;
+function TSpriteList.LeesSprite(Index: Integer): TSprite;
 begin
   Result := TObject(Get(Index)) as TSprite;
 end;
@@ -1232,17 +1232,17 @@ end;
 destructor TBehaviour.Destroy;
 begin
   if FSprite <> nil then
-    Detach;
+    Ontkoppel;
   inherited Destroy;
 end;
 
 { @0046C218 }
-procedure TBehaviour.FinishSequence(Sender: TObject; var RepeatCount: Integer);
+procedure TBehaviour.ReeksKlaar(Sender: TObject; var Herhalingen: Integer);
 begin
 end;
 
 { @0046C21C }
-procedure TBehaviour.Hit(Sender: TObject; HitWhom: TSprite);
+procedure TBehaviour.Raak(Sender: TObject; HitWhom: TSprite);
 begin
 end;
 
@@ -1252,13 +1252,13 @@ begin
 end;
 
 { @0046C228 }
-procedure TBehaviour.AfterBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
+procedure TBehaviour.NaBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
   Where: TRect; Size: Real);
 begin
 end;
 
 { @0046C248 }
-procedure TBehaviour.BeforeBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
+procedure TBehaviour.VoorBlit(Sender: TObject; Surface: TSurface; X, Y: Integer;
   Where: TRect; Size: Real);
 begin
 end;
@@ -1269,7 +1269,7 @@ begin
 end;
 
 { @0046C270 }
-procedure TBehaviour.MouseLeave(Sender: TObject);
+procedure TBehaviour.MuisVerlaten(Sender: TObject);
 begin
 end;
 
@@ -1286,21 +1286,21 @@ begin
 end;
 
 { @0046C284 }
-procedure TBehaviour.VisibleChange(Sender: TObject; var NewVisible: Boolean);
+procedure TBehaviour.ZichtbaarWijziging(Sender: TObject; var NewVisible: Boolean);
 begin
 end;
 
 { @0046C288 }
-procedure TBehaviour.SetSprite(Value: TSprite);
+procedure TBehaviour.ZetSprite(Value: TSprite);
 begin
   FSprite := Value;
 end;
 
 { @0046C28C }
-procedure TBehaviour.Detach;
+procedure TBehaviour.Ontkoppel;
 begin
   SetActive(False);
-  FSprite.FBehaviours.Remove(Self);
+  FSprite.FGedragingen.Remove(Self);
 end;
 
 { @0046C2AC }
@@ -1309,14 +1309,14 @@ begin
   FActive := Value;
 end;
 
-{ @0046C2B0  deactiveert zichzelf en activeert NextBehaviour }
-procedure TBehaviour.Finish;
+{ @0046C2B0  deactiveert zichzelf en activeert VolgendGedrag }
+procedure TBehaviour.Afronden;
 begin
   SetActive(False);
-  if Assigned(FOnFinish) then
-    FOnFinish(Self);
-  if FNextBehaviour <> '' then
-    FSprite.GetBehaviour(FNextBehaviour).SetActive(True);
+  if Assigned(FOnKlaar) then
+    FOnKlaar(Self);
+  if FVolgendGedrag <> '' then
+    FSprite.LeesGedrag(FVolgendGedrag).SetActive(True);
 end;
 
 { ------------------------------------------------------------- TBehaviourList }
@@ -1329,7 +1329,7 @@ begin
 end;
 
 { @0046C2F8 }
-function TBehaviourList.GetBehaviour(Index: Integer): TBehaviour;
+function TBehaviourList.LeesGedrag(Index: Integer): TBehaviour;
 begin
   Result := TObject(Get(Index)) as TBehaviour;
 end;
@@ -1340,10 +1340,10 @@ var
   I: Integer;
 begin
   for I := 0 to Count - 1 do
-    if GetBehaviour(I) <> nil then
-      if GetBehaviour(I).FName = Name then
+    if LeesGedrag(I) <> nil then
+      if LeesGedrag(I).FName = Name then
       begin
-        Result := GetBehaviour(I);
+        Result := LeesGedrag(I);
         Exit;
       end;
   Result := nil;
@@ -1354,11 +1354,11 @@ function TBehaviourList.Remove(Behaviour: TBehaviour): Integer;
 begin
   Result := IndexOf(Behaviour);
   if Result <> -1 then
-    ClearItem(Result);
+    WisItem(Result);
 end;
 
 { @0046C3C0 }
-procedure TBehaviourList.ClearItem(Index: Integer);
+procedure TBehaviourList.WisItem(Index: Integer);
 begin
   if (Index >= 0) and (Index < Count) then
     Put(Index, nil);
@@ -1370,14 +1370,14 @@ var
   I: Integer;
 begin
   for I := Count - 1 downto 0 do
-    if GetBehaviour(I) = nil then
+    if LeesGedrag(I) = nil then
       Delete(I);
 end;
 
 { @0046C400 }
-function TBehaviourList.IsActive(Index: Integer): Boolean;
+function TBehaviourList.IsActief(Index: Integer): Boolean;
 begin
-  Result := (GetBehaviour(Index) <> nil) and GetBehaviour(Index).FActive;
+  Result := (LeesGedrag(Index) <> nil) and LeesGedrag(Index).FActive;
 end;
 
 { De finalization bij @0046C42C geeft SpriteMotto en SpriteMotto2 vrij. }

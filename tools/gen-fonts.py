@@ -14,6 +14,7 @@ Usage: python tools/gen-fonts.py [output.inc]
 """
 import os
 import sys
+import zlib
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -59,55 +60,106 @@ def words(*vals):
     return out
 
 
-def render_face(path, em, metrics):
-    font = ImageFont.truetype(path, em)
-    asc, desc = font.getmetrics()
-    yshift = 0
-    if metrics:
-        yshift = metrics[0] - asc
-        asc, desc = metrics
-    data = bytearray()
-    advs = []
+def render_glyphs(font, em, asc, desc, yshift, aa):
+    """Render the 256 cp1252 glyphs. aa=False: 1-bit glyphs with the hinted mono advances
+    (what Wine/Windows use on <= 8 bpp DIBs); aa=True: 0..16 grey levels (GGO_GRAY4)
+    with the normal hinted advances (Wine on deeper DIBs)."""
+    mode = 'L' if aa else '1'
     glyphs = []
     for c in range(256):
         ch = cp1252_char(c) if c >= 32 else None
         if ch is None or c == 0x7F:
-            glyphs.append((0 if c < 32 else round(font.getlength('?')), 0, 0, 0, 0, b''))
+            glyphs.append((0 if c < 32 else round(font.getlength('?', mode=mode)), 0, 0, 0, 0, b''))
             continue
-        adv = round(font.getlength(ch))
+        adv = round(font.getlength(ch, mode=mode))
         pad = em
         w = adv + 3 * pad
         h = asc + desc + 2 * pad
-        img = Image.new('1', (w, h), 0)
+        img = Image.new('L', (w, h), 0)
         dr = ImageDraw.Draw(img)
-        dr.fontmode = '1'
+        dr.fontmode = mode
         base_x, base_y = pad, pad + asc - yshift
-        dr.text((base_x, base_y), ch, font=font, fill=1, anchor='ls')
+        dr.text((base_x, base_y), ch, font=font, fill=255, anchor='ls')
         bbox = img.getbbox()
         if bbox is None:
             glyphs.append((adv, 0, 0, 0, 0, b''))
-            advs.append(adv)
             continue
         l, t, r, b = bbox
         crop = img.crop(bbox)
         gw, gh = r - l, b - t
-        stride = (gw + 7) // 8
-        bits = bytearray(stride * gh)
         px = crop.load()
-        for y in range(gh):
-            for x in range(gw):
-                if px[x, y]:
-                    bits[y * stride + x // 8] |= 0x80 >> (x % 8)
+        if aa:
+            bits = bytearray(gw * gh)
+            for y in range(gh):
+                for x in range(gw):
+                    # zoals Wine (get_bitmap_outline): niveau = dekking * 17 / 256, naar
+                    # beneden afgerond; niveau 1 tekent Wine niet (dibdrv draw_glyph)
+                    bits[y * gw + x] = px[x, y] * 17 // 256
+        else:
+            stride = (gw + 7) // 8
+            bits = bytearray(stride * gh)
+            for y in range(gh):
+                for x in range(gw):
+                    if px[x, y] >= 128:
+                        bits[y * stride + x // 8] |= 0x80 >> (x % 8)
         glyphs.append((adv, gw, gh, l - base_x, t - pad, bytes(bits)))
-        advs.append(adv)
-    avg = round(font.getlength('x')) if em > 0 else 0
+    return glyphs
+
+
+def gasp_gray(path, ppem):
+    """True when the font's 'gasp' table asks for grey-scale rendering at ppem
+    (Windows and Wine only anti-alias where gasp says GASP_DOGRAY)."""
+    import struct
+    data = open(path, 'rb').read()
+    num = struct.unpack('>H', data[4:6])[0]
+    for i in range(num):
+        tag, _, off, length = struct.unpack('>4sIII', data[12 + 16 * i:28 + 16 * i])
+        if tag == b'gasp':
+            n = struct.unpack('>H', data[off + 2:off + 4])[0]
+            for j in range(n):
+                maxppem, behavior = struct.unpack('>HH', data[off + 4 + 4 * j:off + 8 + 4 * j])
+                if ppem <= maxppem:
+                    return bool(behavior & 2)
+            return False
+    return True
+
+
+def win_metrics(path, ppem):
+    """tmAscent/tmDescent like Wine: usWinAscent/usWinDescent scaled to ppem, rounded."""
+    import struct
+    data = open(path, 'rb').read()
+    num = struct.unpack('>H', data[4:6])[0]
+    tables = {}
+    for i in range(num):
+        tag, _, off, length = struct.unpack('>4sIII', data[12 + 16 * i:28 + 16 * i])
+        tables[tag] = off
+    upem = struct.unpack('>H', data[tables[b'head'] + 18:tables[b'head'] + 20])[0]
+    o = tables[b'OS/2']
+    win_a, win_d = struct.unpack('>HH', data[o + 74:o + 78])
+    return int(win_a * ppem / upem + 0.5), int(win_d * ppem / upem + 0.5)
+
+
+def render_face(path, em, metrics):
+    font = ImageFont.truetype(path, em, layout_engine=ImageFont.Layout.BASIC)
+    asc, desc = win_metrics(path, em)
+    fasc, _ = font.getmetrics()
+    yshift = 0   # baseline at tmAscent
+    if metrics:
+        yshift = metrics[0] - fasc
+        asc, desc = metrics
+    mono = render_glyphs(font, em, asc, desc, yshift, False)
+    aa = render_glyphs(font, em, asc, desc, yshift, True)
     # Windows' tmAveCharWidth for proportional fonts is the weighted average of a-z + space
     lower = 'abcdefghijklmnopqrstuvwxyz '
-    avg = round(sum(font.getlength(ch) for ch in lower) / len(lower))
-    data += words(em, asc, desc, avg, max(advs))
-    for adv, gw, gh, xo, yo, bits in glyphs:
-        data += words(adv, gw, gh, xo, yo)
-        data += bits
+    avg = round(sum(mono[ord(ch)][0] for ch in lower) / len(lower))
+    data = bytearray()
+    # Grijs alleen waar de eigen 'gasp'-tabel van het font daarom vraagt (Liberation Sans
+    # Bold: altijd; Regular: tot 8 en vanaf 18 ppem), zoals Wine.
+    data += words(em, asc, desc, avg, max(g[0] for g in mono), 1 if gasp_gray(path, em) else 0)
+    for glyphs in (mono, aa):
+        for adv, gw, gh, xo, yo, bits in glyphs:
+            data += words(adv, gw, gh, xo, yo)
+            data += bits
     return data
 
 
@@ -130,10 +182,13 @@ def main():
         f.write(',\n'.join("    (Family: '%s'; Bold: %s; Italic: %s; Offset: %d)  { em %d }" %
                            (fam, str(b), str(i), off, em) for fam, b, i, off, em in infos))
         f.write('\n  );\n\n')
-        f.write('  ZMFontData: array[0..%d] of Byte = (\n' % (len(blob) - 1))
-        for i in range(0, len(blob), 24):
-            chunk = blob[i:i + 24]
-            f.write('    ' + ','.join('$%02x' % b for b in chunk) + (',' if i + 24 < len(blob) else '') + '\n')
+        z = zlib.compress(bytes(blob), 9)
+        f.write('  { zlib-compressed glyph data, %d bytes when inflated }\n' % len(blob))
+        f.write('  ZMFontDataSize = %d;\n' % len(blob))
+        f.write('  ZMFontDataZ: array[0..%d] of Byte = (\n' % (len(z) - 1))
+        for i in range(0, len(z), 24):
+            chunk = z[i:i + 24]
+            f.write('    ' + ','.join('$%02x' % b for b in chunk) + (',' if i + 24 < len(z) else '') + '\n')
         f.write('  );\n')
     print('wrote %s: %d faces, %d bytes' % (OUT, len(infos), len(blob)))
 

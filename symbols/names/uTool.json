@@ -1,19 +1,19 @@
 {
   "functions": {
-    "00460b34": "uTool.IMax",
-    "00460b3c": "uTool.IMin",
+    "00460b34": "uTool.IMaximum",
+    "00460b3c": "uTool.IMinimum",
     "00460b44": "uTool.FMax",
     "00460b78": "uTool.FMin",
-    "00460bac": "uTool.Interpolate",
-    "00460c54": "uTool.FreeList",
-    "00460cd0": "uTool.RandomString",
+    "00460bac": "uTool.Interpoleer",
+    "00460c54": "uTool.LijstVrijgeven",
+    "00460cd0": "uTool.WillekeurigeTekst",
     "00460cf0": "TPos.Create",
     "00460d20": "TRectPos.Create",
-    "00460d6c": "TRectPos.CreateRect",
-    "00460dd0": "TRectPos.GetRect",
+    "00460d6c": "TRectPos.MaakRect",
+    "00460dd0": "TRectPos.LeesRect",
     "00460dec": "TRectPos.SetRect",
-    "00460e28": "TRectPos.Intersects",
-    "00460e64": "TRectPos.Union",
+    "00460e28": "TRectPos.Overlapt",
+    "00460e64": "TRectPos.Vereniging",
     "00460ea4": "TPosList.Create",
     "00461024": "TPosList.Sort",
     "00460ee4": "TPosList.Sort.Key",
@@ -21,25 +21,25 @@
     "00460f5c": "TPosList.Sort.QuickSort",
     "00461054": "TPosList.Add",
     "004610cc": "TPosList.GetItem",
-    "004610ec": "uTool.IsEven",
+    "004610ec": "uTool.IsPaar",
     "00461104": "TPosList.Find",
     "00461234": "TPosList.Insert",
     "00461254": "TPosList.IndexOf",
     "004612e4": "TRectPosList.GetItem",
     "00461304": "TRectPosList.Add",
-    "00461324": "TRectPosList.AddRect",
-    "00461358": "uTool.RectWidth",
-    "00461378": "uTool.RectHeight",
-    "00461398": "uTool.RoundUp",
-    "004613d0": "uTool.InPort",
-    "004613ec": "uTool.GetWinVersion",
-    "00461428": "uTool.FindFiles",
+    "00461324": "TRectPosList.VoegRectToe",
+    "00461358": "uTool.RechthoekBreedte",
+    "00461378": "uTool.RechthoekHoogte",
+    "00461398": "uTool.RondOmhoog",
+    "004613d0": "uTool.LeesPoort",
+    "004613ec": "uTool.LeesWinVersie",
+    "00461428": "uTool.ZoekBestanden",
     "0046152c": "uTool.Initialization"
   },
   "globals": {
-    "00488d04": "uTool.DayNames",
-    "0048a8a0": "uTool.AppPath",
-    "0048a8a4": "uTool.AppName"
+    "00488d04": "uTool.DagNamen",
+    "0048a8a0": "uTool.AppPad",
+    "0048a8a4": "uTool.AppNaam"
   },
   "fields": {
     "TPos": {
@@ -68,7 +68,7 @@
         "Boolean"
       ],
       "0x11": [
-        "FKeepSorted",
+        "FSorteerBehouden",
         "Boolean"
       ]
     }

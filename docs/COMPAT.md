@@ -5,7 +5,8 @@ Win32 and DirectDraw. `src/compat/` provides units with the **same names and API
 implemented portably, so the unmodified game source builds with Free Pascal and runs on
 Linux, macOS (aarch64-darwin, SDL3) and later WebAssembly. FPC's own RTL supplies
 `System`, `SysUtils`, `Classes` (TReader/TWriter for the DFM streams), `Math`,
-`IniFiles`, `Contnrs` and `TypInfo`; compat does not shadow them.
+`Contnrs` and `TypInfo`; compat does not shadow them. `IniFiles` is the exception: see
+"INI-bestanden" below.
 
 ## Layers
 
@@ -87,6 +88,14 @@ TStatusBar, TTrackBar, TStringGrid/TDrawGrid, TDirectoryListBox etc.). `MessageB
 `ShowMessage`, `MessageDlg`, `InputQuery` and `TOpenDialog`/`TSaveDialog` are modal forms
 inside the emulated screen.
 
+TMemo breekt regels af zoals de edit-control van Wine (`EDIT_BuildLineDefs_ML`): het
+opmaakrechthoek is het clientgebied min de scrollbalk, 1 pixel per kant voor
+WS_EX_CLIENTEDGE en voor TrueType-fonts een marge van een halve gemiddelde tekenbreedte;
+een te brede regel krijgt een geschat breekpunt (breedte/opmaakbreedte, min 0,2 boven
+1,2) en zoekt van daaruit naar links de eerste woordgrens die past. Daardoor zijn regels
+vaak korter dan nodig; de originele schermen (intro- en leveltekst) laten precies die
+afbrekingen zien, en het spel tekent de memoregels zelf (TBehavMemo).
+
 ### Forms from ROS.exe
 
 `TCustomForm.Create` loads the RCDATA resource named after the form class (and its
@@ -94,6 +103,22 @@ ancestors, like `InitInheritedComponent`) **from the user's original ROS.exe** (
 resource reader in `ZMData`) and streams it with FPC's `TReader`. Unknown properties are
 skipped (listed with `ZM_DEBUG=1`), missing event handlers are reported. No game data
 is in the repository; `{$R *.dfm}` in the game units is Delphi-only.
+
+Anti-aliasing en breedtes, zoals Wine (de referentie) het doet:
+
+* Per lettergrootte zijn er twee glyphsets: zwart-wit met de *mono*-gehinte advances
+  (FreeType `TARGET_MONO`) en 17 grijsniveaus (GGO_GRAY4) met de normaal gehinte
+  advances. Grijs wordt alleen gebruikt op doelen van meer dan 8 bpp, niet voor
+  bitmapfonts (MS Sans Serif, System) en alleen waar de eigen `gasp`-tabel van het
+  font grijs vraagt (Liberation Sans Regular: tot 8 en vanaf 18 ppem; Bold: altijd).
+  `ZM_NO_AA=1` zet anti-aliasing uit.
+* Tekstbreedtes (`GetTextExtentPoint`, `DrawText`) gebruiken altijd de normaal
+  gehinte advances, ook als de glyphs zwart-wit getekend worden.
+* tmAscent/tmDescent zijn usWinAscent/usWinDescent geschaald en afgerond.
+* Grijsniveau = FreeType-dekking * 17 / 256 (naar beneden afgerond, zoals
+  `get_bitmap_outline` in Wine); niveau 0 en 1 laten de pixel ongemoeid, 16 is de
+  tekstkleur, daartussen mengt `ZMGdi.AAComp` met de gammacurve van Wine
+  (`dibdrv/primitives.c`). Hiermee zijn de teksten pixel-gelijk aan de referentie.
 
 ### Data files and paths
 
@@ -112,10 +137,37 @@ the data directory. The game builds paths as `ExtractFilePath(ParamStr(0)) + '\'
   for `ZoetermeerGame.ini`, the file is `ZoetermeerGame.Ini`); files in subdirectories get
   one link each, so `FindFirst('<shadow>/\images\8bits\*.bmp')` returns every file once
   (FPC's FindFirst lists `<shadow>/` and strips the `\...\` prefix from the names).
-  About 660 links; rebuilt in ~60 ms at start. Files the game writes into its own
-  directory stay in the shadow directory.
+  About 660 links; built in ~60 ms at start. Elk proces heeft een eigen schaduwmap
+  (`root-<hash>/<pid>/`, opgeruimd bij afsluiten; mappen van beëindigde processen
+  ruimt de volgende start op), zodat twee gelijktijdige runs elkaar niet storen.
 * Compat's own file access (`TGraphic.LoadFromFile`, dialogs, `FileCtrl`) goes through
   `ZMData.ZMResolvePath` (backslashes and letter case resolved against the real tree).
+
+**Schrijfbare overlay.** Het spel schrijft nooit in de datamap (bij `nix build
+.#zoetermeer` is dat een alleen-lezen store-pad). `ZMData.ZMWritePath` stuurt elke
+schrijfactie op een bestand uit de data- of schaduwmap naar een map per gebruiker:
+`$ZM_SAVE`, anders `$XDG_DATA_HOME/zoetermeer` (`~/.local/share/zoetermeer`), op macOS
+`~/Library/Application Support/Virtueel Zoetermeer`. Een bestaand origineel wordt eerst
+gekopieerd (copy-on-write). De schaduwlinks wijzen naar de overlaykopie zodra die bestaat
+(ook bij een volgende start), en `ZMResolvePath` geeft voor een pad in de datamap de
+overlaykopie terug: lezen geeft dus altijd de laatst geschreven versie. Via de overlay
+lopen: INI-bestanden, `TGraphic.SaveToFile` en de opslaandialoog (`TSaveDialog` geeft
+een pad in de overlay terug; open- en opslaandialoog beginnen daar als de game geen
+andere map opgeeft, zoals op Windows de spelmap). De webversie heeft geen overlay (daar
+bewaart `web/zoetermeer.js` geschreven bestanden in localStorage).
+
+**INI-bestanden.** `src/compat/IniFiles.pas` schaduwt de unit van FPC (wiens TIniFile
+bij elke wijziging het hele bestand herschrijft en commentaar en lege regels weggooit).
+Zoals in Delphi 5 roept TIniFile voor alles `GetPrivateProfileString` /
+`WritePrivateProfileString` aan; die zitten in `ZMProfile` en volgen Windows:
+hoofdletterongevoelige namen, witruimte rond namen/waarden telt niet, aanhalingstekens
+rond een waarde vallen weg, `;` is commentaar, afkappen van de buffer zoals Windows, en
+schrijven gebeurt ter plekke: alleen de betreffende regel verandert (een nieuwe sleutel
+komt na de laatste sleutel van zijn sectie, een nieuwe sectie achteraan), commentaar,
+lege regels, volgorde en CRLF blijven. TMemIniFile werkt als in Delphi 5 in het geheugen.
+Let op: de wasm-compiler zoekt de unitpaden van zijn fpc.cfg vóór `-Fu src/compat`, en
+vindt dan de `IniFiles` van FPC; de webbuild moet de unit expliciet noemen
+(`IniFiles in '../compat/IniFiles.pas'` in de uses van `RosWeb.dpr`).
 
 A cleaner alternative, if the game units may get FPC-only seams: make `uString.AddPath`
 and the `AppPath` initialisation in `uTool` use `PathDelim`; the shadow directory then only
@@ -134,7 +186,9 @@ needs the case-variant links.
 | `ZM_EXIT_AT=ms` | exit after ms |
 | `ZM_SCRIPT="ms:cmd;..."` | scripted input: `click:x,y`, `rclick:x,y`, `move:x,y`, `key:vk`, `char:c`, `shot:file`, `exit`; coordinates relative to the main form's client area |
 | `ZM_DEBUG=1` | log unknown DFM properties, message boxes, exception backtraces, window tree at screenshot |
-| `ZM_SHADOW` | location of the shadow directory |
+| `ZM_SHADOW` | location of the shadow directory (exact, niet per proces) |
+| `ZM_SAVE` | schrijfbare overlay (standaard `$XDG_DATA_HOME/zoetermeer`) |
+| `ZM_NO_AA=1` | geen anti-aliasing van tekst |
 
 SDL's own variables work too (`SDL_VIDEODRIVER=offscreen`).
 
@@ -152,7 +206,9 @@ SDL's own variables work too (`SDL_VIDEODRIVER=offscreen`).
 
 `src/compat/tests/` has `test_controls` (standard controls, injected click),
 `test_bitmap` (8-bit DIB, StretchBlt, mono mask blit with SRCINVERT/SRCAND, ScanLine,
-format conversion) and `test_dfm` (streams TFRMBLACK from ROS.exe).
+format conversion), `test_dfm` (streams TFRMBLACK from ROS.exe) en `test_ini`
+(leesregels van GetPrivateProfileString, schrijven ter plekke, de overlay; met een eigen
+synthetische, schrijfbeveiligde datamap).
 `nix develop --command tools/compat-test.sh` builds and runs them headless and writes
 screenshots to `build/compat-tests/`.
 

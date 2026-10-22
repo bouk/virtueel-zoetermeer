@@ -6,7 +6,7 @@ unit Unit78;
 
   De enige data is de getypte constante hieronder (DATA 00488E9C, 8 AnsiString-pointers); ze
   wordt door niets anders gebruikt dan de finalization van deze unit
-  (FinalizeArray(@WavFiles, TypeInfo(string), 8)), dus geen enkele unit leest hem.
+  (FinalizeArray(@WavBestanden, TypeInfo(string), 8)), dus geen enkele unit leest hem.
 
   Een identiek array staat in Unit49 (code 00461B10, DATA 00488D20), dus de declaratie is
   waarschijnlijk door twee units (of een include-bestand) gedeeld.
@@ -25,7 +25,7 @@ interface
 
 const
   { 00488E9C }
-  WavFiles: array[0..7] of string = (
+  WavBestanden: array[0..7] of string = (
     'ambul.WAV', 'dduck.WAV', 'dicerll.WAV', 'dkbell.WAV',
     'frogs.WAV', 'gbell.WAV', 'houst.WAV', 'wdcat.WAV');
 

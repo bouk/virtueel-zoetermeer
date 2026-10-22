@@ -2,24 +2,24 @@
   "functions": {
     "0047322c": "TView.Create",
     "00473498": "TView.Destroy",
-    "004734e0": "TView.ProcessChanges",
-    "00473530": "Uview.ClipToView",
-    "004735ec": "TView.PlaceSprite",
+    "004734e0": "TView.VerwerkWijzigingen",
+    "00473530": "Uview.KnipNaarZicht",
+    "004735ec": "TView.PlaatsSprite",
     "00473638": "TView.Redraw",
-    "0047376c": "TView.GetCenter",
+    "0047376c": "TView.LeesMidden",
     "004737b8": "TView.ScrollTo",
     "004738e4": "Uview.StoepFrame",
-    "00473988": "TView.PaintCell",
-    "004740a8": "TView.DrawDC",
+    "00473988": "TView.SchilderCel",
+    "004740a8": "TView.TekenDC",
     "004740c8": "TView.Draw.DrawSprite",
     "00474420": "TView.Draw",
     "004749bc": "TView.GetHeight",
     "004749c4": "TView.GetWidth",
-    "004749cc": "TView.GetX",
-    "004749d4": "TView.GetY",
-    "004749dc": "TView.UpdateSprite",
-    "00474e78": "TView.GetLeft",
-    "00474e80": "TView.GetTop",
+    "004749cc": "TView.LeesX",
+    "004749d4": "TView.LeesY",
+    "004749dc": "TView.VerversSprite",
+    "00474e78": "TView.LeesLinks",
+    "00474e80": "TView.LeesBoven",
     "00474e88": "TViewSpriteList.Add",
     "00474e98": "TViewSpriteList.GetItem",
     "00474eb8": "Uview.Finalization",
@@ -30,29 +30,76 @@
   },
   "fields": {
     "TViewSprite": {
-      "0x13c": ["FReserved13C", "Integer"],
-      "0x140": ["FPos", "TPos"],
-      "0x144": ["FAnimated", "Boolean"],
-      "0x148": ["FAnimFrame", "Integer"],
-      "0x14c": ["FAnimName", "string"]
+      "0x13c": [
+        "FGereserveerd13C",
+        "Integer"
+      ],
+      "0x140": [
+        "FPositie",
+        "TPos"
+      ],
+      "0x144": [
+        "FGeanimeerd",
+        "Boolean"
+      ],
+      "0x148": [
+        "FAnimatieFrame",
+        "Integer"
+      ],
+      "0x14c": [
+        "FAnimatieNaam",
+        "string"
+      ]
     },
     "TView": {
-      "0x68": ["FSettings", "TSettings"],
-      "0x6c": ["FStatus", "TStatus"],
-      "0x70": ["FTile", "TSurface"],
-      "0x74": ["FCleanTile", "TSurface"],
-      "0x78": ["FSpriteBox", "TSpriteBox"],
-      "0x7c": ["FSprites", "TSpriteList"],
-      "0x80": ["FWorld", "TWorld"],
-      "0x84": ["FViewSprites", "TSpriteList"],
-      "0x88": ["FAutos", "TSprite"],
-      "0x8c": ["FTreinSprite", "TViewSprite"]
+      "0x68": [
+        "FInstellingen",
+        "TSettings"
+      ],
+      "0x6c": [
+        "FStatus",
+        "TStatus"
+      ],
+      "0x70": [
+        "FTegel",
+        "TSurface"
+      ],
+      "0x74": [
+        "FSchoonTegel",
+        "TSurface"
+      ],
+      "0x78": [
+        "FSpriteVak",
+        "TSpriteBox"
+      ],
+      "0x7c": [
+        "FSprites",
+        "TSpriteList"
+      ],
+      "0x80": [
+        "FWereld",
+        "TWorld"
+      ],
+      "0x84": [
+        "FZichtSprites",
+        "TSpriteList"
+      ],
+      "0x88": [
+        "FAutos",
+        "TSprite"
+      ],
+      "0x8c": [
+        "FTreinSprite",
+        "TViewSprite"
+      ]
     }
   },
   "assumes": {
     "Fmain": [
       "TfrmMain creates TView.Create(ASprites=+0x414, ASpriteBox=sbStage, AWorld=+0x424, ASettings=+0x430, AStatus=+0x42C) into +0x428 and reads View.TreinSprite (+0x8C)"
     ],
-    "Uconst": ["ScrollX, ScrollY, Zoom, PerfStart, PerfView, PerfSprites are writable typed constants/vars"]
+    "Uconst": [
+      "ScrollX, ScrollY, Zoom, PerfStart, PerfView, PerfSprites are writable typed constants/vars"
+    ]
   }
 }
