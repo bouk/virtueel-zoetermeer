@@ -1,0 +1,44 @@
+# Een nieuwe weg aanleggen naast de bestaande weg (y = 28) en daar huizen aan bouwen
+# (speelronde 3: nieuwe huizen bleven "niet aan de weg"). Uitkomst, gelijk aan het origineel:
+# wegstukken op 23,27 en 22,26; huizen op 21,25 (Bereikbaar 0), 23,26 en 24,25 (Bereikbaar 1);
+# de reistijd blijft -1, dus "Volgende ronde" komt niet.
+wait 15000
+seed 1001
+click 429 405      # "Verder" (intro)
+wait 1500
+seed 1002
+click 429 405      # "Verder" (level 1)
+wait 1500
+seed 1003
+click 922 637      # paneel "Wegen en spoor"
+wait 1000
+seed 1004
+click 922 257      # Lokale Weg
+wait 1000
+seed 1005
+click 352 370      # weg op 23,27
+wait 1000
+seed 1006
+click 400 330      # weg op 22,26
+wait 1000
+seed 1007
+click 448 290      # valt weg (geen nieuwe cel)
+wait 1000
+dump weg
+seed 1008
+click 858 637      # paneel "Algemeen"
+wait 1000
+seed 1009
+click 922 257      # Laagbouw
+wait 1000
+seed 1010
+click 400 255      # huis op 21,25: niet bereikbaar
+wait 1000
+seed 1011
+click 448 365      # huis op 23,26
+wait 1000
+seed 1012
+click 640 355      # huis op 24,25
+wait 4000          # timerRecalc: de reistijd wordt opnieuw berekend
+dump huizen
+shot huizen

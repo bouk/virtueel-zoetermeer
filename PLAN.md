@@ -176,7 +176,7 @@ herbouw nergens crasht of vastloopt.
 - [x] Crash- en hangdetectie: het proces loopt nog, er komen frames, er zijn geen exceptions in
   de log (`ZM_DEBUG`). Bij een crash worden het commandolog en de laatste screenshots bewaard,
   zodat het precies na te spelen is als `.zms`-script.
-- [ ] Een Haiku-agent (model `haiku`) speelt alle levels door: wijken openen, wegen, spoor, *Eerste ronde: level 2 gehaald; een crash in het rapport (compat) gevonden en opgelost. Tweede ronde: level 3 gehaald, geen crash; vervolgronde nodig.*
+- [ ] Een Haiku-agent (model `haiku`) speelt alle levels door: wijken openen, wegen, spoor, *Eerste ronde: level 2 gehaald; een crash in het rapport (compat) gevonden en opgelost. Tweede ronde: level 3 gehaald, geen crash. Derde ronde: level 7 gehaald, geen crash of hang; level 7 niet uitgespeeld (de agent kreeg nieuwe wijken niet goed aan de weg).*
   huizen, kantoren, voorzieningen en stations bouwen, rondes afsluiten, rapporten lezen, de stad
   bewaren en weer openen, en het spel afsluiten. Hij houdt een logboek bij en rapporteert elke
   crash, hang of zichtbare fout met het commandolog.
@@ -197,6 +197,10 @@ herbouw nergens crasht of vastloopt.
     het origineel; "level 0" in `toestand` alleen tijdens de introductie, voor `StartNiveau`.
     Vals alarm "SPEL GECRASHT" na Stop -> Ja: fout van `tools/speel.py`, opgelost (het harnas
     schrijft de exitcode naar `uit/einde`).
+  - Derde ronde: inwonertal steeds 1200 en negatieve belasting: in de bewaarde steden staat
+    maar één woning (1200 inwoners per woningcel; belasting = (huizenprijs - 2000) x woningen),
+    dus geen fout. Nieuwe huizen bleven onbereikbaar: `nieuwe-weg.zms` (nieuwe weg plus huizen
+    ernaast) is gelijk aan het origineel, de agent legde de wegen niet aansluitend aan.
 - [x] Hetzelfde voor de webversie (`tools/test-web.py`), minstens tot en met level 2. *Gedaan: `level2-rapport.zms` loopt in de browser door tot en met het rapport van level 2, zonder fouten.*
 
 ## Buiten scope (voorlopig)
