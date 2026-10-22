@@ -8,3 +8,5 @@
 /result
 *.gpr
 *.rep/
+/symbols/*.pkl
+__pycache__/

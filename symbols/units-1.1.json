@@ -1,0 +1,2336 @@
+{
+ "package_units": [
+  "Ros",
+  "Uctrl",
+  "uTool",
+  "uString",
+  "SysUtils",
+  "System",
+  "SysInit",
+  "Windows",
+  "SysConst",
+  "Classes",
+  "Consts",
+  "TypInfo",
+  "ActiveX",
+  "Messages",
+  "FileCtrl",
+  "Dialogs",
+  "ExtCtrls",
+  "Controls",
+  "Forms",
+  "Math",
+  "Printers",
+  "WinSpool",
+  "Graphics",
+  "Commctrl",
+  "FlatSB",
+  "StdActns",
+  "Clipbrd",
+  "ActnList",
+  "Menus",
+  "Contnrs",
+  "ImgList",
+  "StdCtrls",
+  "Imm",
+  "MultiMon",
+  "Dlgs",
+  "CommDlg",
+  "ShlObj",
+  "UrlMon",
+  "WinInet",
+  "RegStr",
+  "ShellAPI",
+  "Buttons",
+  "uTiming",
+  "uSpritebox",
+  "uLog",
+  "MMSystem",
+  "Sprframe",
+  "uSurface",
+  "SprBmp",
+  "fShow",
+  "uGoblin",
+  "uTextBalloon",
+  "uPixie",
+  "DsgnIntf",
+  "Registry",
+  "IniFiles",
+  "Masks",
+  "uSprite",
+  "Sprfrmed",
+  "cEditCtr",
+  "ComCtrls",
+  "ComStrs",
+  "RichEdit",
+  "ToolWin",
+  "Seldir",
+  "ExtLbox",
+  "uSequence",
+  "Sprsqlst",
+  "Sprseqed",
+  "ExtStrGr",
+  "Grids",
+  "Mask",
+  "uResizeScreen",
+  "uMessage",
+  "SprCtrl",
+  "Sprbehav",
+  "uTransition",
+  "uQuickDirectX",
+  "ddraw",
+  "OLE2",
+  "uDebug",
+  "uTrein",
+  "Uconst",
+  "fBack",
+  "Fmain",
+  "fReport",
+  "Uworld",
+  "Uview",
+  "Usett",
+  "uAutos"
+ ],
+ "units": [
+  {
+   "start": 4198400,
+   "end": 4221068,
+   "init": 4220836,
+   "final": 4220732,
+   "init_order": 1,
+   "classes": [
+    "TObject",
+    "TInterfacedObject"
+   ],
+   "rtti_units": {},
+   "kb_modules": {
+    "system": 18680,
+    "bde": 2057,
+    "Series": 228
+   },
+   "kb_bytes": 21085,
+   "strings": [],
+   "name": "System",
+   "library": true
+  },
+  {
+   "start": 4221068,
+   "end": 4221456,
+   "init": 4221448,
+   "final": 4221400,
+   "init_order": 0,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "SysInit": 192,
+    "bde": 180,
+    "system": 16
+   },
+   "kb_bytes": 388,
+   "strings": [],
+   "name": "SysInit",
+   "library": true
+  },
+  {
+   "start": 4221456,
+   "end": 4224500,
+   "init": 4224492,
+   "final": 4224444,
+   "init_order": 2,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 2657,
+    "windows": 319,
+    "Series": 68
+   },
+   "kb_bytes": 3044,
+   "strings": [],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4224500,
+   "end": 4225244,
+   "init": 4225236,
+   "final": 4225188,
+   "init_order": 5,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 744
+   },
+   "kb_bytes": 744,
+   "strings": [],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4225244,
+   "end": 4249504,
+   "init": 4249400,
+   "final": 4249080,
+   "init_order": 6,
+   "classes": [
+    "Exception",
+    "EAbort",
+    "EHeapException",
+    "EOutOfMemory",
+    "EInOutError",
+    "EExternal",
+    "EExternalException",
+    "EIntError",
+    "EDivByZero",
+    "ERangeError",
+    "EIntOverflow",
+    "EMathError",
+    "EInvalidOp",
+    "EZeroDivide",
+    "EOverflow",
+    "EUnderflow",
+    "EInvalidPointer",
+    "EInvalidCast",
+    "EConvertError",
+    "EAccessViolation",
+    "EPrivilege",
+    "EStackOverflow",
+    "EControlC",
+    "EVariantError",
+    "EAssertionFailed",
+    "EAbstractError",
+    "EIntfCastError",
+    "EWin32Error",
+    "ESafecallException",
+    "TMultiReadExclusiveWriteSynchronizer"
+   ],
+   "rtti_units": {},
+   "kb_modules": {
+    "sysutils": 18183,
+    "bde": 2356,
+    "Series": 152
+   },
+   "kb_bytes": 20823,
+   "strings": [
+    "$",
+    "%d",
+    "%d",
+    "\\:",
+    "\\:",
+    ".\\:",
+    "gg",
+    "yy",
+    "yyyy",
+    "e",
+    "ddd",
+    "AM",
+    "PM",
+    "1",
+    "1",
+    "ggg",
+    "eeee",
+    "ee",
+    "e",
+    "C++ Exception"
+   ],
+   "name": "SysUtils",
+   "library": true
+  },
+  {
+   "start": 4249504,
+   "end": 4249584,
+   "init": 4249576,
+   "final": 4249528,
+   "init_order": 3,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "sysutils": 24
+   },
+   "kb_bytes": 24,
+   "strings": [
+    "0x"
+   ],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4249584,
+   "end": 4249648,
+   "init": 4249640,
+   "final": 4249592,
+   "init_order": 4,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 64
+   },
+   "kb_bytes": 64,
+   "strings": [],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4249648,
+   "end": 4250704,
+   "init": 4250696,
+   "final": 4250648,
+   "init_order": 7,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 1056
+   },
+   "kb_bytes": 1056,
+   "strings": [],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4250704,
+   "end": 4252048,
+   "init": 4252040,
+   "final": 4251960,
+   "init_order": 8,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "TypInfo": 1189,
+    "bde": 111,
+    "svcmgr": 44
+   },
+   "kb_bytes": 1344,
+   "strings": [
+    "False",
+    "True",
+    "."
+   ],
+   "name": "TypInfo",
+   "library": true
+  },
+  {
+   "start": 4252048,
+   "end": 4282944,
+   "init": 4282828,
+   "final": 4282644,
+   "init_order": 9,
+   "classes": [
+    "EStreamError",
+    "EFCreateError",
+    "EFOpenError",
+    "EFilerError",
+    "EReadError",
+    "EWriteError",
+    "EClassNotFound",
+    "EResNotFound",
+    "EListError",
+    "EBitsError",
+    "EStringListError",
+    "EComponentError",
+    "EOutOfResources",
+    "EInvalidOperation",
+    "TList",
+    "TThreadList",
+    "TBits",
+    "TPersistent",
+    "TStrings",
+    "TStringList",
+    "TStream",
+    "THandleStream",
+    "TFileStream",
+    "TCustomMemoryStream",
+    "TMemoryStream",
+    "TResourceStream",
+    "TStreamAdapter",
+    "TFiler",
+    "TReader",
+    "TComponent",
+    "TBasicActionLink",
+    "TBasicAction",
+    "TIntConst",
+    "TPropFixup"
+   ],
+   "rtti_units": {
+    "Classes": 5
+   },
+   "kb_modules": {
+    "Classes": 24164,
+    "Series": 550,
+    "bde": 414
+   },
+   "kb_bytes": 25284,
+   "strings": [
+    "nil",
+    ".",
+    "Strings",
+    "=",
+    "=",
+    "Owner",
+    "False",
+    "True",
+    "nil",
+    "Null",
+    "%s_%d",
+    "Left",
+    "Top"
+   ],
+   "name": "Classes",
+   "library": true
+  },
+  {
+   "start": 4282944,
+   "end": 4284884,
+   "init": 4284868,
+   "final": 4284820,
+   "init_order": 12,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "multimon": 1816,
+    "Series": 60
+   },
+   "kb_bytes": 1876,
+   "strings": [
+    "GetMonitorInfoA",
+    "GetSystemMetrics",
+    "MonitorFromRect",
+    "MonitorFromWindow",
+    "MonitorFromPoint",
+    "GetMonitorInfoA",
+    "GetMonitorInfoW",
+    "GetMonitorInfo",
+    "EnumDisplayMonitors"
+   ],
+   "name": "MultiMon",
+   "library": true
+  },
+  {
+   "start": 4284884,
+   "end": 4321544,
+   "init": 4321292,
+   "final": 4321080,
+   "init_order": 11,
+   "classes": [
+    "EInvalidGraphic",
+    "EInvalidGraphicOperation",
+    "TGraphicsObject",
+    "TFont",
+    "TPen",
+    "TBrush",
+    "TCanvas",
+    "TGraphic",
+    "TPicture",
+    "TSharedImage",
+    "TMetafileImage",
+    "TMetafile",
+    "TBitmapImage",
+    "TBitmap",
+    "TIconImage",
+    "TIcon",
+    "TResourceManager",
+    "TFileFormatsList",
+    "TClipboardFormats",
+    "TBitmapCanvas",
+    "TPatternManager"
+   ],
+   "rtti_units": {
+    "Graphics": 11
+   },
+   "kb_modules": {
+    "Graphics": 27219,
+    "Series": 468,
+    "qrprntr": 456
+   },
+   "kb_bytes": 28875,
+   "strings": [
+    "clBlack",
+    "clMaroon",
+    "clGreen",
+    "clOlive",
+    "clNavy",
+    "clPurple",
+    "clTeal",
+    "clGray",
+    "clSilver",
+    "clRed",
+    "clLime",
+    "clYellow",
+    "clBlue",
+    "clFuchsia",
+    "clAqua",
+    "clWhite",
+    "clScrollBar",
+    "clBackground",
+    "clActiveCaption",
+    "clInactiveCaption"
+   ],
+   "name": "Graphics",
+   "library": true
+  },
+  {
+   "start": 4321544,
+   "end": 4321996,
+   "init": 4321988,
+   "final": 4321940,
+   "init_order": 14,
+   "classes": [
+    "TOrderedList",
+    "TStack"
+   ],
+   "rtti_units": {},
+   "kb_modules": {
+    "Series": 136,
+    "Contnrs": 47
+   },
+   "kb_bytes": 183,
+   "strings": [],
+   "name": "Contnrs",
+   "library": true
+  },
+  {
+   "start": 4321996,
+   "end": 4322404,
+   "init": 4322396,
+   "final": 4322348,
+   "init_order": 10,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 263,
+    "commctrl": 145
+   },
+   "kb_bytes": 408,
+   "strings": [],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4322404,
+   "end": 4322460,
+   "init": 4322452,
+   "final": 4322404,
+   "init_order": 13,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 56
+   },
+   "kb_bytes": 56,
+   "strings": [],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4322460,
+   "end": 4322548,
+   "init": 4322540,
+   "final": 4322492,
+   "init_order": 22,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 88
+   },
+   "kb_bytes": 88,
+   "strings": [],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4322548,
+   "end": 4322604,
+   "init": 4322596,
+   "final": 4322548,
+   "init_order": 20,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 56
+   },
+   "kb_bytes": 56,
+   "strings": [],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4322604,
+   "end": 4322672,
+   "init": 4322664,
+   "final": 4322604,
+   "init_order": 21,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 68
+   },
+   "kb_bytes": 68,
+   "strings": [],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4322672,
+   "end": 4323472,
+   "init": 4323456,
+   "final": 4323408,
+   "init_order": 19,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "flatsb": 736,
+    "bde": 64
+   },
+   "kb_bytes": 800,
+   "strings": [],
+   "name": "FlatSB",
+   "library": true
+  },
+  {
+   "start": 4323472,
+   "end": 4364392,
+   "init": 4364384,
+   "final": 4364336,
+   "init_order": 16,
+   "classes": [
+    "TCustomLabel",
+    "TLabel",
+    "TCustomEdit",
+    "TEdit",
+    "TCustomMemo",
+    "TMemo",
+    "TCustomComboBox",
+    "TComboBox",
+    "TButtonActionLink",
+    "TButtonControl",
+    "TButton",
+    "TCustomCheckBox",
+    "TCheckBox",
+    "TRadioButton",
+    "TCustomListBox",
+    "TListBox",
+    "TScrollBar",
+    "TMemoStrings",
+    "TComboBoxStrings",
+    "TListBoxStrings"
+   ],
+   "rtti_units": {
+    "StdCtrls": 19
+   },
+   "kb_modules": {
+    "StdCtrls": 18013,
+    "bde": 1746,
+    "qrprntr": 188
+   },
+   "kb_bytes": 20055,
+   "strings": [
+    " ",
+    "\r\n"
+   ],
+   "name": "StdCtrls",
+   "library": true
+  },
+  {
+   "start": 4364392,
+   "end": 4365888,
+   "init": 4365836,
+   "final": 4365776,
+   "init_order": 17,
+   "classes": [
+    "TClipboard"
+   ],
+   "rtti_units": {
+    "Clipbrd": 1
+   },
+   "kb_modules": {
+    "Clipbrd": 1246
+   },
+   "kb_bytes": 1246,
+   "strings": [],
+   "name": "Clipbrd",
+   "library": true
+  },
+  {
+   "start": 4365888,
+   "end": 4366272,
+   "init": 4366264,
+   "final": 4366216,
+   "init_order": 18,
+   "classes": [
+    "THintAction"
+   ],
+   "rtti_units": {
+    "StdActns": 1
+   },
+   "kb_modules": {
+    "svcmgr": 44,
+    "Clipbrd": 36
+   },
+   "kb_bytes": 80,
+   "strings": [],
+   "name": "StdActns",
+   "library": true
+  },
+  {
+   "start": 4366272,
+   "end": 4369896,
+   "init": 4369888,
+   "final": 4369840,
+   "init_order": 25,
+   "classes": [
+    "TContainedAction",
+    "TCustomActionList",
+    "TCustomAction",
+    "TActionLink"
+   ],
+   "rtti_units": {
+    "ActnList": 3
+   },
+   "kb_modules": {
+    "actnlist": 2409
+   },
+   "kb_bytes": 2409,
+   "strings": [],
+   "name": "ActnList",
+   "library": true
+  },
+  {
+   "start": 4369896,
+   "end": 4419572,
+   "init": 4419540,
+   "final": 4419456,
+   "init_order": 23,
+   "classes": [
+    "TControlScrollBar",
+    "TScrollingWinControl",
+    "TScrollBox",
+    "TCustomForm",
+    "TForm",
+    "TCustomDockForm",
+    "TMonitor",
+    "TScreen",
+    "TApplication"
+   ],
+   "rtti_units": {
+    "Forms": 8
+   },
+   "kb_modules": {
+    "Forms": 38615,
+    "bde": 416,
+    "Series": 152
+   },
+   "kb_bytes": 39242,
+   "strings": [
+    "PixelsPerInch",
+    "TextHeight",
+    "IgnoreFontProperty",
+    "0",
+    "vcltest3.dll",
+    "."
+   ],
+   "name": "Forms",
+   "library": true
+  },
+  {
+   "start": 4419572,
+   "end": 4426028,
+   "init": 4426020,
+   "final": 4425972,
+   "init_order": 24,
+   "classes": [
+    "TChangeLink",
+    "TCustomImageList"
+   ],
+   "rtti_units": {
+    "ImgList": 1
+   },
+   "kb_modules": {
+    "ImgList": 5817,
+    "svcmgr": 20
+   },
+   "kb_bytes": 5837,
+   "strings": [
+    "Bitmap"
+   ],
+   "name": "ImgList",
+   "library": true
+  },
+  {
+   "start": 4426028,
+   "end": 4451112,
+   "init": 4451016,
+   "final": 4450904,
+   "init_order": 15,
+   "classes": [
+    "EMenuError",
+    "TMenuActionLink",
+    "TMenuItem",
+    "TMenu",
+    "TMainMenu",
+    "TPopupMenu",
+    "TPopupList",
+    "TMenuItemStack"
+   ],
+   "rtti_units": {
+    "Menus": 4
+   },
+   "kb_modules": {
+    "Menus": 19679,
+    "bde": 495,
+    "qrprntr": 228
+   },
+   "kb_bytes": 20638,
+   "strings": [
+    "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "F",
+    "^",
+    "\t",
+    "-",
+    "ShortCutText",
+    " ",
+    "-",
+    "-",
+    "-",
+    "-",
+    "...",
+    "(",
+    "&",
+    ")",
+    "-",
+    "&",
+    "-"
+   ],
+   "name": "Menus",
+   "library": true
+  },
+  {
+   "start": 4451112,
+   "end": 4513960,
+   "init": 4513924,
+   "final": 4513840,
+   "init_order": 26,
+   "classes": [
+    "TDragObject",
+    "TBaseDragControlObject",
+    "TDragControlObject",
+    "TDragDockObject",
+    "TControlCanvas",
+    "TControlActionLink",
+    "TSizeConstraints",
+    "TControl",
+    "TWinControlActionLink",
+    "TWinControl",
+    "TGraphicControl",
+    "TCustomControl",
+    "THintWindow",
+    "TDragImageList",
+    "TImageList",
+    "TDockZone",
+    "TDockTree",
+    "TMouse",
+    "TSiteList"
+   ],
+   "rtti_units": {
+    "Controls": 9
+   },
+   "kb_modules": {
+    "Controls": 52373,
+    "qrprntr": 300,
+    "IBInstall": 212
+   },
+   "kb_bytes": 53359,
+   "strings": [
+    "crDefault",
+    "crArrow",
+    "crCross",
+    "crIBeam",
+    "crSizeNESW",
+    "crSizeNS",
+    "crSizeNWSE",
+    "crSizeWE",
+    "crUpArrow",
+    "crHourGlass",
+    "crDrag",
+    "crNoDrop",
+    "crHSplit",
+    "crVSplit",
+    "crMultiDrag",
+    "crSQLWait",
+    "crNo",
+    "crAppStart",
+    "crHelp",
+    "crHandPoint"
+   ],
+   "name": "Controls",
+   "library": true
+  },
+  {
+   "start": 4513960,
+   "end": 4514016,
+   "init": 4514008,
+   "final": 4513960,
+   "init_order": 27,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4514016,
+   "end": 4514072,
+   "init": 4514064,
+   "final": 4514016,
+   "init_order": 28,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4514072,
+   "end": 4514128,
+   "init": 4514120,
+   "final": 4514072,
+   "init_order": 29,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4514128,
+   "end": 4514184,
+   "init": 4514176,
+   "final": 4514128,
+   "init_order": 30,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4514184,
+   "end": 4514240,
+   "init": 4514232,
+   "final": 4514184,
+   "init_order": 31,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4514240,
+   "end": 4514312,
+   "init": 4514304,
+   "final": 4514256,
+   "init_order": 32,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 72
+   },
+   "kb_bytes": 72,
+   "strings": [],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4514312,
+   "end": 4518520,
+   "init": 4518512,
+   "final": 4518464,
+   "init_order": 34,
+   "classes": [
+    "TPaintBox",
+    "TImage"
+   ],
+   "rtti_units": {
+    "ExtCtrls": 2
+   },
+   "kb_modules": {
+    "bde": 2636,
+    "ExtCtrls": 1495
+   },
+   "kb_bytes": 4131,
+   "strings": [],
+   "name": "ExtCtrls",
+   "library": true
+  },
+  {
+   "start": 4518520,
+   "end": 4518576,
+   "init": 4518568,
+   "final": 4518520,
+   "init_order": 33,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4518576,
+   "end": 4526400,
+   "init": 4526372,
+   "final": 4526280,
+   "init_order": 35,
+   "classes": [
+    "TCommonDialog",
+    "TOpenDialog",
+    "TSaveDialog",
+    "TMessageForm"
+   ],
+   "rtti_units": {
+    "Dialogs": 4
+   },
+   "kb_modules": {
+    "Dialogs": 4949,
+    "svcmgr": 88,
+    "Series": 32
+   },
+   "kb_bytes": 5069,
+   "strings": [
+    "FileEditStyle",
+    "\u0000",
+    "\\",
+    ":",
+    "Yes",
+    "No",
+    "OK",
+    "Cancel",
+    "Abort",
+    "Retry",
+    "Ignore",
+    "All",
+    "NoToAll",
+    "YesToAll",
+    "Help",
+    "Image",
+    "Message"
+   ],
+   "name": "Dialogs",
+   "library": true
+  },
+  {
+   "start": 4526400,
+   "end": 4537172,
+   "init": 4537164,
+   "final": 4537116,
+   "init_order": 36,
+   "classes": [
+    "EDBEditError",
+    "TCustomMaskEdit"
+   ],
+   "rtti_units": {
+    "Mask": 1
+   },
+   "kb_modules": {
+    "Mask": 9812,
+    "svcmgr": 40,
+    "Series": 28
+   },
+   "kb_bytes": 9880,
+   "strings": [
+    " "
+   ],
+   "name": "Mask",
+   "library": true
+  },
+  {
+   "start": 4537172,
+   "end": 4573736,
+   "init": 4573728,
+   "final": 4573680,
+   "init_order": 37,
+   "classes": [
+    "EInvalidGridOperation",
+    "TInplaceEdit",
+    "TCustomGrid",
+    "TDrawGrid",
+    "TStringGridStrings",
+    "TStringGrid",
+    "TSparsePointerArray",
+    "TSparseList",
+    "TStringSparseList"
+   ],
+   "rtti_units": {
+    "Grids": 6
+   },
+   "kb_modules": {
+    "grids": 29671,
+    "bde": 86,
+    "svcmgr": 68
+   },
+   "kb_bytes": 29825,
+   "strings": [
+    "ColWidths",
+    "RowHeights",
+    "0",
+    "List",
+    " "
+   ],
+   "name": "Grids",
+   "library": true
+  },
+  {
+   "start": 4573736,
+   "end": 4576920,
+   "init": 4576912,
+   "final": 4576840,
+   "init_order": 38,
+   "classes": [
+    "TCustomIniFile",
+    "TIniFile"
+   ],
+   "rtti_units": {},
+   "kb_modules": {
+    "IniFiles": 2632,
+    "Series": 136,
+    "svcmgr": 16
+   },
+   "kb_bytes": 2784,
+   "strings": [
+    "$",
+    "0",
+    "1"
+   ],
+   "name": "IniFiles",
+   "library": true
+  },
+  {
+   "start": 4576920,
+   "end": 4576976,
+   "init": 4576968,
+   "final": 4576920,
+   "init_order": 39,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4576976,
+   "end": 4577080,
+   "init": 4577072,
+   "final": 4577000,
+   "init_order": 40,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [
+    "0",
+    "1"
+   ],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4577080,
+   "end": 4577412,
+   "init": 4577404,
+   "final": 4577272,
+   "init_order": 41,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "svcmgr": 76,
+    "Series": 72
+   },
+   "kb_bytes": 148,
+   "strings": [
+    "mrNone",
+    "mrOk",
+    "mrCancel",
+    "mrAbort",
+    "mrRetry",
+    "mrIgnore",
+    "mrYes",
+    "mrNo",
+    "mrAll",
+    "mrNoToAll",
+    "mrYesToAll"
+   ],
+   "name": null,
+   "library": true
+  },
+  {
+   "start": 4577412,
+   "end": 4577476,
+   "init": 4577468,
+   "final": 4577420,
+   "init_order": 42,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 64
+   },
+   "kb_bytes": 64,
+   "strings": [],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4577476,
+   "end": 4585812,
+   "init": 4585772,
+   "final": 4585716,
+   "init_order": 43,
+   "classes": [
+    "TBitBtn",
+    "TGlyphList",
+    "TGlyphCache",
+    "TButtonGlyph"
+   ],
+   "rtti_units": {
+    "Buttons": 2
+   },
+   "kb_modules": {
+    "buttons": 6022,
+    "bde": 1917,
+    "Series": 68
+   },
+   "kb_bytes": 8007,
+   "strings": [],
+   "name": "Buttons",
+   "library": true
+  },
+  {
+   "start": 4585812,
+   "end": 4585868,
+   "init": 4585860,
+   "final": 4585812,
+   "init_order": 44,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4585868,
+   "end": 4590004,
+   "init": 4589996,
+   "final": 4589948,
+   "init_order": 45,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 2544
+   },
+   "kb_bytes": 2544,
+   "strings": [
+    ".",
+    " ",
+    " ",
+    "0",
+    "-",
+    "."
+   ],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4590004,
+   "end": 4593108,
+   "init": 4592940,
+   "final": 4592848,
+   "init_order": 46,
+   "classes": [
+    "TPos",
+    "TPosList",
+    "TRectPos",
+    "TRectPosList"
+   ],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 334,
+    "Series": 124,
+    "svcmgr": 44
+   },
+   "kb_bytes": 502,
+   "strings": [
+    "zondag",
+    "maandag",
+    "dinsdag",
+    "woensdag",
+    "donderdag",
+    "vrijdag",
+    "zaterdag"
+   ],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4593108,
+   "end": 4593320,
+   "init": 4593312,
+   "final": 4593264,
+   "init_order": 47,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [
+    "\\"
+   ],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4593320,
+   "end": 4594448,
+   "init": 4594440,
+   "final": 4594392,
+   "init_order": 48,
+   "classes": [
+    "TformDebugShow"
+   ],
+   "rtti_units": {
+    "fShow": 1
+   },
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [
+    "Width: ",
+    " Height: "
+   ],
+   "name": "fShow",
+   "library": false
+  },
+  {
+   "start": 4594448,
+   "end": 4594688,
+   "init": 4594680,
+   "final": 4594608,
+   "init_order": 49,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "IBInstall": 92,
+    "Series": 69
+   },
+   "kb_bytes": 161,
+   "strings": [
+    "ambul.WAV",
+    "dduck.WAV",
+    "dicerll.WAV",
+    "dkbell.WAV",
+    "frogs.WAV",
+    "gbell.WAV",
+    "houst.WAV",
+    "wdcat.WAV"
+   ],
+   "name": null,
+   "library": true
+  },
+  {
+   "start": 4594688,
+   "end": 4600356,
+   "init": 4600276,
+   "final": 4600228,
+   "init_order": 50,
+   "classes": [
+    "TBmpSurface"
+   ],
+   "rtti_units": {
+    "SprBmp": 1
+   },
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [
+    "Can only copy from BmpSurfaces"
+   ],
+   "name": "SprBmp",
+   "library": false
+  },
+  {
+   "start": 4600356,
+   "end": 4601936,
+   "init": 4601916,
+   "final": 4601868,
+   "init_order": 51,
+   "classes": [
+    "TSurface"
+   ],
+   "rtti_units": {
+    "uSurface": 1
+   },
+   "kb_modules": {
+    "bde": 400,
+    "corbaobj": 59,
+    "svcmgr": 16
+   },
+   "kb_bytes": 475,
+   "strings": [],
+   "name": "uSurface",
+   "library": false
+  },
+  {
+   "start": 4601936,
+   "end": 4602900,
+   "init": 4602892,
+   "final": 4602844,
+   "init_order": 52,
+   "classes": [
+    "TPixie"
+   ],
+   "rtti_units": {
+    "uPixie": 1
+   },
+   "kb_modules": {
+    "bde": 944,
+    "mxStore": 20
+   },
+   "kb_bytes": 964,
+   "strings": [],
+   "name": "uPixie",
+   "library": false
+  },
+  {
+   "start": 4602900,
+   "end": 4607768,
+   "init": 4607744,
+   "final": 4607696,
+   "init_order": 53,
+   "classes": [
+    "EFrame",
+    "TFrame",
+    "TPersistentList",
+    "TFrameList"
+   ],
+   "rtti_units": {
+    "Sprframe": 3
+   },
+   "kb_modules": {
+    "bde": 1478,
+    "qrprntr": 228,
+    "Series": 68
+   },
+   "kb_bytes": 1818,
+   "strings": [
+    "Creation of frame failed. Framelist cannot be nil",
+    "Creation of frame failed. Framelist cannot be nil",
+    "Frame.ReadData: no FrameList",
+    "Frame.ReadData: TestByte larger than one",
+    "Data",
+    "X",
+    "BMP"
+   ],
+   "name": "Sprframe",
+   "library": false
+  },
+  {
+   "start": 4607768,
+   "end": 4608944,
+   "init": 4608936,
+   "final": 4608888,
+   "init_order": 55,
+   "classes": [
+    "TScrnMode",
+    "TScrnModeList"
+   ],
+   "rtti_units": {},
+   "kb_modules": {
+    "qrprntr": 228,
+    "svcmgr": 44
+   },
+   "kb_bytes": 272,
+   "strings": [],
+   "name": "uResizeScreen",
+   "library": false
+  },
+  {
+   "start": 4608944,
+   "end": 4609000,
+   "init": 4608992,
+   "final": 4608944,
+   "init_order": 56,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4609000,
+   "end": 4616104,
+   "init": 4616096,
+   "final": 4616048,
+   "init_order": 57,
+   "classes": [
+    "TTextBalloon"
+   ],
+   "rtti_units": {
+    "uTextBalloon": 1
+   },
+   "kb_modules": {
+    "svcmgr": 88
+   },
+   "kb_bytes": 88,
+   "strings": [
+    " ",
+    " "
+   ],
+   "name": "uTextBalloon",
+   "library": false
+  },
+  {
+   "start": 4616104,
+   "end": 4616160,
+   "init": 4616152,
+   "final": 4616104,
+   "init_order": 61,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4616160,
+   "end": 4616216,
+   "init": 4616208,
+   "final": 4616160,
+   "init_order": 62,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4616216,
+   "end": 4616272,
+   "init": 4616264,
+   "final": 4616216,
+   "init_order": 63,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4616272,
+   "end": 4616328,
+   "init": 4616320,
+   "final": 4616272,
+   "init_order": 64,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4616328,
+   "end": 4616384,
+   "init": 4616376,
+   "final": 4616328,
+   "init_order": 66,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4616384,
+   "end": 4616440,
+   "init": 4616432,
+   "final": 4616384,
+   "init_order": 65,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4616440,
+   "end": 4616552,
+   "init": 4616544,
+   "final": 4616496,
+   "init_order": 67,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4616552,
+   "end": 4624964,
+   "init": 4624956,
+   "final": 4624836,
+   "init_order": 68,
+   "classes": [
+    "TCustomTabControl",
+    "TTabControl",
+    "TConversion",
+    "TTabStrings"
+   ],
+   "rtti_units": {
+    "ComCtrls": 3
+   },
+   "kb_modules": {
+    "comctrls": 4828,
+    "Series": 68
+   },
+   "kb_bytes": 4896,
+   "strings": [
+    "rtf",
+    "txt"
+   ],
+   "name": "ComCtrls",
+   "library": true
+  },
+  {
+   "start": 4624964,
+   "end": 4625708,
+   "init": 4625660,
+   "final": 4625612,
+   "init_order": 69,
+   "classes": [
+    "TComment"
+   ],
+   "rtti_units": {
+    "cEditCtr": 1
+   },
+   "kb_modules": {
+    "Series": 48,
+    "svcmgr": 44
+   },
+   "kb_bytes": 92,
+   "strings": [
+    "Arial"
+   ],
+   "name": "cEditCtr",
+   "library": false
+  },
+  {
+   "start": 4625708,
+   "end": 4625772,
+   "init": 4625764,
+   "final": 4625716,
+   "init_order": 70,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4625772,
+   "end": 4637816,
+   "init": 4637808,
+   "final": 4637740,
+   "init_order": 71,
+   "classes": [
+    "ESprite",
+    "TSprite",
+    "TSpriteList",
+    "TBehaviour",
+    "TBehaviourList"
+   ],
+   "rtti_units": {
+    "uSprite": 1
+   },
+   "kb_modules": {
+    "qrprntr": 228,
+    "svcmgr": 88,
+    "Series": 68
+   },
+   "kb_bytes": 428,
+   "strings": [
+    "odi et amo",
+    "dmo",
+    "2.5c",
+    ":",
+    "2.5c",
+    "Frameindex should be between -1 and "
+   ],
+   "name": "uSprite",
+   "library": false
+  },
+  {
+   "start": 4637816,
+   "end": 4639180,
+   "init": 4639172,
+   "final": 4639124,
+   "init_order": 58,
+   "classes": [
+    "TGoblin"
+   ],
+   "rtti_units": {
+    "uGoblin": 1
+   },
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": "uGoblin",
+   "library": false
+  },
+  {
+   "start": 4639180,
+   "end": 4647492,
+   "init": 4647432,
+   "final": 4647384,
+   "init_order": 59,
+   "classes": [
+    "TThreeD",
+    "TSpriteBox",
+    "TSpriteBoxList"
+   ],
+   "rtti_units": {
+    "uSpritebox": 2
+   },
+   "kb_modules": {
+    "bde": 388,
+    "svcmgr": 44
+   },
+   "kb_bytes": 432,
+   "strings": [
+    "Could not create surface"
+   ],
+   "name": "uSpritebox",
+   "library": false
+  },
+  {
+   "start": 4647492,
+   "end": 4650288,
+   "init": 4650280,
+   "final": 4650232,
+   "init_order": 54,
+   "classes": [
+    "TFrameRef",
+    "TSequence",
+    "TSequenceList"
+   ],
+   "rtti_units": {
+    "uSequence": 3
+   },
+   "kb_modules": {
+    "bde": 2430,
+    "QRExpr": 60
+   },
+   "kb_bytes": 2490,
+   "strings": [
+    "1.1b",
+    "Data",
+    "Data",
+    "Data"
+   ],
+   "name": "uSequence",
+   "library": false
+  },
+  {
+   "start": 4650288,
+   "end": 4652888,
+   "init": 4652792,
+   "final": 4652744,
+   "init_order": 60,
+   "classes": [
+    "TCustomFastTimer",
+    "TFastTimer",
+    "TFastTimerList"
+   ],
+   "rtti_units": {
+    "uTiming": 2
+   },
+   "kb_modules": {
+    "qrprntr": 228,
+    "svcmgr": 44,
+    "corbaobj": 20
+   },
+   "kb_bytes": 292,
+   "strings": [
+    "1.0",
+    "Not enough timers available.",
+    "1.0"
+   ],
+   "name": "uTiming",
+   "library": false
+  },
+  {
+   "start": 4652888,
+   "end": 4652944,
+   "init": 4652936,
+   "final": 4652888,
+   "init_order": 72,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4652944,
+   "end": 4653000,
+   "init": 4652992,
+   "final": 4652944,
+   "init_order": 73,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4653000,
+   "end": 4661612,
+   "init": 4661604,
+   "final": 4661556,
+   "init_order": 74,
+   "classes": [
+    "TBehavCursor",
+    "TBehavControl",
+    "TBehavCheckBox",
+    "TBehavRadioButton",
+    "TBehavButton",
+    "TBehavMemo",
+    "TCaption",
+    "TBehavText"
+   ],
+   "rtti_units": {},
+   "kb_modules": {
+    "svcmgr": 88
+   },
+   "kb_bytes": 88,
+   "strings": [
+    "^",
+    "\u0000",
+    "CONTROL_BEHAV",
+    "CAPTION",
+    "_DN",
+    "_OR",
+    "_UP",
+    "_FL",
+    "_EG",
+    "_FG",
+    "_EM",
+    "CONTROL_BEHAV"
+   ],
+   "name": "Sprbehav",
+   "library": false
+  },
+  {
+   "start": 4661612,
+   "end": 4664972,
+   "init": 4664964,
+   "final": 4664916,
+   "init_order": 77,
+   "classes": [
+    "TTask",
+    "TSettings",
+    "TStatus"
+   ],
+   "rtti_units": {},
+   "kb_modules": {
+    "Series": 224,
+    "IBInstall": 220,
+    "Menus": 148
+   },
+   "kb_bytes": 800,
+   "strings": [
+    "ZoetermeerGame.ini",
+    "HighScore",
+    "General",
+    ",",
+    "<eoi>",
+    "IntroTekst",
+    "General",
+    " ",
+    "\r\n",
+    "~",
+    "Geen Intro KopTekst",
+    "IntroKop",
+    "NiveauTekst",
+    "Geen Niveau KopTekst",
+    "NiveauKop",
+    "HighScore",
+    "MaxGroen",
+    "ScreenChangeLevel",
+    "AcceptabeleReistijd",
+    "AutosVisible"
+   ],
+   "name": "Usett",
+   "library": false
+  },
+  {
+   "start": 4664972,
+   "end": 4665212,
+   "init": 4665204,
+   "final": 4665132,
+   "init_order": 78,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "IBInstall": 92,
+    "Series": 69
+   },
+   "kb_bytes": 161,
+   "strings": [
+    "ambul.WAV",
+    "dduck.WAV",
+    "dicerll.WAV",
+    "dkbell.WAV",
+    "frogs.WAV",
+    "gbell.WAV",
+    "houst.WAV",
+    "wdcat.WAV"
+   ],
+   "name": null,
+   "library": true
+  },
+  {
+   "start": 4665212,
+   "end": 4673264,
+   "init": 4673256,
+   "final": 4673208,
+   "init_order": 80,
+   "classes": [
+    "TViewSprite",
+    "TViewSpriteList",
+    "TView"
+   ],
+   "rtti_units": {
+    "Uview": 2
+   },
+   "kb_modules": {
+    "Series": 204,
+    "IBInstall": 204,
+    "svcmgr": 120
+   },
+   "kb_bytes": 604,
+   "strings": [
+    "ZoetermeerViewer",
+    "images",
+    "8bits",
+    "Tile.bmp",
+    "Stoep_",
+    "AndereStad",
+    "Hoofdstation",
+    "Sloop",
+    "X",
+    "00",
+    "_05",
+    "Snel",
+    "_",
+    "_grondvlak",
+    "Station",
+    "Klaver",
+    "Sprite niet gevonden: ",
+    "PaintCell: could not find frame ",
+    " in sprite ",
+    "spriteStoep"
+   ],
+   "name": "Uview",
+   "library": false
+  },
+  {
+   "start": 4673264,
+   "end": 4683228,
+   "init": 4679220,
+   "final": 4679172,
+   "init_order": 81,
+   "classes": [
+    "TAutoSprite",
+    "TSegment",
+    "TSegmentList"
+   ],
+   "rtti_units": {
+    "uAutos": 1
+   },
+   "kb_modules": {
+    "sysutils": 324,
+    "svcmgr": 220,
+    "qrprntr": 164
+   },
+   "kb_bytes": 856,
+   "strings": [
+    "auto",
+    "X",
+    "Klaver",
+    "X",
+    "Klaver"
+   ],
+   "name": "uAutos",
+   "library": false
+  },
+  {
+   "start": 4683228,
+   "end": 4683824,
+   "init": 4683816,
+   "final": 4683768,
+   "init_order": 82,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "qrprntr": 64
+   },
+   "kb_bytes": 64,
+   "strings": [
+    "AAJJ",
+    "FBB",
+    "ADIJ",
+    "FEB",
+    "FFKK",
+    "LJJ",
+    "FEHK",
+    "LIJ",
+    "ACC",
+    "GGBB",
+    "GHEB",
+    "ADC",
+    "LLCC",
+    "GKK",
+    "LIDC",
+    "GHK",
+    "AK",
+    "LB",
+    "FC",
+    "GJ"
+   ],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4683824,
+   "end": 4683888,
+   "init": 4683880,
+   "final": 4683832,
+   "init_order": 83,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 64
+   },
+   "kb_bytes": 64,
+   "strings": [],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4683888,
+   "end": 4684896,
+   "init": 4684888,
+   "final": 4684828,
+   "init_order": 84,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "bde": 1008
+   },
+   "kb_bytes": 1008,
+   "strings": [
+    "Not in correct color mode",
+    "Failed to create IDirectDraw object",
+    "Exclude mode already set",
+    "HWND already set",
+    "Hwnd Subclasses",
+    "Invalid Object",
+    "Invalid Params",
+    "Out of memory",
+    "Unknown error",
+    "DirectDraw2 SetCooperativeLevel Failed: ",
+    "Set Display Mode Failed"
+   ],
+   "name": "bde",
+   "library": true
+  },
+  {
+   "start": 4684896,
+   "end": 4686876,
+   "init": 4686856,
+   "final": 4686648,
+   "init_order": 85,
+   "classes": [
+    "TCtrlForm"
+   ],
+   "rtti_units": {
+    "Uctrl": 1
+   },
+   "kb_modules": {
+    "bde": 1806,
+    "IBInstall": 92
+   },
+   "kb_bytes": 1898,
+   "strings": [
+    "but",
+    "rad",
+    "list",
+    "chk",
+    "memo",
+    "cmb",
+    "txt",
+    "scroll",
+    "pb",
+    "img",
+    "grid",
+    "CURSOR_BEHAV",
+    "CONTROL_BEHAV"
+   ],
+   "name": "Uctrl",
+   "library": false
+  },
+  {
+   "start": 4686876,
+   "end": 4691216,
+   "init": 4691208,
+   "final": 4691076,
+   "init_order": 87,
+   "classes": [
+    "TTrein"
+   ],
+   "rtti_units": {},
+   "kb_modules": {
+    "svcmgr": 44
+   },
+   "kb_bytes": 44,
+   "strings": [
+    " 0505=206,151; 0606=175,111; 0707=183,84; 0808=199,59; 0900=181,55;  1000=175,36;  1100=198,10; 1312=175,-4;1413=175,-4;1413=172,-24;15,14=202,49",
+    " 1615=-10,71;  1716=25,73;   1800=55,79;  1900=105,70;-1900=144,70; -1800=192,79; -1716=232,73;-1615=278,71",
+    "-0404=269,-38;-0303=222,-19;-0200=184,-5;-0100=138,17; 0100=108,17;  0200=71,-5;   0303=43,-19; 0404=5,-38",
+    "-1514=-98,-49;-1413=-46,-24;-1312=-7,-4, -1211=20,10; -1100=44,21;  -1000=67,36;  -0900=36,55; -0808=15,59; -0707=-17,84; -0606=-49,11",
+    " 1514=159,-69; 1413=121,-38; 1312=115,-14;1211=130,2;  0010=117,17; 0009=124,42; 0808=137,67;  0707=122,95; 0606=118,123; 0505=167,172",
+    "-1615=310,46; -1716=256,44; -0017=173,50;  0018=121,43; 0017=59,50;  1716=1,44;   1615=-41,46",
+    " 0404=-26,-13; 0303=20,10;   0002=71,40;  0001=119,65;-0002=172,40;-0303=245,10;-0404=301,-13",
+    "-0505=-63,172;-0606=8,123;  -0707=44,95;  -0808=77,67;-0009=116,42;-0010=124,17;-1211=88,2;   -1312=53,-14;-1413=5,-37;   -1514=-55,-69",
+    ",",
+    ";",
+    ";",
+    "=",
+    "Trein_",
+    "-",
+    ",",
+    "Station",
+    "Hoofdstation"
+   ],
+   "name": "uTrein",
+   "library": false
+  },
+  {
+   "start": 4691216,
+   "end": 4717928,
+   "init": 4717920,
+   "final": 4717860,
+   "init_order": 88,
+   "classes": [
+    "TfrmMain"
+   ],
+   "rtti_units": {
+    "Fmain": 1
+   },
+   "kb_modules": {
+    "svcmgr": 944,
+    "qrprntr": 592,
+    "Series": 548
+   },
+   "kb_bytes": 2824,
+   "strings": [
+    "Versie 1.1",
+    "Started",
+    "ZoetermeerLevels.ini",
+    "Quit",
+    "Yes",
+    "0",
+    "Algemeen",
+    "1",
+    "Wijkvoorzieningen",
+    "WegenEnSpoor",
+    "Stadsvoorzieningen",
+    "SportEnRecreatie",
+    "Ja_dn",
+    "Ja_or",
+    "Ja_up",
+    "KNOP",
+    "Nee_dn",
+    "Nee_or",
+    "Nee_up",
+    "Arial"
+   ],
+   "name": "Fmain",
+   "library": false
+  },
+  {
+   "start": 4717928,
+   "end": 4719192,
+   "init": 4719184,
+   "final": 4719136,
+   "init_order": 86,
+   "classes": [
+    "TfrmReport"
+   ],
+   "rtti_units": {
+    "fReport": 1
+   },
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": "fReport",
+   "library": false
+  },
+  {
+   "start": 4719192,
+   "end": 4741684,
+   "init": 4741676,
+   "final": 4741628,
+   "init_order": 79,
+   "classes": [
+    "TCell",
+    "TCellList",
+    "TWijk",
+    "TWorld"
+   ],
+   "rtti_units": {},
+   "kb_modules": {
+    "svcmgr": 528,
+    "Series": 348,
+    "Menus": 324
+   },
+   "kb_bytes": 1788,
+   "strings": [
+    "Onbereikbaar",
+    "kContKlaverblad",
+    "Klaver",
+    "Klaver",
+    "Snel",
+    "Laagbouw",
+    "Middenbouw",
+    "Hoogbouw",
+    "Kantoor",
+    "Molen",
+    "AndereStad",
+    "Sloop",
+    "Onbereikbaar",
+    "Snel",
+    "Klaver",
+    "X",
+    "Klaver",
+    "Bakst",
+    "X",
+    "Klaver"
+   ],
+   "name": "Uworld",
+   "library": false
+  },
+  {
+   "start": 4741684,
+   "end": 4746348,
+   "init": 4746340,
+   "final": 4746212,
+   "init_order": 76,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {
+    "svcmgr": 312,
+    "Series": 200,
+    "IBInstall": 132
+   },
+   "kb_bytes": 752,
+   "strings": [
+    "Vrijetijd",
+    "Groen",
+    "Veiligheid",
+    "Cultuur",
+    "Mobiliteit",
+    "Werk",
+    "Overlast",
+    "Zeer slecht",
+    "Onvoldoende",
+    "Matig",
+    "Redelijk",
+    "Goed",
+    "Enorm",
+    "Veel",
+    "Matig",
+    "Acceptabel",
+    "Geen",
+    "Objecten.csv",
+    ";",
+    "1"
+   ],
+   "name": null,
+   "library": false
+  },
+  {
+   "start": 4746348,
+   "end": 4747108,
+   "init": 4747100,
+   "final": 4747052,
+   "init_order": 75,
+   "classes": [
+    "TfrmBlack"
+   ],
+   "rtti_units": {
+    "fBack": 1
+   },
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [],
+   "name": "fBack",
+   "library": false
+  },
+  {
+   "start": 4747108,
+   "end": 4747980,
+   "init": null,
+   "final": null,
+   "init_order": null,
+   "classes": [],
+   "rtti_units": {},
+   "kb_modules": {},
+   "kb_bytes": 0,
+   "strings": [
+    "Virtueel Zoetermeer"
+   ],
+   "name": "Ros",
+   "library": false
+  }
+ ]
+}
