@@ -1,8 +1,8 @@
 unit Graphics;
 
-{ Delphi 5 Graphics unit, portable: TFont/TPen/TBrush/TCanvas/TGraphic/TBitmap/
-  TPicture/TIcon on top of the emulated GDI (Windows unit). Bitmaps are DIBs of
-  1/4/8/15-16/24/32 bpp; ScanLine[] returns rows top to bottom. }
+{ Delphi 5 Graphics-unit, draagbaar: TFont/TPen/TBrush/TCanvas/TGraphic/TBitmap/
+  TPicture/TIcon bovenop de geëmuleerde GDI (Windows-unit). Bitmaps zijn DIB's van
+  1/4/8/15-16/24/32 bpp; ScanLine[] geeft rijen van boven naar beneden terug. }
 
 {$MODE DELPHI}{$H+}{$R-}{$Q-}{$POINTERMATH ON}
 
@@ -607,7 +607,7 @@ implementation
 
 uses Math, ZMGdi, ZMData;
 
-{ ---------------------------------------------------------------- colours }
+{ ---------------------------------------------------------------- kleuren }
 
 type
   TIdentMapEntryG = record
@@ -960,7 +960,7 @@ begin
   if FColor <> Value then
   begin
     FColor := Value;
-    inherited Changed;   { colour does not change the font handle }
+    inherited Changed;   { kleur verandert de lettertype-handle niet }
   end;
 end;
 
@@ -1416,7 +1416,7 @@ procedure TCanvas.Arc(X1, Y1, X2, Y2, X3, Y3, X4, Y4: Integer);
 begin
   Changing;
   RequiredState([csHandleValid, csPenValid]);
-  Windows.Ellipse(FHandle, X1, Y1, X2, Y2);   { approximation }
+  Windows.Ellipse(FHandle, X1, Y1, X2, Y2);   { benadering }
   Changed;
 end;
 
@@ -2044,7 +2044,7 @@ begin
   Filer.DefineBinaryProperty('Data', ReadData, WriteData, DoWrite);
 end;
 
-{ ---------------------------------------------------------------- TMetafile (placeholder) }
+{ ---------------------------------------------------------------- TMetafile (tijdelijke aanduiding) }
 
 constructor TMetafile.Create;
 begin
@@ -2186,7 +2186,7 @@ begin
   inherited Create;
   FTransparentColor := clDefault;
   FPixelFormat := pfDevice;
-  FHandleType := bmDDB;   { like Delphi: a new bitmap is a DDB until a pixel format or DIB is asked for }
+  FHandleType := bmDDB;   { zoals Delphi: een nieuwe bitmap is een DDB totdat een pixelformaat of DIB wordt gevraagd }
 end;
 
 destructor TBitmap.Destroy;
@@ -2233,8 +2233,8 @@ begin
     New.ColorsChanged;
   end;
   if ABPP > 1 then
-    { new DIBs start white like Delphi's TBitmap (Canvas brush) is not done here:
-      Windows DIB sections start zeroed (black). }
+    { nieuwe DIB's beginnen wit, zoals de TBitmap van Delphi (Canvas-kwast); dat wordt hier niet gedaan:
+      Windows-DIB-secties beginnen op nul (zwart). }
   ;
   if CopyOld and (Old <> nil) then
   begin
@@ -2244,7 +2244,7 @@ begin
     begin
       if Old.BPP = ABPP then
       begin
-        { same format: copy the rows (keeps the indices of palette bitmaps) }
+        { zelfde formaat: kopieer de rijen (behoudt de indices van palet-bitmaps) }
         for Y := 0 to H - 1 do
           if (ABPP mod 8 = 0) then
             Move(Old.RowPtr(Y)^, New.RowPtr(Y)^, W * (ABPP div 8))
@@ -2333,8 +2333,8 @@ end;
 
 procedure TBitmap.SetHandleType(Value: TBitmapHandleType);
 begin
-  { the pixels stay as they are; only the DIB/DDB nature changes (it matters for
-    text anti-aliasing, see ZMGdi.GdiUseAA) }
+  { de pixels blijven zoals ze zijn; alleen de DIB/DDB-aard verandert (dat is van belang voor
+    tekst-anti-aliasing, zie ZMGdi.GdiUseAA) }
   FHandleType := Value;
   if Img <> nil then
     TZMBitmap(Img).IsDIB := (Value = bmDIB) or (FPixelFormat <> pfDevice);
@@ -2712,7 +2712,7 @@ begin
   Changed(Self);
 end;
 
-{ BMP reading }
+{ BMP lezen }
 procedure DecodeRLE(Src: PByte; SrcLen: Integer; B: TZMBitmap; Is4: Boolean);
 var
   X, Y, I, N, C: Integer;
@@ -3134,7 +3134,7 @@ begin
   Stream.CopyFrom(FData, FData.Size);
 end;
 
-{ ---------------------------------------------------------------- helpers }
+{ ---------------------------------------------------------------- hulpfuncties }
 
 function GraphicFilter(GraphicClass: TGraphicClass): string;
 var

@@ -1,8 +1,8 @@
 unit Dialogs;
 
-{ Delphi 5 Dialogs subset: ShowMessage, MessageDlg, InputBox/InputQuery and
-  TOpenDialog/TSaveDialog, implemented as modal forms inside the emulated screen
-  (no native dialogs, so this also works in a browser). }
+{ Delphi 5-subset van de Dialogs-unit: ShowMessage, MessageDlg, InputBox/InputQuery en
+  TOpenDialog/TSaveDialog, geimplementeerd als modale formulieren binnen het nagebootste
+  scherm (geen native dialogen, dus dit werkt ook in een browser). }
 
 {$MODE DELPHI}{$H+}
 
@@ -143,12 +143,12 @@ implementation
 uses Math, ZMData;
 
 const
-  BtnCaptions: array[TMsgDlgBtn] of string = ('&Yes', '&No', 'OK', 'Cancel', '&Abort',
-    '&Retry', '&Ignore', '&All', 'N&o to All', 'Yes to &All', '&Help');
+  BtnCaptions: array[TMsgDlgBtn] of string = ('&Ja', '&Nee', 'OK', 'Annuleren', '&Afbreken',
+    '&Opnieuw', '&Negeren', '&Alles', 'N&ee voor alles', 'Ja voor a&lles', '&Help');
   BtnResults: array[TMsgDlgBtn] of Integer = (mrYes, mrNo, mrOk, mrCancel, mrAbort,
     mrRetry, mrIgnore, mrAll, mrNoToAll, mrYesToAll, 0);
-  DlgCaptions: array[TMsgDlgType] of string = ('Warning', 'Error', 'Information',
-    'Confirm', '');
+  DlgCaptions: array[TMsgDlgType] of string = ('Waarschuwing', 'Fout', 'Informatie',
+    'Bevestigen', '');
 
 function CreateMessageDialog(const Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): TForm;
 var
@@ -286,7 +286,7 @@ begin
     B.SetBounds(96, 64, 75, 25);
     B := TButton.Create(F);
     B.Parent := F;
-    B.Caption := 'Cancel';
+    B.Caption := 'Annuleren';
     B.ModalResult := mrCancel;
     B.Cancel := True;
     B.SetBounds(177, 64, 75, 25);
@@ -325,7 +325,7 @@ begin
   if Assigned(FOnShow) then FOnShow(Self);
 end;
 
-{ ---------------------------------------------------------------- file dialog }
+{ ---------------------------------------------------------------- bestandsdialoog }
 
 type
   TFileDlgForm = class(TForm)
@@ -516,11 +516,11 @@ begin
   end;
   if (ofFileMustExist in Dlg.Options) and not FileExists(S) then
   begin
-    MessageDlg(ExtractFileName(S) + #13#10 + 'File not found.', mtWarning, [mbOK], 0);
+    MessageDlg(ExtractFileName(S) + #13#10 + 'Bestand niet gevonden.', mtWarning, [mbOK], 0);
     Exit;
   end;
   if Dlg.FIsSave and (ofOverwritePrompt in Dlg.Options) and FileExists(S) then
-    if MessageDlg(ExtractFileName(S) + ' already exists.' + #13#10 + 'Do you want to replace it?',
+    if MessageDlg(ExtractFileName(S) + ' bestaat al.' + #13#10 + 'Wilt u het vervangen?',
       mtWarning, [mbYes, mbNo], 0) <> mrYes then Exit;
   Dlg.FFileName := S;
   ModalResult := mrOk;
@@ -586,14 +586,14 @@ begin
     F.Dlg := Self;
     F.BorderStyle := bsDialog;
     if FTitle <> '' then F.Caption := FTitle
-    else if FIsSave then F.Caption := 'Save As'
-    else F.Caption := 'Open';
+    else if FIsSave then F.Caption := 'Opslaan als'
+    else F.Caption := 'Openen';
     F.Position := poScreenCenter;
     F.Font.Name := 'MS Sans Serif';
     F.Font.Height := -11;
     F.ClientWidth := 420;
     F.ClientHeight := 300;
-    { start directory }
+    { startmap }
     Start := '';
     if FFileName <> '' then Start := ExtractFilePath(ZMResolvePath(FFileName));
     if (Start = '') and (FInitialDir <> '') then Start := ZMResolvePath(FInitialDir);
@@ -617,7 +617,7 @@ begin
     F.List.OnDblClick := F.ListDblClick;
     L := TLabel.Create(F);
     L.Parent := F;
-    L.Caption := 'File &name:';
+    L.Caption := '&Bestandsnaam:';
     L.SetBounds(8, 220, 80, 16);
     F.Edit := TEdit.Create(F);
     F.Edit.Parent := F;
@@ -625,7 +625,7 @@ begin
     F.Edit.Text := ExtractFileName(FFileName);
     L := TLabel.Create(F);
     L.Parent := F;
-    L.Caption := 'Files of &type:';
+    L.Caption := 'Bestands&type:';
     L.SetBounds(8, 250, 80, 16);
     F.Types := TComboBox.Create(F);
     F.Types.Parent := F;
@@ -645,18 +645,18 @@ begin
     finally
       Parts.Free;
     end;
-    if F.Types.Items.Count = 0 then F.Types.Items.Add('All files (*.*)');
+    if F.Types.Items.Count = 0 then F.Types.Items.Add('Alle bestanden (*.*)');
     F.Types.ItemIndex := Max(0, Min(FFilterIndex - 1, F.Types.Items.Count - 1));
     F.Types.OnChange := F.TypesChange;
     F.BtnOK := TButton.Create(F);
     F.BtnOK.Parent := F;
-    if FIsSave then F.BtnOK.Caption := '&Save' else F.BtnOK.Caption := '&Open';
+    if FIsSave then F.BtnOK.Caption := '&Opslaan' else F.BtnOK.Caption := '&Openen';
     F.BtnOK.Default := True;
     F.BtnOK.SetBounds(336, 214, 75, 25);
     F.BtnOK.OnClick := F.OKClick;
     F.BtnCancel := TButton.Create(F);
     F.BtnCancel.Parent := F;
-    F.BtnCancel.Caption := 'Cancel';
+    F.BtnCancel.Caption := 'Annuleren';
     F.BtnCancel.Cancel := True;
     F.BtnCancel.ModalResult := mrCancel;
     F.BtnCancel.SetBounds(336, 244, 75, 25);

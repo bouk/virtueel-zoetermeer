@@ -1,8 +1,8 @@
 unit ZMHandles;
 
-{ Handle table for the emulated Win32 objects (GDI objects, windows, timers, ...).
-  Handles are small integers (System.THandle is 32-bit on every FPC target), so they
-  fit in the Integer/Longint fields where Delphi code tends to keep them. }
+{ Handletabel voor de geëmuleerde Win32-objecten (GDI-objecten, vensters, timers, ...).
+  Handles zijn kleine gehele getallen (System.THandle is op elk FPC-doel 32 bits), dus ze
+  passen in de Integer/Longint-velden waar Delphi-code ze gewoonlijk bewaart. }
 
 {$MODE DELPHI}{$H+}
 

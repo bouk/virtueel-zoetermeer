@@ -1,12 +1,12 @@
 unit Forms;
 
-{ Delphi 5 Forms unit, portable: TCustomForm/TForm (with DFM streaming from the
-  original ROS.exe resources), TScreen, TApplication, AllocateHWnd.
+{ Delphi 5-subset van de Forms-unit, draagbaar: TCustomForm/TForm (met DFM-streaming uit de
+  originele ROS.exe-resources), TScreen, TApplication, AllocateHWnd.
 
-  TCustomForm.Create loads the RCDATA resource named after the form class (and
-  its ancestors, like InitInheritedComponent) from ROS.exe with a TReader. The
-  application message loop runs on the compat message queue; all blocking goes
-  through Application.HandleMessage -> Idle -> WaitMessage. }
+  TCustomForm.Create laadt de RCDATA-resource met de naam van de formulierklasse (en
+  zijn voorouders, zoals InitInheritedComponent) uit ROS.exe met een TReader. De
+  applicatie-berichtenlus loopt op de compat-berichtenwachtrij; al het blokkerende
+  wachten verloopt via Application.HandleMessage -> Idle -> WaitMessage. }
 
 {$MODE DELPHI}{$H+}
 
@@ -677,7 +677,7 @@ function KeysToShiftState(Keys: Word): TShiftState;
 function KeyDataToShiftState(KeyData: Longint): TShiftState;
 function ForegroundTask: Boolean;
 
-{ compat: load a form's resources from the original ROS.exe }
+{ compat: de resources van een formulier laden uit het originele ROS.exe }
 function ZMInitInheritedComponent(Instance: TComponent; RootAncestor: TClass): Boolean;
 
 implementation
@@ -691,7 +691,7 @@ var
   FocusCount: Integer = 0;
   SetWindowToTop: Boolean = False;
 
-{ ---------------------------------------------------------------- helpers }
+{ ---------------------------------------------------------------- hulpfuncties }
 
 function KeysToShiftState(Keys: Word): TShiftState;
 begin
@@ -814,7 +814,7 @@ begin
   end;
 end;
 
-{ ---------------------------------------------------------------- DFM loading }
+{ ---------------------------------------------------------------- DFM laden }
 
 type
   TReaderHelper = class
@@ -837,7 +837,7 @@ procedure TReaderHelper.PropertyNotFound(Reader: TReader; Instance: TPersistent;
   IsPath: Boolean; var Handled, Skip: Boolean);
 begin
   if DebugOn then
-    WriteLn(StdErr, 'DFM: unknown property ', Instance.ClassName, '.', PropName, ' (skipped)');
+    WriteLn(StdErr, 'DFM: onbekende eigenschap ', Instance.ClassName, '.', PropName, ' (overgeslagen)');
   Skip := True;
   Handled := True;
 end;
@@ -847,7 +847,7 @@ procedure TReaderHelper.FindMethod(Reader: TReader; const MethodName: string; va
 begin
   if Error then
   begin
-    WriteLn(StdErr, 'DFM: event handler ', MethodName, ' not found (published method missing)');
+    WriteLn(StdErr, 'DFM: gebeurtenishandler ', MethodName, ' niet gevonden (gepubliceerde methode ontbreekt)');
     Error := False;
   end;
 end;
@@ -1047,8 +1047,8 @@ begin
     Include(FFormState, fsCreating);
     try
       if not ZMInitInheritedComponent(Self, TForm) then
-        raise EResNotFound.CreateFmt('Resource %s not found (is ROS.exe in the data directory? ' +
-          'set ZM_DATA or --data)', [ClassName]);
+        raise EResNotFound.CreateFmt('Resource %s niet gevonden (staat ROS.exe in de datamap? ' +
+          'stel ZM_DATA of --data in)', [ClassName]);
     finally
       Exclude(FFormState, fsCreating);
     end;
@@ -1502,7 +1502,7 @@ begin
       Application.HandleException(Self);
     end;
     ShowWindow(Handle, SW_HIDE);
-    { activate another visible form }
+    { activeer een ander zichtbaar formulier }
     if (Screen <> nil) and (GetActiveWindow = 0) then
       if (Application.MainForm <> nil) and (Application.MainForm <> Self) and
         Application.MainForm.Visible then
@@ -2313,7 +2313,7 @@ begin
   Result := False;
   if (Msg.message = WM_KEYDOWN) or (Msg.message = WM_SYSKEYDOWN) then
   begin
-    { menu / form shortcuts }
+    { menu- / formuliersneltoetsen }
     Wnd := Msg.hwnd;
     Control := FindControl(Wnd);
     if Control = nil then Exit;
@@ -2354,7 +2354,7 @@ procedure TApplication.ProcessMessages;
 var
   Msg: TMsg;
 begin
-  while ProcessMessage(Msg) do {loop};
+  while ProcessMessage(Msg) do {lus};
 end;
 
 procedure TApplication.DoMouseIdle;
@@ -2539,7 +2539,7 @@ procedure TApplication.RestoreTopMosts;
 begin
 end;
 
-{ ---------------------------------------------------------------- message box }
+{ ---------------------------------------------------------------- berichtvenster }
 
 function ZMMessageBox(Wnd: HWND; const Text, Caption: string; Flags: UINT): Integer;
 const
@@ -2563,7 +2563,7 @@ begin
     Btns := [IDOK];
   end;
   if GetEnvironmentVariable('ZM_DEBUG') <> '' then
-    WriteLn(StdErr, 'MessageBox [', Caption, ']: ', Text);
+    WriteLn(StdErr, 'Berichtvenster [', Caption, ']: ', Text);
   DefIdx := (Flags shr 8) and $F;
   if DefIdx > High(Btns) then DefIdx := 0;
   Form := TForm.CreateNew(Application);
@@ -2611,7 +2611,7 @@ begin
   end;
 end;
 
-{ ---------------------------------------------------------------- hooks for Controls }
+{ ---------------------------------------------------------------- hooks voor Controls }
 
 function HookGetParentForm(Control: TControl): TWinControl;
 begin

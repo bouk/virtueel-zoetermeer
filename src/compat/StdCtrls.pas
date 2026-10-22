@@ -1,8 +1,8 @@
 unit StdCtrls;
 
-{ Delphi 5 StdCtrls unit, portable: labels, edits, memos, buttons, check boxes,
-  radio buttons, list boxes, combo boxes, scroll bars and group boxes, drawn in
-  the classic Windows 9x style by Pascal code instead of Windows' window classes. }
+{ Delphi 5-unit StdCtrls, draagbaar: labels, bewerkingsvelden, memo's, knoppen, keuzevakjes,
+  keuzerondjes, lijstvakken, keuzelijsten, schuifbalken en groepsvakken, getekend in de
+  klassieke Windows 9x-stijl door Pascal-code in plaats van de vensterklassen van Windows. }
 
 {$MODE DELPHI}{$H+}
 
@@ -945,7 +945,7 @@ uses Math, ZMWin, ZMGdi;
 const
   SB_TIMER_ID = 77;
 
-{ ---------------------------------------------------------------- helpers }
+{ ---------------------------------------------------------------- hulproutines }
 
 procedure PrepareCanvasFont(C: TCanvas; Control: TControl; AFont: TFont);
 begin
@@ -1548,7 +1548,7 @@ begin
     Font := Self.Font;
     if not Enabled then Font.Color := clGrayText;
     HasFocus := Focused;
-    { keep caret visible }
+    { houd de cursor zichtbaar }
     CX := TextWidth(Copy(S, 1, FSelStart));
     if CX - FScrollX > R.Right - 4 then FScrollX := CX - (R.Right - 4);
     if CX - FScrollX < 0 then FScrollX := CX;
@@ -1702,9 +1702,9 @@ end;
 { ---------------------------------------------------------------- TMemoStrings }
 
 type
-  { Lines of a memo. Like Windows' edit control, the strings seen through
-    Lines[]/Lines.Count are the display lines: with WordWrap on, a long text
-    line is split where the memo wraps it. Text/SetText use the real text. }
+  { De regels van een memo. Net als het bewerkingsveld van Windows zijn de strings die via
+    Lines[]/Lines.Count zichtbaar zijn de weergaveregels: met WordWrap aan wordt een lange
+    tekstregel gesplitst waar de memo hem afbreekt. Text/SetText gebruiken de echte tekst. }
   TMemoStrings = class(TStrings)
   private
     FMemo: TCustomMemo;
@@ -1761,7 +1761,7 @@ begin
   if Wrapped then
   begin
     if not FMemo.FDispValid then FMemo.BuildDisplay;
-    if (Index < 0) or (Index >= GetCount) then Error('List index (%d) out of bounds', Index);
+    if (Index < 0) or (Index >= GetCount) then Error('Lijstindex (%d) buiten bereik', Index);
     with FMemo.FDisp[Index] do Result := Copy(FRaw[Line], Start, Len);
   end
   else
@@ -1979,8 +1979,8 @@ begin
     Result := Rect(0, 0, 0, 0);
 end;
 
-{ Het opmaakrechthoek van de edit-control, zoals Wine het berekent (EDIT_SetRectNP en
-  EDIT_EM_SetMargins met EC_USEFONTINFO): het clientgebied zonder scrollbalk, 1 pixel
+{ Het opmaakrechthoek van het bewerkingsveld, zoals Wine het berekent (EDIT_SetRectNP en
+  EDIT_EM_SetMargins met EC_USEFONTINFO): het clientgebied zonder schuifbalk, 1 pixel
   naar binnen per kant bij WS_EX_CLIENTEDGE (2 bij WS_BORDER) en voor TrueType-fonts
   aan beide kanten een marge van een halve gemiddelde tekenbreedte
   (GdiGetCharDimensions). }
@@ -2537,8 +2537,8 @@ begin
     FPressed := False;
     Invalidate;
   end;
-  { TControl.WMLButtonUp calls Click for csClickEvents controls; the button
-    controls do it themselves (BN_CLICKED) }
+  { TControl.WMLButtonUp roept Click aan voor csClickEvents-besturingselementen; de
+    knopbesturingselementen doen dit zelf (BN_CLICKED) }
   inherited MouseUp(Button, Shift, X, Y);
   if WasPressed and PtInRect(ClientRect, Point(X, Y)) then ButtonClicked;
 end;
@@ -3238,7 +3238,7 @@ begin
   inherited MouseUp(Button, Shift, X, Y);
 end;
 
-{ ---------------------------------------------------------------- combo box drop list }
+{ ---------------------------------------------------------------- uitklaplijst van de combobox }
 
 type
   TComboDropList = class(TCustomListBox)

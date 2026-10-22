@@ -1,12 +1,12 @@
 unit SDL3;
 
-{ Minimal SDL3 binding: only what the compat backend uses.
+{ Minimale SDL3-binding: alleen wat de compat-backend gebruikt.
 
-  The library is loaded at run time (no link-time dependency), so a build works on
-  machines without SDL3 (headless/null backend) and the same binary finds
-  libSDL3.so.0 / libSDL3.0.dylib through the normal loader paths. Search order:
-  $ZM_SDL3_LIB, the default library names, then the libdir of every sdl3.pc on
-  $PKG_CONFIG_PATH (that is how it is found inside `nix develop`). }
+  De bibliotheek wordt pas tijdens het draaien geladen (geen afhankelijkheid bij het
+  linken), zodat een build ook werkt op machines zonder SDL3 (headless/null-backend) en
+  dezelfde binary libSDL3.so.0 / libSDL3.0.dylib vindt via de gewone laadpaden.
+  Zoekvolgorde: $ZM_SDL3_LIB, de standaard bibliotheeknamen, dan de libdir van elke
+  sdl3.pc in $PKG_CONFIG_PATH (zo wordt hij binnen `nix develop` gevonden). }
 
 {$MODE DELPHI}{$H+}
 
@@ -28,7 +28,7 @@ type
   end;
   PSDL_Rect = ^SDL_Rect;
 
-  { SDL_Event is a 128 byte union; the fields we read are accessed by offset }
+  { SDL_Event is een union van 128 bytes; de velden die we lezen, benaderen we via een offset }
   SDL_Event = record
     case Integer of
       0: (type_: LongWord);

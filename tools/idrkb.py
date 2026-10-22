@@ -1,7 +1,7 @@
-"""Reader for IDR (Interactive Delphi Reconstructor) knowledge base files (kb*.bin).
+"""Lezer voor IDR (Interactive Delphi Reconstructor) kennisbankbestanden (kb*.bin).
 
-Format reverse-engineered from IDR's KnowledgeBase.cpp (crypto2011/IDR, GPL).
-Only the parts needed for code signature matching are decoded: modules and procs.
+Het formaat is teruggerekend uit IDR's KnowledgeBase.cpp (crypto2011/IDR, GPL).
+Alleen de delen die nodig zijn voor het matchen van codehandtekeningen worden gedecodeerd: modules en procs.
 """
 import struct
 from dataclasses import dataclass, field
@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Fixup:
-    kind: str        # 'A' absolute address, 'J' relative jump/call, 'D' data
+    kind: str        # 'A' absoluut adres, 'J' relatieve jump/call, 'D' data
     ofs: int
     name: str
 
@@ -26,7 +26,7 @@ class Proc:
     vproc: int
     typedef: str
     dump: bytes
-    relocs: bytes    # per-byte mask, nonzero where the byte is part of a fixup
+    relocs: bytes    # masker per byte, niet-nul waar de byte deel uitmaakt van een fixup
     fixups: list = field(default_factory=list)
 
 
@@ -40,7 +40,7 @@ class Const:
     idx: int
     module_id: int
     name: str
-    kind: str        # 'C' const, 'P' VMT, 'V' typed const/var
+    kind: str        # 'C' const, 'P' VMT, 'V' getypeerde const/var
     typedef: str
     value: str
     dump: bytes
@@ -54,7 +54,7 @@ class KnowledgeBase:
         b = self.b = open(path, 'rb').read()
         sig = b[:24].split(b'\0')[0]
         if sig not in (b'IDR Knowledge Base File', b'IDD Knowledge Base File'):
-            raise ValueError('not an IDR knowledge base: %r' % sig)
+            raise ValueError('geen IDR-kennisbank: %r' % sig)
         self.delphi_ver, = struct.unpack_from('<i', b, 25)
         p, = struct.unpack_from('<I', b, len(b) - 4)
 
@@ -130,7 +130,7 @@ class KnowledgeBase:
             yield self.const(i)
 
     def vmt_slots(self):
-        """{class name: {slot offset: 'Class.Method'}} from the KB's VMT dumps."""
+        """{klassennaam: {slotoffset: 'Klasse.Methode'}} uit de VMT-dumps van de KB."""
         out = {}
         for c in self.consts():
             if not c.name.startswith('_DV_') or not c.typedef.startswith('class of'):
@@ -145,16 +145,16 @@ class KnowledgeBase:
         return out
 
     def class_fields(self, modules=None):
-        """{class name: [(offset, field name, type)]} for class types in the KB.
+        """{klassennaam: [(offset, veldnaam, type)]} voor klassetypen in de KB.
 
-        modules: optional set of lower-case module names to restrict to.
+        modules: optionele set van modulenamen in kleine letters waartoe beperkt wordt.
         """
         b = self.b
         out = {}
         for off, _size, _m, _n in self.type_offs:
             p = off
             if self.version_new():
-                p += 4                                   # Size
+                p += 4                                   # grootte
             module_id, = struct.unpack_from('<H', b, p); p += 2
             if modules is not None and self.modules.get(module_id, '').lower() not in modules:
                 continue
@@ -166,7 +166,7 @@ class KnowledgeBase:
             _fields_total, n = struct.unpack_from('<IH', b, p); p += 6
             fields = []
             for _ in range(n):
-                p += 1                                   # scope
+                p += 1                                   # bereik
                 ofs, _case = struct.unpack_from('<ii', b, p); p += 8
                 fname, p = _cstr(b, p)
                 ftype, p = _cstr(b, p)

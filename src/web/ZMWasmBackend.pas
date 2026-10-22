@@ -1,13 +1,14 @@
 unit ZMWasmBackend;
 
-{ Browser backend for the compat layer (WebAssembly, wasm32-wasip1).
+{ Browserbackend voor de compatlaag (WebAssembly, wasm32-wasip1).
 
-  All platform services come from JavaScript imports in the module 'zm' (web/zoetermeer.js).
-  zm.wait and zm.delay suspend the WebAssembly stack (the module is post-processed with
-  binaryen's Asyncify, see docs/WASM.md), so the game's blocking message loops, modal
-  dialogs and sleeps work unchanged while the browser keeps running.
+  Alle platformdiensten komen van JavaScript-imports in de module 'zm' (web/zoetermeer.js).
+  zm.wait en zm.delay onderbreken de WebAssembly-stack (de module wordt nabewerkt met
+  Asyncify van binaryen, zie docs/WASM.md), zodat de blokkerende berichtenlussen, modale
+  dialogen en pauzes van het spel ongewijzigd werken terwijl de browser doorloopt.
 
-  Registers itself with a higher priority than the null backend, like the SDL3 backend. }
+  Registreert zichzelf met een hogere prioriteit dan de null-backend, net als de
+  SDL3-backend. }
 
 {$MODE DELPHI}{$H+}
 
@@ -18,7 +19,7 @@ implementation
 uses
   ZMPlatform;
 
-{ imports (web/zoetermeer.js) }
+{ imports (uit web/zoetermeer.js) }
 procedure zm_present(Pixels: Pointer; W, H, Stride: Integer); external 'zm' name 'present';
 function zm_poll_event(Buf: Pointer): Integer; external 'zm' name 'poll_event';
 procedure zm_wait(TimeoutMs: Integer); external 'zm' name 'wait';
@@ -30,8 +31,8 @@ procedure zm_beep; external 'zm' name 'beep';
 procedure zm_open(W, H: Integer); external 'zm' name 'open';
 
 type
-  { Layout shared with poll_event in web/zoetermeer.js: 12 Int32 fields, then up to
-    15 bytes of Windows-1252 text. }
+  { Indeling gedeeld met poll_event in web/zoetermeer.js: 12 Int32-velden, gevolgd door
+    maximaal 15 bytes Windows-1252-tekst. }
   TRawEvent = packed record
     Kind, X, Y, Button, Key, ScanCode, Repeated, Wheel, Shift, Ctrl, Alt, TextLen: Longint;
     Text: array[0..15] of AnsiChar;

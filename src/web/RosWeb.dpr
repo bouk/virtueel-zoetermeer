@@ -1,7 +1,7 @@
 program RosWeb;
 
-{ Virtueel Zoetermeer, WebAssembly build: src/game/Ros.dpr plus the browser platform
-  backend (ZMWasmBackend registers itself). Keep the uses list in step with Ros.dpr. }
+{ Virtueel Zoetermeer, WebAssembly-build: src/game/Ros.dpr plus de browser-platformbackend
+  (ZMWasmBackend registreert zichzelf). Houd de uses-lijst gelijk aan die van Ros.dpr. }
 
 {$I zm.inc}
 
@@ -40,7 +40,7 @@ uses
   Uview,
   Usett,
   uAutos,
-  ZMWasmBackend;  { browser platform backend (registers itself) }
+  ZMWasmBackend;  { browser-platformbackend (registreert zichzelf) }
 
 begin
   Application.Title := 'Virtueel Zoetermeer';

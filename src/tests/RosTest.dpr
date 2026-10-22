@@ -1,8 +1,8 @@
 program RosTest;
 
-{ The game (src/game/Ros.dpr) plus the differential-test harness (ZMHarness), which runs
-  ZM_TESTSCRIPT and writes state dumps to ZM_TESTOUT. Keep the uses list in step with
-  Ros.dpr. }
+{ Het spel (src/game/Ros.dpr) plus het differentiële-testharnas (ZMHarness), dat
+  ZM_TESTSCRIPT uitvoert en statusdumps naar ZM_TESTOUT schrijft. Houd de uses-lijst
+  gelijk aan die van Ros.dpr. }
 
 {$I zm.inc}
 

@@ -1,5 +1,5 @@
-# Free Pascal trunk cross compiler for wasm32-wasip1 (FPC 3.2.2 has no WebAssembly target).
-# Pinned to the commit of a known-good official snapshot build; bootstrapped with nixpkgs' fpc.
+# Free Pascal trunk-cross-compiler voor wasm32-wasip1 (FPC 3.2.2 heeft geen WebAssembly-doel).
+# Vastgezet op de commit van een bekende officiele snapshot-build; opgestart met nixpkgs' fpc.
 { stdenv, lib, fetchFromGitLab, fpc, lld, glibc }:
 
 stdenv.mkDerivation rec {
@@ -15,8 +15,8 @@ stdenv.mkDerivation rec {
 
   nativeBuildInputs = [ fpc lld ];
 
-  # -CTbfexceptions: branchful exceptions, so Delphi try/except/finally works without the
-  # WebAssembly exception-handling proposal.
+  # -CTbfexceptions: branchful exceptions, zodat Delphi try/except/finally werkt zonder het
+  # WebAssembly exception-handling-voorstel.
   makeFlags = [
     "OS_TARGET=wasip1"
     "CPU_TARGET=wasm32"
@@ -26,8 +26,8 @@ stdenv.mkDerivation rec {
     "PP=fpc"
   ];
 
-  # The build links native helpers (fpmake) with the freshly built trunk compiler, which only
-  # knows FHS paths; point it at Nix's glibc and dynamic linker, as nixpkgs' fpc does.
+  # De build linkt native hulpprogramma's (fpmake) met de net gebouwde trunk-compiler, die alleen
+  # FHS-paden kent; wijs hem naar Nix' glibc en dynamische linker, zoals nixpkgs' fpc doet.
   postPatch = ''
     substituteInPlace compiler/systems/t_linux.pas \
       --replace-fail "const defdynlinker='/lib64/ld-linux-x86-64.so.2';" \
@@ -49,7 +49,7 @@ stdenv.mkDerivation rec {
     units=$out/lib/fpc/3.3.1/units/wasm32-wasip1
     cat > $out/bin/fpc-wasm <<SH
     #!${stdenv.shell}
-    # ppcrosswasm32 with the target, exception model and RTL unit paths preset.
+    # ppcrosswasm32 met het doel, het exceptiemodel en de RTL-unitpaden vooraf ingesteld.
     export PATH=${lld}/bin:\$PATH
     exec $out/lib/fpc/3.3.1/ppcrosswasm32 -Twasip1 -CTbfexceptions -XP \$(for d in $units/*/; do printf -- '-Fu%s ' "\$d"; done) "\$@"
     SH
@@ -58,5 +58,5 @@ stdenv.mkDerivation rec {
   '';
 
   dontStrip = true;
-  meta.description = "Free Pascal cross compiler targeting wasm32-wasip1";
+  meta.description = "Free Pascal-cross-compiler voor wasm32-wasip1";
 }

@@ -1,7 +1,7 @@
 unit ExtCtrls;
 
-{ Delphi 5 ExtCtrls subset: TShape, TPaintBox, TImage, TBevel, TTimer, TPanel,
-  TSplitter (inert), TNotebook-free. }
+{ Subset van de Delphi 5 ExtCtrls: TShape, TPaintBox, TImage, TBevel, TTimer, TPanel,
+  TSplitter (inactief), zonder TNotebook. }
 
 {$MODE DELPHI}{$H+}
 

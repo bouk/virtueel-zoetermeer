@@ -1,7 +1,7 @@
 unit ZMDraw;
 
-{ Classic (Windows 9x) look for the standard controls: 3D frames, button faces,
-  check boxes, scroll bars, arrows. Used by StdCtrls, Buttons, ComCtrls, Grids. }
+{ Klassieke (Windows 9x) uitstraling voor de standaardbesturingselementen: 3D-kaders, knopvlakken,
+  selectievakjes, schuifbalken, pijlen. Gebruikt door StdCtrls, Buttons, ComCtrls, Grids. }
 
 {$MODE DELPHI}{$H+}
 
@@ -16,12 +16,12 @@ type
   TZMScrollPart = (spNone, spLineUp, spPageUp, spThumb, spPageDown, spLineDown);
 
 procedure ZMFrame3D(Canvas: TCanvas; R: TRect; TopLeft, BottomRight: TColor);
-procedure ZMDrawRaised(Canvas: TCanvas; var R: TRect);      { button edge, 2 px }
-procedure ZMDrawSunken(Canvas: TCanvas; var R: TRect);      { edit edge, 2 px }
+procedure ZMDrawRaised(Canvas: TCanvas; var R: TRect);      { knoprand, 2 px }
+procedure ZMDrawSunken(Canvas: TCanvas; var R: TRect);      { bewerkrand, 2 px }
 procedure ZMDrawButtonFace(Canvas: TCanvas; R: TRect; Pressed, IsDefault, Focused: Boolean);
 procedure ZMDrawCheck(Canvas: TCanvas; R: TRect; Checked, Grayed, Enabled: Boolean);
 procedure ZMDrawRadio(Canvas: TCanvas; R: TRect; Checked, Enabled: Boolean);
-procedure ZMDrawArrow(Canvas: TCanvas; R: TRect; Dir: Integer; Enabled: Boolean); { 0 up 1 down 2 left 3 right }
+procedure ZMDrawArrow(Canvas: TCanvas; R: TRect; Dir: Integer; Enabled: Boolean); { 0 omhoog 1 omlaag 2 links 3 rechts }
 procedure ZMDrawScrollBar(Canvas: TCanvas; R: TRect; Vertical: Boolean; Min, Max, Pos, Page: Integer;
   Pressed: TZMScrollPart; Enabled: Boolean);
 function ZMScrollHit(R: TRect; Vertical: Boolean; Min, Max, Pos, Page: Integer; P: TPoint): TZMScrollPart;
@@ -261,7 +261,7 @@ begin
     Btn(B2, 3, Pressed = spLineDown);
   end;
   T := TrackRect(R, Vertical);
-  { dithered track }
+  { gerasterde baan }
   Canvas.Brush.Color := cl3DLight;
   Canvas.FillRect(T);
   if Enabled and (Max > Min) then

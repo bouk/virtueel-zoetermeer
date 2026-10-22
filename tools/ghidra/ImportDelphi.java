@@ -1,6 +1,6 @@
-// Pre-analysis script: applies symbols from tools/symbols.py output.
-// Ghidra detects Delphi binaries itself (borlanddelphi cspec, default convention __register).
-// Args: <symbols.tsv>
+// Pre-analysisscript: past de symbolen toe uit de uitvoer van tools/symbols.py.
+// Ghidra herkent Delphi-binaries zelf (borlanddelphi cspec, standaardconventie __register).
+// Argumenten: <symbols.tsv>
 //@category Delphi
 
 import java.nio.file.Files;
@@ -24,7 +24,7 @@ public class ImportDelphi extends GhidraScript {
                     clearListing(a, a.add(Integer.parseInt(f[3])));
                     createAsciiString(a, Integer.parseInt(f[3]) + 1);
                 } catch (Exception e) {
-                    println("string at " + a + ": " + e.getMessage());
+                    println("string bij " + a + ": " + e.getMessage());
                 }
             } else if (f[1].equals("f")) {
                 disassemble(a);

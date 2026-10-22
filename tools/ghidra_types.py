@@ -1,8 +1,8 @@
-"""Emit class layouts for Ghidra: VMT-derived sizes/parents plus known field names.
+"""Schrijf klasse-indelingen voor Ghidra: uit VMT's afgeleide groottes/ouders plus bekende veldnamen.
 
-Usage: python tools/ghidra_types.py ROS.exe build/fields.tsv [kb5.bin] > build/ghidra-types.tsv
-Rows:  C <class> <instance size> <parent>
-       F <class> <offset> <name> <pascal type>
+Gebruik: python tools/ghidra_types.py ROS.exe build/fields.tsv [kb5.bin] > build/ghidra-types.tsv
+Rijen:  C <klasse> <instantiegrootte> <ouder>
+       F <klasse> <offset> <naam> <pascal-type>
 """
 import sys
 
@@ -19,7 +19,7 @@ def main():
         for ofs, idx, name in v.published_fields:
             cls = vmts.get(v.field_classes[idx]) if idx < len(v.field_classes) else None
             fields[(v.name, ofs)] = (name, cls.name if cls else 'TObject')
-    # Library (VCL/RTL) class fields from the IDR knowledge base.
+    # Velden van bibliotheekklassen (VCL/RTL) uit de IDR-kennisbank.
     if len(sys.argv) > 3:
         kb = idrkb.KnowledgeBase(sys.argv[3])
         linked = {n.lower() for n in units.package_units(im)}

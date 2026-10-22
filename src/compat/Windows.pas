@@ -1,10 +1,10 @@
 unit Windows;
 
-{ Portable subset of the Delphi 5 Windows unit (Win32 API).
+{ Draagbare subset van de Delphi 5-unit Windows (Win32-API).
 
-  GDI, USER and KERNEL routines used by the game are emulated on top of the
-  software GDI (ZMGdi) and the window manager (ZMWin). Handles are pointers
-  to internal objects (64-bit clean: THandle = PtrUInt). }
+  GDI-, USER- en KERNEL-routines die het spel gebruikt, worden nagebootst bovenop de
+  software-GDI (ZMGdi) en de vensterbeheerder (ZMWin). Handles zijn pointers
+  naar interne objecten (64-bit-proof: THandle = PtrUInt). }
 
 {$MODE DELPHI}{$H+}{$POINTERMATH ON}
 
@@ -13,8 +13,8 @@ interface
 uses Types;
 
 type
-  { Basic types }
-  THandle = System.THandle;   { 32-bit on all FPC targets; handles are table indices }
+  { Basistypen }
+  THandle = System.THandle;   { 32-bit op alle FPC-doelen; handles zijn indexen in een tabel }
   DWORD = LongWord;
   BOOL = LongBool;
   PBOOL = ^BOOL;
@@ -83,7 +83,7 @@ type
   HMETAFILE = THandle;
   PHandle = ^THandle;
 
-  { Geometry: same types as FPC's Types/Classes so Rect/Point/Bounds interoperate }
+  { Geometrie: dezelfde typen als FPC's Types/Classes, zodat Rect/Point/Bounds samenwerken }
   TPoint = Types.TPoint;
   PPoint = Types.PPoint;
   TRect = Types.TRect;
@@ -175,7 +175,7 @@ type
   end;
   PMinMaxInfo = ^TMinMaxInfo;
 
-  { GDI structures }
+  { GDI-structuren }
   TRGBQuad = packed record
     rgbBlue: Byte;
     rgbGreen: Byte;
@@ -251,7 +251,7 @@ type
   end;
   PBitmapInfo = ^TBitmapInfo;
 
-  TBitmap = record   { Windows.TBitmap (BITMAP), as returned by GetObject }
+  TBitmap = record   { Windows.TBitmap (BITMAP), zoals GetObject die teruggeeft }
     bmType: Longint;
     bmWidth: Longint;
     bmHeight: Longint;
@@ -436,7 +436,7 @@ const
   INFINITE = DWORD($FFFFFFFF);
   NULL = 0;
 
-  { Errors / HRESULT }
+  { Fouten / HRESULT }
   S_OK = 0;
   S_FALSE = 1;
   E_FAIL = HRESULT($80004005);
@@ -449,7 +449,7 @@ const
   ERROR_FILE_NOT_FOUND = 2;
   ERROR_INVALID_HANDLE = 6;
 
-  { Virtual keys }
+  { Virtuele toetsen }
   VK_LBUTTON = 1; VK_RBUTTON = 2; VK_CANCEL = 3; VK_MBUTTON = 4;
   VK_BACK = 8; VK_TAB = 9; VK_CLEAR = 12; VK_RETURN = 13;
   VK_SHIFT = $10; VK_CONTROL = $11; VK_MENU = $12; VK_PAUSE = $13; VK_CAPITAL = $14;
@@ -468,7 +468,7 @@ const
   VK_LSHIFT = $A0; VK_RSHIFT = $A1; VK_LCONTROL = $A2; VK_RCONTROL = $A3;
   VK_LMENU = $A4; VK_RMENU = $A5;
 
-  { Window styles }
+  { Vensterstijlen }
   WS_OVERLAPPED = 0;
   WS_POPUP = DWORD($80000000);
   WS_CHILD = $40000000;
@@ -541,20 +541,20 @@ const
   { MessageBeep }
   MB_ICONMASK = $F0;
 
-  { Mouse key states }
+  { Muistoetstoestanden }
   MK_LBUTTON = 1; MK_RBUTTON = 2; MK_SHIFT = 4; MK_CONTROL = 8; MK_MBUTTON = $10;
 
-  { Hit test }
+  { Hit-test }
   HTERROR = -2; HTTRANSPARENT = -1; HTNOWHERE = 0; HTCLIENT = 1; HTCAPTION = 2;
   HTSYSMENU = 3; HTSIZE = 4; HTMENU = 5; HTHSCROLL = 6; HTVSCROLL = 7; HTMINBUTTON = 8;
   HTMAXBUTTON = 9; HTLEFT = 10; HTRIGHT = 11; HTTOP = 12; HTTOPLEFT = 13; HTTOPRIGHT = 14;
   HTBOTTOM = 15; HTBOTTOMLEFT = 16; HTBOTTOMRIGHT = 17; HTBORDER = 18; HTCLOSE = 20;
 
-  { System commands }
+  { Systeemopdrachten }
   SC_SIZE = $F000; SC_MOVE = $F010; SC_MINIMIZE = $F020; SC_MAXIMIZE = $F030;
   SC_CLOSE = $F060; SC_RESTORE = $F120; SC_KEYMENU = $F100;
 
-  { Dialog codes }
+  { Dialoogcodes }
   DLGC_WANTARROWS = 1; DLGC_WANTTAB = 2; DLGC_WANTALLKEYS = 4; DLGC_WANTMESSAGE = 4;
   DLGC_HASSETSEL = 8; DLGC_DEFPUSHBUTTON = $10; DLGC_UNDEFPUSHBUTTON = $20;
   DLGC_RADIOBUTTON = $40; DLGC_WANTCHARS = $80; DLGC_STATIC = $100; DLGC_BUTTON = $2000;
@@ -586,7 +586,7 @@ const
   IDI_ERROR = IDI_HAND;
   IDI_INFORMATION = IDI_ASTERISK;
 
-  { Resource types }
+  { Resourcetypen }
   RT_CURSOR = PAnsiChar(1);
   RT_BITMAP = PAnsiChar(2);
   RT_ICON = PAnsiChar(3);
@@ -614,7 +614,7 @@ const
   SM_CXDOUBLECLK = 36; SM_CYDOUBLECLK = 37; SM_SWAPBUTTON = 23; SM_MOUSEPRESENT = 19;
   SM_CXMAXIMIZED = 61; SM_CYMAXIMIZED = 62; SM_CMONITORS = 80;
 
-  { System colors }
+  { Systeemkleuren }
   COLOR_SCROLLBAR = 0; COLOR_BACKGROUND = 1; COLOR_ACTIVECAPTION = 2;
   COLOR_INACTIVECAPTION = 3; COLOR_MENU = 4; COLOR_WINDOW = 5; COLOR_WINDOWFRAME = 6;
   COLOR_MENUTEXT = 7; COLOR_WINDOWTEXT = 8; COLOR_CAPTIONTEXT = 9; COLOR_ACTIVEBORDER = 10;
@@ -638,7 +638,7 @@ const
   RC_DI_BITMAP = $80; RC_PALETTE = $100; RC_DIBTODEV = $200; RC_STRETCHBLT = $800;
   RC_FLOODFILL = $1000; RC_STRETCHDIB = $2000;
 
-  { Raster operations }
+  { Rasterbewerkingen }
   SRCCOPY = $00CC0020;
   SRCPAINT = $00EE0086;
   SRCAND = $008800C6;
@@ -658,20 +658,20 @@ const
   R2_NOT = 6; R2_XORPEN = 7; R2_NOTMASKPEN = 8; R2_MASKPEN = 9; R2_NOTXORPEN = 10; R2_NOP = 11;
   R2_MERGENOTPEN = 12; R2_COPYPEN = 13; R2_MERGEPENNOT = 14; R2_MERGEPEN = 15; R2_WHITE = 16;
 
-  { Stretch modes }
+  { Uitrekmodi }
   BLACKONWHITE = 1; WHITEONBLACK = 2; COLORONCOLOR = 3; HALFTONE = 4;
   STRETCH_ANDSCANS = 1; STRETCH_ORSCANS = 2; STRETCH_DELETESCANS = 3; STRETCH_HALFTONE = 4;
 
-  { Background modes }
+  { Achtergrondmodi }
   TRANSPARENT = 1; OPAQUE = 2;
 
-  { Stock objects }
+  { Stockobjecten }
   WHITE_BRUSH = 0; LTGRAY_BRUSH = 1; GRAY_BRUSH = 2; DKGRAY_BRUSH = 3; BLACK_BRUSH = 4;
   NULL_BRUSH = 5; HOLLOW_BRUSH = NULL_BRUSH; WHITE_PEN = 6; BLACK_PEN = 7; NULL_PEN = 8;
   OEM_FIXED_FONT = 10; ANSI_FIXED_FONT = 11; ANSI_VAR_FONT = 12; SYSTEM_FONT = 13;
   DEVICE_DEFAULT_FONT = 14; DEFAULT_PALETTE = 15; SYSTEM_FIXED_FONT = $10; DEFAULT_GUI_FONT = 17;
 
-  { Brushes / pens }
+  { Kwasten / pennen }
   BS_SOLID = 0; BS_NULL = 1; BS_HOLLOW = BS_NULL; BS_HATCHED = 2; BS_PATTERN = 3;
   BS_DIBPATTERN = 5;
   HS_HORIZONTAL = 0; HS_VERTICAL = 1; HS_FDIAGONAL = 2; HS_BDIAGONAL = 3; HS_CROSS = 4;
@@ -679,7 +679,7 @@ const
   PS_SOLID = 0; PS_DASH = 1; PS_DOT = 2; PS_DASHDOT = 3; PS_DASHDOTDOT = 4; PS_NULL = 5;
   PS_INSIDEFRAME = 6;
 
-  { Palettes / DIBs }
+  { Paletten / DIB's }
   PC_RESERVED = 1; PC_EXPLICIT = 2; PC_NOCOLLAPSE = 4;
   DIB_RGB_COLORS = 0; DIB_PAL_COLORS = 1;
   BI_RGB = 0; BI_RLE8 = 1; BI_RLE4 = 2; BI_BITFIELDS = 3;
@@ -691,11 +691,11 @@ const
   OBJ_PEN = 1; OBJ_BRUSH = 2; OBJ_DC = 3; OBJ_PAL = 5; OBJ_FONT = 6; OBJ_BITMAP = 7;
   OBJ_REGION = 8; OBJ_MEMDC = 10;
 
-  { Regions }
+  { Gebieden (regions) }
   ERROR = 0; NULLREGION = 1; SIMPLEREGION = 2; COMPLEXREGION = 3;
   RGN_AND = 1; RGN_OR = 2; RGN_XOR = 3; RGN_DIFF = 4; RGN_COPY = 5;
 
-  { Fonts }
+  { Lettertypen }
   FW_DONTCARE = 0; FW_THIN = 100; FW_EXTRALIGHT = 200; FW_LIGHT = 300; FW_NORMAL = 400;
   FW_MEDIUM = 500; FW_SEMIBOLD = 600; FW_BOLD = 700; FW_EXTRABOLD = 800; FW_HEAVY = 900;
   ANSI_CHARSET = 0; DEFAULT_CHARSET = 1; SYMBOL_CHARSET = 2; SHIFTJIS_CHARSET = $80;
@@ -709,7 +709,7 @@ const
   FF_DONTCARE = 0; FF_ROMAN = $10; FF_SWISS = $20; FF_MODERN = $30; FF_SCRIPT = $40;
   FF_DECORATIVE = $50;
 
-  { Text alignment / DrawText }
+  { Tekstuitlijning / DrawText }
   TA_NOUPDATECP = 0; TA_UPDATECP = 1; TA_LEFT = 0; TA_RIGHT = 2; TA_CENTER = 6;
   TA_TOP = 0; TA_BOTTOM = 8; TA_BASELINE = 24;
   DT_TOP = 0; DT_LEFT = 0; DT_CENTER = 1; DT_RIGHT = 2; DT_VCENTER = 4; DT_BOTTOM = 8;
@@ -737,7 +737,7 @@ const
   DFCS_INACTIVE = $100; DFCS_PUSHED = $200; DFCS_CHECKED = $400; DFCS_FLAT = $4000;
   DFCS_MONO = $8000;
 
-  { Scroll bars }
+  { Schuifbalken }
   SB_HORZ = 0; SB_VERT = 1; SB_CTL = 2; SB_BOTH = 3;
   SB_LINEUP = 0; SB_LINELEFT = 0; SB_LINEDOWN = 1; SB_LINERIGHT = 1; SB_PAGEUP = 2;
   SB_PAGELEFT = 2; SB_PAGEDOWN = 3; SB_PAGERIGHT = 3; SB_THUMBPOSITION = 4;
@@ -755,14 +755,14 @@ const
   ENUM_CURRENT_SETTINGS = DWORD(-1);
   ENUM_REGISTRY_SETTINGS = DWORD(-2);
 
-  { Version info }
+  { Versie-informatie }
   VER_PLATFORM_WIN32s = 0; VER_PLATFORM_WIN32_WINDOWS = 1; VER_PLATFORM_WIN32_NT = 2;
 
-  { Memory }
+  { Geheugen }
   GMEM_FIXED = 0; GMEM_MOVEABLE = 2; GMEM_ZEROINIT = $40; GHND = GMEM_MOVEABLE or GMEM_ZEROINIT;
   GPTR = GMEM_FIXED or GMEM_ZEROINIT;
 
-  { Files }
+  { Bestanden }
   GENERIC_READ = DWORD($80000000); GENERIC_WRITE = $40000000;
   FILE_SHARE_READ = 1; FILE_SHARE_WRITE = 2;
   CREATE_NEW = 1; CREATE_ALWAYS = 2; OPEN_EXISTING = 3; OPEN_ALWAYS = 4;
@@ -773,21 +773,21 @@ const
   DRIVE_REMOTE = 4; DRIVE_CDROM = 5; DRIVE_RAMDISK = 6;
   SEM_FAILCRITICALERRORS = 1; SEM_NOOPENFILEERRORBOX = $8000;
 
-  { Window messages that some code takes from Windows instead of Messages }
+  { Vensterberichten die sommige code uit Windows haalt in plaats van uit Messages }
   WM_USER = $0400;
 
-  { Locale }
+  { Landinstellingen }
   LOCALE_USER_DEFAULT = $400;
   LOCALE_SYSTEM_DEFAULT = $800;
 
-  { Clipboard formats }
+  { Klembordformaten }
   CF_TEXT = 1; CF_BITMAP = 2; CF_METAFILEPICT = 3; CF_DIB = 8; CF_PALETTE = 9;
 
-  { Image types }
+  { Afbeeldingstypen }
   IMAGE_BITMAP = 0; IMAGE_ICON = 1; IMAGE_CURSOR = 2;
   LR_DEFAULTCOLOR = 0; LR_LOADFROMFILE = $10; LR_CREATEDIBSECTION = $2000;
 
-{ Macros }
+{ Macro's }
 function RGB(r, g, b: Byte): COLORREF;
 function PaletteRGB(r, g, b: Byte): COLORREF;
 function PaletteIndex(i: Word): COLORREF;
@@ -806,7 +806,7 @@ function MakeLResult(l, h: Word): LRESULT;
 function MakeIntResource(id: PtrUInt): PAnsiChar;
 function MakeROP4(fore, back: DWORD): DWORD;
 
-{ Rectangles }
+{ Rechthoeken }
 function IntersectRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): BOOL;
 function UnionRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): BOOL;
 function SubtractRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): BOOL;
@@ -819,7 +819,7 @@ function SetRect(var lprc: TRect; xLeft, yTop, xRight, yBottom: Integer): BOOL;
 function SetRectEmpty(var lprc: TRect): BOOL;
 function CopyRect(var lprcDst: TRect; const lprcSrc: TRect): BOOL;
 
-{ GDI: device contexts }
+{ GDI: apparaatcontexts }
 function GetDC(hWnd: HWND): HDC;
 function GetWindowDC(hWnd: HWND): HDC;
 function GetDCEx(hWnd: HWND; hrgnClip: HRGN; flags: DWORD): HDC;
@@ -908,7 +908,7 @@ function SetDIBColorTable(DC: HDC; p2, p3: UINT; var RGBQuadSTructs): UINT;
 function GetBitmapBits(Bitmap: HBITMAP; Count: Longint; Bits: Pointer): Longint;
 function SetBitmapBits(p1: HBITMAP; p2: DWORD; bits: Pointer): Longint;
 
-{ GDI: palettes }
+{ GDI: paletten }
 function CreatePalette(const LogPalette: TLogPalette): HPALETTE;
 function CreateHalftonePalette(DC: HDC): HPALETTE;
 function SelectPalette(DC: HDC; Palette: HPALETTE; ForceBackground: Bool): HPALETTE;
@@ -926,7 +926,7 @@ function GetSystemPaletteEntries(DC: HDC; StartIndex, NumEntries: UINT;
 function UnrealizeObject(hGDIObj: HGDIOBJ): BOOL;
 function UpdateColors(DC: HDC): BOOL;
 
-{ GDI: brushes, pens, fonts }
+{ GDI: kwasten, pennen, lettertypen }
 function CreateSolidBrush(p1: COLORREF): HBRUSH;
 function CreateBrushIndirect(const p1: TLogBrush): HBRUSH;
 function CreateHatchBrush(p1: Integer; p2: COLORREF): HBRUSH;
@@ -939,7 +939,7 @@ function CreateFont(nHeight, nWidth, nEscapement, nOrientaion, fnWeight: Integer
   fdwClipPrecision, fdwQuality, fdwPitchAndFamily: DWORD; lpszFace: PAnsiChar): HFONT;
 function GetSysColorBrush(nIndex: Integer): HBRUSH;
 
-{ GDI: text }
+{ GDI: tekst }
 function TextOut(DC: HDC; X, Y: Integer; Str: PAnsiChar; Count: Integer): BOOL;
 function ExtTextOut(DC: HDC; X, Y: Integer; Options: Longint; Rect: PRect;
   Str: PAnsiChar; Count: Longint; Dx: PInteger): BOOL;
@@ -951,7 +951,7 @@ function GetTextMetrics(DC: HDC; var TM: TTextMetric): BOOL;
 function GetTextFace(DC: HDC; Count: Integer; Buffer: PAnsiChar): Integer;
 function SetTextCharacterExtra(DC: HDC; CharExtra: Integer): Integer;
 
-{ GDI: regions & clipping }
+{ GDI: gebieden en knippen }
 function CreateRectRgn(p1, p2, p3, p4: Integer): HRGN;
 function CreateRectRgnIndirect(const p1: TRect): HRGN;
 function CreateEllipticRgn(p1, p2, p3, p4: Integer): HRGN;
@@ -972,7 +972,7 @@ function OffsetClipRgn(DC: HDC; XOffset, YOffset: Integer): Integer;
 function RectVisible(DC: HDC; const Rect: TRect): BOOL;
 function PtVisible(DC: HDC; X, Y: Integer): BOOL;
 
-{ Icons and cursors }
+{ Iconen en cursors }
 function LoadCursor(hInstance: HINST; lpCursorName: PAnsiChar): HCURSOR;
 function LoadIcon(hInstance: HINST; lpIconName: PAnsiChar): HICON;
 function LoadBitmap(hInstance: HINST; lpBitmapName: PAnsiChar): HBITMAP;
@@ -1073,7 +1073,7 @@ function MessageBeep(uType: UINT): BOOL;
 function Beep(dwFreq, dwDuration: DWORD): BOOL;
 function MessageBox(hWnd: HWND; lpText, lpCaption: PAnsiChar; uType: UINT): Integer;
 
-{ Messages }
+{ Berichten }
 function PostMessage(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): BOOL;
 function SendMessage(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT;
 function PostThreadMessage(idThread: DWORD; Msg: UINT; wParam: WPARAM; lParam: LPARAM): BOOL;
@@ -1148,19 +1148,19 @@ function WritePrivateProfileString(lpAppName, lpKeyName, lpString, lpFileName: P
 function GetPrivateProfileInt(lpAppName, lpKeyName: PAnsiChar; nDefault: Integer;
   lpFileName: PAnsiChar): UINT;
 
-{ Resources (only the original ROS.exe and built-in resources are searched) }
+{ Resources (alleen de originele ROS.exe en de ingebouwde resources worden doorzocht) }
 function FindResource(hModule: HMODULE; lpName, lpType: PAnsiChar): HRSRC;
 function LoadResource(hModule: HINST; hResInfo: HRSRC): HGLOBAL;
 function LockResource(hResData: HGLOBAL): Pointer;
 function SizeofResource(hModule: HINST; hResInfo: HRSRC): DWORD;
 function FreeResource(hResData: HGLOBAL): BOOL;
 
-{ ParamStr(0) reports the original game's location (see ZMData.ZMShadowDir), so the
-  game's ExtractFilePath(ParamStr(0)) finds its data files. }
+{ ParamStr(0) meldt de locatie van het originele spel (zie ZMData.ZMShadowDir), zodat de
+  ExtractFilePath(ParamStr(0))-aanroep van het spel zijn datubestanden vindt. }
 function ParamStr(Index: Integer): string;
 
 var
-  HInstance: HINST = 1;   { pseudo module handle of the game (resources come from ROS.exe) }
+  HInstance: HINST = 1;   { pseudo-modulehandle van het spel (resources komen uit ROS.exe) }
 
 implementation
 

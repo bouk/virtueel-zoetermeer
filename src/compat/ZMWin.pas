@@ -1,17 +1,17 @@
 unit ZMWin;
 
-{ Window manager and message queue of the compat layer.
+{ Vensterbeheer en berichtenwachtrij van de compatlaag.
 
-  There is one emulated screen (a 32-bit bitmap, default 1024x768). Top-level
-  windows live on it, child windows inside their parents; every window draws
-  straight into the screen through window DCs whose visible region excludes
-  overlapping siblings and children (WS_CLIPSIBLINGS | WS_CLIPCHILDREN semantics),
-  exactly like non-composited Windows. The backend shows the screen.
+  Er is één geëmuleerd scherm (een 32-bits bitmap, standaard 1024x768). Topniveauvensters
+  staan erop, kindvensters binnen hun ouders; elk venster tekent rechtstreeks in het
+  scherm via vensters-DC's waarvan het zichtbare gebied overlappende zusters en kinderen
+  uitsluit (WS_CLIPSIBLINGS | WS_CLIPCHILDREN-semantiek), precies zoals bij niet-
+  gecomposeerd Windows. De backend toont het scherm.
 
-  Messages: a posted-message queue, SendMessage = direct call, WM_PAINT and
-  WM_TIMER are synthesized when the queue is empty, input comes from the backend.
-  All waiting goes through ZMWaitMessage (WaitMessage/GetMessage), the single
-  place where the program blocks; a browser backend will hook in there. }
+  Berichten: een wachtrij met geplaatste berichten, SendMessage = directe aanroep,
+  WM_PAINT en WM_TIMER worden gesynthetiseerd wanneer de wachtrij leeg is, invoer komt van
+  de backend. Al het wachten loopt via ZMWaitMessage (WaitMessage/GetMessage), de enige
+  plek waar het programma blokkeert; een browserbackend haakt daar in. }
 
 {$MODE DELPHI}{$H+}{$R-}{$Q-}
 
@@ -28,19 +28,19 @@ type
     Handle: HWND;
     Parent: TZMWindow;
     Owner: HWND;
-    Children: TZMWindowArray;       { z-order: index 0 = bottom }
+    Children: TZMWindowArray;       { z-volgorde: index 0 = onderste }
     ClsName: string;
     ClsStyle: UINT;
     ClsBrush: HBRUSH;
     ClsCursor: HCURSOR;
     Style, ExStyle: DWORD;
-    R: TRect;                        { window rect in parent client coords (screen for top-level) }
+    R: TRect;                        { vensterrechthoek in clientcoördinaten van de ouder (scherm voor topniveau) }
     Text: string;
     Method: TWndMethod;
-    Proc: Pointer;                   { TWndProcFunc when Method is not assigned }
+    Proc: Pointer;                   { TWndProcFunc als Method niet is toegewezen }
     ID: PtrInt;
     UserData: PtrInt;
-    UpdRgn: TZMRects;                { client coordinates }
+    UpdRgn: TZMRects;                { clientcoördinaten }
     EraseBk: Boolean;
     NCDirty: Boolean;
     Destroying: Boolean;
@@ -49,7 +49,7 @@ type
     function NCInsets: TRect;
     function ClientRectScreen: TRect;
     function WindowRectScreen: TRect;
-    function IsVisible: Boolean;     { this and all ancestors have WS_VISIBLE }
+    function IsVisible: Boolean;     { dit venster en alle voorouders hebben WS_VISIBLE }
     function IsEnabledTree: Boolean;
     function TopLevel: TZMWindow;
   end;
@@ -62,13 +62,13 @@ var
   ZMScreenH: Integer = 768;
   ZMQuitRequested: Boolean = False;
   ZMExitCode: Integer = 0;
-  { window that gets WM_CLOSE when the user closes the backend window }
+  { venster dat WM_CLOSE krijgt wanneer de gebruiker het backendvenster sluit }
   ZMMainWindow: HWND = 0;
-  { called when the platform window is closed; default posts WM_CLOSE to ZMMainWindow }
+  { aangeroepen wanneer het platformvenster gesloten wordt; standaard plaatst WM_CLOSE in ZMMainWindow }
   ZMOnCloseRequest: procedure = nil;
-  { idle hook (TApplication.Idle), called by WaitMessage before blocking }
+  { idle-hook (TApplication.Idle), aangeroepen door WaitMessage vóór het blokkeren }
   ZMDesktopColor: LongWord = 0;
-  { MessageBox implementation (installed by Forms: an in-framebuffer dialog) }
+  { MessageBox-implementatie (geïnstalleerd door Forms: een dialoog in de framebuffer) }
   ZMMessageBoxHook: function(Wnd: HWND; const Text, Caption: string; Flags: UINT): Integer = nil;
 
 procedure ZMInit;
@@ -92,7 +92,7 @@ function ZMGetWindowInZ(H: HWND; Cmd: UINT): HWND;
 procedure ZMSetStyle(H: HWND; NewStyle: DWORD);
 procedure ZMSetExStyle(H: HWND; NewStyle: DWORD);
 
-{ painting }
+{ tekenen }
 procedure ZMInvalidate(H: HWND; R: PRect; Erase: Boolean);
 procedure ZMInvalidateTree(W: TZMWindow; const ScreenR: TRect);
 procedure ZMInvalidateScreen(const ScreenR: TRect);
@@ -105,7 +105,7 @@ procedure ZMEndPaint(H: HWND; const PS: TPaintStruct);
 procedure ZMUpdateWindow(H: HWND);
 procedure ZMPaintNC(W: TZMWindow);
 
-{ messages }
+{ berichten }
 function ZMPostMessage(H: HWND; Msg: UINT; WP: WPARAM; LP: LPARAM): Boolean;
 function ZMSendMessage(H: HWND; Msg: UINT; WP: WPARAM; LP: LPARAM): LRESULT;
 function ZMPeekMessage(var M: TMsg; H: HWND; MinMsg, MaxMsg, Remove: UINT): Boolean;
@@ -126,7 +126,7 @@ function ZMKillTimer(H: HWND; ID: UINT): Boolean;
 function ZMAddMMTimer(Delay: UINT; Proc: Pointer; User: PtrUInt; Periodic: Boolean): UINT;
 function ZMKillMMTimer(ID: UINT): Boolean;
 
-{ focus, activation, capture, input state }
+{ focus, activering, capture, invoerstatus }
 function ZMSetFocus(H: HWND): HWND;
 function ZMGetFocus: HWND;
 function ZMSetActive(H: HWND): HWND;
@@ -143,14 +143,14 @@ function ZMCursorFromId(Id: PtrUInt): HCURSOR;
 
 procedure ZMDumpWindows;
 
-{ Synthetic input, queued exactly like backend events (works headless too).
-  Coordinates are relative to the client area of the main form (ZMMainWindow;
-  the screen if there is none). Button: 0 = move only, 1 = left, 2 = right. }
+{ Synthetische invoer, in de wachtrij gezet zoals backend-gebeurtenissen (werkt ook headless).
+  Coördinaten zijn relatief aan het clientgebied van het hoofdformulier (ZMMainWindow; het
+  scherm als die er niet is). Button: 0 = alleen verplaatsen, 1 = links, 2 = rechts. }
 procedure ZMInjectMouse(X, Y: Integer; Button: Integer; Down: Boolean);
 procedure ZMInjectKey(VK: Word; Down: Boolean);
 procedure ZMInjectChar(C: Char);
 
-{ test support: save the emulated screen as PNG }
+{ testondersteuning: sla het geëmuleerde scherm op als PNG }
 function ZMSaveScreenshot(const FileName: string): Boolean;
 
 implementation
@@ -172,7 +172,7 @@ type
   end;
 
 var
-  TopLevels: TZMWindowArray;      { z-order: 0 = bottom }
+  TopLevels: TZMWindowArray;      { z-volgorde: 0 = onderste }
   Queue: array of TMsg;
   QHead, QCount: Integer;
   Timers: array of TTimerRec;
@@ -207,7 +207,7 @@ var
 const
   CAPTION_H = 18;
 
-{ ---------------------------------------------------------------- basics }
+{ ---------------------------------------------------------------- basis }
 
 function ZMTicks: LongWord;
 begin
@@ -303,7 +303,7 @@ begin
   while Result.Parent <> nil do Result := Result.Parent;
 end;
 
-{ ---------------------------------------------------------------- visibility }
+{ ---------------------------------------------------------------- zichtbaarheid }
 
 procedure ComputeVis(W: TZMWindow);
 var
@@ -319,7 +319,7 @@ begin
   if not W.IsVisible then Exit;
   SetLength(Win, 1);
   Win[0] := W.WindowRectScreen;
-  { clip to ancestors' client areas }
+  { knip bij tot de clientgebieden van de voorouders }
   A := W.Parent;
   while A <> nil do
   begin
@@ -327,7 +327,7 @@ begin
     A := A.Parent;
   end;
   Win := RectsIntersectRect(Win, Rect(0, 0, ZMScreenW, ZMScreenH));
-  { subtract siblings above W and above each ancestor }
+  { trek zusters boven W en boven elke voorouder af }
   A := W;
   while A <> nil do
   begin
@@ -350,7 +350,7 @@ begin
     if W.Children[I].Style and WS_VISIBLE <> 0 then
       Vis := RectsSubtractRect(Vis, W.Children[I].WindowRectScreen);
   W.VisClientCache := Vis;
-  { the window rect minus children too (for window DCs) }
+  { de vensterrechthoek min de kinderen ook (voor vensters-DC's) }
   for I := 0 to High(W.Children) do
     if W.Children[I].Style and WS_VISIBLE <> 0 then
       W.VisWindowCache := RectsSubtractRect(W.VisWindowCache, W.Children[I].WindowRectScreen);
@@ -395,7 +395,7 @@ begin
   DC.InvalidateClip;
 end;
 
-{ ---------------------------------------------------------------- init }
+{ ---------------------------------------------------------------- initialisatie }
 
 function DefaultCloseRequest: Boolean;
 begin
@@ -421,7 +421,7 @@ begin
   BackendOpen := True;
   if not ZMBackend.Open('Virtueel Zoetermeer', ZMScreenW, ZMScreenH) then
   begin
-    WriteLn(StdErr, 'compat: no display backend, running headless');
+    WriteLn(StdErr, 'compat: geen beeldschermbackend, draait headless');
     ZMFallbackToNull;
     ZMBackend.Open('Virtueel Zoetermeer', ZMScreenW, ZMScreenH);
   end;
@@ -457,7 +457,7 @@ end;
 
 function DDSetMode(W, H, Bpp: Integer): Boolean;
 begin
-  { the display is emulated at a fixed size; mode changes are accepted }
+  { het beeldscherm wordt op een vaste grootte geëmuleerd; modusveranderingen worden geaccepteerd }
   Result := True;
 end;
 
@@ -465,7 +465,7 @@ procedure DDRestoreMode;
 begin
 end;
 
-{ ---------------------------------------------------------------- creation }
+{ ---------------------------------------------------------------- aanmaak }
 
 type
   TWinArray = TZMWindowArray;
@@ -503,7 +503,7 @@ begin
   if W.Parent = nil then TopLevels := A else W.Parent.Children := A;
 end;
 
-{ insertion index honouring WS_EX_TOPMOST for top-level windows }
+{ invoegindex, rekening houdend met WS_EX_TOPMOST voor topniveauvensters }
 function TopInsertIndex(const A: TWinArray; W: TZMWindow): Integer;
 begin
   Result := Length(A);
@@ -588,7 +588,7 @@ begin
       SetLength(A, Length(A) - 1);
       W.Children := A;
     end;
-  { owned top-level windows go with their owner }
+  { eigen topniveauvensters gaan mee met hun eigenaar }
   I := 0;
   while I <= High(TopLevels) do
   begin
@@ -610,7 +610,7 @@ begin
   A := SiblingsOf(W);
   ArrRemove(A, W);
   SetSiblings(W, A);
-  { remove queued messages for this window }
+  { verwijder wachtende berichten voor dit venster }
   for I := 0 to QCount - 1 do
     if Queue[(QHead + I) mod Length(Queue)].hwnd = H then
       Queue[(QHead + I) mod Length(Queue)].message := WM_NULL;
@@ -709,7 +709,7 @@ begin
       ArrInsert(A, Win, 0)
     else
     begin
-      { place below After }
+      { plaats onder After }
       I := 0;
       while (I <= High(A)) and (A[I].Handle <> After) do Inc(I);
       if I > High(A) then ArrInsert(A, Win, TopInsertIndex(A, Win))
@@ -772,7 +772,7 @@ begin
     ZMSetWindowPos(H, 0, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER or SWP_HIDEWINDOW);
     if (FocusWnd <> 0) then
     begin
-      { focus inside a hidden window is lost }
+      { focus binnen een verborgen venster gaat verloren }
       if (FocusWnd = H) or (IsChild(H, FocusWnd)) then ZMSetFocus(0);
     end;
     if ActiveWnd = H then
@@ -924,7 +924,7 @@ begin
   end;
 end;
 
-{ ---------------------------------------------------------------- painting }
+{ ---------------------------------------------------------------- tekenen }
 
 procedure AddUpdate(W: TZMWindow; const ClientR: TRect; Erase: Boolean);
 var
@@ -937,7 +937,7 @@ begin
   T := RectsIntersectRect(T, CR);
   if Length(T) = 0 then Exit;
   W.UpdRgn := RectsUnion(W.UpdRgn, T);
-  { keep the region small: collapse to its bounding box when it fragments }
+  { houd het gebied klein: vouw het samen tot zijn omhullende rechthoek als het versplintert }
   if Length(W.UpdRgn) > 16 then
   begin
     SetLength(T, 1);
@@ -1168,7 +1168,7 @@ begin
   DC := ZMGetDC(W.Handle, True);
   D := GdiDC(DC);
   try
-    { exclude the client area }
+    { sluit het clientgebied uit }
     R := Rect(0, 0, W.R.Right - W.R.Left, W.R.Bottom - W.R.Top);
     CR := Rect(N.Left, N.Top, R.Right - N.Right, R.Bottom - N.Bottom);
     D.St.HasClip := True;
@@ -1212,7 +1212,7 @@ begin
       F.Free;
       if W.Style and WS_SYSMENU <> 0 then
       begin
-        { close button }
+        { sluitknop }
         TR := Rect(TR.Right - 18, TR.Top + 2, TR.Right - 2, TR.Bottom - 2);
         GdiFillSolid(D, TR, SysColors[COLOR_BTNFACE]);
         Edge(TR, $FFFFFF, $000000);
@@ -1228,7 +1228,7 @@ begin
   end;
 end;
 
-{ ---------------------------------------------------------------- messages }
+{ ---------------------------------------------------------------- berichten }
 
 function ZMCallWindow(W: TZMWindow; Msg: UINT; WP: WPARAM; LP: LPARAM): LRESULT;
 var
@@ -1307,7 +1307,7 @@ begin
   Result := False;
   if M.message = WM_NULL then
   begin
-    { cancelled message; match so it gets dropped }
+    { geannuleerd bericht; laat het matchen zodat het wordt weggegooid }
     Exit(True);
   end;
   if (H <> 0) and (M.hwnd <> H) and not IsChild(H, M.hwnd) then Exit;
@@ -1400,13 +1400,13 @@ end;
 
 procedure ZMDumpWindows;
 begin
-  WriteLn(StdErr, 'window tree (top first), active=', ActiveWnd, ' focus=', FocusWnd, ' capture=', CaptureWnd);
+  WriteLn(StdErr, 'vensterboom (bovenste eerst), actief=', ActiveWnd, ' focus=', FocusWnd, ' capture=', CaptureWnd);
   DumpTree(TopLevels, '  ');
 end;
 
-{ ZM_SCRIPT="ms:cmd[:args];..." with cmd = click:x,y | rclick:x,y | move:x,y |
-  key:vk | char:c | shot:file.png | exit. Times are ms since start, coordinates
-  relative to the main form's client area. For tests without a harness. }
+{ ZM_SCRIPT="ms:cmd[:args];..." met cmd = click:x,y | rclick:x,y | move:x,y |
+  key:vk | char:c | shot:bestand.png | exit. Tijden zijn ms sinds de start, coördinaten
+  zijn relatief aan het clientgebied van het hoofdformulier. Voor tests zonder harnas. }
 procedure RunScript(T: LongWord);
 var
   Item, Cmd, Arg: string;
@@ -1458,7 +1458,7 @@ begin
     else if Cmd = 'shot' then
     begin
       ZMPresent(True);
-      if ZMSaveScreenshot(Arg) then WriteLn(StdErr, 'compat: screenshot saved to ', Arg);
+      if ZMSaveScreenshot(Arg) then WriteLn(StdErr, 'compat: screenshot opgeslagen in ', Arg);
     end
     else if Cmd = 'exit' then
       Halt(0);
@@ -1475,13 +1475,13 @@ begin
   if (ShotFile <> '') and (Integer(T) >= ShotAt) then
   begin
     if ZMSaveScreenshot(ShotFile) then
-      WriteLn(StdErr, 'compat: screenshot saved to ', ShotFile);
+      WriteLn(StdErr, 'compat: screenshot opgeslagen in ', ShotFile);
     if GetEnvironmentVariable('ZM_DEBUG') <> '' then ZMDumpWindows;
     ShotFile := '';
   end;
   if (ExitAt >= 0) and (Integer(T) >= ExitAt) then
   begin
-    WriteLn(StdErr, 'compat: ZM_EXIT_AT reached, exiting');
+    WriteLn(StdErr, 'compat: ZM_EXIT_AT bereikt, wordt afgesloten');
     Halt(0);
   end;
 end;
@@ -1501,7 +1501,7 @@ begin
     TestHooks;
   end;
   CallMMTimers;
-  { posted / input messages }
+  { geplaatste / invoerberichten }
   for I := 0 to QCount - 1 do
   begin
     Idx := (QHead + I) mod Length(Queue);
@@ -1510,7 +1510,7 @@ begin
       M := Queue[Idx];
       if (Remove and PM_REMOVE <> 0) or (M.message = WM_NULL) then
       begin
-        { remove entry I }
+        { verwijder item I }
         J := I;
         while J < QCount - 1 do
         begin
@@ -1527,14 +1527,14 @@ begin
       Exit(True);
     end;
   end;
-  { synthetic mouse move (after capture release or window changes under the cursor) }
+  { synthetische muisbeweging (na het loslaten van capture of vensterwijzigingen onder de cursor) }
   if SyntheticMove and MouseSeen and (QCount = 0) then
   begin
     SyntheticMove := False;
     PostMouse(WM_MOUSEMOVE, MousePos, 0);
     if QCount > 0 then Exit(ZMPeekMessage(M, H, MinMsg, MaxMsg, Remove));
   end;
-  { paint }
+  { tekenen }
   if ((MinMsg = 0) and (MaxMsg = 0)) or ((WM_PAINT >= MinMsg) and (WM_PAINT <= MaxMsg)) then
     if FindPaint(H, M) then
     begin
@@ -1550,7 +1550,7 @@ begin
       LastMsgTime := M.time;
       Exit(True);
     end;
-  { nothing: show what was drawn }
+  { niets: toon wat er getekend is }
   ZMPresent(False);
   Result := False;
 end;
@@ -1630,7 +1630,7 @@ begin
   Result := ZMCallWindow(W, M.message, M.wParam, M.lParam);
   if (M.message = WM_PAINT) and (ZMWindowObj(M.hwnd) = W) and (Length(W.UpdRgn) > 0) then
   begin
-    { the window did not paint (no BeginPaint): validate so we do not loop }
+    { het venster heeft niet getekend (geen BeginPaint): valideer het zodat we niet blijven lussen }
     W.UpdRgn := nil;
     W.EraseBk := False;
   end;
@@ -1814,7 +1814,7 @@ begin
   end;
 end;
 
-{ ---------------------------------------------------------------- focus etc. }
+{ ---------------------------------------------------------------- focus enz. }
 
 function ZMGetFocus: HWND;
 begin
@@ -1866,7 +1866,7 @@ begin
   end;
   if W <> nil then
   begin
-    { bring to the top of the z-order }
+    { breng naar de bovenkant van de z-volgorde }
     ZMSetWindowPos(H, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOSENDCHANGING);
     W.NCDirty := True;
     ZMSendMessage(H, WM_NCACTIVATE, 1, 0);
@@ -1894,8 +1894,8 @@ begin
   if Old <> 0 then
   begin
     ZMSendMessage(Old, WM_CAPTURECHANGED, 0, 0);
-    { like Windows/Wine: releasing the capture generates a mouse move, so the
-      window under the cursor learns where the pointer is }
+    { zoals Windows/Wine: het loslaten van capture levert een muisbeweging op, zodat het
+      venster onder de cursor weet waar de aanwijzer staat }
     SyntheticMove := True;
   end;
 end;
@@ -1906,7 +1906,7 @@ var
 begin
   W := ZMWindowObj(H);
   if W = nil then Exit(False);
-  Result := W.Style and WS_DISABLED <> 0;  { previous state: True = was disabled }
+  Result := W.Style and WS_DISABLED <> 0;  { vorige toestand: True = was uitgeschakeld }
   if Enable = not Result then Exit;
   if Enable then W.Style := W.Style and not WS_DISABLED
   else
@@ -1942,7 +1942,7 @@ begin
   Result := LastMsgTime;
 end;
 
-{ cursors are small integers: the IDC_xxx resource ids }
+{ cursors zijn kleine gehele getallen: de IDC_xxx-resource-id's }
 function ZMCursorFromId(Id: PtrUInt): HCURSOR;
 begin
   Result := HCURSOR(Id);
@@ -2005,7 +2005,7 @@ begin
     if IsDown then
     begin
       ZMBackend.Beep;
-      { bring an enabled (modal) window forward }
+      { breng een ingeschakeld (modaal) venster naar voren }
       if (ActiveWnd <> 0) then ZMSetActive(ActiveWnd);
     end;
     Exit;
@@ -2019,7 +2019,7 @@ begin
     W := ZMWindowObj(H);
     if W = nil then Exit;
   end;
-  if (CaptureWnd = 0) and not PtInRect(W.ClientRectScreen, P) then Exit;  { non-client }
+  if (CaptureWnd = 0) and not PtInRect(W.ClientRectScreen, P) then Exit;  { niet-clientgebied }
   ZMSendMessage(H, WM_SETCURSOR, H, MakeLParam(HTCLIENT, Msg));
   C := P;
   ZMScreenToClient(H, C);
@@ -2047,7 +2047,7 @@ begin
       begin
         MouseSeen := True;
         MousePos := Point(E.X, E.Y);
-        { coalesce: replace a pending WM_MOUSEMOVE }
+        { samenvoegen: vervang een wachtende WM_MOUSEMOVE }
         for I := QCount - 1 downto 0 do
           if Queue[(QHead + I) mod Length(Queue)].message = WM_MOUSEMOVE then
           begin
@@ -2175,7 +2175,7 @@ begin
     E.Kind := zeMouseMove
   else
   begin
-    { move first, like a real mouse }
+    { eerst verplaatsen, zoals een echte muis }
     E.Kind := zeMouseMove;
     Inject(E);
     if Down then E.Kind := zeMouseDown else E.Kind := zeMouseUp;

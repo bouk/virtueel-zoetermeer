@@ -1,17 +1,17 @@
-"""Static structure recovery for Delphi 5 executables.
+"""Statische structuurherkenning voor Delphi 5-programma's.
 
-Parses the PE image and recovers:
-  * the unit initialization table (unit order and init/finalization procs)
-  * class VMTs (name, parent, instance size, virtual methods)
-  * published method tables (event handler names → addresses)
-  * published field tables
+Leest het PE-image en herstelt:
+  * de unit-initialisatietabel (unitvolgorde en init-/finalisatieprocedures)
+  * klasse-VMT's (naam, ouder, instantiegrootte, virtuele methoden)
+  * tabellen van gepubliceerde methoden (namen van eventhandlers → adressen)
+  * tabellen van gepubliceerde velden
 """
 import struct
 from dataclasses import dataclass, field
 
 import pefile
 
-# Delphi 5 VMT layout (offsets relative to the VMT pointer)
+# Delphi 5 VMT-indeling (offsets ten opzichte van de VMT-pointer)
 VMT_SELF = -76
 VMT_INTF_TABLE = -72
 VMT_AUTO_TABLE = -68
@@ -43,7 +43,7 @@ class VMT:
     virtuals: list = field(default_factory=list)
     published_methods: list = field(default_factory=list)   # (addr, name)
     published_fields: list = field(default_factory=list)    # (offset, class_idx, name)
-    field_classes: list = field(default_factory=list)       # VMT addrs from the field class table
+    field_classes: list = field(default_factory=list)       # VMT-adressen uit de veldklassentabel
     dynamic_methods: list = field(default_factory=list)     # (index, addr)
 
 
@@ -85,12 +85,12 @@ class Image:
         n = self.u8(va)
         return self.bytes(va + 1, n).decode('latin1')
 
-    # ---- unit init table -------------------------------------------------
+    # ---- unit-initialisatietabel -------------------------------------------------
 
     def init_table(self):
-        """Return [(init_proc, final_proc), ...] in unit initialization order.
+        """Geef [(init_proc, final_proc), ...] in unit-initialisatievolgorde.
 
-        The program entry does `mov eax, offset InitTable; call @InitExe`.
+        Het programma-entrypoint doet `mov eax, offset InitTable; call @InitExe`.
         """
         p = self.entry
         for _ in range(32):
@@ -102,9 +102,9 @@ class Image:
                     return [(self.u32(entries + 8 * i), self.u32(entries + 8 * i + 4))
                             for i in range(count)]
             p += 1
-        raise ValueError('InitTable not found near entry point')
+        raise ValueError('InitTable niet gevonden nabij het entrypoint')
 
-    # ---- VMTs ------------------------------------------------------------
+    # ---- VMT's ------------------------------------------------------------
 
     def find_vmts(self):
         vmts = {}
@@ -132,8 +132,8 @@ class Image:
                     dynamic_table=self.u32(v + VMT_DYNAMIC_TABLE),
                     std_virtuals=[self.u32(v - 32 + 4 * i) for i in range(8)],
                 )
-        # Virtual method slots run from the VMT pointer up to the first structure that
-        # follows it (class name, tables, or the next VMT's self pointer).
+        # Virtuele-methodeslots lopen van de VMT-pointer tot de eerste structuur die erop volgt
+        # (klassenaam, tabellen, of de self-pointer van de volgende VMT).
         bounds = sorted(set(
             [p for m in vmts.values() for p in (
                 self.u32(m.addr + VMT_CLASS_NAME), m.field_table, m.method_table,

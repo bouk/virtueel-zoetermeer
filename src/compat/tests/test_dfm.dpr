@@ -1,8 +1,9 @@
 program test_dfm;
 
-{ Compat layer test: TCustomForm.Create streams the TFRMBLACK form resource of the
-  user's ROS.exe (ZM_EXE or ZM_DATA) with TReader: TImage with an embedded bitmap
-  (Picture.Data), TLabels with fonts, events bound to published methods. }
+{ Test van de compatlaag: TCustomForm.Create leest de formulierresource TFRMBLACK uit de
+  ROS.exe van de gebruiker (ZM_EXE of ZM_DATA) in met TReader: TImage met een ingebedde
+  bitmap (Picture.Data), TLabels met lettertypen, en events die aan gepubliceerde methoden
+  zijn gekoppeld. }
 
 {$MODE DELPHI}{$H+}
 
@@ -60,11 +61,11 @@ begin
   OutFile := ParamStr(1);
   if OutFile = '' then OutFile := 'test_dfm.png';
   Application.CreateForm(TfrmBlack, F);
-  Check(F.Created, 'OnCreate (FormCreate) was not called');
-  Check(F.imgLoading <> nil, 'imgLoading not streamed');
-  Check((F.imgLoading <> nil) and (F.imgLoading.Picture.Width = 400), 'imgLoading picture width');
-  Check(F.lblLoading.Font.Height = -32, 'lblLoading font height');
-  Check(F.lblLoading.Alignment = taCenter, 'lblLoading alignment');
+  Check(F.Created, 'OnCreate (FormCreate) is niet aangeroepen');
+  Check(F.imgLoading <> nil, 'imgLoading is niet ingelezen');
+  Check((F.imgLoading <> nil) and (F.imgLoading.Picture.Width = 400), 'breedte van de imgLoading-afbeelding');
+  Check(F.lblLoading.Font.Height = -32, 'lettergrootte van lblLoading');
+  Check(F.lblLoading.Alignment = taCenter, 'uitlijning van lblLoading');
   Check(F.BorderStyle = bsNone, 'BorderStyle');
   Check(F.WindowState = wsMaximized, 'WindowState');
   Check(F.Color = clBlack, 'Color');

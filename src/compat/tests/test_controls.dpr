@@ -1,7 +1,7 @@
 program test_controls;
 
-{ Compat layer test: standard controls on a form, drawn into the emulated screen.
-  Run headless: ZM_HEADLESS=1 test_controls <out.png> }
+{ Test van de compatlaag: standaardbesturingselementen op een formulier, getekend in het
+  geëmuleerde scherm. Headless uitvoeren: ZM_HEADLESS=1 test_controls <uit.png> }
 
 {$MODE DELPHI}{$H+}
 
@@ -33,7 +33,7 @@ type
 procedure TTestForm.BtnClick(Sender: TObject);
 begin
   Inc(Clicks);
-  Lbl.Caption := 'Clicked ' + IntToStr(Clicks) + 'x';
+  Lbl.Caption := 'Geklikt ' + IntToStr(Clicks) + 'x';
 end;
 
 procedure TTestForm.PaintPaint(Sender: TObject);
@@ -78,7 +78,7 @@ begin
   F := TTestForm.CreateNew(Application);
   with F do
   begin
-    Caption := 'Compat controls test';
+    Caption := 'Compat-besturingselemententest';
     BorderStyle := bsSingle;
     SetBounds(40, 30, 640, 480);
     Font.Name := 'MS Sans Serif';
@@ -99,7 +99,7 @@ begin
     Btn := TButton.Create(F);
     Btn.Parent := F;
     Btn.SetBounds(16, 70, 90, 25);
-    Btn.Caption := '&Click me';
+    Btn.Caption := '&Klik hier';
     Btn.Default := True;
     Btn.OnClick := BtnClick;
     BitBtn := TBitBtn.Create(F);
@@ -109,38 +109,38 @@ begin
     Edit := TEdit.Create(F);
     Edit.Parent := F;
     Edit.SetBounds(16, 108, 187, 21);
-    Edit.Text := 'Edit text';
+    Edit.Text := 'Bewerkingstekst';
     Check := TCheckBox.Create(F);
     Check.Parent := F;
     Check.SetBounds(16, 138, 120, 17);
-    Check.Caption := 'Check box';
+    Check.Caption := 'Selectievakje';
     Check.Checked := True;
     Radio1 := TRadioButton.Create(F);
     Radio1.Parent := F;
     Radio1.SetBounds(16, 160, 120, 17);
-    Radio1.Caption := 'Radio 1';
+    Radio1.Caption := 'Keuzerondje 1';
     Radio2 := TRadioButton.Create(F);
     Radio2.Parent := F;
     Radio2.SetBounds(16, 180, 120, 17);
-    Radio2.Caption := 'Radio 2';
+    Radio2.Caption := 'Keuzerondje 2';
     Radio2.Checked := True;
     Memo := TMemo.Create(F);
     Memo.Parent := F;
     Memo.SetBounds(220, 12, 200, 120);
     Memo.ScrollBars := ssVertical;
     for I := 1 to 20 do
-      Memo.Lines.Add('Memo line ' + IntToStr(I) + ' with some text that wraps around');
+      Memo.Lines.Add('Memoregel ' + IntToStr(I) + ' met wat tekst die doorloopt');
     List := TListBox.Create(F);
     List.Parent := F;
     List.SetBounds(430, 12, 190, 120);
-    for I := 1 to 12 do List.Items.Add('List item ' + IntToStr(I));
+    for I := 1 to 12 do List.Items.Add('Lijstitem ' + IntToStr(I));
     List.ItemIndex := 2;
     Combo := TComboBox.Create(F);
     Combo.Parent := F;
     Combo.Style := csDropDownList;
     Combo.SetBounds(220, 140, 200, 21);
-    Combo.Items.Add('Combo item A');
-    Combo.Items.Add('Combo item B');
+    Combo.Items.Add('Keuze-item A');
+    Combo.Items.Add('Keuze-item B');
     Combo.ItemIndex := 1;
     Tabs := TTabControl.Create(F);
     Tabs.Parent := F;
@@ -155,22 +155,22 @@ begin
     Panel := TPanel.Create(F);
     Panel.Parent := F;
     Panel.SetBounds(430, 140, 190, 60);
-    Panel.Caption := 'Panel';
+    Panel.Caption := 'Paneel';
     Paint := TPaintBox.Create(F);
     Paint.Parent := F;
     Paint.SetBounds(430, 210, 190, 120);
     Paint.OnPaint := PaintPaint;
   end;
   F.Show;
-  ZMMainWindow := F.Handle;   { ZMInjectMouse coordinates are relative to this window }
+  ZMMainWindow := F.Handle;   { ZMInjectMouse-coördinaten zijn relatief aan dit venster }
   Application.ProcessMessages;
-  { click the button through the message queue }
+  { klik op de knop via de berichtenwachtrij }
   ZMInjectMouse(60, 82, 1, True);
   ZMInjectMouse(60, 82, 1, False);
   for I := 1 to 5 do Application.ProcessMessages;
   if F.Clicks <> 1 then
   begin
-    WriteLn('FAIL: button click not delivered');
+    WriteLn('FAIL: knopklik niet afgeleverd');
     Halt(1);
   end;
   for I := 1 to 3 do Application.ProcessMessages;

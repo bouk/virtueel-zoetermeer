@@ -1,9 +1,9 @@
 unit Menus;
 
-{ Delphi 5 Menus unit subset: TMenuItem, TMainMenu, TPopupMenu, shortcuts.
-  Menus are kept as data; TPopupMenu.Popup shows nothing yet (the game's
-  popup menus belong to the sprite editor forms, which are not part of the
-  playable game). }
+{ Delphi 5 Menus-unit (deel): TMenuItem, TMainMenu, TPopupMenu, sneltoetsen.
+  Menu's worden als gegevens bewaard; TPopupMenu.Popup toont nog niets (de
+  popupmenu's van het spel horen bij de formulieren van de sprite-editor, die
+  geen onderdeel van het speelbare spel zijn). }
 
 {$MODE DELPHI}{$H+}
 

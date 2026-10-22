@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Run the original game under Wine on a headless X server and take a screenshot.
-# Usage: tools/run-orig.sh [1.0|1.1] [seconds] [screenshot.png]
+# Draai het originele spel onder Wine op een X-server zonder beeldscherm en maak een schermafdruk.
+# Gebruik: tools/run-orig.sh [1.0|1.1] [seconden] [schermafdruk.png]
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 ver="${1:-1.1}"; secs="${2:-30}"; shot="${3:-$root/build/orig-$ver.png}"

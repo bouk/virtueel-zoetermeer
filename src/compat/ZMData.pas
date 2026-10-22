@@ -1,18 +1,18 @@
 unit ZMData;
 
-{ Where the original game files are, and access to them.
+{ Waar de originele spelbestanden staan, en de toegang ertoe.
 
-  The user's own copy of the game supplies ROS.exe (form resources) and the data
-  files. The data directory is found, in this order, from:
-    1. the command-line option  --data=<dir>  (or  --data <dir>)
-    2. the environment variable ZM_DATA
-    3. the current directory, then the directory of the executable
-  A directory qualifies when it contains ROS.exe or an images/ folder (any case).
-  ROS.exe itself may be overridden with ZM_EXE / --exe=<file> (the data files of
-  v1.1 and the exe can live in different directories).
+  De eigen kopie van het spel levert ROS.exe (formulierresources) en de datafiles. De
+  datamap wordt in deze volgorde gezocht:
+    1. de commandoregeloptie --data=<map> (of --data <map>)
+    2. de omgevingsvariabele ZM_DATA
+    3. de huidige map, daarna de map van het uitvoerbare bestand
+  Een map komt in aanmerking als die ROS.exe of een images/-map bevat (elke letterkast).
+  ROS.exe zelf kan overschreven worden met ZM_EXE / --exe=<bestand> (de datafiles van
+  v1.1 en het exe kunnen in verschillende mappen staan).
 
-  Paths written the Windows way (backslashes, any letter case) are resolved
-  against the real file system by ZMResolvePath. }
+  Paden in Windows-schrijfwijze (backslashes, elke letterkast) worden door
+  ZMResolvePath opgelost tegen het echte bestandssysteem. }
 
 {$MODE DELPHI}{$H+}
 
@@ -20,17 +20,17 @@ interface
 
 uses Windows;
 
-function ZMDataDir: string;          { with trailing path delimiter }
-function ZMExeFile: string;          { full path of the original ROS.exe ('' if not found) }
-function ZMExeName: string;          { what ParamStr(0)/Application.ExeName report (see ZMShadowDir) }
-{ The "shadow" directory makes the game's Windows-style paths work through the
-  plain RTL (TIniFile, AssignFile, FindFirst, TStrings.LoadFromFile). The game builds
-  paths as ExtractFilePath(ParamStr(0)) + '\' + 'images\8bits\x.bmp'. ParamStr(0)
-  reports <shadow>/ROS.exe, so such a path is '<shadow>/\images\8bits\x.bmp': one
-  file name (backslashes are ordinary characters on Unix) in the shadow directory.
-  The shadow directory holds symlinks with exactly those names (in several letter
-  cases) to the user's data files, and directories named '\images\8bits\' for
-  FindFirst. It lives in $XDG_CACHE_HOME/zoetermeer (override: ZM_SHADOW). }
+function ZMDataDir: string;          { met afsluitend scheidingsteken }
+function ZMExeFile: string;          { volledig pad van het originele ROS.exe ('' als het niet gevonden is) }
+function ZMExeName: string;          { wat ParamStr(0)/Application.ExeName teruggeven (zie ZMShadowDir) }
+{ De "schaduw"-map laat de Windows-achtige paden van het spel werken via de gewone RTL
+  (TIniFile, AssignFile, FindFirst, TStrings.LoadFromFile). Het spel bouwt paden als
+  ExtractFilePath(ParamStr(0)) + '\' + 'images\8bits\x.bmp'. ParamStr(0) geeft
+  <schaduw>/ROS.exe, dus zo'n pad wordt '<schaduw>/\images\8bits\x.bmp': één bestandsnaam
+  (backslashes zijn gewone tekens op Unix) in de schaduwmap. De schaduwmap bevat symlinks
+  met precies die namen (in meerdere letterkasten) naar de datafiles van de gebruiker, en
+  mappen met de naam '\images\8bits\' voor FindFirst. Hij staat in
+  $XDG_CACHE_HOME/zoetermeer (overschrijven met ZM_SHADOW). }
 function ZMShadowDir: string;
 function ZMResolvePath(const Path: string): string;
 
@@ -54,7 +54,7 @@ function ZMWritePath(const Path: string): string;
 function ZMInDataDir(const Path: string): Boolean;
 function ZMFileExists(const Path: string): Boolean;
 
-{ PE resources of the original ROS.exe }
+{ PE-resources van het originele ROS.exe }
 function ZMFindExeResource(Name, ResType: PAnsiChar): HRSRC;
 function ZMExeResourceData(Res: HRSRC): Pointer;
 function ZMExeResourceSize(Res: HRSRC): DWORD;
@@ -87,7 +87,7 @@ begin
   end;
 end;
 
-{ case-insensitive lookup of one directory entry }
+{ zoekt één map-item hoofdletterongevoelig op }
 function FindEntry(const Dir, Name: string): string;
 var
   SR: TSearchRec;
@@ -130,7 +130,7 @@ begin
   P := Path;
   for I := 1 to Length(P) do
     if P[I] = '\' then P[I] := '/';
-  { drive letters (C:/...) are mapped onto the data directory }
+  { stationsletters (C:/...) worden naar de datamap omgezet }
   if (Length(P) >= 2) and (P[2] = ':') then
     P := ZMDataDir + Copy(P, 4, MaxInt);
   if FileExists(P) or DirectoryExists(P) then Exit(P);
@@ -147,7 +147,7 @@ begin
     Part := Copy(P, Start, I - Start);
     if Part = '' then Break;
     Found := FindEntry(Cur, Part);
-    if Found = '' then Found := Part;  { does not exist (yet): keep the spelling }
+    if Found = '' then Found := Part;  { bestaat (nog) niet: houd de schrijfwijze aan }
     if (Result <> '') and (Result[Length(Result)] <> '/') then Result := Result + '/';
     Result := Result + Found;
     if Cur = '/' then Cur := '/' + Found
@@ -217,7 +217,7 @@ var
   GShadow: string = '';
 
 {$IFDEF UNIX}
-{ Directory listing with literal names (FindFirst would treat '\' as a separator). }
+{ Maplijst met letterlijke namen (FindFirst zou '\' als scheidingsteken zien). }
 function ListDir(const Dir: string; out Names: TStringList; out IsDir: TList): Boolean;
 var
   D: PDir;
@@ -244,7 +244,7 @@ begin
   FpCloseDir(D^);
 end;
 
-{ remove the symlinks of a previous run (files the game wrote stay) }
+{ verwijdert de symlinks van een vorige run (bestanden die het spel schreef, blijven) }
 procedure ClearLinks(const Dir: string);
 var
   Names: TStringList;
@@ -304,12 +304,12 @@ var
   I: Integer;
   Sub, Root: string;
 begin
-  { Rel is the Windows-style relative path of SrcDir, e.g. '\images\8bits\'.
-    Root files get links in several letter cases ('\ZoetermeerGame.ini' for
-    ZoetermeerGame.Ini); files in subdirectories get exactly one link each with
-    the on-disk name, because FindFirst('<shadow>/\images\8bits\*.bmp') lists
-    the shadow root and must return every file once. Plain (non-backslash) links
-    to the root entries are made too. }
+  { Rel is het Windows-achtige relatieve pad van SrcDir, bijv. '\images\8bits\'.
+    Bestanden in de hoofdmap krijgen links in meerdere letterkasten ('\ZoetermeerGame.ini'
+    voor ZoetermeerGame.Ini); bestanden in submappen krijgen precies één link elk met de
+    naam op schijf, omdat FindFirst('<schaduw>/\images\8bits\*.bmp') de hoofdmap van de
+    schaduw doorzoekt en elk bestand precies één keer moet teruggeven. Ook gewone
+    (zonder backslash) links naar de items in de hoofdmap worden aangemaakt. }
   Root := ExcludeTrailingPathDelimiter(GShadow);
   ListDir(SrcDir, Names, IsDir);
   try
@@ -628,11 +628,11 @@ begin
 {$ENDIF}
 end;
 
-{ ---------------------------------------------------------------- PE resources }
+{ ---------------------------------------------------------------- PE-resources }
 
 type
   TResEntry = record
-    Offset, Size: LongWord;  { file offset and size of the data }
+    Offset, Size: LongWord;  { bestandsoffset en grootte van de data }
   end;
 
 var
@@ -676,7 +676,7 @@ begin
   if A > B then Result := A else Result := B;
 end;
 
-{ Find a resource: returns its file offset/size via the out params. }
+{ Zoekt een resource: geeft de bestandsoffset/grootte via de out-parameters. }
 function FindRes(const Name: string; NameId: PtrUInt; TypeName: string; TypeId: PtrUInt;
   out Offset, Size: LongWord): Boolean;
 var
@@ -698,7 +698,7 @@ var
       Result := Result + Chr(RdW(RsrcRaw + Ofs + 2 + LongWord(K) * 2) and $FF);
   end;
 
-  { search a directory for a name or id; returns the entry's OffsetToData }
+  { zoekt in een map op naam of id; geeft de OffsetToData van het item }
   function Lookup(DirOfs: LongWord; const AName: string; AId: PtrUInt; out Child: LongWord): Boolean;
   var
     NNamed, NId, K, E: LongWord;
@@ -742,7 +742,7 @@ begin
   NSec := RdW(PE + 6);
   OptSize := RdW(PE + 20);
   SecTab := PE + 24 + OptSize;
-  RsrcRVA := RdD(PE + 24 + 112);   { data directory 2 (resources), PE32 }
+  RsrcRVA := RdD(PE + 24 + 112);   { datadirectory 2 (resources), PE32 }
   RsrcRaw := 0;
   RsrcVSize := 0;
   for I := 0 to NSec - 1 do
@@ -751,7 +751,7 @@ begin
     begin
       RsrcRaw := RdD(SecTab + I * 40 + 20) + (RsrcRVA - RdD(SecTab + I * 40 + 12));
       RsrcVSize := RdD(SecTab + I * 40 + 8);
-      RsrcRVA := RsrcRVA;  { section-relative base already applied }
+      RsrcRVA := RsrcRVA;  { sectie-relatieve basis is al toegepast }
       Break;
     end;
   if RsrcRaw = 0 then Exit;

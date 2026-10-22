@@ -1,9 +1,9 @@
 unit MMSystem;
 
-{ Portable subset of the Delphi 5 MMSystem unit: multimedia timer and sound API.
-  Timing comes from the platform backend; timeSetEvent callbacks are delivered
-  from the compat message pump (there are no threads). Sound playback is a no-op
-  (ROS.exe does not play sounds). }
+{ Draagbare subset van de Delphi 5-unit MMSystem: multimedia-timer en geluid-API.
+  De timing komt van de platformbackend; timeSetEvent-callbacks worden afgeleverd
+  vanuit de berichtenlus van de compat-laag (er zijn geen threads). Geluidsweergave
+  doet niets (ROS.exe speelt geen geluiden af). }
 
 {$MODE DELPHI}{$H+}
 

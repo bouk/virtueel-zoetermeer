@@ -1,7 +1,7 @@
 unit Buttons;
 
-{ Delphi 5 Buttons unit subset: TBitBtn and TSpeedButton with glyphs.
-  The stock glyphs of TBitBtn.Kind are drawn procedurally (check mark, cross, ...). }
+{ Delphi 5-subset van de Buttons-unit: TBitBtn en TSpeedButton met glyphs.
+  De standaard glyphs van TBitBtn.Kind worden procedureel getekend (vinkje, kruis, ...). }
 
 {$MODE DELPHI}{$H+}
 
@@ -160,8 +160,8 @@ implementation
 uses Math;
 
 const
-  BitBtnCaptions: array[TBitBtnKind] of string = ('', 'OK', 'Cancel', '&Help', '&Yes', '&No',
-    '&Close', 'Abort', '&Retry', '&Ignore', '&All');
+  BitBtnCaptions: array[TBitBtnKind] of string = ('', 'OK', 'Annuleren', '&Help', '&Ja', '&Nee',
+    '&Sluiten', '&Afbreken', '&Opnieuw', '&Negeren', '&Alles');
   BitBtnModalResults: array[TBitBtnKind] of TModalResult = (0, mrOk, mrCancel, 0, mrYes, mrNo,
     0, mrAbort, mrRetry, mrIgnore, mrAll);
 
@@ -173,7 +173,7 @@ begin
   InflateRect(Result, -2, -2);
 end;
 
-{ Draws the glyph of a stock button kind, 16x16, at X, Y. }
+{ Tekent het glyph van een standaard knopsoort, 16x16, op X, Y. }
 procedure DrawKindGlyph(Canvas: TCanvas; Kind: TBitBtnKind; X, Y: Integer; Enabled: Boolean);
 var
   I: Integer;

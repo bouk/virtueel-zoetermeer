@@ -1,10 +1,10 @@
 unit Messages;
 
-{ Portable subset of the Delphi 5 Messages unit: WM_* constants and the
-  message records used by message handlers (procedure X(var Msg: TWMxxx); message WM_xxx).
+{ Draagbare subset van de Delphi 5-unit Messages: WM_*-constanten en de
+  berichtrecords die door berichtafhandelaars worden gebruikt (procedure X(var Msg: TWMxxx); message WM_xxx).
 
-  64-bit layout: Msg is a Cardinal followed (on 64-bit CPUs) by 4 bytes of padding,
-  WParam/LParam/Result are pointer sized, like FPC's own Windows/LCL headers. }
+  Indeling voor 64-bit: Msg is een Cardinal, gevolgd door (op 64-bit-cpu's) 4 bytes opvulling;
+  WParam/LParam/Result hebben de grootte van een pointer, net als de eigen Windows/LCL-headers van FPC. }
 
 {$MODE DELPHI}{$H+}
 
@@ -181,7 +181,7 @@ const
   WM_APP = $8000;
   WM_USER = $0400;
 
-  { Edit control messages }
+  { Berichten voor het bewerkingsvak }
   EM_GETSEL = $00B0;
   EM_SETSEL = $00B1;
   EM_GETRECT = $00B2;
@@ -203,7 +203,7 @@ const
   EM_SETREADONLY = $00CF;
   EM_GETFIRSTVISIBLELINE = $00CE;
 
-  { Button messages }
+  { Berichten voor knoppen }
   BM_GETCHECK = $00F0;
   BM_SETCHECK = $00F1;
   BM_GETSTATE = $00F2;
@@ -212,7 +212,7 @@ const
   BM_CLICK = $00F5;
   BN_CLICKED = 0;
 
-  { Notification codes }
+  { Meldingscodes }
   EN_CHANGE = $0300;
   EN_UPDATE = $0400;
   LBN_SELCHANGE = 1;
@@ -223,12 +223,12 @@ const
   CBN_DROPDOWN = 7;
   CBN_CLOSEUP = 8;
 
-  { WM_ACTIVATE state values }
+  { Toestandswaarden van WM_ACTIVATE }
   WA_INACTIVE = 0;
   WA_ACTIVE = 1;
   WA_CLICKACTIVE = 2;
 
-  { WM_SIZE values }
+  { Waarden van WM_SIZE }
   SIZE_RESTORED = 0;
   SIZE_MINIMIZED = 1;
   SIZE_MAXIMIZED = 2;

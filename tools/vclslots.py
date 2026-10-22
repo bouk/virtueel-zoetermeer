@@ -1,6 +1,6 @@
-"""Write a reference of virtual method slots for the library classes linked into ROS.exe.
+"""Schrijf een naslag van virtuele methodeslots voor de bibliotheekklassen die in ROS.exe gelinkt zijn.
 
-Usage: python tools/vclslots.py ROS.exe kb5.bin > symbols/vcl-vmt-slots.md
+Gebruik: python tools/vclslots.py ROS.exe kb5.bin > symbols/vcl-vmt-slots.md
 """
 import sys
 
@@ -13,9 +13,9 @@ def main():
     kb = idrkb.KnowledgeBase(sys.argv[2])
     vmts = {v.name: v for v in im.find_vmts().values()}
     slots = kb.vmt_slots()
-    print('# Virtual method slots of the library classes linked into ROS.exe\n')
-    print('Slot offsets are relative to the VMT pointer (`call dword ptr [reg + slot]`).')
-    print('Negative TObject slots: -0x20 SafeCallException, -0x1c AfterConstruction, '
+    print('# Virtuele-methodeslots van de bibliotheekklassen die in ROS.exe gelinkt zijn\n')
+    print('Slotoffsets zijn ten opzichte van de VMT-pointer (`call dword ptr [reg + slot]`).')
+    print('Negatieve TObject-slots: -0x20 SafeCallException, -0x1c AfterConstruction, '
           '-0x18 BeforeDestruction, -0x14 Dispatch, -0x10 DefaultHandler, -0x0c NewInstance, '
           '-0x08 FreeInstance, -0x04 Destroy.\n')
     for name in sorted(vmts):

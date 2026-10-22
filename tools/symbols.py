@@ -1,14 +1,14 @@
-"""Build a symbol table for a Delphi 5 executable.
+"""Bouw een symboolTabel voor een Delphi 5-programma.
 
-Sources, in decreasing priority:
-  * RTTI: published methods, property getters/setters, class VMTs
-  * VMT virtual slots (named after the overriding class)
-  * IDR knowledge-base signature matches (library units only)
-  * unit initialization/finalization procs
+Bronnen, in afnemende prioriteit:
+  * RTTI: gepubliceerde methoden, property-getters/-setters, klasse-VMT's
+  * VMT-virtuele slots (genoemd naar de overschrijvende klasse)
+  * overeenkomsten met IDR-kennisbankhandtekeningen (alleen bibliotheekunits)
+  * initialisatie-/finalisatieprocedures van units
 
-Usage: python tools/symbols.py ROS.exe kb5.bin units.json [names.tsv] > symbols/ros.tsv
-Output columns: address  kind  unit  name
-  kind: f = function, d = data label, v = VMT, s = string literal (name = length)
+Gebruik: python tools/symbols.py ROS.exe kb5.bin units.json [names.tsv] > symbols/ros.tsv
+Uitvoerkolommen: adres  soort  unit  naam
+  soort: f = functie, d = datalabel, v = VMT, s = stringliteral (naam = lengte)
 """
 import json
 import struct
@@ -23,15 +23,15 @@ TK_CLASS = 7
 
 
 def class_props(im, vmt):
-    """Yield (name, get, set) for the published properties declared by this class."""
+    """Yield (naam, get, set) voor de gepubliceerde properties die deze klasse declareert."""
     ti = vmt.type_info
     if not ti or im.u8(ti) != TK_CLASS:
         return
     p = ti + 2 + im.u8(ti + 1)
     p += 4 + 4                       # ClassType, ParentInfo
-    p += 2                           # PropCount (total, incl. inherited)
+    p += 2                           # PropCount (totaal, incl. geërfde)
     p += 1 + im.u8(p)                # UnitName
-    n = im.u16(p); p += 2            # props declared in this class
+    n = im.u16(p); p += 2            # properties gedeclareerd in deze klasse
     for _ in range(n):
         get, set_ = im.u32(p + 4), im.u32(p + 8)
         name = im.sstr(p + 26)
@@ -99,10 +99,10 @@ def main():
         name = names.pop()
         mod = kb.modules[cands[0].module_id]
         if not local and len(cands[0].dump) < 24:
-            continue      # short generic match from a foreign module: too unreliable
+            continue      # korte generieke overeenkomst uit een vreemde module: te onbetrouwbaar
         prio = 80 if local else 40
         add(va, 'f', name if '.' in name or name.startswith('@') else '%s.%s' % (mod, name), prio)
-        # Absolute fixups that point outside CODE name the globals this routine uses.
+        # Absolute fixups die buiten CODE wijzen, noemen de globals die deze routine gebruikt.
         if local:
             for p in cands[:1]:
                 for fx in p.fixups:
@@ -123,13 +123,13 @@ def main():
     kb_slots = kb.vmt_slots()
 
     def slot_method(v, i):
-        """Name of the method that the root-most ancestor declared at virtual slot i."""
+        """Naam van de methode die de bovenste voorouder op virtueel slot i heeft gedeclareerd."""
         chain = []
         while v is not None:
             chain.append(v)
             v = vmts.get(v.parent)
         for anc in chain:
-            # Only library classes: the game has its own classes named like VCL ones (TFrame).
+            # Alleen bibliotheekklassen: het spel heeft eigen klassen met VCL-namen (TFrame).
             u = unit_at(anc.addr)
             if not (u and u.get('library')):
                 continue
@@ -167,13 +167,13 @@ def main():
             if set_ and (set_ >> 24) != 0xFF and im.in_code(set_):
                 add(set_, 'f', '%s.Set%s' % (v.name, name), 70)
 
-    # Names assigned during decompilation (tools/merge_names.py) win over everything else.
+    # Tijdens de decompilatie toegekende namen (tools/merge_names.py) winnen van alles.
     if len(sys.argv) > 4:
         for line in open(sys.argv[4]):
             a, kind, _unit, name = line.rstrip('\n').split('\t')
             add(int(a, 16), kind, name, 95)
 
-    # Delphi reaches another unit's globals through a pointer stored in DATA.
+    # Delphi bereikt de globals van een andere unit via een pointer die in DATA is opgeslagen.
     data = im.sections['DATA']
     lo = im.base + data.VirtualAddress
     for va in range(lo, lo + data.Misc_VirtualSize - 3, 4):
@@ -181,8 +181,8 @@ def main():
         if t in syms and syms[t][0] == 'd' and va not in syms:
             add(va, 'd', 'PTR_' + syms[t][1], 10)
 
-    # Delphi long-string literals (refcount -1, length, chars): code references point at
-    # the characters, so mark those as strings.
+    # Delphi long-string-literals (refcount -1, lengte, tekens): codeverwijzingen wijzen naar
+    # de tekens, dus die markeren we als strings.
     for u in units:
         b = bytes(im.bytes(u['start'], u['end'] - u['start']))
         i = b.find(b'\xff\xff\xff\xff')

@@ -1,6 +1,6 @@
-// Post-analysis script: writes decompiled C plus disassembly for each function in the
-// requested units.
-// Args: <units.json-derived ranges file: "name start end" per line> <outdir>
+// Postanalysisscript: schrijft de gedecompileerde C plus de disassemblage voor elke functie in de
+// gevraagde units.
+// Argumenten: <bereikenbestand afgeleid van units.json: "naam start eind" per regel> <uitvoermap>
 //@category Delphi
 
 import java.io.PrintWriter;
@@ -38,8 +38,8 @@ public class ExportDecomp extends GhidraScript {
         di.openProgram(currentProgram);
 
         List<String> lines = Files.readAllLines(Path.of(args[0]));
-        // Delphi try/except/finally handlers are only referenced by a PUSH of their address,
-        // so auto-analysis leaves them undisassembled.  Disassemble them before exporting.
+        // Delphi try/except/finally-handlers worden alleen aangeroepen via een PUSH van hun adres,
+        // dus de automatische analyse laat ze ongedisassembleerd. Disassembleer ze voor de export.
         for (int pass = 0; pass < 3; pass++) {
             for (String line : lines) {
                 String[] f = line.trim().split("\\s+");
@@ -48,8 +48,8 @@ public class ExportDecomp extends GhidraScript {
                 List<Address> targets = new ArrayList<>();
                 for (Instruction ins : currentProgram.getListing().getInstructions(range, true)) {
                     if (ins.getMnemonicString().equals("JMP")) {
-                        // Code continues after @HandleAnyException/@HandleFinally; a handler
-                        // table follows @HandleOnException.
+                        // De code gaat verder na @HandleAnyException/@HandleFinally; een handlertabel
+                        // volgt op @HandleOnException.
                         Function callee = null;
                         for (Reference ref : ins.getReferencesFrom()) callee = getFunctionAt(ref.getToAddress());
                         if (callee == null) continue;
@@ -65,7 +65,7 @@ public class ExportDecomp extends GhidraScript {
                                     if (range.contains(h) && getInstructionAt(h) == null) targets.add(h);
                                 }
                             } catch (Exception e) {
-                                println("handler table at " + after + ": " + e.getMessage());
+                                println("handlertabel bij " + after + ": " + e.getMessage());
                             }
                         }
                         continue;
@@ -99,7 +99,7 @@ public class ExportDecomp extends GhidraScript {
                     if (r != null && r.decompileCompleted()) {
                         c.println(r.getDecompiledFunction().getC());
                     } else {
-                        c.println("// decompilation failed\n");
+                        c.println("// decompilatie mislukt\n");
                     }
                     s.printf("%n%s:  ; %s%n", fn.getName(true), fn.getEntryPoint());
                     for (Instruction ins : currentProgram.getListing().getInstructions(new AddressSet(fn.getEntryPoint(), next), true)) {
@@ -116,7 +116,7 @@ public class ExportDecomp extends GhidraScript {
                     }
                 }
             }
-            println("Exported " + unit);
+            println("Geexporteerd " + unit);
         }
         di.dispose();
     }

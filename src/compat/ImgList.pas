@@ -1,6 +1,6 @@
 unit ImgList;
 
-{ Delphi 5 ImgList unit: the image list classes live in Controls here. }
+{ Delphi 5 ImgList-unit: de klassen voor afbeeldingenlijsten staan hier in Controls. }
 
 {$MODE DELPHI}{$H+}
 

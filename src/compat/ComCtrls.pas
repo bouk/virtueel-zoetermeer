@@ -1,7 +1,7 @@
 unit ComCtrls;
 
-{ Delphi 5 ComCtrls subset: TTabControl (with OwnerDraw/MultiLine), TPageControl/
-  TTabSheet, TProgressBar, TStatusBar and TTrackBar, drawn in classic style. }
+{ Delphi 5-subset van de ComCtrls-unit: TTabControl (met OwnerDraw/MultiLine), TPageControl/
+  TTabSheet, TProgressBar, TStatusBar en TTrackBar, getekend in de klassieke stijl. }
 
 {$MODE DELPHI}{$H+}
 
@@ -463,7 +463,7 @@ begin
     Inc(X, W);
   end;
   FRows := Row + 1;
-  { stretch rows to the full width (not ragged) when multi-line }
+  { rijen over de volle breedte uitrekken (niet ongelijk) bij meerdere regels }
   if FMultiLine and (FRows > 1) and not FRaggedRight then
     for K := 0 to FRows - 1 do
     begin
@@ -488,7 +488,7 @@ begin
           Inc(J);
         end;
     end;
-  { the row of the selected tab is moved next to the client area (bottom row) }
+  { de rij van het geselecteerde tabblad wordt naast het clientgebied geplaatst (onderste rij) }
   ActRow := FRows - 1;
   if (FTabIndex >= 0) and (FTabIndex < FTabs.Count) then ActRow := RowOf[FTabIndex];
   for I := 0 to FTabs.Count - 1 do
@@ -629,7 +629,7 @@ begin
       FCanvas.LineTo(R.Right - 2, R.Bottom);
       if Active then
       begin
-        { merge with the client frame }
+        { samenvoegen met het kaderlijn van het clientgebied }
         FCanvas.Pen.Color := clBtnFace;
         FCanvas.MoveTo(R.Left + 1, R.Bottom);
         FCanvas.LineTo(R.Right - 2, R.Bottom);

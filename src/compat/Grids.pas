@@ -1,8 +1,8 @@
 unit Grids;
 
-{ Delphi 5 Grids subset: TCustomGrid, TDrawGrid and TStringGrid with drawing,
-  selection, scrolling and simple in-place text editing. Used only by the sprite
-  editor forms of ROS.exe. }
+{ Delphi 5-subset van de Grids-unit: TCustomGrid, TDrawGrid en TStringGrid met tekenen,
+  selectie, scrollen en eenvoudig tekstbewerken op de cel. Alleen gebruikt door de
+  spriteditor-formulieren van ROS.exe. }
 
 {$MODE DELPHI}{$H+}
 
@@ -730,7 +730,7 @@ begin
       if FDefaultDrawing and (gdFixed in State) then
         ZMFrame3D(Canvas, Rect(Rc.Left, Rc.Top, Rc.Right + 1, Rc.Bottom + 1), clBtnHighlight, clBtnShadow);
       if gdFocused in State then Canvas.DrawFocusRect(Rc);
-      { grid lines }
+      { rasterlijnen }
       if FGridLineWidth > 0 then
       begin
         Canvas.Pen.Color := clSilver;

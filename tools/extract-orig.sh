@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Unpack the original "Virtueel Zoetermeer.zip" into orig/ and verify checksums.
-# Usage: tools/extract-orig.sh [path/to/Virtueel Zoetermeer.zip]
+# Pak het originele "Virtueel Zoetermeer.zip" uit in orig/ en controleer de checksums.
+# Gebruik: tools/extract-orig.sh [pad/naar/Virtueel Zoetermeer.zip]
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 zip="${1:-$root/Virtueel Zoetermeer.zip}"

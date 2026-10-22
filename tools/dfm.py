@@ -1,9 +1,9 @@
-"""Decode Delphi binary form resources (TPF0 streams) to the textual .dfm syntax.
+"""Decodeer Delphi-binaire formulierresources (TPF0-streams) naar de tekstuele .dfm-syntaxis.
 
-Usage:
-  python tools/dfm.py ROS.exe outdir [--full]
-Writes one <FORM>.txt per RCDATA form resource.  Binary property data (bitmaps,
-glyphs) is summarized as a byte count unless --full is given.
+Gebruik:
+  python tools/dfm.py ROS.exe uitvoermap [--full]
+Schrijft per RCDATA-formulierresource een <FORM>.txt. Binaire eigenschapsdata (bitmaps,
+glyphs) wordt als aantal bytes samengevat, tenzij --full is opgegeven.
 """
 import os
 import struct
@@ -147,7 +147,7 @@ def value(r, full, indent):
         return quote(r.raw(2 * n).decode('utf-16le'))
     if t == 19:
         return str(r.unpack('<q'))
-    raise ValueError('unknown value type %d at %#x' % (t, r.p - 1))
+    raise ValueError('onbekend waardetype %d bij %#x' % (t, r.p - 1))
 
 
 def obj(r, full, indent=0):

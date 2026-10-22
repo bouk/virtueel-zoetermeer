@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Build the portable game with Free Pascal.
-# Usage: tools/build.sh [unit-or-program.pas ...]   (default: src/game/Ros.dpr)
+# Bouw het draagbare spel met Free Pascal.
+# Gebruik: tools/build.sh [unit-of-programma.pas ...]   (standaard: src/game/Ros.dpr)
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 out="$root/build/fpc"

@@ -1,7 +1,7 @@
-"""Brute-force extract raw-deflate streams from a Wise installer.
+"""Pak met brute force ruwe deflate-streams uit een Wise-installatieprogramma.
 
-Usage: python tools/wise-scan.py update.exe outdir
-Every offset that inflates to a non-trivial stream is written to outdir as <offset>.bin.
+Gebruik: python tools/wise-scan.py update.exe uitvoermap
+Elke offset die uitpakt tot een niet-triviale stream wordt als <offset>.bin in de uitvoermap geschreven.
 """
 import os
 import sys

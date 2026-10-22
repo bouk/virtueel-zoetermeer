@@ -1,14 +1,14 @@
-"""Recover unit boundaries and names for a Delphi 5 executable.
+"""Herstel unitgrenzen en -namen voor een Delphi 5-programma.
 
-Every unit's initialization proc is emitted as the last routine of that unit's code,
-so sorting the InitTable entries by address yields the unit boundaries.  Names come from:
-  * class RTTI (tkClass type data carries the declaring unit name)
-  * IDR knowledge-base matches (dominant library module within the range)
-  * the PACKAGEINFO unit list, for elimination
+De initialisatieprocedure van elke unit staat als laatste routine in de code van die unit,
+dus het sorteren van de InitTable-ingangen op adres levert de unitgrenzen op. Namen komen uit:
+  * klasse-RTTI (tkClass-typegegevens bevatten de naam van de declarerende unit)
+  * overeenkomsten met IDR-kennisbankhandtekeningen (dominante bibliotheekmodule binnen het bereik)
+  * de unitlijst van PACKAGEINFO, voor eliminatie
 
-Usage: python tools/units.py ROS.exe kb5.bin [names.json] > symbols/units.json
+Gebruik: python tools/units.py ROS.exe kb5.bin [names.json] > symbols/units.json
 
-names.json maps init-table index -> unit name for units the heuristics cannot name.
+names.json koppelt init-tabelindex -> unitnaam voor units die de heuristieken niet kunnen benoemen.
 """
 import collections
 import json
@@ -23,7 +23,7 @@ import kbmatch
 
 
 def proc_end(im, start):
-    """Linear-sweep a routine; stop at a ret/jmp past every forward branch target."""
+    """Lineaire doorloop van een routine; stop bij een ret/jmp voorbij elk voorwaarts vertakkingsdoel."""
     md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)
     md.detail = True
     code = bytes(im.bytes(start, 0x4000))
@@ -37,7 +37,7 @@ def proc_end(im, start):
                     reach = max(reach, op.imm)
         if ins.mnemonic in ('ret', 'jmp') and end > reach:
             return end
-    raise ValueError('no end for proc at %#x' % start)
+    raise ValueError('geen einde voor proc bij %#x' % start)
 
 
 def align4(x):
@@ -76,7 +76,7 @@ def class_unit(im, vmt):
 
 
 def string_literals(im, start, end):
-    """Delphi long-string constants: refcount -1, length, chars, NUL."""
+    """Delphi long-string-constanten: refcount -1, lengte, tekens, NUL."""
     out = []
     b = bytes(im.bytes(start, end - start))
     i = b.find(b'\xff\xff\xff\xff')
@@ -99,7 +99,7 @@ def main():
     procs = [p for p in kb.procs() if kb.modules[p.module_id].lower() in linked]
     matches = dict(kbmatch.scan(code, kbmatch.build_index(procs)))
 
-    # Bytes covered by non-trivial library signatures, per module.
+    # Bytes die door niet-triviale bibliotheekhandtekeningen gedekt worden, per module.
     covered = {}
     for pos, hits in matches.items():
         mods = {kb.modules[h.module_id] for h in hits}
@@ -117,7 +117,7 @@ def main():
         end = align4(proc_end(im, init))
         units.append(dict(start=start, end=end, init=init, final=final, init_order=order))
         start = end
-    # The program's main block runs from the last unit to the end of CODE.
+    # Het hoofdblok van het programma loopt van de laatste unit tot het einde van CODE.
     units.append(dict(start=start, end=im.code_end, init=None, final=None, init_order=None))
 
     known = {n.lower(): n for n in package_units(im)}

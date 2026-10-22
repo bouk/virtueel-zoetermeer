@@ -1,6 +1,6 @@
-// Post-analysis script: builds a structure per Delphi class (inheriting ancestor fields) and
-// types the Self parameter (EAX) of every Class.Method function as a pointer to it.
-// Args: <ghidra-types.tsv from tools/ghidra_types.py> <project class list>
+// Postanalysisscript: bouwt per Delphi-klasse een structuur (met overgeerfde velden van voorouders) en
+// typeert de Self-parameter (EAX) van elke Klasse.Methode-functie als pointer ernaar.
+// Argumenten: <ghidra-types.tsv van tools/ghidra_types.py> <lijst met projectklassen>
 //@category Delphi
 
 import java.nio.file.Files;
@@ -35,7 +35,7 @@ public class ApplyTypes extends GhidraScript {
                 fields.computeIfAbsent(f[1], k -> new TreeMap<>()).put(Integer.parseInt(f[2]), new String[]{f[3], f[4]});
             }
         }
-        // Create empty structs first so fields can point at any class.
+        // Maak eerst lege structs aan, zodat velden naar elke klasse kunnen wijzen.
         for (String cls : sizes.keySet()) {
             StructureDataType s = new StructureDataType(cat, cls, Math.max(sizes.get(cls), 4), dtm);
             structs.put(cls, s);
@@ -64,8 +64,8 @@ public class ApplyTypes extends GhidraScript {
         for (String cls : structs.keySet()) {
             resolved.put(cls, dtm.addDataType(structs.get(cls), DataTypeConflictHandler.REPLACE_HANDLER));
         }
-        // Only project methods are typed: let the decompiler infer their parameters first and
-        // commit them, then retype the first one (EAX = Self).
+        // Alleen projectmethoden worden getypeerd: laat de decompiler eerst de parameters afleiden en
+        // leg ze vast, en typeer daarna de eerste (EAX = Self).
         Set<String> projectClasses = new HashSet<>();
         if (getScriptArgs().length > 1) {
             projectClasses.addAll(Files.readAllLines(Path.of(getScriptArgs()[1])));
@@ -124,7 +124,7 @@ public class ApplyTypes extends GhidraScript {
             case "tpoint":
                 return new ArrayDataType(IntegerDataType.dataType, 2, 4);
         }
-        if (l.startsWith("on") || l.endsWith("event")) {   // method pointer: Code + Data
+        if (l.startsWith("on") || l.endsWith("event")) {   // methodepointer: Code + Data
             return new ArrayDataType(PointerDataType.dataType, 2, 4);
         }
         StructureDataType s = structs.get(t);

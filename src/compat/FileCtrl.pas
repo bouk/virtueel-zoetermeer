@@ -1,8 +1,8 @@
 unit FileCtrl;
 
-{ Delphi 5 FileCtrl subset: TDirectoryListBox, TDriveComboBox, TFileListBox,
-  TFilterComboBox and the directory helpers. Drives are not meaningful on Unix;
-  the drive combo shows a single 'c:' entry. }
+{ Delphi 5-subset van de FileCtrl-unit: TDirectoryListBox, TDriveComboBox, TFileListBox,
+  TFilterComboBox en de maphulpfuncties. Stations hebben op Unix geen betekenis;
+  de stationskeuzelijst toont een enkel 'c:'-item. }
 
 {$MODE DELPHI}{$H+}
 
@@ -208,7 +208,7 @@ begin
   Parts := TStringList.Create;
   try
     Items.Clear;
-    { the path components, then the subdirectories }
+    { eerst de padonderdelen, daarna de submappen }
     Parts.Delimiter := PathDelim;
     Parts.StrictDelimiter := True;
     Parts.DelimitedText := FDirectory;
@@ -421,7 +421,7 @@ constructor TFilterComboBox.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Style := csDropDownList;
-  FFilter := 'All files (*.*)|*.*';
+  FFilter := 'Alle bestanden (*.*)|*.*';
   SetFilter(FFilter);
 end;
 
@@ -465,7 +465,7 @@ begin
   end;
 end;
 
-{ ---------------------------------------------------------------- SelectDirectory }
+{ ---------------------------------------------------------------- SelectDirectory (mapkiezer) }
 
 function SelectDirectory(var Directory: string; Options: TSelectDirOpts; HelpCtx: Longint): Boolean;
 var
@@ -477,7 +477,7 @@ begin
   F := TForm.CreateNew(Application);
   try
     F.BorderStyle := bsDialog;
-    F.Caption := 'Select Directory';
+    F.Caption := 'Map selecteren';
     F.Position := poScreenCenter;
     F.ClientWidth := 300;
     F.ClientHeight := 260;
@@ -493,7 +493,7 @@ begin
     B.SetBounds(136, 224, 75, 25);
     B := TButton.Create(F);
     B.Parent := F;
-    B.Caption := 'Cancel';
+    B.Caption := 'Annuleren';
     B.Cancel := True;
     B.ModalResult := mrCancel;
     B.SetBounds(217, 224, 75, 25);

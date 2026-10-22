@@ -1,8 +1,8 @@
-// Minimal Asyncify driver + WASI subset for testing an FPC wasip1 program under node.
+// Minimale Asyncify-driver + WASI-subset om een FPC-wasip1-programma onder node te testen.
 import fs from 'fs';
 const bytes = fs.readFileSync(process.argv[2]);
 let inst, mem;
-const DATA = 16; // asyncify data struct at a scratch address we allocate below
+const DATA = 16; // asyncify-datastructuur op een scratch-adres dat we hieronder alloceren
 let dataPtr = 0, sleeping = false, resumeValue = 0;
 const view = () => new DataView(mem.buffer);
 const wasi = {
@@ -15,13 +15,13 @@ const wasi = {
 };
 const zm = {
   wait(ms) {
-    if (!sleeping) {               // first entry: start unwinding, resume later
+    if (!sleeping) {               // eerste keer: start unwinding, hervat later
       sleeping = true;
       inst.exports.asyncify_start_unwind(dataPtr);
       setTimeout(() => { resumeValue = ms * 2; inst.exports.asyncify_start_rewind(dataPtr); run(); }, ms);
       return 0;
     }
-    sleeping = false;              // rewinding: return the value
+    sleeping = false;              // rewinden: geef de waarde terug
     inst.exports.asyncify_stop_rewind();
     return resumeValue;
   },
@@ -29,7 +29,7 @@ const zm = {
 const imports = { wasi_snapshot_preview1: new Proxy(wasi, { get: (t, k) => t[k] || (() => { return 52; }) }), zm };
 const { instance } = await WebAssembly.instantiate(bytes, imports);
 inst = instance; mem = inst.exports.memory;
-// carve an asyncify buffer at the end of memory
+// snijd een asyncify-buffer uit aan het einde van het geheugen
 const pages = mem.grow(4); dataPtr = pages * 65536;
 view().setUint32(dataPtr, dataPtr + 8, true); view().setUint32(dataPtr + 4, dataPtr + 4 * 65536, true);
 function run() {

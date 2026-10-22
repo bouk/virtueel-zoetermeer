@@ -1,20 +1,21 @@
-"""Drive the original ROS.exe under Wine and dump its game state (differential-testing oracle).
+"""Stuur het originele ROS.exe onder Wine aan en lees de spelstatus uit (differentiële-testorakel).
 
-Under Wine the Win32 address space is the Linux process itself, so the game's objects can be
-read (and RandSeed written) through /proc/<pid>/mem.  Yama ptrace_scope=1 only permits that
-for descendants, and Wine double-forks, so this script makes itself a child subreaper first.
+Onder Wine is de Win32-adresruimte het Linux-proces zelf, dus de objecten van het spel kunnen
+gelezen (en RandSeed geschreven) worden via /proc/<pid>/mem. Yama ptrace_scope=1 staat dat
+alleen toe voor afstammelingen, en Wine forkt dubbel, dus dit script maakt zichzelf eerst
+child subreaper.
 
-Input scripts are shared with the portable build (see docs/DIFFTEST.md):
-    wait <ms>             sleep
-    move <x> <y>          mouse move (client coordinates of the main form)
-    click <x> <y> [right] mouse click
-    key <xdotool-key>     key press (Return, Escape, plus, minus, Left, ...)
-    seed <n>              set System.RandSeed right before the next mouse press
-    dump <name>           write the game state to <outdir>/<name>.state
-    shot <name>           screenshot to <outdir>/<name>.png
+Invoerscripts worden gedeeld met de draagbare build (zie docs/DIFFTEST.md):
+    wait <ms>             slapen
+    move <x> <y>          muisbeweging (clientcoördinaten van het hoofdvenster)
+    click <x> <y> [right] muisklik
+    key <xdotool-key>     toetsdruk (Return, Escape, plus, minus, Left, ...)
+    seed <n>              System.RandSeed zetten vlak voor de volgende muisklik
+    dump <naam>           de spelstatus schrijven naar <uitvoermap>/<naam>.state
+    shot <naam>           schermafdruk naar <uitvoermap>/<naam>.png
 
-Must run on an X display; tools/difftest.sh wraps it in xvfb-run.
-Usage: python tools/orig_probe.py <rundir> <script> <outdir>
+Moet draaien op een X-display; tools/difftest.sh omhult het met xvfb-run.
+Gebruik: python tools/orig_probe.py <rundir> <script> <uitvoermap>
 """
 import os
 import struct
@@ -22,11 +23,11 @@ import subprocess
 import sys
 import time
 
-FRMMAIN_PTR = 0x0048950C      # DATA: pointer to Fmain.frmMain
+FRMMAIN_PTR = 0x0048950C      # DATA: pointer naar Fmain.frmMain
 VMT_TFRMMAIN = 0x0047955C
 RANDSEED = 0x0048A03C         # System.RandSeed
 
-# Field offsets (see src/game/Fmain.pas, Uworld.pas, Usett.pas)
+# Veldoffsets (zie src/game/Fmain.pas, Uworld.pas, Usett.pas)
 FRM_WORLD, FRM_STATUS = 0x424, 0x42C
 WORLD_CELLS, WORLD_REISTIJD, WORLD_SIZE = 0x10, 0x1FC8, 45
 CELL_CONTENTS, CELL_PARAM, CELL_WIJK, CELL_WEGEN, CELL_BEREIKBAAR = 0x04, 0x08, 0x0C, 0x1C, 0x54
@@ -43,7 +44,7 @@ class Process:
         return self.f.read(n)
 
     def write(self, va, data):
-        # /proc/<pid>/mem writes fail with EIO on Wine's image pages; process_vm_writev works.
+        # Schrijven naar /proc/<pid>/mem faalt met EIO op Wine's image-pagina's; process_vm_writev werkt.
         import ctypes
 
         class IoVec(ctypes.Structure):
@@ -66,7 +67,7 @@ class Process:
         return struct.unpack('<d', self.read(va, 8))[0]
 
     def dstr(self, va):
-        """Delphi AnsiString: pointer to chars, length at -4."""
+        """Delphi AnsiString: pointer naar tekens, lengte op -4."""
         if not va:
             return ''
         n = self.i32(va - 4)
@@ -74,7 +75,7 @@ class Process:
 
 
 def state_text(p):
-    """Canonical state dump; the portable build writes the same format (src/tests/ZMState.pas)."""
+    """Canonieke statusdump; de draagbare build schrijft hetzelfde formaat (src/tests/ZMState.pas)."""
     frm = p.u32(p.u32(FRMMAIN_PTR))
     assert p.u32(frm) == VMT_TFRMMAIN
     world = p.u32(frm + FRM_WORLD)
@@ -109,7 +110,7 @@ def find_game_pid():
                 except OSError:
                     pass
         time.sleep(0.2)
-    raise RuntimeError('game process not found')
+    raise RuntimeError('spelproces niet gevonden')
 
 
 def become_subreaper():
@@ -121,7 +122,7 @@ def become_subreaper():
 
 
 def window_origin():
-    """Screen position of the main form (bsNone: window = client area)."""
+    """Schermpositie van het hoofdvenster (bsNone: venster = clientgebied)."""
     for _ in range(100):
         r = subprocess.run(['xdotool', 'search', '--name', '^Virtueel Zoetermeer$'],
                            capture_output=True, text=True)
@@ -132,18 +133,18 @@ def window_origin():
             if int(kv['WIDTH']) >= 1000:
                 return int(kv['X']), int(kv['Y'])
         time.sleep(0.2)
-    raise RuntimeError('main window not found')
+    raise RuntimeError('hoofdvenster niet gevonden')
 
 
 def run_script(p, script, outdir):
     origin = []
 
     def org():
-        if not origin:                       # look the window up once it is surely there
+        if not origin:                       # zoek het venster pas op als het er zeker is
             origin.extend(window_origin())
         return origin
 
-    pending_seed = []          # 'seed' takes effect right before the next mouse press
+    pending_seed = []          # 'seed' werkt vlak voor de volgende muisklik
     for line in open(script):
         f = line.split('#')[0].split()
         if not f:
@@ -155,10 +156,10 @@ def run_script(p, script, outdir):
             ox, oy = org()
             subprocess.run(['xdotool', 'mousemove', str(ox + int(args[0])), str(oy + int(args[1]))])
         elif cmd == 'click':
-            # The game's buttons are sprite behaviours: they need the hover (mouse move) and a
-            # real press/release, not an instantaneous click.
-            # A single warp produces no hover: enter the target from 60 px to the left in
-            # small steps, so the sprite sees the pointer arrive.
+            # De knoppen van het spel zijn sprite-gedrag: ze hebben de hover (muisbeweging) nodig en een
+            # echte indruk/loslaat-handeling, geen kortstondige klik.
+            # Eén verspringing geeft geen hover: nader het doel van 60 px links in kleine
+            # stapjes, zodat de sprite de aankomende aanwijzer ziet.
             button = '3' if args[2:3] == ['right'] else '1'
             ox, oy = org()
             x, y = ox + int(args[0]), oy + int(args[1])
@@ -176,19 +177,19 @@ def run_script(p, script, outdir):
         elif cmd == 'seed':
             pending_seed[:] = [int(args[0])]
         elif cmd == 'dump':
-            for attempt in range(20):        # objects may be mid-update; retry briefly
+            for attempt in range(20):        # objecten kunnen midden in een update zijn; kort opnieuw proberen
                 try:
                     text = state_text(p)
                     break
                 except (OSError, AssertionError):
                     time.sleep(0.25)
             else:
-                raise RuntimeError('could not read game state')
+                raise RuntimeError('kon de spelstatus niet lezen')
             open(os.path.join(outdir, args[0] + '.state'), 'w').write(text)
         elif cmd == 'shot':
             subprocess.run(['import', '-window', 'root', os.path.join(outdir, args[0] + '.png')])
         else:
-            raise ValueError('unknown script command: %s' % line)
+            raise ValueError('onbekend scriptcommando: %s' % line)
 
 
 def main():

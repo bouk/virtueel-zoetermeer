@@ -1,10 +1,10 @@
 unit ddraw;
 
-{ DirectDraw header subset (JEDI/Erik Unger style interfaces) with a software
-  implementation. ROS.exe only uses DirectDraw to switch the display mode
-  (SetCooperativeLevel, SetDisplayMode, RestoreDisplayMode, Release); those are
-  emulated on the compat window manager. Surface creation is not supported
-  (DDERR_UNSUPPORTED); the game draws through GDI. }
+{ Subset van de DirectDraw-headers (interfaces in de stijl van JEDI/Erik Unger) met een
+  softwareimplementatie. ROS.exe gebruikt DirectDraw alleen om de schermmodus te wisselen
+  (SetCooperativeLevel, SetDisplayMode, RestoreDisplayMode, Release); die worden
+  nagebootst in de vensterbeheerder van de compat-laag. Het aanmaken van surfaces wordt
+  niet ondersteund (DDERR_UNSUPPORTED); het spel tekent via GDI. }
 
 {$MODE DELPHI}{$H+}
 
@@ -233,7 +233,7 @@ type
 
 function DirectDrawCreate(lpGUID: PGUID; out lplpDD: IDirectDraw; pUnkOuter: IUnknown): HResult; stdcall;
 
-{ Hook used by the window manager to apply display mode changes (set by ZMWin). }
+{ Hook die de vensterbeheerder gebruikt om schermmodus-wijzigingen door te voeren (ingesteld door ZMWin). }
 var
   ZMSetDisplayModeHook: function(W, H, Bpp: Integer): Boolean = nil;
   ZMRestoreDisplayModeHook: procedure = nil;
@@ -241,8 +241,8 @@ var
 implementation
 
 type
-  { Not reference counted: the game calls _Release itself and then clears the
-    variable without another release (old class-based header semantics). }
+  { Niet referentie-geteld: het spel roept _Release zelf aan en maakt daarna de
+    variabele leeg zonder nog een release (semantiek van de oude klassegebaseerde header). }
   TDirectDrawEmu = class(TObject, IUnknown, IDirectDraw)
   private
     FCoopWnd: HWND;

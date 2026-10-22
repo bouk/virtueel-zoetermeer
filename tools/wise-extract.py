@@ -1,7 +1,7 @@
-"""Extract the v1.1 ROS.exe from the Wise upgrade installer (update.exe).
+"""Pak het v1.1-ROS.exe uit het Wise-upgradeprogramma (update.exe).
 
-The payload is a raw deflate stream at a fixed offset (found with wise-scan.py).
-Usage: python tools/wise-extract.py update.exe out/ROS.exe
+De lading is een ruwe deflate-stream op een vaste offset (gevonden met wise-scan.py).
+Gebruik: python tools/wise-extract.py update.exe uit/ROS.exe
 """
 import sys
 import zlib

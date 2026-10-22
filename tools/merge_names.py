@@ -1,9 +1,9 @@
-"""Merge per-unit name maps (symbols/names/*.json) into symbol and field tables.
+"""Voeg de naamkaarten per unit (symbols/names/*.json) samen tot symbool- en veldtabellen.
 
-Usage: python tools/merge_names.py symbols/names build/names.tsv build/fields.tsv
+Gebruik: python tools/merge_names.py symbols/names build/names.tsv build/fields.tsv
 
-names.tsv rows use the symbols.py format (address, kind, unit, name) and are applied with
-the highest priority; fields.tsv rows are: class, offset, name, type.
+De rijen van names.tsv gebruiken het formaat van symbols.py (adres, soort, unit, naam) en
+worden met de hoogste prioriteit toegepast; de rijen van fields.tsv zijn: klasse, offset, naam, type.
 """
 import glob
 import json

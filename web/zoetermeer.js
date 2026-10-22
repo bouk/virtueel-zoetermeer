@@ -1,23 +1,25 @@
-// Browser host for the WebAssembly build of Virtueel Zoetermeer (src/web/RosWeb.dpr).
+// Browserhost voor de WebAssembly-build van Virtueel Zoetermeer (src/web/RosWeb.dpr).
 //
-//  * WASI (wasip1) subset over an in-memory file system holding the game data
-//    (data.json + data.pack). Paths are case-insensitive and '\' is a separator, like on
-//    Windows. Files the game writes (saved cities, high score) persist in localStorage.
-//  * The 'zm' imports used by src/web/ZMWasmBackend.pas: framebuffer, input, time.
-//  * Asyncify (binaryen): zm.wait, zm.delay and poll_oneoff suspend the module so the
-//    game's blocking loops yield to the browser.
-//  * Mouse capture: clicking the game requests pointer lock; while locked the game sees
-//    a virtual pointer driven by relative motion, drawn by us as a software cursor.
+//  * WASI (wasip1)-subset over een bestandssysteem in het geheugen met de spelgegevens
+//    (data.json + data.pack). Paden zijn hoofdletterongevoelig en '\' is een scheidingsteken,
+//    zoals op Windows. Bestanden die het spel schrijft (opgeslagen steden, highscore) blijven
+//    bewaard in localStorage.
+//  * De 'zm'-imports die src/web/ZMWasmBackend.pas gebruikt: framebuffer, invoer, tijd.
+//  * Asyncify (binaryen): zm.wait, zm.delay en poll_oneoff pauzeren de module, zodat de
+//    blokkerende lussen van het spel de besturing aan de browser teruggeven.
+//  * Muisvangst: klikken op het spel vraagt pointer lock aan; terwijl de muis gevangen is ziet
+//    het spel een virtuele aanwijzer die via relatieve beweging wordt aangestuurd; wij tekenen
+//    die als softwarecursor.
 
 'use strict';
 
 const SCREEN_W = 1024, SCREEN_H = 768;
 const DEBUG = /[?&]debug\b/.test(location.search);
-// ?nolock: never capture the mouse (automated tests send absolute, synthetic events).
+// ?nolock: legt de muis nooit vast (geautomatiseerde tests sturen absolute, synthetische events).
 const NO_LOCK = /[?&]nolock\b/.test(location.search);
 const debug = (...a) => { if (DEBUG) console.log('[zm]', ...a); };
 
-// ---------------------------------------------------------------- file system
+// ---------------------------------------------------------------- bestandssysteem
 
 class FS {
   constructor() {
@@ -44,7 +46,7 @@ class FS {
     return node;
   }
 
-  // Returns [parentNode, name] for creating path.
+  // Geeft [bovenliggende node, naam] om het pad aan te maken.
   parentOf(path, base = this.root) {
     const parts = FS.parts(path);
     const name = parts.pop();
@@ -88,12 +90,12 @@ function persist(node) {
     for (let i = 0; i < d.length; i += 0x8000) s += String.fromCharCode.apply(null, d.subarray(i, i + 0x8000));
     localStorage.setItem(PERSIST_PREFIX + node.path.toLowerCase(), JSON.stringify([node.path, btoa(s)]));
   } catch (e) {
-    console.warn('could not persist', node.path, e);
+    console.warn('kon niet opslaan', node.path, e);
   }
 }
 
 function unpersist(path) {
-  try { localStorage.removeItem(PERSIST_PREFIX + path.toLowerCase()); } catch (e) { /* ignore */ }
+  try { localStorage.removeItem(PERSIST_PREFIX + path.toLowerCase()); } catch (e) { /* negeren */ }
 }
 
 function restorePersisted(fs) {
@@ -108,7 +110,7 @@ function restorePersisted(fs) {
       fs.addFile(path, data, true);
     }
   } catch (e) {
-    console.warn('could not restore saved files', e);
+    console.warn('opgeslagen bestanden konden niet worden hersteld', e);
   }
 }
 
@@ -407,7 +409,7 @@ class Wasi {
         return E.SUCCESS;
       },
       path_readlink() { return E.INVAL; },
-      // Sleep: a clock subscription; suspended through Asyncify like zm.delay.
+      // Slapen: een klokabonnement; gepauzeerd via Asyncify, net als zm.delay.
       poll_oneoff(inPtr, outPtr, nsubs, nevents) {
         const v = self.view;
         let ms = 0;
@@ -429,7 +431,7 @@ class Wasi {
       },
     };
     return new Proxy(ret, {
-      get: (t, k) => t[k] || ((...a) => { console.warn('WASI not implemented:', k, a); return E.NOSYS; }),
+      get: (t, k) => t[k] || ((...a) => { console.warn('WASI niet geimplementeerd:', k, a); return E.NOSYS; }),
     });
   }
 }
@@ -438,9 +440,9 @@ class ProcExit extends Error {
   constructor(code) { super('exit ' + code); this.code = code; }
 }
 
-// ---------------------------------------------------------------- input
+// ---------------------------------------------------------------- invoer
 
-// KeyboardEvent.code -> Windows virtual-key code
+// KeyboardEvent.code -> Windows-virtuele toetscode
 const VK = {
   Backspace: 8, Tab: 9, Enter: 13, NumpadEnter: 13, ShiftLeft: 16, ShiftRight: 16,
   ControlLeft: 17, ControlRight: 17, AltLeft: 18, AltRight: 18, Pause: 19, CapsLock: 20,
@@ -491,9 +493,9 @@ class Host {
 
   // ---- Asyncify
   //
-  // An import that wants to block calls suspend(ms, finish). The first time through it
-  // starts unwinding and returns; JS later rewinds into the same import, which then calls
-  // stopRewind and returns finish()'s value.
+  // Een import die wil blokkeren roept suspend(ms, finish) aan. De eerste keer begint hij met
+  // unwinden en keert terug; JS spoelt later terug naar dezelfde import, die dan stopRewind
+  // aanroept en de waarde van finish() teruggeeft.
   suspend(ms, finish, wakeOnEvent = false) {
     const ex = this.exports;
     if (this.rewinding) {
@@ -502,7 +504,7 @@ class Host {
       return finish ? finish() : undefined;
     }
     if (wakeOnEvent && this.events.length) return finish ? finish() : undefined;
-    if (!this.asyncData) return finish ? finish() : undefined;   // not registered yet: don't yield
+    if (!this.asyncData) return finish ? finish() : undefined;   // nog niet geregistreerd: niet opleveren
     const dv = new DataView(this.memory.buffer);
     dv.setUint32(this.asyncData, this.asyncData + 8, true);
     dv.setUint32(this.asyncData + 4, this.asyncData + this.asyncSize, true);
@@ -526,8 +528,8 @@ class Host {
     return finish ? 0 : undefined;
   }
 
-  // Polling loops (PeekMessage pumps, clock reads in busy-waits) never block, which would
-  // freeze the page; give the browser a turn whenever ~16 ms passed since the last one.
+  // Pollinglussen (PeekMessage-pompen, kloklezingen in busy-waits) blokkeren nooit, anders zou de
+  // pagina vastlopen; geef de browser een beurt zodra er ~16 ms sinds de vorige is verstreken.
   maybeYield(finish) {
     if (this.rewinding) return this.suspend(0, finish);
     if (performance.now() - this.lastYield < 16) return finish();
@@ -572,7 +574,7 @@ class Host {
     if (this.wake) { const w = this.wake; w(); }
   }
 
-  // ---- imports
+  // ---- importen
   zmImports() {
     const self = this;
     return {
@@ -593,7 +595,7 @@ class Host {
         for (let y = 0, d = 0; y < h; y++) {
           let s = y * sw;
           for (let x = 0; x < w; x++, s++, d++) {
-            const p = src[s];   // $00RRGGBB -> RGBA bytes (little endian ABGR)
+            const p = src[s];   // $00RRGGBB -> RGBA-bytes (little endian ABGR)
             dst[d] = 0xff000000 | ((p & 0xff) << 16) | (p & 0xff00) | ((p >> 16) & 0xff);
           }
         }
@@ -622,7 +624,7 @@ class Host {
           o.frequency.value = 800; g.gain.value = 0.05;
           o.connect(g).connect(self.audio.destination);
           o.start(); o.stop(self.audio.currentTime + 0.12);
-        } catch (e) { /* no audio */ }
+        } catch (e) { /* geen audio */ }
       },
     };
   }
@@ -640,7 +642,7 @@ class Host {
     return 1;
   }
 
-  // ---- pointer
+  // ---- aanwijzer
   toScreen(e) {
     const r = this.canvas.getBoundingClientRect();
     return { x: Math.floor((e.clientX - r.left) * SCREEN_W / r.width),
@@ -667,7 +669,7 @@ class Host {
     this.push({ kind, x: Math.round(this.mouse.x), y: Math.round(this.mouse.y), button: b, ...this.mods(e) });
   }
 
-  // While the pointer is locked the browser hides it: draw the game's cursor ourselves.
+  // Terwijl de aanwijzer is vastgelegd verbergt de browser hem: de cursor van het spel tekenen we zelf.
   drawCursor() {
     const c = this.octx;
     c.clearRect(0, 0, this.overlay.width, this.overlay.height);
@@ -683,10 +685,10 @@ class Host {
       c.translate(-5, 0);
       c.moveTo(5, 0); c.lineTo(8, 0); c.lineTo(8, 7); c.lineTo(14, 8); c.lineTo(15, 16);
       c.lineTo(12, 21); c.lineTo(5, 21); c.lineTo(0, 13); c.lineTo(2, 11); c.lineTo(5, 13);
-    } else if (this.cursorShape === 1) {                // I-beam
+    } else if (this.cursorShape === 1) {                // I-balk
       c.moveTo(-3, -8); c.lineTo(3, -8); c.moveTo(0, -8); c.lineTo(0, 8); c.moveTo(-3, 8); c.lineTo(3, 8);
       c.stroke(); c.restore(); return;
-    } else {                                            // arrow
+    } else {                                            // pijl
       c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12); c.lineTo(7, 19); c.lineTo(9, 18);
       c.lineTo(6, 11); c.lineTo(11, 11);
     }
@@ -701,11 +703,11 @@ class Host {
   }
 
   installInput() {
-    const cv = this.overlay;   // the overlay sits on top of the game canvas
+    const cv = this.overlay;   // de overlay ligt boven het spelcanvas
     cv.addEventListener('contextmenu', (e) => e.preventDefault());
     cv.addEventListener('mousedown', (e) => {
       if (!this.locked && !NO_LOCK && cv.requestPointerLock) {
-        // Capture the mouse; the click itself is delivered to the game too.
+        // Vang de muis; de klik zelf gaat ook naar het spel.
         this.mouse = this.toScreen(e);
         const p = cv.requestPointerLock({ unadjustedMovement: false });
         if (p && p.catch) p.catch(() => {});
@@ -764,8 +766,8 @@ class Host {
     });
     this.exports = instance.exports;
     this.memory = instance.exports.memory;
-    // The Asyncify buffer lives in the program's data segment; the first unit to be
-    // initialised (src/web/ZMAsyncStack.pas) registers it via zm.set_async_buffer.
+    // De Asyncify-buffer staat in het datasegment van het programma; de eerste unit die wordt
+    // geinitialiseerd (src/web/ZMAsyncStack.pas) registreert hem via zm.set_async_buffer.
     this.asyncData = 0;
     this.installInput();
     this.status.hidden = true;

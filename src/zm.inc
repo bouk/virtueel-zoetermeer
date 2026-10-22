@@ -1,5 +1,5 @@
-{ Common compiler settings for every Virtueel Zoetermeer unit.
-  Delphi 5 builds the original; Free Pascal builds the portable version. }
+{ Gemeenschappelijke compilerinstellingen voor elke Virtueel Zoetermeer-unit.
+  Delphi 5 bouwt het origineel; Free Pascal bouwt de draagbare versie. }
 {$IFDEF FPC}
   {$MODE DELPHI}
   {$H+}

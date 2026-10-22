@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Import ROS.exe into a headless Ghidra project, apply Delphi symbols and export
-# decompiled C / disassembly for every project unit.
-# Usage: tools/ghidra/analyze.sh <version> [export]   (e.g. 1.1)
-#   export: only re-run the export on the already analyzed project
+# Importeer ROS.exe in een Ghidra-project zonder beeldscherm, pas Delphi-symbolen toe en exporteer
+# de gedecompileerde C / disassemblage voor elke projectunit.
+# Gebruik: tools/ghidra/analyze.sh <versie> [export]   (bijv. 1.1)
+#   export: voer alleen de export opnieuw uit op het al geanalyseerde project
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 ver="${1:-1.1}"

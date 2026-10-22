@@ -7,9 +7,9 @@ begin
   for i := 1 to 3 do
   begin
     r := host_wait(50 * i);
-    Writeln('tick ', i, ' got ', r);
+    Writeln('tik ', i, ' kreeg ', r);
   end;
   try
-    raise Exception.Create('after async');
-  except on E: Exception do Writeln('caught ', E.Message); end;
+    raise Exception.Create('na async');
+  except on E: Exception do Writeln('gevangen ', E.Message); end;
 end.

@@ -1,14 +1,14 @@
 unit ZMRandom;
 
-{ Delphi 5's random number generator, so the portable build makes the same "random" choices
-  as the original (house variants, events, trains) for the same seed. Free Pascal's own
-  Random is a Mersenne Twister.
+{ De willekeurige-getallengenerator van Delphi 5, zodat de draagbare build bij dezelfde seed
+  dezelfde "willekeurige" keuzes maakt als het origineel (huisvarianten, gebeurtenissen,
+  treinen). De eigen Random van Free Pascal is een Mersenne Twister.
 
-  Game units that call Random/Randomize list this unit last in their uses clause under
-  an IFDEF FPC, which makes these declarations shadow the System ones.
+  Spelunits die Random/Randomize aanroepen, zetten deze unit als laatste in hun
+  uses-clausule onder een IFDEF FPC; dan overschaduwen deze declaraties de System-varianten.
 
-  Taken from ROS.exe: System.@RandInt (00402B98) and System.Randomize (00402924).
-  ZM_RANDSEED=<n> in the environment makes Randomize use a fixed seed (differential tests). }
+  Overgenomen uit ROS.exe: System.@RandInt (00402B98) en System.Randomize (00402924).
+  ZM_RANDSEED=<n> in de omgeving laat Randomize een vaste seed gebruiken (differentiële tests). }
 
 {$MODE DELPHI}
 
@@ -36,7 +36,7 @@ begin
     RandSeed := StrToInt(Fixed);
     Exit;
   end;
-  { Delphi 5: GetSystemTime, seed = milliseconds since midnight (UTC) }
+  { Delphi 5: GetSystemTime, seed = milliseconden sinds middernacht (UTC) }
   DecodeTime(Time, H, M, S, MS);
   RandSeed := ((H * 60 + M) * 60 + S) * 1000 + MS;
 end;
@@ -51,7 +51,7 @@ end;
 
 function Random(Range: Integer): Integer;
 begin
-  { MUL: unsigned 32x32 -> 64, high half }
+  { MUL: ongetekend 32x32 -> 64, hoge helft }
   Result := Integer((QWord(NextSeed) * QWord(Longword(Range))) shr 32);
 end;
 

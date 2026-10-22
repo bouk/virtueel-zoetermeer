@@ -1,18 +1,18 @@
 unit ZMSdl3Backend;
 
-{ SDL3 implementation of the compat platform backend (ZMPlatform.TZMBackend).
+{ SDL3-implementatie van de compat-platformbackend (ZMPlatform.TZMBackend).
 
-  One resizable window shows the emulated screen with letterboxed scaling
-  (SDL_SetRenderLogicalPresentation), so mouse coordinates come back in screen
-  pixels. Keys are mapped to Windows virtual-key codes; text input arrives as
-  UTF-8 and is converted to Windows-1252.
+  Eén vergrootbaar venster toont het geëmuleerde scherm met letterboxschaling
+  (SDL_SetRenderLogicalPresentation), zodat muiscoördinaten terugkomen in schermpixels.
+  Toetsen worden vertaald naar Windows-virtual-keycodes; tekstinvoer komt binnen als
+  UTF-8 en wordt omgezet naar Windows-1252.
 
-  The backend registers itself in the initialization section; if SDL3 cannot be
-  loaded or initialized, the null backend stays in place. Environment:
-    ZM_HEADLESS=1   do not open a window (null backend)
-    ZM_SCALE=n      initial window scale factor (default 1)
-    ZM_FULLSCREEN=1 start fullscreen-desktop
-  SDL's own variables work too (SDL_VIDEODRIVER=offscreen etc.). }
+  De backend registreert zichzelf in de initialization-sectie; als SDL3 niet geladen of
+  geïnitialiseerd kan worden, blijft de null-backend actief. Omgeving:
+    ZM_HEADLESS=1   open geen venster (null-backend)
+    ZM_SCALE=n      beginschaalfactor van het venster (standaard 1)
+    ZM_FULLSCREEN=1 start op het volledige bureaublad
+  De eigen variabelen van SDL werken ook (SDL_VIDEODRIVER=offscreen enz.). }
 
 {$MODE DELPHI}{$H+}
 
@@ -78,10 +78,10 @@ begin
   Result := Ev.padding[Ofs];
 end;
 
-{ SDL scancode -> Windows virtual key }
+{ SDL-scancode -> Windows-virtual-key }
 function ScanToVK(Scan: LongWord; Key: LongWord): Word;
 begin
-  { letters follow the keyboard layout (keycode), everything else the position }
+  { letters volgen de toetsenbordindeling (keycode), al het andere de positie }
   if (Key >= Ord('a')) and (Key <= Ord('z')) then Exit(Key - 32);
   case Scan of
     4..29: Result := Ord('A') + Scan - 4;
@@ -154,7 +154,7 @@ begin
   if FOpen then Exit;
   if not SDL_Init(SDL_INIT_VIDEO or SDL_INIT_EVENTS) then
   begin
-    WriteLn(StdErr, 'SDL_Init failed: ', SDL_GetError);
+    WriteLn(StdErr, 'SDL_Init mislukt: ', SDL_GetError);
     Exit(False);
   end;
   Scale := StrToIntDef(GetEnvironmentVariable('ZM_SCALE'), 1);
@@ -164,13 +164,13 @@ begin
   FWindow := SDL_CreateWindow(PAnsiChar(AnsiString(Title)), W * Scale, H * Scale, Flags);
   if FWindow = nil then
   begin
-    WriteLn(StdErr, 'SDL_CreateWindow failed: ', SDL_GetError);
+    WriteLn(StdErr, 'SDL_CreateWindow mislukt: ', SDL_GetError);
     Exit(False);
   end;
   FRenderer := SDL_CreateRenderer(FWindow, nil);
   if FRenderer = nil then
   begin
-    WriteLn(StdErr, 'SDL_CreateRenderer failed: ', SDL_GetError);
+    WriteLn(StdErr, 'SDL_CreateRenderer mislukt: ', SDL_GetError);
     Exit(False);
   end;
   FOpen := True;
@@ -267,7 +267,7 @@ begin
             begin
               E.Kind := zeMouseWheel;
               E.Wheel := Round(EvF32(Ev2, 28) * 120);
-              if EvU32(Ev2, 32) = 1 then E.Wheel := -E.Wheel;  { flipped }
+              if EvU32(Ev2, 32) = 1 then E.Wheel := -E.Wheel;  { omgekeerd }
               E.X := Trunc(EvF32(Ev2, 36));
               E.Y := Trunc(EvF32(Ev2, 40));
               if E.Wheel = 0 then Exit(False);

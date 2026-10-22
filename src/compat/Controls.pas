@@ -1,12 +1,13 @@
 unit Controls;
 
-{ Delphi 5 Controls unit, portable: TControl, TWinControl, TGraphicControl,
-  TCustomControl, TControlCanvas, TImageList (minimal), mouse/keyboard routing.
+{ Delphi 5 Controls-unit, draagbaar: TControl, TWinControl, TGraphicControl,
+  TCustomControl, TControlCanvas, TImageList (minimaal), muis- en toetsenbordroutering.
 
-  TWinControls own windows of the compat window manager (ZMWin); graphic controls
-  paint inside their parent's WM_PAINT. The structure follows the VCL (WndProc,
-  message handlers, Perform, PaintHandler/PaintControls, AlignControls) so that
-  game code overriding those methods behaves as on Windows. }
+  TWinControls bezitten eigen vensters van de compat-vensterbeheerder (ZMWin); grafische
+  besturingselementen tekenen binnen de WM_PAINT van hun bovenliggende element. De structuur
+  volgt de VCL (WndProc, berichtafhandelaars, Perform, PaintHandler/PaintControls,
+  AlignControls), zodat spelcode die die methoden overschrijft zich net als op Windows
+  gedraagt. }
 
 {$MODE DELPHI}{$H+}{$R-}{$Q-}
 
@@ -19,7 +20,7 @@ type
   TCursor = -32768..32767;
 
 const
-  { VCL control messages }
+  { VCL-berichten voor besturingselementen }
   CM_BASE = $B000;
   CM_ACTIVATE = CM_BASE + 0;
   CM_DEACTIVATE = CM_BASE + 1;
@@ -108,7 +109,7 @@ const
   CN_SYSCHAR = CN_BASE + WM_SYSCHAR;
   CN_VSCROLL = CN_BASE + WM_VSCROLL;
 
-  { modal results }
+  { modale resultaten }
   mrNone = 0;
   mrOk = IDOK;
   mrCancel = IDCANCEL;
@@ -224,7 +225,7 @@ type
     MousePos: TPoint; var Handled: Boolean) of object;
   TContextPopupEvent = procedure(Sender: TObject; MousePos: TPoint; var Handled: Boolean) of object;
 
-  { control message records }
+  { berichtrecords voor besturingselementen }
   TCMActivate = TWMNoParams;
   TCMDeactivate = TWMNoParams;
   TCMGotFocus = TWMNoParams;
@@ -563,7 +564,7 @@ type
     function UseRightToLeftAlignment: Boolean; dynamic;
     function UseRightToLeftReading: Boolean;
     function UseRightToLeftScrollBar: Boolean;
-    property Action: TObject read FActionDummy write FActionDummy;  { actions are not supported }
+    property Action: TObject read FActionDummy write FActionDummy;  { acties worden niet ondersteund }
     property Align: TAlign read FAlign write SetAlign default alNone;
     property Anchors: TAnchors read FAnchors write SetAnchors default [akLeft, akTop];
     property BiDiMode: TBiDiMode read FBiDiMode write FBiDiMode;
@@ -833,7 +834,7 @@ type
   end;
   THintWindowClass = class of THintWindow;
 
-  { minimal image list }
+  { minimale afbeeldingenlijst }
   TImageIndex = type Integer;
   TCustomImageList = class(TComponent)
   private
@@ -859,7 +860,7 @@ type
   TImageList = class(TCustomImageList);
   TDragImageList = class(TCustomImageList);
 
-  { drag objects (drag & drop is not implemented) }
+  { sleepobjecten (slepen en neerzetten is niet geimplementeerd) }
   TDragObject = class(TObject)
   public
     procedure Finished(Target: TObject; X, Y: Integer; Accepted: Boolean); virtual;
@@ -900,7 +901,7 @@ var
   CreationControl: TControl = nil;
   DefaultDockTreeClass: TClass = nil;
 
-  { set by Forms: the form of a control, cursor mapping }
+  { gezet door Forms: het formulier van een besturingselement, cursorafbeelding }
   ZMGetParentFormHook: function(Control: TControl): TWinControl = nil;
   ZMCursorHook: function(Cursor: TCursor): HCURSOR = nil;
   ZMKeyPreviewHook: function(Form: TWinControl): Boolean = nil;
@@ -927,7 +928,7 @@ var
 const
   ShiftKeyMask = [ssShift, ssAlt, ssCtrl];
 
-{ ---------------------------------------------------------------- helpers }
+{ ---------------------------------------------------------------- hulpfuncties }
 
 function PointToLParam(const P: TPoint): LPARAM;
 begin
@@ -1087,10 +1088,10 @@ begin
   end;
 end;
 
-{ ---------------------------------------------------------------- window lookup }
+{ ---------------------------------------------------------------- vensterzoeken }
 
 var
-  WinControls: TList = nil;   { all TWinControls with a handle }
+  WinControls: TList = nil;   { alle TWinControls met een handle }
 
 function FindControl(Handle: HWnd): TWinControl;
 var
@@ -1178,7 +1179,7 @@ begin
   Result := Sender is TDragObject;
 end;
 
-{ ---------------------------------------------------------------- device contexts }
+{ ---------------------------------------------------------------- apparaatcontexten }
 
 procedure FreeDeviceContexts;
 var
@@ -1583,7 +1584,7 @@ begin
   if CheckNewSize(AWidth, AHeight) and
     ((ALeft <> FLeft) or (ATop <> FTop) or (AWidth <> FWidth) or (AHeight <> FHeight)) then
   begin
-    { invalidate old area }
+    { oud gebied ongeldig maken }
     if (Parent <> nil) and Visible and Parent.HandleAllocated then
     begin
       R := BoundsRect;
@@ -2611,7 +2612,7 @@ procedure TWinControl.FlipChildren(AllLevels: Boolean);
 begin
 end;
 
-{ alignment }
+{ uitlijning }
 
 procedure TWinControl.DisableAlign;
 begin
@@ -2704,7 +2705,7 @@ var
         end;
     end;
     Control.SetBounds(NewLeft, NewTop, NewWidth, NewHeight);
-    { the control may not accept the size: adjust the remaining rectangle }
+    { het besturingselement accepteert de grootte mogelijk niet: pas de resterende rechthoek aan }
     if (Control.Width <> NewWidth) or (Control.Height <> NewHeight) then
       case AAlign of
         alTop: Dec(Rect.Top, NewHeight - Control.Height);
@@ -2819,7 +2820,7 @@ begin
       end;
 end;
 
-{ bounds }
+{ begrenzingen }
 
 procedure TWinControl.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);
 var
@@ -3129,7 +3130,7 @@ begin
   end;
 end;
 
-{ showing }
+{ zichtbaarheid }
 
 procedure TWinControl.UpdateShowing;
 var
@@ -3168,7 +3169,7 @@ begin
     Control := Control.Parent;
     if not Control.Showing then Exit;
   end;
-  { top-level controls (forms, popups) and controls hosted in a foreign window }
+  { besturingselementen op het hoogste niveau (formulieren, popups) en besturingselementen in een vreemd venster }
   if (Control.FParentWindow <> 0) or (Control.Parent = nil) then
     UpdateShowing;
 end;
@@ -3199,7 +3200,7 @@ begin
   if Parent <> nil then Parent.ShowControl(Self);
 end;
 
-{ painting }
+{ tekenen }
 
 procedure TWinControl.Invalidate;
 begin
@@ -3328,7 +3329,7 @@ begin
   Result := False;
 end;
 
-{ messages }
+{ berichten }
 
 procedure TWinControl.MainWndProc(var Message: TMessage);
 begin
@@ -3387,7 +3388,7 @@ begin
     WM_MOUSEFIRST..WM_MOUSELAST:
       if IsControlMouseMsg(TWMMouse(Message)) then
       begin
-        { graphic children get the message; the window does not }
+        { grafische onderliggende elementen krijgen het bericht; het venster niet }
         Exit;
       end;
     WM_KEYFIRST..WM_KEYLAST:
@@ -3431,7 +3432,7 @@ begin
     inherited DefaultHandler(Message);
 end;
 
-{ keyboard }
+{ toetsenbord }
 
 procedure TWinControl.HandleKeyMessage(var Message: TWMKey);
 var
@@ -3443,7 +3444,7 @@ begin
       begin
         if DoKeyDown(Message) then Exit;
         if Message.CharCode = 0 then Exit;
-        { dialog keys: Tab, arrows, Enter, Escape }
+        { dialoogtoetsen: Tab, pijltjes, Enter, Escape }
         Mask := 0;
         case Message.CharCode of
           VK_TAB: Mask := DLGC_WANTTAB;
@@ -3616,8 +3617,8 @@ function TWinControl.CanFocus: Boolean;
 var
   Control: TWinControl;
 begin
-  { like the VCL: every control up to (not including) the top-level form must be
-    visible and enabled }
+  { zoals de VCL: elk besturingselement tot (exclusief) het formulier op het hoogste niveau moet
+    zichtbaar en ingeschakeld zijn }
   Result := False;
   Control := Self;
   while Control.Parent <> nil do
@@ -3833,7 +3834,7 @@ begin
     SetWindowPos(FHandle, WindowPos[TopMost], 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE);
 end;
 
-{ misc }
+{ diversen }
 
 procedure TWinControl.SetBorderWidth(Value: TBorderWidth);
 begin

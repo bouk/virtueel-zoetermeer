@@ -1,15 +1,16 @@
 unit ZMPlatform;
 
-{ The narrow platform boundary of the compat layer.
+{ De smalle platformgrens van de compatlaag.
 
-  Everything above this unit (window manager, GDI, VCL) is portable Pascal. A backend
-  provides: one window showing the emulated screen (a 32-bit XRGB framebuffer), input
-  events in screen coordinates with Windows virtual-key codes, time, sleeping and a
-  cursor shape. The SDL3 backend lives in sdl3/ZMSdl3Backend.pas; a WebAssembly/JS
-  backend can implement the same class later.
+  Alles daarboven (vensterbeheer, GDI, VCL) is draagbare Pascal. Een backend levert: een
+  venster dat het geëmuleerde scherm toont (een 32-bits XRGB-framebuffer), invoer-
+  gebeurtenissen in schermcoördinaten met Windows-virtual-keycodes, tijd, slapen en een
+  cursorvorm. De SDL3-backend staat in sdl3/ZMSdl3Backend.pas; een WebAssembly/JS-backend
+  kan later dezelfde klasse implementeren.
 
-  A null backend (no window, wall-clock time) is used when no other backend is
-  registered or when ZM_HEADLESS=1 is set; tests use it together with screenshots. }
+  Een null-backend (geen venster, kloktijd) wordt gebruikt wanneer geen andere backend is
+  geregistreerd of wanneer ZM_HEADLESS=1 is gezet; tests gebruiken hem samen met
+  schermafbeeldingen. }
 
 {$MODE DELPHI}{$H+}
 
@@ -21,13 +22,13 @@ type
 
   TZMEvent = record
     Kind: TZMEventKind;
-    X, Y: Integer;        { mouse position in screen coordinates }
-    Button: Integer;      { 1 = left, 2 = right, 3 = middle }
-    Key: Word;            { Windows virtual-key code }
+    X, Y: Integer;        { muispositie in schermcoördinaten }
+    Button: Integer;      { 1 = links, 2 = rechts, 3 = midden }
+    Key: Word;            { Windows-virtual-keycode }
     ScanCode: Word;
     Repeated: Boolean;
-    Text: string[15];     { Windows-1252 characters typed (zeText) }
-    Wheel: Integer;       { +120 = one notch away from the user }
+    Text: string[15];     { getypte Windows-1252-tekens (zeText) }
+    Wheel: Integer;       { +120 = één klik van de gebruiker af }
     Shift, Ctrl, Alt: Boolean;
   end;
 
@@ -37,16 +38,16 @@ type
   TZMBackend = class
   public
     function Name: string; virtual;
-    { open the output window; W x H is the emulated screen size }
+    { open het uitvoervenster; W x H is de grootte van het geëmuleerde scherm }
     function Open(const Title: string; W, H: Integer): Boolean; virtual;
     procedure Close; virtual;
     procedure Resize(W, H: Integer); virtual;
-    { show a frame: Pixels are W x H 32-bit $00RRGGBB values, Stride bytes per row }
+    { toon een beeld: Pixels zijn W x H 32-bits $00RRGGBB-waarden, Stride bytes per regel }
     procedure Present(Pixels: Pointer; W, H, Stride: Integer); virtual;
     function PollEvent(out E: TZMEvent): Boolean; virtual;
-    { block until an event arrives or TimeoutMs elapsed (-1 = forever) }
+    { blokkeer tot een gebeurtenis binnenkomt of TimeoutMs verstreken is (-1 = oneindig) }
     procedure WaitEvent(TimeoutMs: Integer); virtual;
-    function Ticks: LongWord; virtual;             { milliseconds }
+    function Ticks: LongWord; virtual;             { milliseconden }
     function PerfCounter: Int64; virtual;
     function PerfFrequency: Int64; virtual;
     procedure Delay(Ms: Integer); virtual;
@@ -56,17 +57,17 @@ type
   end;
 
 var
-  { Called once per message-pump iteration (every PeekMessage/GetMessage/
-    WaitMessage, including the modal loops of ShowModal and MessageBox).
-    Used by the differential-test harness. }
+  { Wordt eenmaal per iteratie van de berichtenpomp aangeroepen (bij elke PeekMessage/
+    GetMessage/WaitMessage, inclusief de modale lussen van ShowModal en MessageBox).
+    Gebruikt door het differentiële-testharnas. }
   ZMIdleHook: procedure = nil;
 
 procedure ZMRegisterBackend(B: TZMBackend; Priority: Integer);
 function ZMBackend: TZMBackend;
-{ replace the current backend by the null backend (e.g. when no display is available) }
+{ vervang de huidige backend door de null-backend (bijv. wanneer geen beeldscherm beschikbaar is) }
 procedure ZMFallbackToNull;
 
-{ Utilities shared by backends and tests }
+{ Hulpfuncties die door backends en tests gedeeld worden }
 function ZMUtf8ToCp1252(const S: AnsiString): AnsiString;
 function ZMSavePNG(const FileName: string; Pixels: Pointer; W, H, Stride: Integer): Boolean;
 
@@ -113,7 +114,7 @@ begin
   GPriority := 0;
 end;
 
-{ ---------------------------------------------------------------- null backend }
+{ ---------------------------------------------------------------- null-backend }
 
 function TZMBackend.Name: string;
 begin
@@ -194,7 +195,7 @@ procedure TZMBackend.Beep;
 begin
 end;
 
-{ ---------------------------------------------------------------- utilities }
+{ ---------------------------------------------------------------- hulpfuncties }
 
 function ZMUtf8ToCp1252(const S: AnsiString): AnsiString;
 const
@@ -232,7 +233,7 @@ begin
   end;
 end;
 
-{ minimal PNG writer (stored deflate blocks) }
+{ minimale PNG-schrijver (opgeslagen deflate-blokken) }
 
 var
   CrcTable: array[0..255] of LongWord;
@@ -307,7 +308,7 @@ begin
       Inc(Src);
     end;
   end;
-  { zlib stream with stored blocks }
+  { zlib-stroom met opgeslagen blokken }
   SetLength(Z, 2 + RawLen + (RawLen div 65535 + 1) * 5 + 4);
   Z[0] := $78; Z[1] := $01;
   ZP := 2;

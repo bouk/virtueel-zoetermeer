@@ -87,7 +87,7 @@ implementation
 uses Windows, ZMData;
 
 const
-  SIniFileWriteError = 'Unable to write to %s';
+  SIniFileWriteError = 'Kan niet schrijven naar %s';
 
 { ---------------------------------------------------------------- TCustomIniFile }
 

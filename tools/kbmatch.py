@@ -1,7 +1,7 @@
-"""Match IDR knowledge-base procedure signatures against an executable's CODE section.
+"""Zoek IDR-kennisbankprocedurehandtekeningen in het CODE-gedeelte van een uitvoerbaar bestand.
 
-Delphi aligns every routine to 4 bytes, so only aligned positions are tried.
-A match requires every non-relocated byte of the KB dump to be identical.
+Delphi lijnt elke routine uit op 4 bytes, dus alleen uitgelijnde posities worden geprobeerd.
+Een match vereist dat elke niet-verplaatste byte van de KB-dump identiek is.
 """
 from collections import defaultdict
 
@@ -13,7 +13,7 @@ def _mask_key(dump, relocs):
 
 
 def build_index(procs, min_len=KEY_LEN):
-    """Group code procs by the reloc pattern of their first KEY_LEN bytes."""
+    """Groepeer codeprocs op het reloc-patroon van hun eerste KEY_LEN bytes."""
     index = defaultdict(lambda: defaultdict(list))
     for p in procs:
         if p.dump_type != 'C' or len(p.dump) < min_len:
@@ -36,7 +36,7 @@ def full_match(code, pos, p):
 
 
 def scan(code, index, align=4):
-    """Yield (pos, [procs]) for every aligned position with full matches."""
+    """Yield (pos, [procs]) voor elke uitgelijnde positie met volledige overeenkomsten."""
     patterns = list(index.items())
     for pos in range(0, len(code) - KEY_LEN, align):
         window = code[pos:pos + KEY_LEN]

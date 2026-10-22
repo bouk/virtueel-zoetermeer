@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Regenerate symbols, class catalog and the Ghidra export after names were added under
-# symbols/names/.  Usage: tools/refresh.sh [1.1] [export]
+# Genereer symbolen, klassencatalogus en de Ghidra-export opnieuw nadat er namen zijn toegevoegd onder
+# symbols/names/.  Gebruik: tools/refresh.sh [1.1] [export]
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 ver="${1:-1.1}"

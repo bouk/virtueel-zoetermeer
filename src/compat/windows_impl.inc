@@ -1,4 +1,4 @@
-{ Implementation of the Windows unit (included by Windows.pas). }
+{ Implementatie van de Windows-unit (wordt ingesloten door Windows.pas). }
 
 uses SysUtils, Classes, Math, ZMHandles, ZMGdi, ZMFonts, ZMWin, ZMPlatform, ZMData, ZMProfile;
 
@@ -12,7 +12,7 @@ begin
   if Index = 0 then Result := ZMExeName else Result := System.ParamStr(Index);
 end;
 
-{ ---------------------------------------------------------------- macros }
+{ ---------------------------------------------------------------- macro's }
 
 function RGB(r, g, b: Byte): COLORREF;
 begin
@@ -99,7 +99,7 @@ begin
   Result := ((back shl 8) and $FF000000) or fore;
 end;
 
-{ ---------------------------------------------------------------- rects }
+{ ---------------------------------------------------------------- rechthoeken }
 
 function IntersectRect(var lprcDst: TRect; const lprcSrc1, lprcSrc2: TRect): BOOL;
 var
@@ -220,7 +220,7 @@ begin
   Result := True;
 end;
 
-{ ---------------------------------------------------------------- DCs }
+{ ---------------------------------------------------------------- apparaatcontexts (DC's) }
 
 function GetDC(hWnd: HWND): HDC;
 begin
@@ -389,7 +389,7 @@ begin
   begin
     B := TZMBitmap(O);
     if (B.SelectedIn <> nil) and (TZMDC(B.SelectedIn).Target = B) then
-      Exit(False);  { still selected into a DC, like Windows }
+      Exit(False);  { nog geselecteerd in een DC, zoals in Windows }
   end;
   O.Free;
   Result := True;
@@ -444,7 +444,7 @@ begin
       DS.dsBm.bmBits := Bits;
       DS.dsBmih.biSize := SizeOf(TBitmapInfoHeader);
       DS.dsBmih.biWidth := Width;
-      DS.dsBmih.biHeight := -Height;  { top-down }
+      DS.dsBmih.biHeight := -Height;  { van boven naar beneden }
       DS.dsBmih.biPlanes := 1;
       DS.dsBmih.biBitCount := BPP;
       DS.dsBmih.biSizeImage := Stride * Height;
@@ -650,7 +650,7 @@ end;
 
 function SetMapMode(DC: HDC; p2: Integer): Integer;
 begin
-  Result := 1;  { MM_TEXT only }
+  Result := 1;  { alleen MM_TEXT }
 end;
 
 function MoveToEx(DC: HDC; p2, p3: Integer; p4: PPoint): BOOL;
@@ -849,7 +849,7 @@ begin
         end
         else
         begin
-          { radio button }
+          { radioknop }
           D.St.Brush := TZMBrush(StockObjects[WHITE_BRUSH]);
           D.St.Pen := TZMPen(StockObjects[BLACK_PEN]);
           GdiEllipse(D, R.Left, R.Top, R.Right, R.Bottom);
@@ -1018,7 +1018,7 @@ begin
   B := TZMBitmap.Create(Width, Height, BitCount);
   if Bits <> nil then
   begin
-    SrcStride := ((Width * BitCount + 15) div 16) * 2;   { DDB rows are WORD aligned }
+    SrcStride := ((Width * BitCount + 15) div 16) * 2;   { DDB-rijen zijn WORD-uitgelijnd }
     for Y := 0 to Height - 1 do
       Move((PByte(Bits) + Y * SrcStride)^, B.RowPtr(Y)^, Min(SrcStride, B.Stride));
   end;
@@ -1049,7 +1049,7 @@ begin
   Result := B.Handle;
 end;
 
-{ copy DIB bits (bottom-up unless biHeight < 0) into a bitmap }
+{ kopieer DIB-bits (van onder naar boven, tenzij biHeight < 0) naar een bitmap }
 procedure CopyDIBIn(B: TZMBitmap; StartScan, NumScans: Integer; Bits: Pointer; const BI: TBitmapInfo; Usage: UINT; Pal: TZMPalette);
 var
   Src: TZMBitmap;
@@ -1072,7 +1072,7 @@ begin
     end;
     Exit;
   end;
-  { format conversion through a temporary DIB }
+  { formaatconversie via een tijdelijke DIB }
   Src := NewBitmapFromInfo(BI, Usage, Pal);
   try
     for Y := StartScan to Min(Integer(StartScan + NumScans), H) - 1 do
@@ -1115,7 +1115,7 @@ begin
   if B = nil then Exit;
   if BitInfo.bmiHeader.biBitCount = 0 then
   begin
-    { query format }
+    { formaat opvragen }
     BitInfo.bmiHeader.biWidth := B.Width;
     BitInfo.bmiHeader.biHeight := B.Height;
     BitInfo.bmiHeader.biPlanes := 1;
@@ -1187,7 +1187,7 @@ begin
   try
     H := Abs(BitsInfo.bmiHeader.biHeight);
     CopyDIBIn(Src, 0, H, Bits, BitsInfo, Usage, D.St.Palette);
-    { DIB source coordinates are bottom-up for bottom-up DIBs }
+    { DIB-brongecoördinaten zijn van onder naar boven bij DIB's die van onder naar boven lopen }
     if BitsInfo.bmiHeader.biHeight > 0 then
       SrcY := H - SrcY - SrcHeight;
     GdiBltBitmap(D, DestX, DestY, DestWidth, DestHeight, Src, $FFFFFF, SrcX, SrcY,
@@ -1266,7 +1266,7 @@ begin
   Move(bits^, B.Bits^, Result);
 end;
 
-{ ---------------------------------------------------------------- palettes }
+{ ---------------------------------------------------------------- paletten }
 
 function CreatePalette(const LogPalette: TLogPalette): HPALETTE;
 var
@@ -1310,7 +1310,7 @@ var
 begin
   D := GdiDC(DC);
   if (D = nil) or (D.St.Palette = nil) then Exit(0);
-  Result := 0;   { true-colour display: nothing changes in the system palette }
+  Result := 0;   { true-colour-scherm: er verandert niets in het systeempalet }
 end;
 
 function GetPaletteEntries(Palette: HPALETTE; StartIndex, NumEntries: UINT;
@@ -1410,7 +1410,7 @@ begin
   Result := True;
 end;
 
-{ ---------------------------------------------------------------- brushes, pens, fonts }
+{ ---------------------------------------------------------------- kwasten, pennen, lettertypen }
 
 function CreateSolidBrush(p1: COLORREF): HBRUSH;
 var
@@ -1523,7 +1523,7 @@ begin
     Result := 0;
 end;
 
-{ ---------------------------------------------------------------- text }
+{ ---------------------------------------------------------------- tekst }
 
 function TextOut(DC: HDC; X, Y: Integer; Str: PAnsiChar; Count: Integer): BOOL;
 var
@@ -1603,7 +1603,7 @@ begin
   TM.tmBreakChar := ' ';
   TM.tmItalic := Ord(F^.Italic);
   if F^.Family = 'mono' then TM.tmPitchAndFamily := FF_MODERN
-  else TM.tmPitchAndFamily := FF_SWISS or 1 or 4;  { variable pitch, TrueType }
+  else TM.tmPitchAndFamily := FF_SWISS or 1 or 4;  { variabele breedte, TrueType }
   if D.St.Font <> nil then TM.tmCharSet := D.St.Font.LF.lfCharSet;
   Result := True;
 end;
@@ -1628,7 +1628,7 @@ begin
   D.St.CharExtra := CharExtra;
 end;
 
-{ ---------------------------------------------------------------- regions }
+{ ---------------------------------------------------------------- gebieden }
 
 function NewRgn(const R: TRect): HRGN;
 var
@@ -1685,7 +1685,7 @@ var
   I: Integer;
   R: TRect;
 begin
-  { approximation: bounding box }
+  { benadering: omsluitend kader }
   P := @Points;
   if Count <= 0 then Exit(NewRgn(Types.Rect(0, 0, 0, 0)));
   R := Types.Rect(P^.X, P^.Y, P^.X, P^.Y);
@@ -1833,7 +1833,7 @@ begin
   if Length(Cur) = 0 then Result := NULLREGION else Result := SIMPLEREGION;
 end;
 
-{ logical -> device(client) coordinates for clip rectangles }
+{ logische -> apparaat(client)-coördinaten voor knipvierkanten }
 function LToDev(D: TZMDC; const R: TRect): TRect;
 begin
   Result := R;
@@ -1936,14 +1936,14 @@ begin
   Result := RectsContain(D.Eff, X + D.OffX, Y + D.OffY);
 end;
 
-{ ---------------------------------------------------------------- cursors / icons }
+{ ---------------------------------------------------------------- cursors / iconen }
 
 function LoadCursor(hInstance: HINST; lpCursorName: PAnsiChar): HCURSOR;
 begin
   if PtrUInt(lpCursorName) < $10000 then
     Result := HCURSOR(PtrUInt(lpCursorName))
   else
-    Result := 32649;  { named cursor resources of ROS.exe (the 'handje') are not loaded: hand }
+    Result := 32649;  { benoemde cursorresources van ROS.exe (de 'handje') worden niet geladen: hand }
 end;
 
 function LoadIcon(hInstance: HINST; lpIconName: PAnsiChar): HICON;
@@ -2037,7 +2037,7 @@ begin
   Result := False;
 end;
 
-{ ---------------------------------------------------------------- windows }
+{ ---------------------------------------------------------------- vensters }
 
 type
   TRegClass = record
@@ -2698,7 +2698,7 @@ end;
 
 function ChangeDisplaySettings(lpDevMode: PDeviceMode; dwFlags: DWORD): Longint;
 begin
-  { the emulated display keeps its size; mode changes are accepted }
+  { het nagebootste scherm behoudt zijn grootte; schermmodus-wijzigingen worden geaccepteerd }
   if lpDevMode <> nil then
   begin
     if lpDevMode^.dmFields and DM_PELSWIDTH <> 0 then ScreenModeW := lpDevMode^.dmPelsWidth;
@@ -2768,7 +2768,7 @@ begin
   end;
 end;
 
-{ ---------------------------------------------------------------- messages }
+{ ---------------------------------------------------------------- berichten }
 
 function PostMessage(hWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): BOOL;
 begin
@@ -2870,7 +2870,7 @@ function MsgWaitForMultipleObjects(nCount: DWORD; var pHandles; fWaitAll: BOOL;
   dwMilliseconds, dwWakeMask: DWORD): DWORD;
 begin
   ZMWaitMessage;
-  Result := nCount;  { WAIT_OBJECT_0 + nCount: input available }
+  Result := nCount;  { WAIT_OBJECT_0 + nCount: invoer beschikbaar }
 end;
 
 { ---------------------------------------------------------------- kernel }
@@ -2899,8 +2899,8 @@ end;
 
 function GetVersionEx(var lpVersionInformation: TOSVersionInfo): BOOL;
 begin
-  { report Windows XP (NT): on 9x the game busy-waits on the VGA retrace port, and
-    the reference runs of the original (Wine) report NT too }
+  { meld Windows XP (NT): op 9x draait het spel in een wachtlus op de VGA-retracepoort, en
+    de referentieruns van het origineel (Wine) melden ook NT }
   lpVersionInformation.dwMajorVersion := 5;
   lpVersionInformation.dwMinorVersion := 1;
   lpVersionInformation.dwBuildNumber := 2600;
@@ -2926,7 +2926,7 @@ end;
 
 function LoadLibrary(lpLibFileName: PAnsiChar): HMODULE;
 begin
-  { no Windows DLLs here: callers fall back to their non-DLL code paths }
+  { hier geen Windows-DLL's: aanroepers vallen terug op hun code zonder DLL }
   LastErr := ERROR_FILE_NOT_FOUND;
   Result := 0;
 end;
@@ -3139,7 +3139,7 @@ var
 begin
   if nDenominator = 0 then Exit(-1);
   T := Int64(nNumber) * nNumerator;
-  { rounds half away from zero, like Windows }
+  { rondt half af van nul af, zoals Windows }
   if (T < 0) xor (nDenominator < 0) then
     Result := (T - Abs(nDenominator) div 2) div nDenominator
   else

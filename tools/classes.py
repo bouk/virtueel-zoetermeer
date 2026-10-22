@@ -1,6 +1,6 @@
-"""Write a Markdown catalog of every project class recovered from VMTs and RTTI.
+"""Schrijf een Markdown-catalogus van elke projectklasse die uit VMT's en RTTI is hersteld.
 
-Usage: python tools/classes.py ROS.exe units.json symbols.tsv > symbols/classes.md
+Gebruik: python tools/classes.py ROS.exe units.json symbols.tsv > symbols/classes.md
 """
 import json
 import sys
@@ -13,7 +13,7 @@ TYPE_KINDS = ['tkUnknown', 'tkInteger', 'tkChar', 'tkEnumeration', 'tkFloat', 't
 
 
 def typeinfo_name(im, pp):
-    """PropType is a PPTypeInfo (pointer to pointer)."""
+    """PropType is een PPTypeInfo (pointer naar pointer)."""
     if not pp or not im.valid(pp):
         return '?'
     ti = im.u32(pp)
@@ -64,8 +64,8 @@ def main():
                 return u
         return None
 
-    print('# Project classes (recovered from VMT and RTTI)\n')
-    print('Offsets are hex. Field offsets include the VMT pointer at +0.\n')
+    print('# Projectklassen (hersteld uit VMT en RTTI)\n')
+    print('Offsets zijn hexadecimaal. Veldoffsets tellen de VMT-pointer op +0 mee.\n')
     for v in sorted(vmts.values(), key=lambda m: m.addr):
         u = unit_of(v.addr)
         if u is None or u['library']:
@@ -75,17 +75,17 @@ def main():
         print('- VMT: `%#x`, instance size: `%#x` (parent: `%#x`)' % (
             v.addr, v.instance_size, parent.instance_size if parent else 0))
         if v.published_fields:
-            print('- Published fields:')
+            print('- Gepubliceerde velden:')
             for ofs, idx, name in v.published_fields:
                 cls = vmts.get(v.field_classes[idx]).name if idx < len(v.field_classes) and v.field_classes[idx] in vmts else '?'
                 print('  - `+%#x` %s: %s' % (ofs, name, cls))
         if v.published_methods:
-            print('- Published methods:')
+            print('- Gepubliceerde methoden:')
             for addr, name in v.published_methods:
                 print('  - `%#x` %s' % (addr, name))
         pl = list(props(im, v))
         if pl:
-            print('- Published properties:')
+            print('- Gepubliceerde properties:')
             for name, tname, get, set_, default in pl:
                 d = '' if default == -2147483648 else ' default %d' % default
                 print('  - %s: %s read %s write %s%s' % (name, tname, accessor(get, syms), accessor(set_, syms), d))
@@ -94,12 +94,12 @@ def main():
             if parent is None or parent.std_virtuals[i] != slot:
                 std.append('%s=`%#x`' % (delphi.VMT_STD_VIRTUALS[i], slot))
         if std:
-            print('- Overrides of TObject virtuals: ' + ', '.join(std))
+            print('- Overrides van TObject-virtuals: ' + ', '.join(std))
         if v.virtuals:
-            print('- Virtual method table (slot offset, address, status):')
+            print('- Virtuele-methodetabel (slotoffset, adres, status):')
             for i, slot in enumerate(v.virtuals):
                 inherited = parent is not None and i < len(parent.virtuals) and parent.virtuals[i] == slot
-                status = 'inherited' if inherited else ('override' if parent and i < len(parent.virtuals) else 'NEW')
+                status = 'geërfd' if inherited else ('override' if parent and i < len(parent.virtuals) else 'NIEUW')
                 if inherited:
                     continue
                 origin = ''
@@ -111,9 +111,9 @@ def main():
                 print('  - `+%#04x` `%#x` %s %s%s' % (i * 4, slot, status, syms.get(slot, ''), origin))
             n_inh = sum(1 for i, s in enumerate(v.virtuals)
                         if parent and i < len(parent.virtuals) and parent.virtuals[i] == s)
-            print('  - (%d inherited slots omitted)' % n_inh)
+            print('  - (%d geërfde slots weggelaten)' % n_inh)
         if v.dynamic_methods:
-            print('- Dynamic/message methods: ' + ', '.join('%#x→`%#x`' % (i, a) for i, a in v.dynamic_methods))
+            print('- Dynamische/message-methoden: ' + ', '.join('%#x→`%#x`' % (i, a) for i, a in v.dynamic_methods))
         print()
 
 
