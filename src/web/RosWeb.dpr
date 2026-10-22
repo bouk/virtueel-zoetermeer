@@ -7,6 +7,7 @@ program RosWeb;
 
 uses
   ZMAsyncStack,  { als eerste: buffer voor Asyncify (src/web/ZMAsyncStack.pas) }
+  IniFiles in '../compat/IniFiles.pas',  { de compat-versie (Delphi 5-semantiek), niet die van de RTL }
   Forms,
   Uctrl,
   uTool,
