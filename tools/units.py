@@ -95,7 +95,9 @@ def main():
     kb = idrkb.KnowledgeBase(sys.argv[2])
     overrides = json.load(open(sys.argv[3])) if len(sys.argv) > 3 else {}
     code = bytes(im.bytes(im.code_start, im.code_end - im.code_start))
-    matches = dict(kbmatch.scan(code, kbmatch.build_index(kb.procs())))
+    linked = {n.lower() for n in package_units(im)}
+    procs = [p for p in kb.procs() if kb.modules[p.module_id].lower() in linked]
+    matches = dict(kbmatch.scan(code, kbmatch.build_index(procs)))
 
     # Bytes covered by non-trivial library signatures, per module.
     covered = {}
@@ -119,7 +121,7 @@ def main():
     units.append(dict(start=start, end=im.code_end, init=None, final=None, init_order=None))
 
     known = {n.lower(): n for n in package_units(im)}
-    kb_names = {m.lower() for m in kb.modules.values()} | {'sysinit', 'system'}
+    kb_names = ({m.lower() for m in kb.modules.values()} & linked) | {'sysinit', 'system'}
     for u in units:
         start, end = u['start'], u['end']
         in_range = [m for m in vmts if start <= m.addr < end]

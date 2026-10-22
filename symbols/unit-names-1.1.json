@@ -1,10 +1,23 @@
 {
   "0": "SysInit",
+  "2": "Windows",
+  "3": "!library",
+  "4": "!library",
+  "5": "!library",
+  "7": "!library",
+  "10": "!library",
   "14": "Contnrs",
   "41": "!library",
+  "45": "uString",
+  "46": "uTool",
+  "47": "uLog",
   "55": "uResizeScreen",
   "74": "Sprbehav",
+  "76": "Uconst",
   "77": "Usett",
   "79": "Uworld",
+  "82": "uTransition",
+  "83": "ddraw",
+  "84": "uQuickDirectX",
   "87": "uTrein"
 }

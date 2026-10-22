@@ -104,11 +104,9 @@
    ],
    "rtti_units": {},
    "kb_modules": {
-    "system": 18680,
-    "bde": 2057,
-    "Series": 228
+    "system": 19110
    },
-   "kb_bytes": 21085,
+   "kb_bytes": 19110,
    "strings": [],
    "name": "System",
    "library": true
@@ -123,10 +121,9 @@
    "rtti_units": {},
    "kb_modules": {
     "SysInit": 192,
-    "bde": 180,
     "system": 16
    },
-   "kb_bytes": 388,
+   "kb_bytes": 208,
    "strings": [],
    "name": "SysInit",
    "library": true
@@ -140,13 +137,11 @@
    "classes": [],
    "rtti_units": {},
    "kb_modules": {
-    "bde": 2657,
-    "windows": 319,
-    "Series": 68
+    "windows": 387
    },
-   "kb_bytes": 3044,
+   "kb_bytes": 387,
    "strings": [],
-   "name": "bde",
+   "name": "Windows",
    "library": true
   },
   {
@@ -157,12 +152,10 @@
    "init_order": 5,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "bde": 744
-   },
-   "kb_bytes": 744,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
-   "name": "bde",
+   "name": null,
    "library": true
   },
   {
@@ -205,11 +198,9 @@
    ],
    "rtti_units": {},
    "kb_modules": {
-    "sysutils": 18183,
-    "bde": 2356,
-    "Series": 152
+    "sysutils": 18726
    },
-   "kb_bytes": 20823,
+   "kb_bytes": 18726,
    "strings": [
     "$",
     "%d",
@@ -251,7 +242,7 @@
     "0x"
    ],
    "name": null,
-   "library": false
+   "library": true
   },
   {
    "start": 4249584,
@@ -261,12 +252,10 @@
    "init_order": 4,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "bde": 64
-   },
-   "kb_bytes": 64,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
-   "name": "bde",
+   "name": null,
    "library": true
   },
   {
@@ -277,12 +266,10 @@
    "init_order": 7,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "bde": 1056
-   },
-   "kb_bytes": 1056,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
-   "name": "bde",
+   "name": null,
    "library": true
   },
   {
@@ -294,11 +281,9 @@
    "classes": [],
    "rtti_units": {},
    "kb_modules": {
-    "TypInfo": 1189,
-    "bde": 111,
-    "svcmgr": 44
+    "TypInfo": 1189
    },
-   "kb_bytes": 1344,
+   "kb_bytes": 1189,
    "strings": [
     "False",
     "True",
@@ -353,11 +338,9 @@
     "Classes": 5
    },
    "kb_modules": {
-    "Classes": 24164,
-    "Series": 550,
-    "bde": 414
+    "Classes": 24958
    },
-   "kb_bytes": 25284,
+   "kb_bytes": 24958,
    "strings": [
     "nil",
     ".",
@@ -385,8 +368,7 @@
    "classes": [],
    "rtti_units": {},
    "kb_modules": {
-    "multimon": 1816,
-    "Series": 60
+    "multimon": 1876
    },
    "kb_bytes": 1876,
    "strings": [
@@ -436,11 +418,10 @@
     "Graphics": 11
    },
    "kb_modules": {
-    "Graphics": 27219,
-    "Series": 468,
-    "qrprntr": 456
+    "Graphics": 27648,
+    "Menus": 76
    },
-   "kb_bytes": 28875,
+   "kb_bytes": 27724,
    "strings": [
     "clBlack",
     "clMaroon",
@@ -478,10 +459,9 @@
    ],
    "rtti_units": {},
    "kb_modules": {
-    "Series": 136,
     "Contnrs": 47
    },
-   "kb_bytes": 183,
+   "kb_bytes": 47,
    "strings": [],
    "name": "Contnrs",
    "library": true
@@ -495,12 +475,11 @@
    "classes": [],
    "rtti_units": {},
    "kb_modules": {
-    "bde": 263,
     "commctrl": 145
    },
-   "kb_bytes": 408,
+   "kb_bytes": 145,
    "strings": [],
-   "name": "bde",
+   "name": null,
    "library": true
   },
   {
@@ -511,13 +490,11 @@
    "init_order": 13,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "bde": 56
-   },
-   "kb_bytes": 56,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
-   "name": "bde",
-   "library": true
+   "name": null,
+   "library": false
   },
   {
    "start": 4322460,
@@ -527,13 +504,11 @@
    "init_order": 22,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "bde": 88
-   },
-   "kb_bytes": 88,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
-   "name": "bde",
-   "library": true
+   "name": null,
+   "library": false
   },
   {
    "start": 4322548,
@@ -543,13 +518,11 @@
    "init_order": 20,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "bde": 56
-   },
-   "kb_bytes": 56,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
-   "name": "bde",
-   "library": true
+   "name": null,
+   "library": false
   },
   {
    "start": 4322604,
@@ -559,13 +532,11 @@
    "init_order": 21,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "bde": 68
-   },
-   "kb_bytes": 68,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
-   "name": "bde",
-   "library": true
+   "name": null,
+   "library": false
   },
   {
    "start": 4322672,
@@ -576,10 +547,9 @@
    "classes": [],
    "rtti_units": {},
    "kb_modules": {
-    "flatsb": 736,
-    "bde": 64
+    "flatsb": 736
    },
-   "kb_bytes": 800,
+   "kb_bytes": 736,
    "strings": [],
    "name": "FlatSB",
    "library": true
@@ -616,11 +586,9 @@
     "StdCtrls": 19
    },
    "kb_modules": {
-    "StdCtrls": 18013,
-    "bde": 1746,
-    "qrprntr": 188
+    "StdCtrls": 18347
    },
-   "kb_bytes": 20055,
+   "kb_bytes": 18347,
    "strings": [
     " ",
     "\r\n"
@@ -661,10 +629,10 @@
     "StdActns": 1
    },
    "kb_modules": {
-    "svcmgr": 44,
+    "StdActns": 57,
     "Clipbrd": 36
    },
-   "kb_bytes": 80,
+   "kb_bytes": 93,
    "strings": [],
    "name": "StdActns",
    "library": true
@@ -685,9 +653,9 @@
     "ActnList": 3
    },
    "kb_modules": {
-    "actnlist": 2409
+    "actnlist": 2462
    },
-   "kb_bytes": 2409,
+   "kb_bytes": 2462,
    "strings": [],
    "name": "ActnList",
    "library": true
@@ -713,11 +681,10 @@
     "Forms": 8
    },
    "kb_modules": {
-    "Forms": 38615,
-    "bde": 416,
-    "Series": 152
+    "Forms": 39093,
+    "Menus": 35
    },
-   "kb_bytes": 39242,
+   "kb_bytes": 39128,
    "strings": [
     "PixelsPerInch",
     "TextHeight",
@@ -743,10 +710,9 @@
     "ImgList": 1
    },
    "kb_modules": {
-    "ImgList": 5817,
-    "svcmgr": 20
+    "ImgList": 5834
    },
-   "kb_bytes": 5837,
+   "kb_bytes": 5834,
    "strings": [
     "Bitmap"
    ],
@@ -773,11 +739,10 @@
     "Menus": 4
    },
    "kb_modules": {
-    "Menus": 19679,
-    "bde": 495,
-    "qrprntr": 228
+    "Menus": 20398,
+    "Forms": 16
    },
-   "kb_bytes": 20638,
+   "kb_bytes": 20414,
    "strings": [
     "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     "F",
@@ -832,11 +797,10 @@
     "Controls": 9
    },
    "kb_modules": {
-    "Controls": 52373,
-    "qrprntr": 300,
-    "IBInstall": 212
+    "Controls": 52640,
+    "Menus": 148
    },
-   "kb_bytes": 53359,
+   "kb_bytes": 52788,
    "strings": [
     "crDefault",
     "crArrow",
@@ -940,13 +904,11 @@
    "init_order": 32,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "bde": 72
-   },
-   "kb_bytes": 72,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
-   "name": "bde",
-   "library": true
+   "name": null,
+   "library": false
   },
   {
    "start": 4514312,
@@ -962,10 +924,9 @@
     "ExtCtrls": 2
    },
    "kb_modules": {
-    "bde": 2636,
     "ExtCtrls": 1495
    },
-   "kb_bytes": 4131,
+   "kb_bytes": 1495,
    "strings": [],
    "name": "ExtCtrls",
    "library": true
@@ -1000,11 +961,9 @@
     "Dialogs": 4
    },
    "kb_modules": {
-    "Dialogs": 4949,
-    "svcmgr": 88,
-    "Series": 32
+    "Dialogs": 5432
    },
-   "kb_bytes": 5069,
+   "kb_bytes": 5432,
    "strings": [
     "FileEditStyle",
     "\u0000",
@@ -1041,11 +1000,9 @@
     "Mask": 1
    },
    "kb_modules": {
-    "Mask": 9812,
-    "svcmgr": 40,
-    "Series": 28
+    "Mask": 10009
    },
-   "kb_bytes": 9880,
+   "kb_bytes": 10009,
    "strings": [
     " "
    ],
@@ -1073,11 +1030,9 @@
     "Grids": 6
    },
    "kb_modules": {
-    "grids": 29671,
-    "bde": 86,
-    "svcmgr": 68
+    "grids": 29831
    },
-   "kb_bytes": 29825,
+   "kb_bytes": 29831,
    "strings": [
     "ColWidths",
     "RowHeights",
@@ -1100,11 +1055,9 @@
    ],
    "rtti_units": {},
    "kb_modules": {
-    "IniFiles": 2632,
-    "Series": 136,
-    "svcmgr": 16
+    "IniFiles": 2632
    },
-   "kb_bytes": 2784,
+   "kb_bytes": 2632,
    "strings": [
     "$",
     "0",
@@ -1152,11 +1105,8 @@
    "init_order": 41,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "svcmgr": 76,
-    "Series": 72
-   },
-   "kb_bytes": 148,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "mrNone",
     "mrOk",
@@ -1181,13 +1131,11 @@
    "init_order": 42,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "bde": 64
-   },
-   "kb_bytes": 64,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
-   "name": "bde",
-   "library": true
+   "name": null,
+   "library": false
   },
   {
    "start": 4577476,
@@ -1205,11 +1153,9 @@
     "Buttons": 2
    },
    "kb_modules": {
-    "buttons": 6022,
-    "bde": 1917,
-    "Series": 68
+    "buttons": 6199
    },
-   "kb_bytes": 8007,
+   "kb_bytes": 6199,
    "strings": [],
    "name": "Buttons",
    "library": true
@@ -1236,10 +1182,8 @@
    "init_order": 45,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "bde": 2544
-   },
-   "kb_bytes": 2544,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     ".",
     " ",
@@ -1248,8 +1192,8 @@
     "-",
     "."
    ],
-   "name": "bde",
-   "library": true
+   "name": "uString",
+   "library": false
   },
   {
    "start": 4590004,
@@ -1265,11 +1209,9 @@
    ],
    "rtti_units": {},
    "kb_modules": {
-    "bde": 334,
-    "Series": 124,
-    "svcmgr": 44
+    "math": 104
    },
-   "kb_bytes": 502,
+   "kb_bytes": 104,
    "strings": [
     "zondag",
     "maandag",
@@ -1279,7 +1221,7 @@
     "vrijdag",
     "zaterdag"
    ],
-   "name": null,
+   "name": "uTool",
    "library": false
   },
   {
@@ -1295,7 +1237,7 @@
    "strings": [
     "\\"
    ],
-   "name": null,
+   "name": "uLog",
    "library": false
   },
   {
@@ -1327,11 +1269,8 @@
    "init_order": 49,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "IBInstall": 92,
-    "Series": 69
-   },
-   "kb_bytes": 161,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "ambul.WAV",
     "dduck.WAV",
@@ -1343,7 +1282,7 @@
     "wdcat.WAV"
    ],
    "name": null,
-   "library": true
+   "library": false
   },
   {
    "start": 4594688,
@@ -1377,12 +1316,8 @@
    "rtti_units": {
     "uSurface": 1
    },
-   "kb_modules": {
-    "bde": 400,
-    "corbaobj": 59,
-    "svcmgr": 16
-   },
-   "kb_bytes": 475,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
    "name": "uSurface",
    "library": false
@@ -1399,11 +1334,8 @@
    "rtti_units": {
     "uPixie": 1
    },
-   "kb_modules": {
-    "bde": 944,
-    "mxStore": 20
-   },
-   "kb_bytes": 964,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
    "name": "uPixie",
    "library": false
@@ -1423,12 +1355,8 @@
    "rtti_units": {
     "Sprframe": 3
    },
-   "kb_modules": {
-    "bde": 1478,
-    "qrprntr": 228,
-    "Series": 68
-   },
-   "kb_bytes": 1818,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "Creation of frame failed. Framelist cannot be nil",
     "Creation of frame failed. Framelist cannot be nil",
@@ -1452,11 +1380,8 @@
     "TScrnModeList"
    ],
    "rtti_units": {},
-   "kb_modules": {
-    "qrprntr": 228,
-    "svcmgr": 44
-   },
-   "kb_bytes": 272,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
    "name": "uResizeScreen",
    "library": false
@@ -1487,10 +1412,8 @@
    "rtti_units": {
     "uTextBalloon": 1
    },
-   "kb_modules": {
-    "svcmgr": 88
-   },
-   "kb_bytes": 88,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     " ",
     " "
@@ -1612,10 +1535,9 @@
     "ComCtrls": 3
    },
    "kb_modules": {
-    "comctrls": 4828,
-    "Series": 68
+    "comctrls": 4925
    },
-   "kb_bytes": 4896,
+   "kb_bytes": 4925,
    "strings": [
     "rtf",
     "txt"
@@ -1635,11 +1557,8 @@
    "rtti_units": {
     "cEditCtr": 1
    },
-   "kb_modules": {
-    "Series": 48,
-    "svcmgr": 44
-   },
-   "kb_bytes": 92,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "Arial"
    ],
@@ -1677,11 +1596,9 @@
     "uSprite": 1
    },
    "kb_modules": {
-    "qrprntr": 228,
-    "svcmgr": 88,
-    "Series": 68
+    "Classes": 44
    },
-   "kb_bytes": 428,
+   "kb_bytes": 44,
    "strings": [
     "odi et amo",
     "dmo",
@@ -1725,11 +1642,8 @@
    "rtti_units": {
     "uSpritebox": 2
    },
-   "kb_modules": {
-    "bde": 388,
-    "svcmgr": 44
-   },
-   "kb_bytes": 432,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "Could not create surface"
    ],
@@ -1750,11 +1664,8 @@
    "rtti_units": {
     "uSequence": 3
    },
-   "kb_modules": {
-    "bde": 2430,
-    "QRExpr": 60
-   },
-   "kb_bytes": 2490,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "1.1b",
     "Data",
@@ -1778,12 +1689,8 @@
    "rtti_units": {
     "uTiming": 2
    },
-   "kb_modules": {
-    "qrprntr": 228,
-    "svcmgr": 44,
-    "corbaobj": 20
-   },
-   "kb_bytes": 292,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "1.0",
     "Not enough timers available.",
@@ -1837,10 +1744,8 @@
     "TBehavText"
    ],
    "rtti_units": {},
-   "kb_modules": {
-    "svcmgr": 88
-   },
-   "kb_bytes": 88,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "^",
     "\u0000",
@@ -1871,11 +1776,9 @@
    ],
    "rtti_units": {},
    "kb_modules": {
-    "Series": 224,
-    "IBInstall": 220,
     "Menus": 148
    },
-   "kb_bytes": 800,
+   "kb_bytes": 148,
    "strings": [
     "ZoetermeerGame.ini",
     "HighScore",
@@ -1909,11 +1812,8 @@
    "init_order": 78,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "IBInstall": 92,
-    "Series": 69
-   },
-   "kb_bytes": 161,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "ambul.WAV",
     "dduck.WAV",
@@ -1925,7 +1825,7 @@
     "wdcat.WAV"
    ],
    "name": null,
-   "library": true
+   "library": false
   },
   {
    "start": 4665212,
@@ -1941,12 +1841,8 @@
    "rtti_units": {
     "Uview": 2
    },
-   "kb_modules": {
-    "Series": 204,
-    "IBInstall": 204,
-    "svcmgr": 120
-   },
-   "kb_bytes": 604,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "ZoetermeerViewer",
     "images",
@@ -1988,10 +1884,9 @@
    },
    "kb_modules": {
     "sysutils": 324,
-    "svcmgr": 220,
-    "qrprntr": 164
+    "Menus": 148
    },
-   "kb_bytes": 856,
+   "kb_bytes": 472,
    "strings": [
     "auto",
     "X",
@@ -2010,10 +1905,8 @@
    "init_order": 82,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "qrprntr": 64
-   },
-   "kb_bytes": 64,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "AAJJ",
     "FBB",
@@ -2036,7 +1929,7 @@
     "FC",
     "GJ"
    ],
-   "name": null,
+   "name": "uTransition",
    "library": false
   },
   {
@@ -2047,13 +1940,11 @@
    "init_order": 83,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "bde": 64
-   },
-   "kb_bytes": 64,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [],
-   "name": "bde",
-   "library": true
+   "name": "ddraw",
+   "library": false
   },
   {
    "start": 4683888,
@@ -2063,10 +1954,8 @@
    "init_order": 84,
    "classes": [],
    "rtti_units": {},
-   "kb_modules": {
-    "bde": 1008
-   },
-   "kb_bytes": 1008,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "Not in correct color mode",
     "Failed to create IDirectDraw object",
@@ -2080,8 +1969,8 @@
     "DirectDraw2 SetCooperativeLevel Failed: ",
     "Set Display Mode Failed"
    ],
-   "name": "bde",
-   "library": true
+   "name": "uQuickDirectX",
+   "library": false
   },
   {
    "start": 4684896,
@@ -2095,11 +1984,8 @@
    "rtti_units": {
     "Uctrl": 1
    },
-   "kb_modules": {
-    "bde": 1806,
-    "IBInstall": 92
-   },
-   "kb_bytes": 1898,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     "but",
     "rad",
@@ -2128,10 +2014,8 @@
     "TTrein"
    ],
    "rtti_units": {},
-   "kb_modules": {
-    "svcmgr": 44
-   },
-   "kb_bytes": 44,
+   "kb_modules": {},
+   "kb_bytes": 0,
    "strings": [
     " 0505=206,151; 0606=175,111; 0707=183,84; 0808=199,59; 0900=181,55;  1000=175,36;  1100=198,10; 1312=175,-4;1413=175,-4;1413=172,-24;15,14=202,49",
     " 1615=-10,71;  1716=25,73;   1800=55,79;  1900=105,70;-1900=144,70; -1800=192,79; -1716=232,73;-1615=278,71",
@@ -2167,11 +2051,9 @@
     "Fmain": 1
    },
    "kb_modules": {
-    "svcmgr": 944,
-    "qrprntr": 592,
-    "Series": 548
+    "Menus": 148
    },
-   "kb_bytes": 2824,
+   "kb_bytes": 148,
    "strings": [
     "Versie 1.1",
     "Started",
@@ -2229,11 +2111,9 @@
    ],
    "rtti_units": {},
    "kb_modules": {
-    "svcmgr": 528,
-    "Series": 348,
-    "Menus": 324
+    "Menus": 444
    },
-   "kb_bytes": 1788,
+   "kb_bytes": 444,
    "strings": [
     "Onbereikbaar",
     "kContKlaverblad",
@@ -2268,11 +2148,9 @@
    "classes": [],
    "rtti_units": {},
    "kb_modules": {
-    "svcmgr": 312,
-    "Series": 200,
-    "IBInstall": 132
+    "Menus": 148
    },
-   "kb_bytes": 752,
+   "kb_bytes": 148,
    "strings": [
     "Vrijetijd",
     "Groen",
@@ -2295,7 +2173,7 @@
     ";",
     "1"
    ],
-   "name": null,
+   "name": "Uconst",
    "library": false
   },
   {

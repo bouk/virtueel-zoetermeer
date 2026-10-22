@@ -16,6 +16,7 @@ import sys
 import delphi
 import idrkb
 import kbmatch
+import units as units_mod
 
 TK_CLASS = 7
 
@@ -85,7 +86,9 @@ def main():
                 add(set_, 'f', '%s.Set%s' % (v.name, name), 70)
 
     code = bytes(im.bytes(im.code_start, im.code_end - im.code_start))
-    for pos, hits in kbmatch.scan(code, kbmatch.build_index(kb.procs())):
+    linked = {n.lower() for n in units_mod.package_units(im)}
+    procs = [p for p in kb.procs() if kb.modules[p.module_id].lower() in linked]
+    for pos, hits in kbmatch.scan(code, kbmatch.build_index(procs)):
         va = im.code_start + pos
         u = unit_at(va)
         if not u or not u.get('library'):

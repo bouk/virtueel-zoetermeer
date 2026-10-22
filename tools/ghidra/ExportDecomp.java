@@ -1,5 +1,5 @@
-// Post-analysis script: sets the Delphi register convention on every function and writes
-// decompiled C plus disassembly for each function in the requested units.
+// Post-analysis script: writes decompiled C plus disassembly for each function in the
+// requested units.
 // Args: <units.json-derived ranges file: "name start end" per line> <outdir>
 //@category Delphi
 
@@ -15,7 +15,6 @@ import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressSet;
 import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.Instruction;
-import ghidra.program.model.symbol.SourceType;
 
 public class ExportDecomp extends GhidraScript {
     @Override
@@ -23,12 +22,6 @@ public class ExportDecomp extends GhidraScript {
         String[] args = getScriptArgs();
         Path outdir = Path.of(args[1]);
         Files.createDirectories(outdir);
-
-        for (Function fn : currentProgram.getFunctionManager().getFunctions(true)) {
-            if (!fn.isExternal() && !fn.isThunk()) {
-                fn.setCallingConvention("__register");
-            }
-        }
 
         DecompInterface di = new DecompInterface();
         DecompileOptions opts = new DecompileOptions();
