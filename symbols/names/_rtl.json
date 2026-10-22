@@ -1,0 +1,27 @@
+{
+  "comment": "Library routines the KB matcher could not name unambiguously; resolved by hand (call targets, neighbours, imports).",
+  "functions": {
+    "0040323c": "@ClassDestroy",
+    "00403d98": "@LStrFromString",
+    "00403df4": "@LStrLen",
+    "004043b0": "@InitializeRecord",
+    "0040459c": "@AddRefRecord",
+    "00404e3c": "@DynArrayHigh",
+    "00405916": "@Assign",
+    "00405bfb": "@ResetText",
+    "004065ed": "@_llmod",
+    "00405ef3": "@Str2Ext",
+    "0040f428": "Classes.Point",
+    "0040fffc": "TList.Put",
+    "004188ac": "TCanvas.FillRect",
+    "00418974": "TCanvas.Polygon",
+    "004189ac": "TCanvas.Rectangle",
+    "004305bc": "TCustomForm.GetCanvas",
+    "00432d08": "TCustomForm.Hide",
+    "0041f49c": "Math.Log2",
+    "0040743c": "Windows.RGB",
+    "00407458": "Windows.GetRValue",
+    "0040745c": "Windows.GetGValue",
+    "00407460": "Windows.GetBValue"
+  }
+}

@@ -6,6 +6,8 @@
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import ghidra.app.decompiler.DecompInterface;
 import ghidra.app.decompiler.DecompileOptions;
@@ -35,16 +37,63 @@ public class ExportDecomp extends GhidraScript {
         di.setOptions(opts);
         di.openProgram(currentProgram);
 
-        for (String line : Files.readAllLines(Path.of(args[0]))) {
+        List<String> lines = Files.readAllLines(Path.of(args[0]));
+        // Delphi try/except/finally handlers are only referenced by a PUSH of their address,
+        // so auto-analysis leaves them undisassembled.  Disassemble them before exporting.
+        for (int pass = 0; pass < 3; pass++) {
+            for (String line : lines) {
+                String[] f = line.trim().split("\\s+");
+                if (f.length < 3) continue;
+                AddressSet range = new AddressSet(toAddr(Long.parseLong(f[1], 16)), toAddr(Long.parseLong(f[2], 16) - 1));
+                List<Address> targets = new ArrayList<>();
+                for (Instruction ins : currentProgram.getListing().getInstructions(range, true)) {
+                    if (ins.getMnemonicString().equals("JMP")) {
+                        // Code continues after @HandleAnyException/@HandleFinally; a handler
+                        // table follows @HandleOnException.
+                        Function callee = null;
+                        for (Reference ref : ins.getReferencesFrom()) callee = getFunctionAt(ref.getToAddress());
+                        if (callee == null) continue;
+                        Address after = ins.getMaxAddress().add(1);
+                        String cn = callee.getName();
+                        if (cn.equals("@HandleAnyException") || cn.equals("@HandleFinally") || cn.equals("@HandleAutoException")) {
+                            if (getInstructionAt(after) == null) targets.add(after);
+                        } else if (cn.equals("@HandleOnException")) {
+                            try {
+                                int n = getInt(after);
+                                for (int i = 0; i < n && i < 32; i++) {
+                                    Address h = toAddr(getInt(after.add(4 + 8 * i + 4)) & 0xffffffffL);
+                                    if (range.contains(h) && getInstructionAt(h) == null) targets.add(h);
+                                }
+                            } catch (Exception e) {
+                                println("handler table at " + after + ": " + e.getMessage());
+                            }
+                        }
+                        continue;
+                    }
+                    if (!ins.getMnemonicString().equals("PUSH")) continue;
+                    for (Reference ref : ins.getReferencesFrom()) {
+                        Address t = ref.getToAddress();
+                        if (range.contains(t) && getInstructionAt(t) == null) targets.add(t);
+                    }
+                }
+                for (Address t : targets) disassemble(t);
+            }
+        }
+
+        for (String line : lines) {
             String[] f = line.trim().split("\\s+");
             if (f.length < 3) continue;
             String unit = f[0];
             Address start = toAddr(Long.parseLong(f[1], 16));
             Address end = toAddr(Long.parseLong(f[2], 16) - 1);
+            List<Function> funcs = new ArrayList<>();
+            for (Function fn : currentProgram.getFunctionManager().getFunctions(new AddressSet(start, end), true)) funcs.add(fn);
             try (PrintWriter c = new PrintWriter(outdir.resolve(unit + ".c").toFile());
                  PrintWriter s = new PrintWriter(outdir.resolve(unit + ".s").toFile())) {
                 c.printf("// Unit %s: %s-%s%n%n", unit, start, end);
-                for (Function fn : currentProgram.getFunctionManager().getFunctions(new AddressSet(start, end), true)) {
+                for (int fi = 0; fi < funcs.size(); fi++) {
+                    Function fn = funcs.get(fi);
+                    Address next = fi + 1 < funcs.size() ? funcs.get(fi + 1).getEntryPoint().subtract(1) : end;
                     DecompileResults r = di.decompileFunction(fn, 120, monitor);
                     c.printf("// %s @ %s (%d bytes)%n", fn.getName(true), fn.getEntryPoint(), fn.getBody().getNumAddresses());
                     if (r != null && r.decompileCompleted()) {
@@ -53,7 +102,7 @@ public class ExportDecomp extends GhidraScript {
                         c.println("// decompilation failed\n");
                     }
                     s.printf("%n%s:  ; %s%n", fn.getName(true), fn.getEntryPoint());
-                    for (Instruction ins : currentProgram.getListing().getInstructions(fn.getBody(), true)) {
+                    for (Instruction ins : currentProgram.getListing().getInstructions(new AddressSet(fn.getEntryPoint(), next), true)) {
                         String label = "";
                         Symbol sym = currentProgram.getSymbolTable().getPrimarySymbol(ins.getAddress());
                         if (sym != null && !ins.getAddress().equals(fn.getEntryPoint())) label = sym.getName() + ":";

@@ -25,3 +25,4 @@ with open('symbols/project-ranges-%s.txt' % ver, 'w') as f:
 PY
 tools/ghidra/analyze.sh "$ver" ${2:-} > build/ghidra.log 2>&1
 grep -E 'ERROR|Applied' build/ghidra.log || true
+python tools/compat_surface.py "build/decomp-$ver" "symbols/units-$ver.json" "build/project-classes-$ver.txt" > symbols/compat-surface.md
