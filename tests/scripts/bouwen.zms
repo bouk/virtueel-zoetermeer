@@ -18,6 +18,7 @@ seed 777
 click 470 475      # langs de weg
 wait 1500
 dump twee-huizen
+wait 1000          # "Volgende ronde" verschijnt 2 tot 3 s na het bouwen (timerRecalc)
 seed 99            # de volgende ronde trekt ook willekeurige getallen
 click 920 727      # "Volgende ronde"
 wait 5000
