@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virtueel Zoetermeer</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #000; color: #ddd;
+               font: 15px/1.4 system-ui, sans-serif; overflow: hidden; }
+  /* Het spel is 1024x768; schaal het zo groot mogelijk binnen het venster, zonder vervorming. */
+  #scherm { position: absolute; inset: 0; margin: auto; aspect-ratio: 4 / 3;
+            width: min(100vw, calc(100vh * 4 / 3)); }
+  #scherm canvas { position: absolute; inset: 0; width: 100%; height: 100%;
+                   image-rendering: pixelated; }
+  #status { position: absolute; inset: 0; display: grid; place-items: center;
+            text-align: center; padding: 16px; background: rgba(0, 0, 0, .8); }
+  #status[hidden] { display: none; }
+  #hulp { position: fixed; right: 8px; bottom: 6px; font-size: 12px; opacity: .6; }
+</style>
+</head>
+<body>
+<div id="scherm">
+  <canvas id="spel" width="1024" height="768"></canvas>
+  <!-- De overlay vangt de muis (pointer lock) en tekent de cursor zolang de muis gevangen is. -->
+  <canvas id="overlay" width="1024" height="768"></canvas>
+  <div id="status">Laden…</div>
+</div>
+<div id="hulp">Klik in het spel om de muis te vangen · Esc laat de muis los</div>
+<script src="zoetermeer.js"></script>
+<script>
+  const host = new ZoetermeerHost(document.getElementById('spel'),
+                                  document.getElementById('overlay'),
+                                  document.getElementById('status'));
+  host.start('zoetermeer.wasm', 'data').catch((e) => host.fail(e));
+</script>
+</body>
+</html>

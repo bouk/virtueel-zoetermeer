@@ -15,6 +15,7 @@
         capstone  # x86 disassembly for diff tooling
         unicorn   # emulating original routines for differential tests
         lief      # PE rewriting / layout inspection
+        playwright  # headless browser tests of the web build (tools/test-web.py)
         pillow    # rendering bitmap fonts for the compat layer (tools/gen-fonts.py)
       ]);
 
@@ -65,6 +66,8 @@
         shellHook = ''
           export WINEPREFIX="$PWD/.wine"
           export WINEDEBUG=-all
+          export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
+          export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
         '';
       };
     };
