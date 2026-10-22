@@ -464,14 +464,18 @@ var
   B: Byte;
 begin
   B := 0;
-{$IFDEF CPUI386}
+{$IFNDEF FPC}
   asm
     MOV DX, Port
     IN AL, DX
     MOV B, AL
   end;
 {$ELSE}
-  { NOTE: x86 port I/O; no equivalent on other CPUs, reads as 0 }
+  { PORT: no port I/O on the portable targets. The only port the game reads is the VGA
+    input status register $3DA (uTiming's retrace wait); emulate its vertical-retrace bit
+    (bit 3) at 60 Hz so the wait loops terminate. }
+  if (Port = $3DA) and (GetTickCount64 mod 17 = 0) then
+    B := 8;
 {$ENDIF}
   Result := B;
 end;
