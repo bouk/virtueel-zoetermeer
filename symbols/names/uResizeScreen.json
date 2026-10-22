@@ -1,0 +1,43 @@
+{
+  "functions": {
+    "00464fdc": "TScrnMode.Create",
+    "00465030": "TScrnMode.Destroy",
+    "00465058": "TScrnMode.Apply",
+    "004650d4": "TScrnMode.Matches",
+    "00465114": "TScrnModeList.Create",
+    "004651a0": "TScrnModeList.Destroy",
+    "004651cc": "TScrnModeList.StoreCurrentMode",
+    "00465240": "TScrnModeList.Add",
+    "00465250": "TScrnModeList.Find",
+    "004652b0": "TScrnModeList.GetMode",
+    "004652d0": "uResizeScreen.SetScreenMode",
+    "00465334": "uResizeScreen.RestoreScreenMode",
+    "00465370": "uResizeScreen.IsScreenChanged"
+  },
+  "globals": {
+    "00488d88": "uResizeScreen.ScreenChanged",
+    "0048a8e8": "uResizeScreen.OriginalMode",
+    "0048a8ec": "uResizeScreen.NewMode",
+    "0048a8f0": "uResizeScreen.ModeList"
+  },
+  "fields": {
+    "TScrnMode": {
+      "0x4": [
+        "FBitsPerPel",
+        "Integer"
+      ],
+      "0x8": [
+        "FWidth",
+        "Integer"
+      ],
+      "0xc": [
+        "FHeight",
+        "Integer"
+      ],
+      "0x10": [
+        "FFrequency",
+        "Integer"
+      ]
+    }
+  }
+}

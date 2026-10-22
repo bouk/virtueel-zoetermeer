@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "00477870": "uQuickDirectX.StartDirectX",
+    "00477bf4": "uQuickDirectX.StopDirectX"
+  },
+  "globals": {
+    "00488f1c": "uQuickDirectX.DirectXActive",
+    "0048b13c": "uQuickDirectX.DirectDraw",
+    "0048b140": "uQuickDirectX.DDErrorText",
+    "0048b144": "uQuickDirectX.DDResult"
+  }
+}

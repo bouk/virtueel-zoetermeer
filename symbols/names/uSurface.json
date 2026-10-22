@@ -1,0 +1,49 @@
+{
+  "functions": {
+    "00463370": "TSurface.Create",
+    "004633b0": "TSurface.CreateSize",
+    "004633ec": "TSurface.GetHandle",
+    "004633f0": "TSurface.Draw",
+    "0046343c": "TSurface.SetSize",
+    "00463534": "TSurface.SetWidth",
+    "00463560": "TSurface.SetHeight",
+    "0046358c": "TSurface.GetEmpty",
+    "004635b0": "TSurface.GetScreen",
+    "004635b4": "TSurface.DrawSurface",
+    "00463628": "TSurface.CopyTo",
+    "00463674": "TSurface.Clear",
+    "004636b0": "TSurface.ColorToIndex",
+    "0046377c": "TSurface.IndexToColor",
+    "004637b4": "uSurface.NewSurface",
+    "004637d8": "uSurface.NewSurfaceSize",
+    "00463800": "uSurface.SurfaceScreen",
+    "0046383c": "uSurface.Initialization"
+  },
+  "globals": {
+    "0048a8cc": "uSurface.SurfaceClass"
+  },
+  "fields": {
+    "TSurface": {
+      "0x1c": [
+        "FReserved1C",
+        "Integer"
+      ],
+      "0x20": [
+        "FBlank",
+        "Boolean"
+      ],
+      "0x24": [
+        "FReserved24",
+        "Integer"
+      ],
+      "0x28": [
+        "FReserved28",
+        "Integer"
+      ],
+      "0x2c": [
+        "FReserved2C",
+        "Integer"
+      ]
+    }
+  }
+}

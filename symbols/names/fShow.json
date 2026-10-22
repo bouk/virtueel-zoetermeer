@@ -1,0 +1,30 @@
+{
+  "functions": {
+    "00461898": "TformDebugShow.ShowGraphic",
+    "00461914": "TformDebugShow.PaintBox1Paint",
+    "004619f0": "TformDebugShow.OKBtnKeyPress",
+    "004619fc": "TformDebugShow.FormResize",
+    "00461a3c": "fShow.CreateDebugShow",
+    "00461a60": "fShow.FreeDebugShow",
+    "00461a7c": "fShow.ShowBitmap"
+  },
+  "globals": {
+    "0048a8b0": "fShow.formDebugShow"
+  },
+  "fields": {
+    "TformDebugShow": {
+      "0x2e0": [
+        "FKind",
+        "TDebugShowKind"
+      ],
+      "0x2e4": [
+        "FGraphic",
+        "TGraphic"
+      ],
+      "0x2e8": [
+        "FView",
+        "TControl"
+      ]
+    }
+  }
+}

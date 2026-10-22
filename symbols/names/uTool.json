@@ -1,0 +1,76 @@
+{
+  "functions": {
+    "00460b34": "uTool.IMax",
+    "00460b3c": "uTool.IMin",
+    "00460b44": "uTool.FMax",
+    "00460b78": "uTool.FMin",
+    "00460bac": "uTool.Interpolate",
+    "00460c54": "uTool.FreeList",
+    "00460cd0": "uTool.RandomString",
+    "00460cf0": "TPos.Create",
+    "00460d20": "TRectPos.Create",
+    "00460d6c": "TRectPos.CreateRect",
+    "00460dd0": "TRectPos.GetRect",
+    "00460dec": "TRectPos.SetRect",
+    "00460e28": "TRectPos.Intersects",
+    "00460e64": "TRectPos.Union",
+    "00460ea4": "TPosList.Create",
+    "00461024": "TPosList.Sort",
+    "00460ee4": "TPosList.Sort.Key",
+    "00460f18": "TPosList.Sort.SetKey",
+    "00460f5c": "TPosList.Sort.QuickSort",
+    "00461054": "TPosList.Add",
+    "004610cc": "TPosList.GetItem",
+    "004610ec": "uTool.IsEven",
+    "00461104": "TPosList.Find",
+    "00461234": "TPosList.Insert",
+    "00461254": "TPosList.IndexOf",
+    "004612e4": "TRectPosList.GetItem",
+    "00461304": "TRectPosList.Add",
+    "00461324": "TRectPosList.AddRect",
+    "00461358": "uTool.RectWidth",
+    "00461378": "uTool.RectHeight",
+    "00461398": "uTool.RoundUp",
+    "004613d0": "uTool.InPort",
+    "004613ec": "uTool.GetWinVersion",
+    "00461428": "uTool.FindFiles",
+    "0046152c": "uTool.Initialization"
+  },
+  "globals": {
+    "00488d04": "uTool.DayNames",
+    "0048a8a0": "uTool.AppPath",
+    "0048a8a4": "uTool.AppName"
+  },
+  "fields": {
+    "TPos": {
+      "0x4": [
+        "FX",
+        "Integer"
+      ],
+      "0x8": [
+        "FY",
+        "Integer"
+      ]
+    },
+    "TRectPos": {
+      "0xc": [
+        "FWidth",
+        "Integer"
+      ],
+      "0x10": [
+        "FHeight",
+        "Integer"
+      ]
+    },
+    "TPosList": {
+      "0x10": [
+        "FSorted",
+        "Boolean"
+      ],
+      "0x11": [
+        "FKeepSorted",
+        "Boolean"
+      ]
+    }
+  }
+}

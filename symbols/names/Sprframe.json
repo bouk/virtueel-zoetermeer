@@ -1,0 +1,111 @@
+{
+  "functions": {
+    "00463e78": "Sprframe.DoProgress",
+    "00463ea8": "TFrame.Init",
+    "00463f24": "TFrame.Create",
+    "00464004": "TFrame.CreateEmpty",
+    "004640bc": "TFrame.Destroy",
+    "004640f8": "TFrame.Assign",
+    "00464194": "TFrame.FreeData",
+    "004641ac": "TFrame.GetWidth",
+    "004641b4": "TFrame.SetWidth",
+    "004641bc": "TFrame.GetHeight",
+    "004641c4": "TFrame.SetHeight",
+    "004641cc": "TFrame.IncCount",
+    "004641d4": "TFrame.GetSurface",
+    "004641dc": "TFrame.DrawDC",
+    "00464274": "TFrame.Draw",
+    "00464310": "TFrame.ReadData",
+    "00464440": "TFrame.WriteData",
+    "004644c8": "TPersistentList.Create",
+    "0046450c": "TPersistentList.Destroy",
+    "00464540": "TPersistentList.Clear",
+    "00464578": "TPersistentList.GetCount",
+    "00464580": "TFrameList.Create",
+    "004645d0": "TFrameList.Destroy",
+    "00464604": "TFrameList.RemoveFrame",
+    "0046470c": "TFrameList.AddImage",
+    "00464854": "TFrameList.Clear",
+    "00464894": "TFrameList.IndexOf",
+    "00464940": "TFrameList.Assign",
+    "004649f4": "TFrameList.FrameByName",
+    "00464b38": "TFrameList.GetFrame",
+    "00464b58": "TFrameList.Add",
+    "00464ba4": "TFrameList.AddFrame",
+    "00464c10": "TFrameList.SetTransparentColor",
+    "00464c28": "TFrameList.DefineProperties",
+    "00464c64": "TFrameList.ReadData",
+    "00464d28": "Sprframe.DebugStr",
+    "00464d80": "TFrameList.WriteData",
+    "00464f00": "Sprframe.Initialization"
+  },
+  "globals": {
+    "00488d80": "Sprframe.ElrondMode",
+    "00488d84": "Sprframe.FrameCount",
+    "0048a8d8": "Sprframe.OnFrameProgress"
+  },
+  "fields": {
+    "TFrame": {
+      "0x4": [
+        "FName",
+        "TFrameName"
+      ],
+      "0x58": [
+        "FFrameList",
+        "TFrameList"
+      ],
+      "0x5c": [
+        "FX",
+        "SmallInt"
+      ],
+      "0x5e": [
+        "FY",
+        "SmallInt"
+      ],
+      "0x60": [
+        "FWidth",
+        "SmallInt"
+      ],
+      "0x62": [
+        "FHeight",
+        "SmallInt"
+      ],
+      "0x64": [
+        "FHotSpotX",
+        "SmallInt"
+      ],
+      "0x66": [
+        "FHotSpotY",
+        "SmallInt"
+      ],
+      "0x68": [
+        "FData",
+        "TMemoryStream"
+      ]
+    },
+    "TPersistentList": {
+      "0x4": [
+        "FList",
+        "TList"
+      ]
+    },
+    "TFrameList": {
+      "0x8": [
+        "FTransparentColor",
+        "TColor"
+      ],
+      "0xc": [
+        "FSurface",
+        "TSurface"
+      ],
+      "0x10": [
+        "FClearing",
+        "Boolean"
+      ],
+      "0x11": [
+        "FFormat",
+        "string[127]"
+      ]
+    }
+  }
+}
