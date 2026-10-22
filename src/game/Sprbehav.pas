@@ -706,7 +706,7 @@ begin
       begin
         if Pos('^', Line) > 0 then
         begin
-          SplitFirst(Line, '^', Part);
+          Part := SplitFirst(Line, '^');
           Toggle := True;
         end
         else

@@ -404,8 +404,7 @@ var
       begin
         Bmp := NewSurface;
         Bmp.LoadFromFile(AddPath(Dir, FileName));
-        { NOTE: the original passes the token as a function result of SplitFirst }
-        SplitFirst(FileName, '.', Token);
+        Token := SplitFirst(FileName, '.');
         Sprite.FrameList.AddFrame(Token, Bmp);
         Bmp.Free;
       end;
@@ -476,7 +475,7 @@ begin
             Bmp.LoadFromFile(AddPath(Dir, FileName));
             with Sprite.FrameList do
             begin
-              SplitFirst(FileName, '.', Token);
+              Token := SplitFirst(FileName, '.');
               AddFrame(Token, Bmp);
               Frames[Count - 1].HotSpotX := Contents[I].GrondvlakX * TileW;
               Frames[Count - 1].HotSpotY := Frames[Count - 1].Height - 44;
@@ -487,11 +486,11 @@ begin
           begin
             Bmp := NewSurface;
             Bmp.LoadFromFile(AddPath(Dir, FileName));
-            SplitFirst(FileName, '.', Token);
+            Token := SplitFirst(FileName, '.');
             FileName := DelLeft(Token, 2);
             if EndsWith(FileName, '_ov') then
             begin
-              SplitFirst(FileName, '_', Token);
+              Token := SplitFirst(FileName, '_');
               FileName := Token + '_or';
             end;
             with Knop.FrameList do
@@ -560,7 +559,7 @@ var
   Token: string;
 begin
   if Pos('_', Msg) > 0 then
-    SplitFirst(Msg, '_', Token);
+    Token := SplitFirst(Msg, '_');
   with FBlack.lblLoading do
   begin
     Caption := Msg;
@@ -644,8 +643,7 @@ begin
       else
       begin
         Info := Contents[FDragIndex];
-        { NOTE: KanBouwen returns the message as a function result in the original }
-        Cell.KanBouwen(Info.Name, Msg);
+        Msg := Cell.KanBouwen(Info.Name);
         FBouwMsg := Msg;
         if FBouwMsg = '' then
         begin
@@ -724,7 +722,7 @@ begin
     memoUitleg.Lines.Clear;
     while Uitleg <> '' do
     begin
-      SplitFirst(Uitleg, '\n', Line);
+      Line := SplitFirst(Uitleg, '\n');
       memoUitleg.Lines.Add(Line);
     end;
   end;
@@ -848,7 +846,7 @@ begin
   else if LeftStr(Event, 5) = 'Level' then
   begin
     Kop := Event;
-    SplitFirst(Event, ' ', Token);
+    Token := SplitFirst(Event, ' ');
     Uitleg := FSettings.Levels[StrToInt(Event)].Uitleg;
     if Event <> '1' then
       Uitleg := Uitleg + ScoreText;
@@ -868,7 +866,7 @@ begin
     Dialog('Level 1')
   else if LeftStr(FEvent, 5) = 'Level' then
   begin
-    SplitFirst(FEvent, ' ', Token);
+    Token := SplitFirst(FEvent, ' ');
     if FEvent <> StartedLevel then
     begin
       StartedLevel := FEvent;
@@ -1070,7 +1068,7 @@ begin
   W := 0;
   while S <> '' do
   begin
-    SplitFirst(S, '\n', Line);
+    Line := SplitFirst(S, '\n');
     Inc(N);
     W := IMax(W, Surface.TextWidth(Font, ' ' + Line));
   end;
@@ -1087,7 +1085,7 @@ begin
   N := 0;
   while S <> '' do
   begin
-    SplitFirst(S, '\n', Line);
+    Line := SplitFirst(S, '\n');
     Surface.TextOut(X + 2, Y + 2 + H * N, Font, ' ' + Line);
     Inc(N);
   end;
@@ -1117,7 +1115,7 @@ procedure TfrmMain.ShowHintSprite(Text: string);
     W := 0;
     while S <> '' do
     begin
-      SplitFirst(S, '\n', Line);
+      Line := SplitFirst(S, '\n');
       Inc(N);
       W := IMax(W, Surface.TextWidth(Font, ' ' + Line));
     end;
@@ -1138,7 +1136,7 @@ procedure TfrmMain.ShowHintSprite(Text: string);
     N := 0;
     while S <> '' do
     begin
-      SplitFirst(S, '\n', Line);
+      Line := SplitFirst(S, '\n');
       Surface.TextOut(2, H * N + 2, Font, ' ' + Line);
       Inc(N);
     end;
@@ -1192,7 +1190,7 @@ begin
   Cell := FWorld.GetCell(G.X, G.Y);
   if Cell <> nil then
   begin
-    Cell.KanBouwen(Name, Msg);
+    Msg := Cell.KanBouwen(Name);
     if Msg = '' then
     begin
       if Name = 'Sloop' then
@@ -1464,7 +1462,7 @@ begin
     Lines := TStringList.Create;
     Lines.LoadFromFile(OpenDialog.FileName);
     Line := Lines[0];
-    SplitFirst(Line, ' ', Token);
+    Token := SplitFirst(Line, ' ');
     if Token <> 'Level' then
     begin
       Msg := 'Kan ' + OpenDialog.FileName + ' niet openen. Het is geen juist bestand.'#0;
@@ -1481,17 +1479,17 @@ begin
       ReadSprites(FLevel);
       CreateKnoppen(FLevel);
       Line := Lines[0];
-      SplitFirst(Line, ' ', Token);
+      Token := SplitFirst(Line, ' ');
       Lines.Delete(0);
       Geld := StrToIntDef0(Line);
       Line := Lines[0];
-      SplitFirst(Line, ' ', Token);
+      Token := SplitFirst(Line, ' ');
       Lines.Delete(0);
-      SplitFirst(Line, ',', Token);
+      Token := SplitFirst(Line, ',');
       CX := StrToIntDef0(Token);
       CY := StrToIntDef0(Line);
       Line := Lines[0];
-      SplitFirst(Line, ' ', Token);
+      Token := SplitFirst(Line, ' ');
       Lines.Delete(0);
       Z := StrToFloatDef0(Line);
       if Z = 0 then

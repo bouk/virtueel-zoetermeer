@@ -450,7 +450,7 @@ begin
   begin
     P := Pos(':', Name);   { NOTE: result not used }
     Rest := Name;
-    SplitFirst(Rest, ':', Name);
+    Name := SplitFirst(Rest, ':');
     StartStep := StrToIntDef0(Rest);
   end
   else

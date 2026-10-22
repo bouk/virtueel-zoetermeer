@@ -146,7 +146,7 @@ var
     Result := TStringList.Create;
     while S <> '' do
     begin
-      SplitFirst(S, ',', Item);
+      Item := SplitFirst(S, ',');
       Result.Add(Item);
     end;
   end;

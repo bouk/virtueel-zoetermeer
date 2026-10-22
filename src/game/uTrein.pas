@@ -238,7 +238,7 @@ begin
       Pad := BochtA[FNr div 3];
   end;
   for I := 1 to FStap do
-    SplitFirst(Pad, ';', Item);
+    Item := SplitFirst(Pad, ';');
   if Pad = '' then
   begin
     Vorige := FCell.Contents;
@@ -258,7 +258,7 @@ begin
     end
     else
     begin
-      SplitFirst(Item, '=', S);
+      S := SplitFirst(Item, '=');
       Key := TrimStr(S);
       if Key[1] = '-' then
       begin
@@ -270,7 +270,7 @@ begin
       FSprite.CurrentFrame := 'Trein_' + Copy(Key, 1, 2) + '-' + Copy(Key, 3, 4);
     end;
     Item := TrimStr(Item);
-    SplitFirst(Item, ',', S);
+    S := SplitFirst(Item, ',');
     X := StrToIntDef0(S);
     Y := StrToIntDef0(Item);
     case FNr of

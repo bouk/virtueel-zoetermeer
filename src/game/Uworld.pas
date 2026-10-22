@@ -55,7 +55,7 @@ type
     procedure SetContents(S: string);
     procedure Bouw(NewContents: string);
     function HeeftWeg(Mask: Integer; Aanpassen: Boolean): Boolean;
-    procedure KanBouwen(NewContents: string; var Msg: string);
+    function KanBouwen(NewContents: string): string;
   end;
 
   { VMT 00480310, instance size $10. }
@@ -682,7 +682,7 @@ begin
 end;
 
 { @00481EEC }
-procedure TCell.KanBouwen(NewContents: string; var Msg: string);
+function TCell.KanBouwen(NewContents: string): string;
 var
   Onder: string;   { EBP-0xC: NOTE: never assigned, always '' }
 
@@ -690,17 +690,17 @@ var
   procedure CheckCell(S: string);
   begin
     if S = 'Onbereikbaar' then
-      Msg := 'Nog geen onderdeel van Zoetermeer'
+      Result := 'Nog geen onderdeel van Zoetermeer'
     else if S <> 'Sloop' then
     begin
       if not (IsRechtSpoor(NewContents) and IsWeg(S, 'X')) then
       begin
         if ContentsDescription(S) = 'Spoorrails' then
-          Msg := 'Er ligt al ' + ContentsDescription(S)
+          Result := 'Er ligt al ' + ContentsDescription(S)
         else
-          Msg := 'Er staat al een ' + ContentsDescription(S);
+          Result := 'Er staat al een ' + ContentsDescription(S);
         if IsRechtSpoor(S) and IsWeg(NewContents, Onder) then
-          Msg := Msg + '\nWil je een spoorwegovergang, breek dan het spoor af,\nbouw de weg en leg dan het spoor erover.';
+          Result := Result + '\nWil je een spoorwegovergang, breek dan het spoor af,\nbouw de weg en leg dan het spoor erover.';
       end;
     end;
   end;
@@ -722,25 +722,25 @@ var
   Ok: Boolean;
 begin
   if (X = 15) and (Y = 27) then
-    Msg := '';   { NOTE: debugging leftover }
-  Msg := '';
+    Result := '';   { NOTE: debugging leftover }
+  Result := '';
   if NewContents = '' then
     Exit;
   if not InMap(X, Y) then
   begin
-    Msg := 'Buiten het speelveld';
+    Result := 'Buiten het speelveld';
     Exit;
   end;
   if World.Level.OpenWijk < Wijk then
   begin
-    Msg := '(Nog) geen onderdeel van Zoetermeer';
+    Result := '(Nog) geen onderdeel van Zoetermeer';
     Exit;
   end;
   if ContentsInfoByContents(NewContents).Prijs > World.Status.Geld then
   begin
-    Msg := 'Te duur.';
+    Result := 'Te duur.';
     if World.Status.Level = 1 then
-      Msg := 'Te duur. Sloop iets om geld te krijgen (alleen in dit level).';
+      Result := 'Te duur. Sloop iets om geld te krijgen (alleen in dit level).';
     Exit;
   end;
 
@@ -751,14 +751,14 @@ begin
     else
       Kosten := 0;
     if Kosten > World.Status.Geld then
-      Msg := 'Te duur.'
+      Result := 'Te duur.'
     else if Contents = 'Onbereikbaar' then
-      Msg := 'Nog geen onderdeel van Zoetermeer';
+      Result := 'Nog geen onderdeel van Zoetermeer';
     Exit;
   end;
 
   CheckCell(Contents);
-  if Msg <> '' then
+  if Result <> '' then
     Exit;
 
   if IsSnelweg(NewContents, '') then
@@ -773,7 +773,7 @@ begin
     case Mask of
       7, 11, 13..15:
         begin
-          Msg := 'Hier kan geen ' + ContentsDescription(NewContents) + ' worden geplaatst.';
+          Result := 'Hier kan geen ' + ContentsDescription(NewContents) + ' worden geplaatst.';
           Exit;
         end;
     end;
@@ -835,9 +835,9 @@ begin
     if not Ok then
     begin
       if IsStation(NewContents, Nr) then
-        Msg := 'Stations moeten aansluiten aan bestaand spoor.\nSloop desnoods een stuk spoor om ruimte te maken voor het station.'
+        Result := 'Stations moeten aansluiten aan bestaand spoor.\nSloop desnoods een stuk spoor om ruimte te maken voor het station.'
       else
-        Msg := 'Spoorwegen moeten aan bestaande spoorwegen\naansluiten. Bouw nooit twee bochten vlak bij elkaar of\neen bocht vlak bij een station';
+        Result := 'Spoorwegen moeten aan bestaande spoorwegen\naansluiten. Bouw nooit twee bochten vlak bij elkaar of\neen bocht vlak bij een station';
       Exit;
     end;
   end;
@@ -850,11 +850,11 @@ begin
         C := Buur(-I, -J);
         if C = nil then
         begin
-          Msg := 'Dit valt buiten het scherm.';
+          Result := 'Dit valt buiten het scherm.';
           Exit;
         end;
         CheckCell(C.Contents);
-        if Msg <> '' then
+        if Result <> '' then
           Exit;
       end;
 end;
@@ -1659,11 +1659,11 @@ begin
   for I := 0 to List.Count - 1 do
   begin
     Line := List[I];
-    SplitFirst(Line, ' ', S);
+    S := SplitFirst(Line, ' ');
     X := StrToIntDef0(S);
-    SplitFirst(Line, ' ', S);
+    S := SplitFirst(Line, ' ');
     Y := StrToIntDef0(S);
-    SplitFirst(Line, ' ', C);
+    C := SplitFirst(Line, ' ');
     { what is left of Line is the cell's Param }
     if IsWeg(C, Line) or (C = 'Klaver') or IsBebouwing(C) or IsTreinBestemming(C) then
       Cells[X, Y].Bouw(C)

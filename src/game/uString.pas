@@ -13,7 +13,7 @@ var
 function ReplaceStr(S, Find, Replace: string): string;
 function UpStr(S: string): string;
 function LowStr(S: string): string;
-procedure SplitFirst(var S: string; Sep: string; var Token: string);
+function SplitFirst(var S: string; Sep: string): string;
 function ByteToHex(B: Byte): string;
 function WordToHex(W: Word): string;
 function LongToHex(L: Longint): string;
@@ -61,11 +61,11 @@ var
 begin
   S := S + Find;
   Result := '';
-  SplitFirst(S, Find, Token);
+  Token := SplitFirst(S, Find);
   while S <> '' do
   begin
     Result := Result + Token + Replace;
-    SplitFirst(S, Find, Token);
+    Token := SplitFirst(S, Find);
   end;
   Result := Result + Token;
 end;
@@ -85,19 +85,19 @@ begin
 end;
 
 { @0045FAF0 }
-procedure SplitFirst(var S: string; Sep: string; var Token: string);
+function SplitFirst(var S: string; Sep: string): string;
 var
   P: Word;
 begin
   P := Pos(Sep, S);
   if P = 0 then
   begin
-    Token := S;
+    Result := S;
     S := '';
   end
   else
   begin
-    Token := Copy(S, 1, P - 1);
+    Result := Copy(S, 1, P - 1);
     Delete(S, 1, P + Length(Sep) - 1);
   end;
 end;

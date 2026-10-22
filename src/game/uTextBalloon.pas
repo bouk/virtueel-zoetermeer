@@ -460,7 +460,7 @@ begin
   WordCount := 0;
   while S <> '' do
   begin
-    SplitFirst(S, ' ', Word);
+    Word := SplitFirst(S, ' ');
     WordWidths[WordCount] := Canvas.TextWidth(Word);
     Inc(WordCount);
   end;
@@ -629,12 +629,12 @@ var
       for J := 1 to Words[I] do
         if Line <> '' then
         begin
-          SplitFirst(S, ' ', Word);
+          Word := SplitFirst(S, ' ');
           Line := Line + ' ' + Word;
         end
         else
         begin
-          SplitFirst(S, ' ', Word);
+          Word := SplitFirst(S, ' ');
           Line := Line + Word;
         end;
       Lines.Add(Line);

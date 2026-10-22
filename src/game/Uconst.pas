@@ -148,30 +148,30 @@ begin
     ReadLn(F, Line);
     if TrimStr(Line) <> '' then
     begin
-      SplitFirst(Line, ';', S);
+      S := SplitFirst(Line, ';');
       Info.Name := S;
       if TrimStr(Info.Name) <> '' then
       begin
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.Page := S;
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.Description := S;
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.Level := StrToIntDef0(S);
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.IsGround := StrToIntDef0(S);
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.Singleton := S = '1';
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.Prijs := StrToIntDef0(S);
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.Onderhoud := StrToIntDef0(S);
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.Capaciteit := StrToIntDef0(S);
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.MaxSpeed := StrToIntDef0(S);
-        SplitFirst(Line, ';', SX);
-        SplitFirst(Line, ';', SY);
+        SX := SplitFirst(Line, ';');
+        SY := SplitFirst(Line, ';');
         if SX = '' then
           Info.GrondvlakX := 1
         else
@@ -180,15 +180,15 @@ begin
           Info.GrondvlakY := 1
         else
           Info.GrondvlakY := IMax(1, StrToIntDef0(SY));
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.Hoofdrubriek := S;
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.BaseScore := StrToIntDef0(S);
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.Value := StrToIntDef0(S);
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.Afstand := StrToIntDef0(S);
-        SplitFirst(Line, ';', S);
+        S := SplitFirst(Line, ';');
         Info.Wens := S;
         Inc(ContentsCount);
         SetLength(Contents, ContentsCount);
