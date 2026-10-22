@@ -179,7 +179,9 @@ def kaart(*grenzen):
     for r in lees(os.path.join(UIT, 'toestand.state')).splitlines():
         if not r.startswith('cell '):
             continue
-        _, x, y, inhoud, _param, _wijk, _wegen, bereikbaar = r.split()
+        # Param kan spaties bevatten (een wijknaam als 'Buytenwegh De Leyens')
+        v = r.split()
+        x, y, inhoud, bereikbaar = v[1], v[2], v[3], v[-1]
         x, y = int(x), int(y)
         teken = TEKENS.get(inhoud, inhoud[0].lower())
         cellen[x, y] = teken

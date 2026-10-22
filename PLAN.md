@@ -176,7 +176,7 @@ herbouw nergens crasht of vastloopt.
 - [x] Crash- en hangdetectie: het proces loopt nog, er komen frames, er zijn geen exceptions in
   de log (`ZM_DEBUG`). Bij een crash worden het commandolog en de laatste screenshots bewaard,
   zodat het precies na te spelen is als `.zms`-script.
-- [ ] Een Haiku-agent (model `haiku`) speelt alle levels door: wijken openen, wegen, spoor, *Eerste ronde: level 2 gehaald; een crash in het rapport (compat) gevonden en opgelost. Tweede ronde: level 3 gehaald, geen crash. Derde ronde: level 7 gehaald, geen crash of hang; level 7 niet uitgespeeld (de agent kreeg nieuwe wijken niet goed aan de weg).*
+- [x] Een Haiku-agent (model `haiku`) speelt alle levels door: wijken openen, wegen, spoor, *Eerste ronde: level 2 gehaald; een crash in het rapport (compat) gevonden en opgelost. Tweede ronde: level 3 gehaald, geen crash. Derde ronde: level 7 gehaald, geen crash of hang; level 7 niet uitgespeeld (de agent kreeg nieuwe wijken niet goed aan de weg). Vierde ronde (met `speel.py kaart` en `cel`): van level 6 tot en met level 11 en "Einde Spel!", geen crash of hang.*
   huizen, kantoren, voorzieningen en stations bouwen, rondes afsluiten, rapporten lezen, de stad
   bewaren en weer openen, en het spel afsluiten. Hij houdt een logboek bij en rapporteert elke
   crash, hang of zichtbare fout met het commandolog.
@@ -201,6 +201,15 @@ herbouw nergens crasht of vastloopt.
     maar één woning (1200 inwoners per woningcel; belasting = (huizenprijs - 2000) x woningen),
     dus geen fout. Nieuwe huizen bleven onbereikbaar: `nieuwe-weg.zms` (nieuwe weg plus huizen
     ernaast) is gelijk aan het origineel, de agent legde de wegen niet aansluitend aan.
+  - Vierde ronde: het geld in beeld blijft na "Open een stad" op het oude bedrag staan (13000
+    terwijl het spel 646980 heeft). Oorspronkelijk gedrag, nagespeeld onder Wine met dezelfde
+    `level6.sav` (bestandsnaam intypen in het Wine-dialoogvenster): `StatusWijziging` dwingt het
+    hertekenen af met `Left xor 1`, en na een even aantal geldwijzigingen tussen twee beelden
+    ziet `TPixie.LeesWijziging` geen verschil. Ziekenhuis (2x3), zwembad (2x3) en tennisbanen
+    (3x3) werden geweigerd omdat hun grondvlak over bestaande gebouwen viel (`KanBouwen`;
+    de melding staat alleen in de zweeftekst). Middenbouw bestaat niet in level 7 en 11
+    (geen `Midden=` in ZoetermeerLevels.Ini). `speel.py kaart` liep vast op wijknamen met
+    spaties: opgelost.
 - [x] Hetzelfde voor de webversie (`tools/test-web.py`), minstens tot en met level 2. *Gedaan: `level2-rapport.zms` loopt in de browser door tot en met het rapport van level 2, zonder fouten.*
 
 ## Buiten scope (voorlopig)
