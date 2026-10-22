@@ -13,6 +13,7 @@ Invoerscripts worden gedeeld met de draagbare build (zie docs/DIFFTEST.md):
     seed <n>              System.RandSeed zetten vlak voor de volgende muisklik
     dump <naam>           de spelstatus schrijven naar <uitvoermap>/<naam>.state
     shot <naam>           schermafdruk naar <uitvoermap>/<naam>.png
+    waar, sprites         alleen voor de port (hulp bij tools/speel.py); hier overgeslagen
 
 Moet draaien op een X-display; tools/difftest.sh omhult het met xvfb-run.
 Gebruik: python tools/orig_probe.py <rundir> <script> <uitvoermap>
@@ -188,6 +189,8 @@ def run_script(p, script, outdir):
             open(os.path.join(outdir, args[0] + '.state'), 'w').write(text)
         elif cmd == 'shot':
             subprocess.run(['import', '-window', 'root', os.path.join(outdir, args[0] + '.png')])
+        elif cmd in ('waar', 'sprites'):
+            pass
         else:
             raise ValueError('onbekend scriptcommando: %s' % line)
 

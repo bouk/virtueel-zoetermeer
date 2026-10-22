@@ -15,7 +15,10 @@ unit ZMHarness;
 
   Commando's (één per regel, # begint commentaar):
     wait <ms> | move <x> <y> | click <x> <y> [right] | key <naam> | seed <n> |
-    dump <naam> | sprites <naam> | shot <naam> | stop
+    dump <naam> | sprites <naam> | shot <naam> | waar <x> <y> | stop
+
+  'waar' schrijft de schermpositie van het midden van kaartcel x,y (met de zoom en het
+  scrollen van dat moment) naar <ZM_TESTOUT>/waar: "<px> <py> <1 als in beeld, anders 0>".
 
   Het harnas draait vanuit ZMInactiefHaak (bij elke ronde van de berichtenlus, ook binnen modale
   lussen) en geeft invoer door via ZMWin, alsof die van de backend kwam. }
@@ -27,11 +30,11 @@ interface
 implementation
 
 uses
-  SysUtils, Classes, Windows, ZMPlatform, ZMWin, ZMRandom, Fmain, Uworld, uSprite;
+  SysUtils, Classes, Windows, Types, ZMPlatform, ZMWin, ZMRandom, Fmain, Uworld, Uconst, uSprite;
 
 type
   TActieSoort = (asBeweeg, asDruk, asLos, asToets, asTeken, asSeed, asDump, asFoto, asSprites,
-    asBevestig, asStop);
+    asBevestig, asWaar, asStop);
   TActie = record
     Tijd: Int64;            { ms sinds de start van het harnas }
     Soort: TActieSoort;
@@ -147,6 +150,8 @@ begin
       Voeg(T, asSprites, 0, 0, 0, F[1])
     else if F[0] = 'shot' then
       Voeg(T, asFoto, 0, 0, 0, F[1])
+    else if F[0] = 'waar' then
+      Voeg(T, asWaar, StrToInt(F[1]), StrToInt(F[2]), 0, '')
     else if F[0] = 'stop' then
       Voeg(T, asStop, 0, 0, 0, '')
     else
@@ -288,6 +293,15 @@ begin
   end;
 end;
 
+{ Schermpositie van het midden van een kaartcel (SchermNaarRaster rondt daar precies op af) }
+function Waar(X, Y: Integer): string;
+var
+  P: TPoint;
+begin
+  P := RasterNaarScherm(Point(X, Y));
+  Result := Format('%d %d %d'#10, [P.X, P.Y, Ord(PtInRect(BeeldRect, P))]);
+end;
+
 procedure Tik;
 var
   Nu: Int64;
@@ -334,6 +348,7 @@ begin
       asSprites: SchrijfBestand(UitPad(A.Arg + '.sprites'), SpritesTekst);
       asFoto: ZMBewaarSchermafdruk(UitPad(A.Arg + '.png'));
       asBevestig: SchrijfBestand(UitPad('bevestigd'), IntToStr(A.X) + #10);
+      asWaar: SchrijfBestand(UitPad('waar'), Waar(A.X, A.Y));
       asStop: Halt(0);
     end;
   end;

@@ -8,6 +8,8 @@ staat de hele sessie in <map>/besturing.zms, dat later als script na te spelen i
   python tools/speel.py start              start een nieuw spel (map: build/speel)
   python tools/speel.py foto [naam]        screenshot; drukt het pad af (bekijk de PNG)
   python tools/speel.py klik X Y [rechts]  klik op schermcoordinaten (1024x768)
+  python tools/speel.py cel X Y [rechts]   klik op het midden van kaartcel X,Y (zie 'kaart')
+  python tools/speel.py kaart [X1 Y1 X2 Y2] plattegrond van de kaart in tekst (cellen 0..44)
   python tools/speel.py beweeg X Y         beweeg de muis (bijv. om een hint te zien)
   python tools/speel.py toets NAAM         Return, Escape, Left, Right, Up, Down, plus, minus, ...
   python tools/speel.py wacht MS           laat het spel MS milliseconden doorlopen
@@ -161,6 +163,50 @@ def toestand():
     print('op de kaart:', json.dumps(dict(telling.most_common()), ensure_ascii=False))
 
 
+# Tekens voor 'kaart'; andere inhoud krijgt de eerste letter van zijn naam (klein).
+TEKENS = {'Sloop': '.', 'Onbereikbaar': ' ', 'Bakst': '=', 'Weg': '=', 'Snel': 'S', 'Klaver': 'S',
+          'Rails10': '#', 'AndereStad': '@', 'Laagbouw': 'L', 'Middenbouw': 'M', 'Hoogbouw': 'H',
+          'Kantoor': 'K', 'Molen': 'W'}
+
+
+def kaart(*grenzen):
+    """Plattegrond uit een state dump: rijen = y, kolommen = x. Daaronder het gebouw zonder route
+    (Bereikbaar 0, het knippert). TWorld.BerekenReistijd stopt bij het eerste gebouw zonder route,
+    dus er kunnen er meer zijn: los het gemelde op en kijk opnieuw."""
+    stuur('dump toestand')
+    x1, y1, x2, y2 = (int(g) for g in grenzen) if len(grenzen) == 4 else (0, 0, 44, 44)
+    cellen, gebruikt, los = {}, {}, []
+    for r in lees(os.path.join(UIT, 'toestand.state')).splitlines():
+        if not r.startswith('cell '):
+            continue
+        _, x, y, inhoud, _param, _wijk, _wegen, bereikbaar = r.split()
+        x, y = int(x), int(y)
+        teken = TEKENS.get(inhoud, inhoud[0].lower())
+        cellen[x, y] = teken
+        gebruikt[teken] = inhoud
+        if bereikbaar == '0' and inhoud not in ('Sloop', 'Onbereikbaar', 'AndereStad'):
+            los.append('%d,%d %s' % (x, y, inhoud))
+    print('    ' + ''.join(str(x // 10) if x % 10 == 0 else ' ' for x in range(x1, x2 + 1)))
+    print('  y ' + ''.join(str(x % 10) for x in range(x1, x2 + 1)) + '  x')
+    for y in range(y1, y2 + 1):
+        print('%3d ' % y + ''.join(cellen.get((x, y), '?') for x in range(x1, x2 + 1)))
+    print('legenda: ' + ', '.join("'%s' %s" % (t, n) for t, n in sorted(gebruikt.items())))
+    print("(' ' = wijk nog niet open). Op het scherm: x+1 = rechtsomlaag, y+1 = linksomlaag.")
+    print('Cellen zijn alleen buren als ze een zijde delen (x of y verschilt 1, niet allebei).')
+    if los:
+        print('geen route (knippert; misschien zijn er meer): ' + '; '.join(los))
+
+
+def cel(x, y, rechts=False):
+    stuur('waar %d %d' % (x, y))
+    px, py, binnen = (int(v) for v in lees(os.path.join(UIT, 'waar')).split())
+    if not binnen:
+        print('cel %d,%d valt buiten beeld (scherm %d,%d); scroll met de pijlen of zoom uit' % (x, y, px, py))
+        sys.exit(1)
+    stuur('click %d %d%s' % (px, py, ' right' if rechts else ''))
+    print('ok (scherm %d,%d)' % (px, py))
+
+
 def stop():
     if leeft():
         try:
@@ -185,6 +231,10 @@ def main():
     elif cmd == 'klik':
         stuur('click %d %d%s' % (int(args[0]), int(args[1]), ' right' if args[2:3] == ['rechts'] else ''))
         print('ok')
+    elif cmd == 'cel':
+        cel(int(args[0]), int(args[1]), args[2:3] == ['rechts'])
+    elif cmd == 'kaart':
+        kaart(*args[:4])
     elif cmd == 'beweeg':
         stuur('move %d %d' % (int(args[0]), int(args[1])))
         print('ok')
