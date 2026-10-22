@@ -182,6 +182,14 @@ herbouw nergens crasht of vastloopt.
   crash, hang of zichtbare fout met het commandolog.
 - [x] Gevonden fouten worden nagespeeld tegen het origineel onder Wine (zelfde script) om te *Gedaan: `tests/scripts/level2-rapport.zms`.*
   bepalen of het een fout van de herbouw is of oorspronkelijk gedrag.
+  - Crash in het rapport van level 2: fout van compat, opgelost (`level2-rapport.zms`).
+  - "Volgende ronde" reageerde soms niet: een tikteller >= 2^31 maakt `DrawAutos` extreem traag
+    (fout van het origineel); de port gebruikte FPC's GetTickCount (uptime). Opgelost met
+    `ZMKlok`; het origineel draait in een tijdnaamruimte (`volgende-ronde.zms`).
+  - Huizen verdwijnen na het slopen van een wegstuk: oorspronkelijk gedrag. Gebouwen die niet
+    aan de weg liggen knipperen (500 ms) zolang de reistijd -1 is, en "Volgende ronde" blijft weg
+    (`sloop-weg.zms`, gelijk aan het origineel, ook de foto's). In het logboek bleef het gat
+    open: de klik die het moest dichten plaatste Laagbouw.
 - [ ] Hetzelfde voor de webversie (`tools/test-web.py`), minstens tot en met level 2.
 
 ## Buiten scope (voorlopig)

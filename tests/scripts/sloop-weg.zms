@@ -1,0 +1,56 @@
+# Een wegstuk naast huizen slopen (logboek fase 6, "Visuele fouten": huizen verdwenen uit beeld).
+# Oorspronkelijk gedrag: zolang niet alles aan de weg ligt (Reistijd < 0) knipperen de gebouwen
+# die niet bereikbaar zijn (TView.Draw @ Uview: (GetTickCount div 500) mod 2 = 0 verbergt ze);
+# "Volgende ronde" blijft weg en de melding "Alle huizen ... moeten aan de weg liggen" staat er.
+# De foto's k0..k5 (250 ms uit elkaar) laten de huizen op 23,27 afwisselend zien en niet zien.
+wait 15000
+shot foto-2
+dump stap1
+seed 1001
+click 429 405
+wait 1500
+shot foto-5
+dump stap2
+seed 1002
+click 429 405
+wait 1500
+shot foto-8
+seed 1003
+click 922 257
+wait 1500
+seed 1004
+click 400 400
+wait 1500
+wait 500
+shot foto-12
+seed 1005
+click 993 320
+wait 1500
+seed 1006
+click 520 330
+wait 1500
+wait 500
+shot foto-16
+dump stap3
+seed 2001
+click 838 252      # Sloopterrein
+wait 1500
+seed 2002
+click 352 440      # het wegstuk 23,28 onder de huizen
+wait 4000          # timerRecalc: de reistijd wordt opnieuw berekend
+dump gesloopt
+shot k0
+wait 250
+shot k1
+wait 250
+shot k2
+wait 250
+shot k3
+wait 250
+shot k4
+wait 250
+shot k5
+seed 2003
+click 920 727      # "Volgende ronde" is er niet: er gebeurt niets
+wait 2000
+dump na-klik
