@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "00486f64": "Ros.Initialization",
+    "00487264": "Ros.main"
+  },
+  "globals": {},
+  "assumes": {}
+}

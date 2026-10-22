@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "00486e68": "TfrmBlack.FormKeyDown",
+    "00486e80": "TfrmBlack.FormKeyPress",
+    "00486e90": "TfrmBlack.FormMouseDown",
+    "00486ea4": "TfrmBlack.FormCreate",
+    "00486f2c": "fBack.Finalization",
+    "00486f5c": "fBack.Initialization"
+  },
+  "globals": {
+    "0048b198": "fBack.InitCount"
+  },
+  "assumes": {}
+}

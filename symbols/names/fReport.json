@@ -1,0 +1,25 @@
+{
+  "functions": {
+    "0047ff5c": "TfrmReport.FormCreate",
+    "0047ffc4": "TfrmReport.FormDestroy",
+    "0047ffe0": "TfrmReport.Execute",
+    "00480074": "TfrmReport.ShowTab",
+    "00480144": "TfrmReport.butOKClick",
+    "00480150": "TfrmReport.tcTabsChange",
+    "0048016c": "TfrmReport.tcTabsDrawTab",
+    "00480220": "fReport.Finalization",
+    "00480250": "fReport.Initialization"
+  },
+  "globals": {
+    "0048919c": "fReport.TabR",
+    "004891a8": "fReport.TabG",
+    "004891b4": "fReport.TabB",
+    "0048b170": "fReport.InitCount"
+  },
+  "fields": {
+    "TfrmReport": {
+      "0x2dc": ["Lists", "array[0..10] of TStrings"]
+    }
+  },
+  "assumes": {}
+}
