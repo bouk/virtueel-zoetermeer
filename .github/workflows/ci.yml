@@ -1,0 +1,23 @@
+# CI in equivalentiemodus: 'nix flake check' bouwt de native versie en de webversie, speelt de
+# testscripts (tests/scripts) af en vergelijkt de speltoestand met die van het originele spel
+# (tests/verwacht, gemaakt met tools/ververs-verwacht.sh), en compileert en linkt de
+# macOS-versie voor Apple Silicon. Zie docs/DIFFTEST.md.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  flake-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: nix flake check
+        run: nix flake check -L

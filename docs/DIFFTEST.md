@@ -68,3 +68,32 @@ Vergelijk daarna met `diff build/diff/orig/<name>.state build/diff/port/<name>.s
   van die timer ligt vast vanaf de start van het programma. Klik er dus niet eerder dan ruim 3 s
   na het bouwen op.
 * Screenshots verschillen in grootte (het Wine-bureaublad is 1280x1024 met het formulier op +128,+128).
+
+## CI (`nix flake check`)
+
+Zonder Delphi 5 kan de CI geen bytes vergelijken; ze controleert het gedrag. `nix flake check`
+(op x86_64-linux) bouwt:
+
+| check | wat |
+|---|---|
+| `zoetermeer` | de native versie (`packages.zoetermeer`) |
+| `web` | de webversie (`packages.web`) |
+| `difftest` | `nix/difftest.nix`: bouwt `src/tests/RosTest.dpr`, speelt elk `tests/scripts/*.zms` zonder venster af (`ZM_HEADLESS=1`, geen X-server nodig) en vergelijkt elke `.state` met `tests/verwacht/<script>/<naam>.state` |
+| `macos-compileert` | `nix/macos-compileert.nix`: compileert `src/game/Ros.dpr` met een FPC 3.2.2-cross-compiler voor aarch64-darwin (`nix/fpc-aarch64-darwin.nix`) en linkt met `ld64.lld` tegen de macOS-SDK-stubs tot een arm64-Mach-O (draaien kan op Linux niet) |
+
+Eén check los: `nix build .#checks.x86_64-linux.difftest -L`. Het harnas draait in echte tijd,
+dus `difftest` duurt een paar minuten; een afwijkend script wordt één keer opnieuw gedraaid
+(timing op een drukke bouwmachine). De toestanden van de port staan daarna in `result/`.
+
+De verwachte toestanden in `tests/verwacht/` komen van het **originele** spel onder Wine:
+
+```
+tools/ververs-verwacht.sh                        # alle scripts, na elkaar (1 tot 3 min per script)
+tools/ververs-verwacht.sh tests/scripts/smoke.zms
+```
+
+Het script start zichzelf zo nodig in `nix develop`, haalt de spelbestanden uit `.#spel-data` en
+draait elk script in een verse kopie (`build/verwacht/`). Nieuw script: eerst verwachte
+toestanden maken, dan controleren dat de port overeenkomt (de check zelf, of met de hand zoals
+hierboven), en `git diff tests/verwacht` bekijken voordat je ze commit. Een script zonder
+verwachte toestanden laat de check falen.

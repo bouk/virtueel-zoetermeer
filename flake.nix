@@ -8,7 +8,8 @@
   outputs = { self, nixpkgs }:
     let
       lib = nixpkgs.lib;
-      systemen = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
+      # Geen x86_64-darwin: nixpkgs (26.11) ondersteunt dat niet meer en gooit bij het importeren een fout.
+      systemen = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
       perSysteem = f: lib.genAttrs systemen (system: f system (import nixpkgs { inherit system; }));
     in
     {
@@ -22,12 +23,33 @@
           spel-data = spelData;
           default = zoetermeer;
         } // lib.optionalAttrs (system == "x86_64-linux") (
-          let fpc-wasm = pkgs.callPackage ./nix/fpc-wasm.nix { };
+          let
+            fpc-wasm = pkgs.callPackage ./nix/fpc-wasm.nix { };
+            fpc-aarch64-darwin = pkgs.callPackage ./nix/fpc-aarch64-darwin.nix { };
           in {
             # De WebAssembly-compiler (FPC trunk) wordt alleen op x86_64-linux gebouwd.
             inherit fpc-wasm;
             web = pkgs.callPackage ./nix/web.nix { inherit spelData fpc-wasm; };
+            # Cross-compiler voor de compileercontrole van de macOS-versie (checks.macos-compileert).
+            inherit fpc-aarch64-darwin;
           }));
+
+      # CI (equivalentiemodus, zie docs/DIFFTEST.md): 'nix flake check' bouwt de native en de
+      # webversie, speelt elk testscript af en vergelijkt de speltoestand met die van het
+      # origineel (tests/verwacht), en compileert en linkt de macOS-versie voor Apple Silicon.
+      checks.x86_64-linux =
+        let
+          pkgs = import nixpkgs { system = "x86_64-linux"; };
+          p = self.packages.x86_64-linux;
+        in
+        {
+          zoetermeer = p.zoetermeer;
+          web = p.web;
+          difftest = pkgs.callPackage ./nix/difftest.nix { spelData = p.spel-data; };
+          macos-compileert = pkgs.callPackage ./nix/macos-compileert.nix {
+            inherit (p) fpc-aarch64-darwin;
+          };
+        };
 
       apps = perSysteem (system: pkgs: {
         default = {

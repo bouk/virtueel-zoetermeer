@@ -66,7 +66,9 @@ web/           de browserhost (WASI, Asyncify, canvas, invoer)
 tools/         analyse- en bouwgereedschap (Python, shell, Ghidra-scripts)
 symbols/       teruggevonden symbolen, klassen, unitgrenzen en naamkaarten
 tests/scripts/ invoerscripts voor de differentiële tests
-nix/           Nix-pakketten: spelbestanden, spel, website, Free Pascal voor wasm32
+tests/verwacht/ verwachte speltoestanden van het origineel (voor de CI, zie docs/DIFFTEST.md)
+nix/           Nix-pakketten: spelbestanden, spel, website, Free Pascal voor wasm32 en
+               aarch64-darwin, CI-checks
 docs/          werkwijze en ontwerp (DECOMP, COMPAT, WASM, DIFFTEST)
 PLAN.md        het plan en de beslissingen
 ```
