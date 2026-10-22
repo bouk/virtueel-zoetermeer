@@ -1,0 +1,10 @@
+# Original copyrighted game files: never commit
+*.zip
+/orig/
+
+# Tool / build state
+/.wine/
+/build/
+/result
+*.gpr
+*.rep/
