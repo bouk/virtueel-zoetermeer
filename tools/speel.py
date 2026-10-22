@@ -14,7 +14,8 @@ staat de hele sessie in <map>/besturing.zms, dat later als script na te spelen i
   python tools/speel.py toestand           niveau, geld, score en wat er op de kaart staat
   python tools/speel.py stop               spel afsluiten
 
-Crash: het proces is weg -> 'SPEL GECRASHT' plus het einde van de log, exitcode 2.
+Crash: het proces is weg -> 'SPEL GECRASHT' plus het einde van de log, exitcode 2. Is het
+spel zelf netjes afgesloten (Stop -> Ja), dan meldt het commando dat met exitcode 4.
 Hang: een commando wordt niet binnen 60 s bevestigd en de hartslag staat stil ->
 'SPEL HANGT', exitcode 3. Omgeving: ZM_SPEELMAP om een andere map te gebruiken.
 """
@@ -62,7 +63,15 @@ def leeft():
     return 'Z' not in lees('/proc/%d/stat' % p).split(')')[-1][:3]
 
 
+def gewoon_beeindigd():
+    """Het harnas schrijft bij een gewoon einde exitcode 0 naar uit/einde."""
+    return lees(os.path.join(UIT, 'einde')).strip() == '0'
+
+
 def crash():
+    if gewoon_beeindigd():
+        print('het spel is afgesloten (bijv. via Stop -> Ja); start een nieuw spel met "start"')
+        sys.exit(4)
     print('SPEL GECRASHT')
     print('--- laatste regels van', LOG)
     print('\n'.join(lees(LOG).splitlines()[-30:]))

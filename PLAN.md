@@ -176,7 +176,7 @@ herbouw nergens crasht of vastloopt.
 - [x] Crash- en hangdetectie: het proces loopt nog, er komen frames, er zijn geen exceptions in
   de log (`ZM_DEBUG`). Bij een crash worden het commandolog en de laatste screenshots bewaard,
   zodat het precies na te spelen is als `.zms`-script.
-- [ ] Een Haiku-agent (model `haiku`) speelt alle levels door: wijken openen, wegen, spoor, *Eerste ronde: level 2 gehaald; een crash in het rapport (compat) gevonden en opgelost; vervolgronde nodig.*
+- [ ] Een Haiku-agent (model `haiku`) speelt alle levels door: wijken openen, wegen, spoor, *Eerste ronde: level 2 gehaald; een crash in het rapport (compat) gevonden en opgelost. Tweede ronde: level 3 gehaald, geen crash; vervolgronde nodig.*
   huizen, kantoren, voorzieningen en stations bouwen, rondes afsluiten, rapporten lezen, de stad
   bewaren en weer openen, en het spel afsluiten. Hij houdt een logboek bij en rapporteert elke
   crash, hang of zichtbare fout met het commandolog.
@@ -190,6 +190,13 @@ herbouw nergens crasht of vastloopt.
     aan de weg liggen knipperen (500 ms) zolang de reistijd -1 is, en "Volgende ronde" blijft weg
     (`sloop-weg.zms`, gelijk aan het origineel, ook de foto's). In het logboek bleef het gat
     open: de klik die het moest dichten plaatste Laagbouw.
+  - Tweede ronde: geld springt bij het begin van level 3 van -2670 naar 147330 (de startsom van
+    het level wordt bij het saldo opgeteld: `ADD EDX,[Status+8]` op @0047CE48, oorspronkelijk
+    gedrag); score 0 na het openen van een bewaarde stad (het bestand bevat geen score,
+    oorspronkelijk); het getoonde saldo is bij elke foto van `level2-rapport.zms` gelijk aan
+    het origineel; "level 0" in `toestand` alleen tijdens de introductie, voor `StartNiveau`.
+    Vals alarm "SPEL GECRASHT" na Stop -> Ja: fout van `tools/speel.py`, opgelost (het harnas
+    schrijft de exitcode naar `uit/einde`).
 - [x] Hetzelfde voor de webversie (`tools/test-web.py`), minstens tot en met level 2. *Gedaan: `level2-rapport.zms` loopt in de browser door tot en met het rapport van level 2, zonder fouten.*
 
 ## Buiten scope (voorlopig)

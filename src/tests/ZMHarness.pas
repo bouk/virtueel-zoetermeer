@@ -355,4 +355,11 @@ initialization
     BesturingsBestand := GetEnvironmentVariable('ZM_BESTURING');
     ZMInactiefHaak := Tik;
   end;
+
+finalization
+  { Het programma eindigt via Halt of na Application.Terminate: laat de exitcode achter, zodat
+    tools/speel.py een gewoon einde (0) kan onderscheiden van een crash (runtime-error of
+    helemaal geen bestand). }
+  if BesturingsBestand <> '' then
+    SchrijfBestand(UitPad('einde'), IntToStr(ExitCode) + #10);
 end.
