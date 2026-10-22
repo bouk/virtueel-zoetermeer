@@ -129,6 +129,10 @@ def main():
             chain.append(v)
             v = vmts.get(v.parent)
         for anc in chain:
+            # Only library classes: the game has its own classes named like VCL ones (TFrame).
+            u = unit_at(anc.addr)
+            if not (u and u.get('library')):
+                continue
             known = kb_slots.get(anc.name, {}).get(i * 4) if i < len(anc.virtuals) else None
             if known and known != '(abstract)':
                 return known.split('.')[-1]
