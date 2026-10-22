@@ -1,13 +1,24 @@
 unit ZMHarness;
 
-{ Differential-test harness for the portable build: runs the same input scripts as
-  tools/orig_probe.py does against the original, and writes the same state dumps.
+{ Testharnas voor de portable build.
 
-  ZM_TESTSCRIPT=<file.zms>   script to run (see docs/DIFFTEST.md)
-  ZM_TESTOUT=<dir>           where dump/shot files go
+  Twee manieren van werken:
 
-  The script runs from ZMIdleHook (called on every pass of the message pump, also inside
-  modal loops); input is injected through ZMWin as if it came from the backend. }
+  * Script (differentiële tests): ZM_TESTSCRIPT=<bestand.zms> wordt in zijn geheel ingelezen en
+    afgespeeld, precies zoals tools/orig_probe.py dat tegen het origineel doet; daarna stopt
+    het programma. Dumps en screenshots gaan naar ZM_TESTOUT. Zie docs/DIFFTEST.md.
+
+  * Live (een agent die het spel speelt, tools/speel.py): ZM_BESTURING=<bestand> wordt
+    voortdurend gevolgd; nieuwe regels worden meteen uitgevoerd. Na elke regel schrijft het
+    harnas het regelnummer naar <ZM_TESTOUT>/bevestigd, en elke seconde een teken van leven
+    naar <ZM_TESTOUT>/hartslag (voor het opsporen van een hangend spel).
+
+  Commando's (één per regel, # begint commentaar):
+    wait <ms> | move <x> <y> | click <x> <y> [right] | key <naam> | seed <n> |
+    dump <naam> | sprites <naam> | shot <naam> | stop
+
+  Het harnas draait vanuit ZMIdleHook (bij elke ronde van de berichtenlus, ook binnen modale
+  lussen) en geeft invoer door via ZMWin, alsof die van de backend kwam. }
 
 {$MODE DELPHI}{$H+}
 
@@ -19,166 +30,179 @@ uses
   SysUtils, Classes, Windows, ZMPlatform, ZMWin, ZMRandom, Fmain, Uworld, uSprite;
 
 type
-  TActionKind = (akMove, akDown, akUp, akKey, akChar, akSeed, akDump, akShot, akSprites, akExit);
-  TAction = record
-    At: Int64;            { ms since script start }
-    Kind: TActionKind;
-    X, Y, Button: Integer;
+  TActieSoort = (asBeweeg, asDruk, asLos, asToets, asTeken, asSeed, asDump, asFoto, asSprites,
+    asBevestig, asStop);
+  TActie = record
+    Tijd: Int64;            { ms sinds de start van het harnas }
+    Soort: TActieSoort;
+    X, Y, Knop: Integer;
     Arg: string;
   end;
 
-var
-  Actions: array of TAction;
-  Next: Integer;
-  StartTijd: Int64 = -1;
-  OutDir: string;
-
 const
-  NoSeed = Low(Int64);
+  GeenSeed = Low(Int64);
 
 var
-  PendingSeed: Int64 = NoSeed;
+  Acties: array of TActie;
+  Volgende: Integer;
+  StartTijd: Int64 = -1;
+  UitMap: string;
+  OpenstaandeSeed: Int64 = GeenSeed;
 
-procedure Add(At: Int64; Kind: TActionKind; X, Y, Button: Integer; const Arg: string);
+  { live-modus }
+  BesturingsBestand: string;
+  VerwerkteRegels: Integer;
+  LaatsteControle, LaatsteHartslag: Int64;
+  Tikken: Int64;
+
+procedure Voeg(Tijd: Int64; Soort: TActieSoort; X, Y, Knop: Integer; const Arg: string);
 var
   N: Integer;
 begin
-  N := Length(Actions);
-  SetLength(Actions, N + 1);
-  Actions[N].At := At;
-  Actions[N].Kind := Kind;
-  Actions[N].X := X;
-  Actions[N].Y := Y;
-  Actions[N].Button := Button;
-  Actions[N].Arg := Arg;
+  N := Length(Acties);
+  SetLength(Acties, N + 1);
+  Acties[N].Tijd := Tijd;
+  Acties[N].Soort := Soort;
+  Acties[N].X := X;
+  Acties[N].Y := Y;
+  Acties[N].Knop := Knop;
+  Acties[N].Arg := Arg;
 end;
 
-{ xdotool key names used in scripts -> Windows virtual keys / characters }
-procedure AddKey(At: Int64; const Name: string);
+{ xdotool-toetsnamen uit de scripts -> Windows virtual keys of tekens }
+procedure VoegToets(Tijd: Int64; const Naam: string);
 const
-  Names: array[0..9] of string = ('Return', 'Escape', 'Left', 'Right', 'Up', 'Down',
+  Namen: array[0..9] of string = ('Return', 'Escape', 'Left', 'Right', 'Up', 'Down',
     'Tab', 'BackSpace', 'Delete', 'space');
   Codes: array[0..9] of Word = (VK_RETURN, VK_ESCAPE, VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN,
     VK_TAB, VK_BACK, VK_DELETE, VK_SPACE);
 var
   I: Integer;
 begin
-  if Name = 'plus' then
-    Add(At, akChar, 0, 0, 0, '+')
-  else if Name = 'minus' then
-    Add(At, akChar, 0, 0, 0, '-')
-  else if Length(Name) = 1 then
-    Add(At, akChar, 0, 0, 0, Name)
+  if Naam = 'plus' then
+    Voeg(Tijd, asTeken, 0, 0, 0, '+')
+  else if Naam = 'minus' then
+    Voeg(Tijd, asTeken, 0, 0, 0, '-')
+  else if Length(Naam) = 1 then
+    Voeg(Tijd, asTeken, 0, 0, 0, Naam)
   else
   begin
-    for I := Low(Names) to High(Names) do
-      if Name = Names[I] then
+    for I := Low(Namen) to High(Namen) do
+      if Naam = Namen[I] then
       begin
-        Add(At, akKey, Codes[I], 1, 0, '');
-        Add(At + 50, akKey, Codes[I], 0, 0, '');
+        Voeg(Tijd, asToets, Codes[I], 1, 0, '');
+        Voeg(Tijd + 50, asToets, Codes[I], 0, 0, '');
         Exit;
       end;
-    raise Exception.CreateFmt('harness: unknown key %s', [Name]);
+    raise Exception.CreateFmt('harnas: onbekende toets %s', [Naam]);
   end;
 end;
 
-{ Parse the script into timed primitive actions, mirroring tools/orig_probe.py:
-  a click enters the target from 60 px to the left in 3 px steps (30 ms apart), waits
-  300 ms, presses, and releases 150 ms later. }
-procedure LoadScript(const FileName: string);
+{ Zet één scriptregel om in getimede basisacties vanaf tijdstip T (dat schuift op).
+  Een klik nadert het doel van 60 px links in stappen van 3 px (30 ms ertussen), wacht
+  300 ms, drukt, en laat 150 ms later los, net als tools/orig_probe.py. }
+procedure VerwerkRegel(Regel: string; var T: Int64);
 var
-  Lines, F: TStringList;
-  I, J, X, Y, Btn: Integer;
-  T: Int64;
-  Line: string;
+  F: TStringList;
+  J, X, Y, Knop: Integer;
 begin
-  Lines := TStringList.Create;
+  if Pos('#', Regel) > 0 then
+    Regel := Copy(Regel, 1, Pos('#', Regel) - 1);
   F := TStringList.Create;
   try
-    Lines.LoadFromFile(FileName);
-    T := 0;
-    for I := 0 to Lines.Count - 1 do
+    ExtractStrings([' ', #9], [], PChar(Regel), F);
+    if F.Count = 0 then
+      Exit;
+    if F[0] = 'wait' then
+      Inc(T, StrToInt(F[1]))
+    else if F[0] = 'move' then
+      Voeg(T, asBeweeg, StrToInt(F[1]), StrToInt(F[2]), 0, '')
+    else if F[0] = 'click' then
     begin
-      Line := Lines[I];
-      if Pos('#', Line) > 0 then
-        Line := Copy(Line, 1, Pos('#', Line) - 1);
-      F.Clear;
-      ExtractStrings([' ', #9], [], PChar(Line), F);
-      if F.Count = 0 then
-        Continue;
-      if F[0] = 'wait' then
-        Inc(T, StrToInt(F[1]))
-      else if F[0] = 'move' then
-        Add(T, akMove, StrToInt(F[1]), StrToInt(F[2]), 0, '')
-      else if F[0] = 'click' then
+      X := StrToInt(F[1]);
+      Y := StrToInt(F[2]);
+      Knop := 1;
+      if (F.Count > 3) and (F[3] = 'right') then
+        Knop := 2;
+      for J := 20 downto 0 do
       begin
-        X := StrToInt(F[1]);
-        Y := StrToInt(F[2]);
-        Btn := 1;
-        if (F.Count > 3) and (F[3] = 'right') then
-          Btn := 2;
-        for J := 20 downto 0 do
-        begin
-          Add(T, akMove, X - 3 * J, Y, 0, '');
-          Inc(T, 30);
-        end;
-        Inc(T, 300);
-        Add(T, akDown, X, Y, Btn, '');
-        Inc(T, 150);
-        Add(T, akUp, X, Y, Btn, '');
-      end
-      else if F[0] = 'key' then
-      begin
-        AddKey(T, F[1]);
-        Inc(T, 100);
-      end
-      else if F[0] = 'seed' then
-        Add(T, akSeed, StrToInt(F[1]), 0, 0, '')
-      else if F[0] = 'dump' then
-        Add(T, akDump, 0, 0, 0, F[1])
-      else if F[0] = 'sprites' then
-        Add(T, akSprites, 0, 0, 0, F[1])
-      else if F[0] = 'shot' then
-        Add(T, akShot, 0, 0, 0, F[1])
-      else
-        raise Exception.CreateFmt('harness: unknown command in %s: %s', [FileName, Lines[I]]);
-    end;
-    Add(T + 500, akExit, 0, 0, 0, '');
+        Voeg(T, asBeweeg, X - 3 * J, Y, 0, '');
+        Inc(T, 30);
+      end;
+      Inc(T, 300);
+      Voeg(T, asDruk, X, Y, Knop, '');
+      Inc(T, 150);
+      Voeg(T, asLos, X, Y, Knop, '');
+    end
+    else if F[0] = 'key' then
+    begin
+      VoegToets(T, F[1]);
+      Inc(T, 100);
+    end
+    else if F[0] = 'seed' then
+      Voeg(T, asSeed, StrToInt(F[1]), 0, 0, '')
+    else if F[0] = 'dump' then
+      Voeg(T, asDump, 0, 0, 0, F[1])
+    else if F[0] = 'sprites' then
+      Voeg(T, asSprites, 0, 0, 0, F[1])
+    else if F[0] = 'shot' then
+      Voeg(T, asFoto, 0, 0, 0, F[1])
+    else if F[0] = 'stop' then
+      Voeg(T, asStop, 0, 0, 0, '')
+    else
+      raise Exception.CreateFmt('harnas: onbekend commando: %s', [Regel]);
   finally
     F.Free;
-    Lines.Free;
   end;
 end;
 
-{ Same format as tools/orig_probe.py state_text }
-function StateText: string;
+procedure LeesScript(const Bestand: string);
+var
+  Regels: TStringList;
+  I: Integer;
+  T: Int64;
+begin
+  Regels := TStringList.Create;
+  try
+    Regels.LoadFromFile(Bestand);
+    T := 0;
+    for I := 0 to Regels.Count - 1 do
+      VerwerkRegel(Regels[I], T);
+    Voeg(T + 500, asStop, 0, 0, 0, '');
+  finally
+    Regels.Free;
+  end;
+end;
+
+{ Zelfde formaat als state_text in tools/orig_probe.py }
+function Toestand: string;
 var
   S: TStringList;
   X, Y: Integer;
   W: TWorld;
   C: TCell;
-  Fmt: TFormatSettings;
+  Opmaak: TFormatSettings;
 
-  function Dash(const V: string): string;
+  function Streep(const V: string): string;
   begin
     if V = '' then Result := '-' else Result := V;
   end;
 
 begin
-  Fmt := DefaultFormatSettings;
-  Fmt.DecimalSeparator := '.';
+  Opmaak := DefaultFormatSettings;
+  Opmaak.DecimalSeparator := '.';
   W := frmMain.FWereld;
   S := TStringList.Create;
   try
     S.Add(Format('level %d', [frmMain.FStatus.Speelniveau]));
     S.Add(Format('geld %d', [frmMain.FStatus.Geld]));
     S.Add(Format('score %d', [frmMain.FStatus.Score]));
-    S.Add(Format('reistijd %.6f', [W.Reistijd], Fmt));
+    S.Add(Format('reistijd %.6f', [W.Reistijd], Opmaak));
     for X := 0 to WereldGrootte - 1 do
       for Y := 0 to WereldGrootte - 1 do
       begin
         C := W.Cells[X, Y];
-        S.Add(Format('cell %d %d %s %s %d %d %d', [X, Y, Dash(C.Inhoud), Dash(C.Param),
+        S.Add(Format('cell %d %d %s %s %d %d %d', [X, Y, Streep(C.Inhoud), Streep(C.Param),
           C.Wijk, C.Wegen, Ord(C.Bereikbaar)]));
       end;
     S.LineBreak := #10;
@@ -188,8 +212,8 @@ begin
   end;
 end;
 
-{ Port-only debugging aid: every sprite of the main form }
-function SpritesText: string;
+{ Alleen voor de port, om te debuggen: alle sprites van het hoofdformulier }
+function SpritesTekst: string;
 var
   S: TStringList;
   I: Integer;
@@ -215,63 +239,120 @@ begin
   end;
 end;
 
-procedure WriteFile(const Name, Text: string);
+procedure SchrijfBestand(const Naam, Tekst: string);
 var
   F: TFileStream;
+  Tijdelijk: string;
 begin
-  F := TFileStream.Create(Name, fmCreate);
+  { eerst naar een tijdelijk bestand en dan hernoemen: lezers zien nooit een half bestand }
+  Tijdelijk := Naam + '.tmp';
+  F := TFileStream.Create(Tijdelijk, fmCreate);
   try
-    if Text <> '' then
-      F.WriteBuffer(Text[1], Length(Text));
+    if Tekst <> '' then
+      F.WriteBuffer(Tekst[1], Length(Tekst));
   finally
     F.Free;
+  end;
+  DeleteFile(Naam);
+  RenameFile(Tijdelijk, Naam);
+end;
+
+function UitPad(const Naam: string): string;
+begin
+  Result := IncludeTrailingPathDelimiter(UitMap) + Naam;
+end;
+
+{ Live-modus: nieuwe regels uit het besturingsbestand inplannen }
+procedure VolgBesturing(Nu: Int64);
+var
+  Regels: TStringList;
+  T: Int64;
+begin
+  if not FileExists(BesturingsBestand) then
+    Exit;
+  Regels := TStringList.Create;
+  try
+    Regels.LoadFromFile(BesturingsBestand);
+    while VerwerkteRegels < Regels.Count do
+    begin
+      { een regel schuift pas aan als alles ervoor gedaan is }
+      T := Nu - StartTijd;
+      if (Volgende < Length(Acties)) and (Acties[High(Acties)].Tijd > T) then
+        T := Acties[High(Acties)].Tijd;
+      VerwerkRegel(Regels[VerwerkteRegels], T);
+      Inc(VerwerkteRegels);
+      Voeg(T, asBevestig, VerwerkteRegels, 0, 0, '');
+    end;
+  finally
+    Regels.Free;
   end;
 end;
 
 procedure Tik;
 var
-  Now: Int64;
-  A: TAction;
+  Nu: Int64;
+  A: TActie;
 begin
-  Now := GetTickCount64;
+  Nu := GetTickCount64;
   if StartTijd < 0 then
-    StartTijd := Now;
-  while (Next < Length(Actions)) and (Now - StartTijd >= Actions[Next].At) do
+    StartTijd := Nu;
+  Inc(Tikken);
+  if BesturingsBestand <> '' then
   begin
-    A := Actions[Next];
-    Inc(Next);
-    case A.Kind of
-      akMove: ZMInjectMouse(A.X, A.Y, 0, False);
-      akDown:
+    if Nu - LaatsteControle >= 50 then
+    begin
+      LaatsteControle := Nu;
+      VolgBesturing(Nu);
+    end;
+    if Nu - LaatsteHartslag >= 1000 then
+    begin
+      LaatsteHartslag := Nu;
+      SchrijfBestand(UitPad('hartslag'), Format('%d %d'#10, [Nu - StartTijd, Tikken]));
+    end;
+  end;
+  while (Volgende < Length(Acties)) and (Nu - StartTijd >= Acties[Volgende].Tijd) do
+  begin
+    A := Acties[Volgende];
+    Inc(Volgende);
+    case A.Soort of
+      asBeweeg: ZMInjectMouse(A.X, A.Y, 0, False);
+      asDruk:
         begin
           { een 'seed' geldt vlak voor de volgende muisklik (zie docs/DIFFTEST.md) }
-          if PendingSeed <> NoSeed then
+          if OpenstaandeSeed <> GeenSeed then
           begin
-            ZMRandom.RandSeed := PendingSeed;
-            PendingSeed := NoSeed;
+            ZMRandom.RandSeed := OpenstaandeSeed;
+            OpenstaandeSeed := GeenSeed;
           end;
-          ZMInjectMouse(A.X, A.Y, A.Button, True);
+          ZMInjectMouse(A.X, A.Y, A.Knop, True);
         end;
-      akUp: ZMInjectMouse(A.X, A.Y, A.Button, False);
-      akKey: ZMInjectKey(A.X, A.Y <> 0);
-      akChar: ZMInjectChar(A.Arg[1]);
-      akSeed: PendingSeed := A.X;
-      akDump: WriteFile(IncludeTrailingPathDelimiter(OutDir) + A.Arg + '.state', StateText);
-      akSprites: WriteFile(IncludeTrailingPathDelimiter(OutDir) + A.Arg + '.sprites', SpritesText);
-      akShot: ZMSaveScreenshot(IncludeTrailingPathDelimiter(OutDir) + A.Arg + '.png');
-      akExit: Halt(0);
+      asLos: ZMInjectMouse(A.X, A.Y, A.Knop, False);
+      asToets: ZMInjectKey(A.X, A.Y <> 0);
+      asTeken: ZMInjectChar(A.Arg[1]);
+      asSeed: OpenstaandeSeed := A.X;
+      asDump: SchrijfBestand(UitPad(A.Arg + '.state'), Toestand);
+      asSprites: SchrijfBestand(UitPad(A.Arg + '.sprites'), SpritesTekst);
+      asFoto: ZMSaveScreenshot(UitPad(A.Arg + '.png'));
+      asBevestig: SchrijfBestand(UitPad('bevestigd'), IntToStr(A.X) + #10);
+      asStop: Halt(0);
     end;
   end;
 end;
 
 initialization
+  UitMap := GetEnvironmentVariable('ZM_TESTOUT');
+  if UitMap = '' then
+    UitMap := '.';
   if GetEnvironmentVariable('ZM_TESTSCRIPT') <> '' then
   begin
-    OutDir := GetEnvironmentVariable('ZM_TESTOUT');
-    if OutDir = '' then
-      OutDir := '.';
-    ForceDirectories(OutDir);
-    LoadScript(GetEnvironmentVariable('ZM_TESTSCRIPT'));
+    ForceDirectories(UitMap);
+    LeesScript(GetEnvironmentVariable('ZM_TESTSCRIPT'));
+    ZMIdleHook := Tik;
+  end
+  else if GetEnvironmentVariable('ZM_BESTURING') <> '' then
+  begin
+    ForceDirectories(UitMap);
+    BesturingsBestand := GetEnvironmentVariable('ZM_BESTURING');
     ZMIdleHook := Tik;
   end;
 end.
