@@ -23,7 +23,8 @@ type
   end;
 
   TPixie = class(TComponent)
-  private
+  protected
+    { protected, not private: uSprite's TSprite.GetChange reads and writes FState }
     FVisible: Boolean;               { +0x24 }
     FLeft: SmallInt;                 { +0x26 }
     FTop: SmallInt;                  { +0x28 }

@@ -1,0 +1,333 @@
+{
+  "functions": {
+    "00469d70": "TSprite.Create",
+    "00469ecc": "TSprite.CreateCopy",
+    "0046a150": "TSprite.Destroy",
+    "0046a220": "TSprite.Kill",
+    "0046a228": "TSprite.Redraw",
+    "0046a2a4": "TSprite.MoveTo",
+    "0046a30c": "TSprite.MoveTo3D",
+    "0046a374": "TSprite.MoveBy",
+    "0046a3b0": "TSprite.PlaySequence",
+    "0046a408": "TSprite.PlaySequenceAt",
+    "0046a5d4": "TSprite.StopSequence",
+    "0046a5ec": "TSprite.DoVisible",
+    "0046a60c": "TSprite.DoMove",
+    "0046a69c": "TSprite.DoFinishSequence",
+    "0046a720": "TSprite.DoHit",
+    "0046a7ec": "TSprite.DoAfterBlit",
+    "0046a924": "TSprite.DoBeforeBlit",
+    "0046a9d4": "TSprite.GetChange",
+    "0046aae8": "TSprite.DoFrameSkipped",
+    "0046ab14": "TSprite.MouseMove",
+    "0046ab94": "TSprite.MouseLeave",
+    "0046abf0": "TSprite.MouseDown",
+    "0046ac78": "TSprite.MouseUp",
+    "0046ad00": "TSprite.DrawDC",
+    "0046ae50": "TSprite.Draw",
+    "0046afe8": "TSprite.TimerSkip",
+    "0046b008": "TSprite.TimerTick",
+    "0046b2d0": "TSprite.GetScale",
+    "0046b2ec": "TSprite.ChangeState",
+    "0046b5a4": "TSprite.GetAbout",
+    "0046b5c8": "TSprite.GetSurface",
+    "0046b5f0": "TSprite.GetSequence",
+    "0046b614": "TSprite.SetSequence",
+    "0046b65c": "TSprite.SetMouseCapture",
+    "0046b688": "TSprite.SetVisible",
+    "0046b710": "TSprite.SetMirrorX",
+    "0046b724": "TSprite.SetMirrorY",
+    "0046b738": "TSprite.SetX",
+    "0046b7ac": "TSprite.SetY",
+    "0046b820": "TSprite.SetLeft",
+    "0046b84c": "TSprite.SetTop",
+    "0046b878": "TSprite.SetZ",
+    "0046b8f8": "TSprite.SetZOrder",
+    "0046b924": "TSprite.SetMarginLeft",
+    "0046b998": "TSprite.SetMarginTop",
+    "0046ba0c": "TSprite.SetMarginRight",
+    "0046ba80": "TSprite.SetMarginBottom",
+    "0046baf4": "TSprite.GetX",
+    "0046bb50": "TSprite.GetY",
+    "0046bbac": "TSprite.GetWidth",
+    "0046bbe0": "TSprite.GetHeight",
+    "0046bc14": "TSprite.GetHotSpotX",
+    "0046bc50": "TSprite.GetHotSpotY",
+    "0046bc8c": "TSprite.GetTransparent",
+    "0046bc94": "TSprite.SetTransparent",
+    "0046bca0": "TSprite.SetSpriteBox",
+    "0046bd08": "TSprite.SetFrameList",
+    "0046bd18": "TSprite.SetSequenceList",
+    "0046bd24": "TSprite.GetCurrentFrame",
+    "0046bd58": "TSprite.SetCurrentFrame",
+    "0046be60": "TSprite.SetFrameIndex",
+    "0046bf94": "TSprite.SetScale",
+    "0046c010": "TSprite.GetFrozen",
+    "0046c018": "TSprite.SetPriority",
+    "0046c024": "TSprite.GetPriority",
+    "0046c030": "TSprite.GetBehaviour",
+    "0046c084": "TSprite.AddBehaviour",
+    "0046c0f0": "TSpriteList.Add",
+    "0046c100": "TSpriteList.SpriteByName",
+    "0046c180": "TSpriteList.GetSprite",
+    "0046c1a0": "TBehaviour.Create",
+    "0046c1e4": "TBehaviour.Destroy",
+    "0046c218": "TBehaviour.FinishSequence",
+    "0046c21c": "TBehaviour.Hit",
+    "0046c220": "TBehaviour.Move",
+    "0046c228": "TBehaviour.AfterBlit",
+    "0046c248": "TBehaviour.BeforeBlit",
+    "0046c268": "TBehaviour.MouseMove",
+    "0046c270": "TBehaviour.MouseLeave",
+    "0046c274": "TBehaviour.MouseDown",
+    "0046c27c": "TBehaviour.MouseUp",
+    "0046c284": "TBehaviour.VisibleChange",
+    "0046c288": "TBehaviour.SetSprite",
+    "0046c28c": "TBehaviour.Detach",
+    "0046c2ac": "TBehaviour.SetActive",
+    "0046c2b0": "TBehaviour.Finish",
+    "0046c2e8": "TBehaviourList.Add",
+    "0046c2f8": "TBehaviourList.GetBehaviour",
+    "0046c318": "TBehaviourList.Find",
+    "0046c3a0": "TBehaviourList.Remove",
+    "0046c3c0": "TBehaviourList.ClearItem",
+    "0046c3d4": "TBehaviourList.Pack",
+    "0046c400": "TBehaviourList.IsActive",
+    "0046c42c": "uSprite.Finalization",
+    "0046c470": "uSprite.Initialization"
+  },
+  "globals": {
+    "00488e70": "uSprite.SpriteMotto",
+    "00488e74": "uSprite.SpriteMotto2"
+  },
+  "fields": {
+    "TSprite": {
+      "0x68": [
+        "FAbout",
+        "string"
+      ],
+      "0x6c": [
+        "FSpriteBox",
+        "TSpriteBox"
+      ],
+      "0x70": [
+        "FFrameList",
+        "TFrameList"
+      ],
+      "0x74": [
+        "FSequenceList",
+        "TSequenceList"
+      ],
+      "0x78": [
+        "FSequence",
+        "TSequence"
+      ],
+      "0x7c": [
+        "FReserved7C",
+        "Integer"
+      ],
+      "0x80": [
+        "FPlotmode",
+        "TPlotMode"
+      ],
+      "0x84": [
+        "FFrameIndex",
+        "Integer"
+      ],
+      "0x88": [
+        "FTimer",
+        "TFastTimer"
+      ],
+      "0x8c": [
+        "FRepeatCount",
+        "Integer"
+      ],
+      "0x90": [
+        "FStep",
+        "Integer"
+      ],
+      "0x94": [
+        "FDynamic",
+        "Boolean"
+      ],
+      "0x95": [
+        "FKilled",
+        "Boolean"
+      ],
+      "0x96": [
+        "FHitTest",
+        "THitTest"
+      ],
+      "0x98": [
+        "FReserved98",
+        "Integer"
+      ],
+      "0x9c": [
+        "FMirrorY",
+        "Boolean"
+      ],
+      "0x9d": [
+        "FMirrorX",
+        "Boolean"
+      ],
+      "0x9e": [
+        "FReserved9E",
+        "Boolean"
+      ],
+      "0x9f": [
+        "FFrozen",
+        "Boolean"
+      ],
+      "0xa0": [
+        "FStopped",
+        "Boolean"
+      ],
+      "0xa8": [
+        "FScale",
+        "Double"
+      ],
+      "0xb0": [
+        "FData",
+        "TObject"
+      ],
+      "0xb4": [
+        "FMarginLeft",
+        "Integer"
+      ],
+      "0xb8": [
+        "FMarginRight",
+        "Integer"
+      ],
+      "0xbc": [
+        "FMarginTop",
+        "Integer"
+      ],
+      "0xc0": [
+        "FMarginBottom",
+        "Integer"
+      ],
+      "0xc4": [
+        "FLastFrame",
+        "string"
+      ],
+      "0xc8": [
+        "FMouseCapture",
+        "Boolean"
+      ],
+      "0xcc": [
+        "FNewX",
+        "Integer"
+      ],
+      "0xd0": [
+        "FNewY",
+        "Integer"
+      ],
+      "0xd4": [
+        "FNewZ",
+        "Integer"
+      ],
+      "0xd8": [
+        "FNewFrameIndex",
+        "Integer"
+      ],
+      "0xdc": [
+        "FNewVisible",
+        "Boolean"
+      ],
+      "0xe0": [
+        "FNewScale",
+        "Double"
+      ],
+      "0xe8": [
+        "FNewMarginLeft",
+        "Integer"
+      ],
+      "0xec": [
+        "FNewMarginRight",
+        "Integer"
+      ],
+      "0xf0": [
+        "FNewMarginTop",
+        "Integer"
+      ],
+      "0xf4": [
+        "FNewMarginBottom",
+        "Integer"
+      ],
+      "0xf8": [
+        "FChanging",
+        "Boolean"
+      ],
+      "0xf9": [
+        "FForceRedraw",
+        "Boolean"
+      ],
+      "0xfc": [
+        "FReservedFC",
+        "Integer"
+      ],
+      "0x100": [
+        "FOnVisible",
+        "TOnVisibleEvent"
+      ],
+      "0x108": [
+        "FOnMove",
+        "TOnMoveEvent"
+      ],
+      "0x110": [
+        "FOnFinishSequence",
+        "TOnFinishSequence"
+      ],
+      "0x118": [
+        "FOnHit",
+        "TOnHitEvent"
+      ],
+      "0x120": [
+        "FOnBeforeBlit",
+        "TOnBlitEvent"
+      ],
+      "0x128": [
+        "FOnAfterBlit",
+        "TOnBlitEvent"
+      ],
+      "0x130": [
+        "FOnFrameSkipped",
+        "TOnSkipFrameEvent"
+      ],
+      "0x138": [
+        "FBehaviours",
+        "TBehaviourList"
+      ]
+    },
+    "TBehaviour": {
+      "0x4": [
+        "FName",
+        "string"
+      ],
+      "0x8": [
+        "FSprite",
+        "TSprite"
+      ],
+      "0xc": [
+        "FActive",
+        "Boolean"
+      ],
+      "0x10": [
+        "FOnFinish",
+        "TNotifyEvent"
+      ],
+      "0x18": [
+        "FNextBehaviour",
+        "string"
+      ]
+    }
+  },
+  "assumes": {
+    "uPixie": [
+      "TPixie.FState (+0x2C) must be visible to descendants (protected): TSprite.GetChange reads and writes it"
+    ],
+    "Sprframe": [
+      "TPlot/TPlotMode are declared in uSprite (RTTI puts them in Sprframe)"
+    ]
+  }
+}

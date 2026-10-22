@@ -1,0 +1,37 @@
+{
+  "functions": {
+    "0046c5bc": "TGoblin.Create",
+    "0046c600": "TGoblin.Destroy",
+    "0046c638": "TGoblin.GetChange",
+    "0046c674": "TGoblin.SetSpriteBox",
+    "0046c6a0": "TGoblin.SetSurface",
+    "0046c6b8": "TGoblin.GetWidth",
+    "0046c6c4": "TGoblin.GetHeight",
+    "0046c6d0": "TGoblin.Draw",
+    "0046c71c": "TGoblin.DrawDC",
+    "0046c968": "TGoblin.SetZ",
+    "0046c994": "uGoblin.Finalization",
+    "0046c9c4": "uGoblin.Initialization"
+  },
+  "globals": {},
+  "fields": {
+    "TGoblin": {
+      "0x68": [
+        "FArea",
+        "TRect"
+      ],
+      "0x78": [
+        "FSurface",
+        "TSurface"
+      ],
+      "0x7c": [
+        "FSpriteBox",
+        "TSpriteBox"
+      ],
+      "0x80": [
+        "FChanged",
+        "Boolean"
+      ]
+    }
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "functions": {
+    "0046ebf8": "TFrameRef.Create",
+    "0046ec34": "TFrameRef.SetFrameName",
+    "0046ec68": "TFrameRef.GetFrameIndex",
+    "0046ec88": "TFrameRef.GetDX",
+    "0046ec90": "TFrameRef.GetDY",
+    "0046ec98": "TFrameRef.GetDZ",
+    "0046eca0": "TFrameRef.ReadData",
+    "0046ed8c": "TFrameRef.WriteData",
+    "0046ede0": "TFrameRef.DefineProperties",
+    "0046ee1c": "TFrameRef.Assign",
+    "0046ee8c": "TSequence.Create",
+    "0046eef4": "TSequence.Assign",
+    "0046efa0": "TSequence.GetStep",
+    "0046f04c": "TSequence.GetFrameRef",
+    "0046f06c": "TSequence.ReadData",
+    "0046f0cc": "TSequence.WriteData",
+    "0046f128": "TSequence.DefineProperties",
+    "0046f164": "TSequenceList.Create",
+    "0046f1a0": "TSequenceList.Assign",
+    "0046f230": "TSequenceList.GetSequence",
+    "0046f250": "TSequenceList.SequenceByName",
+    "0046f34c": "TSequenceList.IndexOf",
+    "0046f410": "TSequenceList.Add",
+    "0046f41c": "TSequenceList.DefineProperties",
+    "0046f458": "TSequenceList.ReadData",
+    "0046f4ac": "TSequenceList.WriteData",
+    "0046f4f8": "uSequence.Finalization",
+    "0046f528": "uSequence.Initialization"
+  },
+  "globals": {},
+  "fields": {
+    "TFrameRef": {
+      "0x4": [
+        "FFrameName",
+        "TName"
+      ],
+      "0x58": [
+        "FOwner",
+        "TComponent"
+      ],
+      "0x5c": [
+        "FDX",
+        "SmallInt"
+      ],
+      "0x5e": [
+        "FDY",
+        "SmallInt"
+      ],
+      "0x60": [
+        "FDZ",
+        "SmallInt"
+      ],
+      "0x68": [
+        "FDelay",
+        "Real48"
+      ]
+    },
+    "TSequence": {
+      "0x8": [
+        "FName",
+        "TName"
+      ],
+      "0x60": [
+        "FTime",
+        "Double"
+      ],
+      "0x68": [
+        "FOwner",
+        "TComponent"
+      ]
+    },
+    "TSequenceList": {
+      "0x8": [
+        "FOwner",
+        "TComponent"
+      ]
+    }
+  },
+  "assumes": {
+    "Sprframe": [
+      "TPersistentList.List, Count, Clear",
+      "TFrameList.IndexOf",
+      "type TName = string[80] is declared in uSequence (RTTI puts it in Sprframe)"
+    ]
+  }
+}

@@ -1,0 +1,197 @@
+{
+  "functions": {
+    "0046d1a8": "TSpriteBox.Create",
+    "0046d2d4": "TSpriteBox.Destroy",
+    "0046d410": "TSpriteBox.NoPicture",
+    "0046d41c": "TSpriteBox.GetPixie",
+    "0046d440": "TSpriteBox.PixieCount",
+    "0046d44c": "TSpriteBox.WMEraseBkgnd",
+    "0046d460": "TSpriteBox.WMStarted",
+    "0046d4bc": "TSpriteBox.SetAutoSize",
+    "0046d504": "TThreeD.Project",
+    "0046d564": "TThreeD.Assign",
+    "0046d5b8": "TSpriteBox.MouseDown",
+    "0046d620": "TSpriteBox.MouseMove",
+    "0046d6a8": "TSpriteBox.MouseUp",
+    "0046d714": "TSpriteBox.Paint",
+    "0046d800": "TSpriteBox.AddUpdateRect",
+    "0046d858": "TSpriteBox.SetAutoFlip",
+    "0046d880": "TSpriteBox.MergeRects",
+    "0046d900": "TSpriteBox.GetDrawWindow",
+    "0046d914": "TSpriteBox.FullFlip",
+    "0046db0c": "TSpriteBox.DirtyFlip",
+    "0046de00": "TSpriteBox.GDIFlip",
+    "0046dea8": "TSpriteBox.InvalidateState",
+    "0046df60": "TSpriteBox.Flip",
+    "0046e0b0": "TSpriteBox.InvalidateRect",
+    "0046e0f0": "TSpriteBox.InvalidateArea",
+    "0046e1e4": "TSpriteBox.PaintBackground",
+    "0046e294": "TSpriteBox.DrawRegion",
+    "0046e690": "TSpriteBox.FindPixie",
+    "0046e700": "TSpriteBox.PixieAt",
+    "0046e718": "TSpriteBox.AddPixie",
+    "0046e734": "TSpriteBox.RemovePixie",
+    "0046e78c": "TSpriteBox.SetPicture",
+    "0046e7a4": "TSpriteBox.SetPaletteImage",
+    "0046e7d0": "TSpriteBox.UpdateZOrder",
+    "0046e7f0": "TSpriteBox.ZOrderDirection",
+    "0046e870": "TSpriteBox.UpdateZOrderAt",
+    "0046e8a0": "TSpriteBox.UpdatePalette",
+    "0046e928": "TSpriteBox.SetCapturePixie",
+    "0046e94c": "TSpriteBoxList.Add",
+    "0046e95c": "TSpriteBoxList.GetSpriteBox",
+    "0046e97c": "TSpriteBoxList.FlipAll",
+    "0046e9b4": "uSpritebox.SpriteBoxExit",
+    "0046e9d8": "uSpritebox.Finalization",
+    "0046ea08": "uSpritebox.Initialization"
+  },
+  "globals": {
+    "00488e78": "uSpritebox.DrawDepth",
+    "0048a934": "uSpritebox.TempSurface",
+    "0048a938": "uSpritebox.SpriteBoxes",
+    "0048a940": "uSpritebox.OldExitProc"
+  },
+  "fields": {
+    "TThreeD": {
+      "0x4": [
+        "FEnabled",
+        "Boolean"
+      ],
+      "0x8": [
+        "FXDis",
+        "Integer"
+      ],
+      "0xc": [
+        "FYDis",
+        "Integer"
+      ],
+      "0x10": [
+        "FZDis",
+        "Integer"
+      ],
+      "0x14": [
+        "FDiaF",
+        "Integer"
+      ]
+    },
+    "TSpriteBox": {
+      "0x1f4": [
+        "FReserved1F4",
+        "Integer"
+      ],
+      "0x1f8": [
+        "FBackRects",
+        "TRectPosList"
+      ],
+      "0x1fc": [
+        "FDirtyRects",
+        "TRectPosList"
+      ],
+      "0x200": [
+        "FAutoFlip",
+        "Boolean"
+      ],
+      "0x201": [
+        "FFrozen",
+        "Boolean"
+      ],
+      "0x202": [
+        "FCenter",
+        "Boolean"
+      ],
+      "0x203": [
+        "FAutoSize",
+        "Boolean"
+      ],
+      "0x204": [
+        "FStretch",
+        "Boolean"
+      ],
+      "0x208": [
+        "FPicture",
+        "TSurface"
+      ],
+      "0x20c": [
+        "FPaletteImage",
+        "TSurface"
+      ],
+      "0x210": [
+        "FPalette",
+        "HPALETTE"
+      ],
+      "0x214": [
+        "FReserved214",
+        "Boolean"
+      ],
+      "0x218": [
+        "FPixies",
+        "TList"
+      ],
+      "0x21c": [
+        "FReserved21C",
+        "TRect"
+      ],
+      "0x22c": [
+        "FFlipMode",
+        "Byte"
+      ],
+      "0x230": [
+        "FDrawWindow",
+        "HWND"
+      ],
+      "0x234": [
+        "FThreeD",
+        "TThreeD"
+      ],
+      "0x238": [
+        "FReload",
+        "string"
+      ],
+      "0x23c": [
+        "FStarted",
+        "Boolean"
+      ],
+      "0x240": [
+        "FOnFlip",
+        "TNotifyEvent"
+      ],
+      "0x248": [
+        "FOnStarted",
+        "TNotifyEvent"
+      ],
+      "0x250": [
+        "FOnShow",
+        "TNotifyEvent"
+      ],
+      "0x258": [
+        "FScale",
+        "Double"
+      ],
+      "0x260": [
+        "FCapturePixie",
+        "TPixie"
+      ],
+      "0x264": [
+        "FMousePixie",
+        "TPixie"
+      ],
+      "0x268": [
+        "FFrameTime",
+        "Integer"
+      ],
+      "0x26c": [
+        "FLastTick",
+        "Integer"
+      ],
+      "0x270": [
+        "FHandleBackGround",
+        "THandleBackGround"
+      ],
+      "0x274": [
+        "FBackGroundColor",
+        "TColor"
+      ]
+    }
+  },
+  "assumes": {}
+}

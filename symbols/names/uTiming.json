@@ -1,0 +1,135 @@
+{
+  "functions": {
+    "0046f7f4": "uTiming.FreeWinMM",
+    "0046f810": "uTiming.ReleaseMMTimer",
+    "0046f838": "uTiming.GetTime",
+    "0046f86c": "uTiming.SetMaxMessageLoops",
+    "0046f874": "TCustomFastTimer.Create",
+    "0046f928": "TCustomFastTimer.Destroy",
+    "0046f988": "TCustomFastTimer.WndProc",
+    "0046fa0c": "TCustomFastTimer.UpdateTimer",
+    "0046fac4": "TCustomFastTimer.GetAbout",
+    "0046fae4": "TCustomFastTimer.SetEnabled",
+    "0046faf4": "TCustomFastTimer.GetRealInterval",
+    "0046fb34": "TCustomFastTimer.SetInterval",
+    "0046fb44": "TCustomFastTimer.SetOnTimer",
+    "0046fb5c": "TCustomFastTimer.DoTimer",
+    "0046fbc8": "TCustomFastTimer.Timer",
+    "0046fbd4": "TCustomFastTimer.SkipTimer",
+    "0046fbe0": "TCustomFastTimer.GetTimerMode",
+    "0046fc08": "TFastTimerList.Add",
+    "0046fc18": "TFastTimerList.GetTimer",
+    "0046fc38": "TFastTimerList.NextDue",
+    "0046fca4": "uTiming.FastTimerLoop",
+    "0046fe10": "uTiming.WaitRetrace",
+    "0046fe2c": "uTiming.GetRetraceTime",
+    "0046fe40": "uTiming.MeasureRetrace",
+    "0046fe8c": "uTiming.CheckWinNT",
+    "0046fec8": "uTiming.Finalization",
+    "0046fef8": "uTiming.Initialization"
+  },
+  "globals": {
+    "00488e7c": "uTiming.NoMMTimers",
+    "00488e80": "uTiming.MaxLoopTime",
+    "00488e84": "uTiming.IdleLoopTime",
+    "00488e88": "uTiming.InTimerLoop",
+    "00488e8c": "uTiming.MaxMessageLoops",
+    "00488e90": "uTiming.TimerCount",
+    "00488e94": "uTiming.TimeScale",
+    "0048a948": "uTiming.FastTimers",
+    "0048a94c": "uTiming.RetraceTime",
+    "0048a950": "uTiming.IsWinNT",
+    "0048a958": "uTiming.MMSetEventProc",
+    "0048a95c": "uTiming.MMGetDevCapsProc",
+    "0048a960": "uTiming.MMKillEventProc",
+    "0048a964": "uTiming.MMTimerUsers",
+    "0048a968": "uTiming.WinMMLoaded",
+    "0048a96c": "uTiming.WinMMHandle",
+    "0048a970": "uTiming.StartTime"
+  },
+  "fields": {
+    "TCustomFastTimer": {
+      "0x24": [
+        "FAbout",
+        "string"
+      ],
+      "0x28": [
+        "FEnabled",
+        "Boolean"
+      ],
+      "0x2c": [
+        "FInterval",
+        "Integer"
+      ],
+      "0x30": [
+        "FReserved30",
+        "Integer"
+      ],
+      "0x34": [
+        "FWindowHandle",
+        "HWND"
+      ],
+      "0x38": [
+        "FTimerWnd",
+        "HWND"
+      ],
+      "0x3c": [
+        "FReserved3C",
+        "Integer"
+      ],
+      "0x40": [
+        "FOnTimer",
+        "TNotifyEvent"
+      ],
+      "0x48": [
+        "FOnSkipTimer",
+        "TNotifyEvent"
+      ],
+      "0x50": [
+        "FUseMMTimer",
+        "Boolean"
+      ],
+      "0x54": [
+        "FMMTimerID",
+        "Integer"
+      ],
+      "0x58": [
+        "FID",
+        "Integer"
+      ],
+      "0x5c": [
+        "FNextTime",
+        "Integer"
+      ],
+      "0x60": [
+        "FLastTime",
+        "Integer"
+      ],
+      "0x64": [
+        "FPrevTime",
+        "Integer"
+      ],
+      "0x68": [
+        "FPriority",
+        "Integer"
+      ],
+      "0x6c": [
+        "FSyncRetrace",
+        "Boolean"
+      ],
+      "0x6d": [
+        "FUpdated",
+        "Boolean"
+      ]
+    }
+  },
+  "assumes": {
+    "uTool": [
+      "InPort (004613D0)",
+      "IMax (00460B34)"
+    ],
+    "uLog": [
+      "ProcessMessage (004615E8)"
+    ]
+  }
+}
