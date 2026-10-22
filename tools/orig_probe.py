@@ -9,7 +9,7 @@ Input scripts are shared with the portable build (see docs/DIFFTEST.md):
     move <x> <y>          mouse move (client coordinates of the main form)
     click <x> <y> [right] mouse click
     key <xdotool-key>     key press (Return, Escape, plus, minus, Left, ...)
-    seed <n>              set System.RandSeed
+    seed <n>              set System.RandSeed right before the next mouse press
     dump <name>           write the game state to <outdir>/<name>.state
     shot <name>           screenshot to <outdir>/<name>.png
 
@@ -43,9 +43,18 @@ class Process:
         return self.f.read(n)
 
     def write(self, va, data):
-        with open('/proc/%d/mem' % self.pid, 'r+b', buffering=0) as f:
-            f.seek(va)
-            f.write(data)
+        # /proc/<pid>/mem writes fail with EIO on Wine's image pages; process_vm_writev works.
+        import ctypes
+
+        class IoVec(ctypes.Structure):
+            _fields_ = [('base', ctypes.c_void_p), ('len', ctypes.c_size_t)]
+        libc = ctypes.CDLL(None, use_errno=True)
+        buf = ctypes.create_string_buffer(data, len(data))
+        local = IoVec(ctypes.cast(buf, ctypes.c_void_p), len(data))
+        remote = IoVec(va, len(data))
+        n = libc.process_vm_writev(self.pid, ctypes.byref(local), 1, ctypes.byref(remote), 1, 0)
+        if n != len(data):
+            raise OSError(ctypes.get_errno(), 'process_vm_writev')
 
     def u32(self, va):
         return struct.unpack('<I', self.read(va, 4))[0]
@@ -134,6 +143,7 @@ def run_script(p, script, outdir):
             origin.extend(window_origin())
         return origin
 
+    pending_seed = []          # 'seed' takes effect right before the next mouse press
     for line in open(script):
         f = line.split('#')[0].split()
         if not f:
@@ -156,13 +166,15 @@ def run_script(p, script, outdir):
                 subprocess.run(['xdotool', 'mousemove', str(x - 3 * i), str(y)])
                 time.sleep(0.03)
             time.sleep(0.3)
+            if pending_seed:
+                p.write(RANDSEED, struct.pack('<i', pending_seed.pop()))
             subprocess.run(['xdotool', 'mousedown', button])
             time.sleep(0.15)
             subprocess.run(['xdotool', 'mouseup', button])
         elif cmd == 'key':
             subprocess.run(['xdotool', 'key', args[0]])
         elif cmd == 'seed':
-            p.write(RANDSEED, struct.pack('<i', int(args[0])))
+            pending_seed[:] = [int(args[0])]
         elif cmd == 'dump':
             for attempt in range(20):        # objects may be mid-update; retry briefly
                 try:

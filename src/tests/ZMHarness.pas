@@ -33,6 +33,12 @@ var
   StartTime: Int64 = -1;
   OutDir: string;
 
+const
+  NoSeed = Low(Int64);
+
+var
+  PendingSeed: Int64 = NoSeed;
+
 procedure Add(At: Int64; Kind: TActionKind; X, Y, Button: Integer; const Arg: string);
 var
   N: Integer;
@@ -236,11 +242,20 @@ begin
     Inc(Next);
     case A.Kind of
       akMove: ZMInjectMouse(A.X, A.Y, 0, False);
-      akDown: ZMInjectMouse(A.X, A.Y, A.Button, True);
+      akDown:
+        begin
+          { een 'seed' geldt vlak voor de volgende muisklik (zie docs/DIFFTEST.md) }
+          if PendingSeed <> NoSeed then
+          begin
+            ZMRandom.RandSeed := PendingSeed;
+            PendingSeed := NoSeed;
+          end;
+          ZMInjectMouse(A.X, A.Y, A.Button, True);
+        end;
       akUp: ZMInjectMouse(A.X, A.Y, A.Button, False);
       akKey: ZMInjectKey(A.X, A.Y <> 0);
       akChar: ZMInjectChar(A.Arg[1]);
-      akSeed: ZMRandom.RandSeed := A.X;
+      akSeed: PendingSeed := A.X;
       akDump: WriteFile(IncludeTrailingPathDelimiter(OutDir) + A.Arg + '.state', StateText);
       akSprites: WriteFile(IncludeTrailingPathDelimiter(OutDir) + A.Arg + '.sprites', SpritesText);
       akShot: ZMSaveScreenshot(IncludeTrailingPathDelimiter(OutDir) + A.Arg + '.png');

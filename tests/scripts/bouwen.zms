@@ -1,0 +1,14 @@
+# Speel level 1: een huis bouwen.
+wait 15000
+click 429 405      # "Verder" (intro)
+wait 2000
+click 429 405      # "Verder" (level 1)
+wait 3000
+click 922 257      # knop Laagbouw
+wait 1000
+shot na-knop
+seed 4242          # geldt voor de volgende klik: het plaatsen (kiest een huisvariant)
+click 400 300      # op de kaart
+wait 1500
+shot na-plaatsen
+dump na-plaatsen

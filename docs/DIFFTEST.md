@@ -15,7 +15,7 @@ form (1024x768).
 | `move <x> <y>` | move the pointer |
 | `click <x> <y> [right]` | enter the target from 60 px to the left in 3 px steps, wait 300 ms, press, release 150 ms later (the game's buttons are sprites that need the hover) |
 | `key <name>` | key press, xdotool key names (`Return`, `Escape`, `Left`, `plus`, ...) |
-| `seed <n>` | set `RandSeed` (Delphi's LCG; the port uses the same generator, `src/compat/ZMRandom.pas`) |
+| `seed <n>` | set `RandSeed` right before the next mouse press (Delphi's LCG; the port uses the same generator, `src/compat/ZMRandom.pas`) |
 | `dump <name>` | write `<name>.state` |
 | `shot <name>` | write `<name>.png` |
 | `sprites <name>` | port only: write `<name>.sprites` (all sprites of the main form) |
@@ -53,7 +53,7 @@ Then `diff build/diff/orig/<name>.state build/diff/port/<name>.state`.
 
 ## Caveats
 
-* Timers (the seagull, cars, trains) also draw random numbers, so `seed` right before an
-  action keeps the random choices of that action comparable; long idle periods between a
-  `seed` and a `dump` can diverge for timing reasons alone.
+* Timers (the seagull, cars, trains) also draw random numbers. That is why `seed` takes
+  effect right before the next mouse press: the random choices made by that click are then
+  comparable, while choices made later by timers can still diverge for timing reasons.
 * Screenshots differ in size (the Wine desktop is 1280x1024 with the form at +128,+128).
