@@ -1,7 +1,7 @@
-# Virtual method slots of the library classes linked into ROS.exe
+# Virtuele-methodeslots van de bibliotheekklassen die in ROS.exe gelinkt zijn
 
-Slot offsets are relative to the VMT pointer (`call dword ptr [reg + slot]`).
-Negative TObject slots: -0x20 SafeCallException, -0x1c AfterConstruction, -0x18 BeforeDestruction, -0x14 Dispatch, -0x10 DefaultHandler, -0x0c NewInstance, -0x08 FreeInstance, -0x04 Destroy.
+Slotoffsets zijn ten opzichte van de VMT-pointer (`call dword ptr [reg + slot]`).
+Negatieve TObject-slots: -0x20 SafeCallException, -0x1c AfterConstruction, -0x18 BeforeDestruction, -0x14 Dispatch, -0x10 DefaultHandler, -0x0c NewInstance, -0x08 FreeInstance, -0x04 Destroy.
 
 - **TActionLink**: `+0x0` TBasicActionLink.AssignClient, `+0x4` TBasicActionLink.Change, `+0x8` TBasicActionLink.IsOnExecuteLinked, `+0xc` TBasicActionLink.SetAction, `+0x10` TBasicActionLink.SetOnExecute, `+0x14` TBasicActionLink.Create, `+0x18` TBasicActionLink.Execute, `+0x1c` TBasicActionLink.Update, `+0x20` TActionLink.IsCaptionLinked, `+0x24` TActionLink.IsCheckedLinked, `+0x28` TActionLink.IsEnabledLinked, `+0x2c` TActionLink.IsHelpContextLinked, `+0x30` TActionLink.IsHintLinked, `+0x34` TActionLink.IsImageIndexLinked, `+0x38` TActionLink.IsShortCutLinked, `+0x3c` TActionLink.IsVisibleLinked, `+0x40` TActionLink.SetCaption, `+0x44` TActionLink.SetChecked, `+0x48` TActionLink.SetEnabled, `+0x4c` TActionLink.SetHelpContext, `+0x50` TActionLink.SetHint, `+0x54` TActionLink.SetImageIndex, `+0x58` TActionLink.SetShortCut, `+0x5c` TActionLink.SetVisible
 - **TApplication**: `+0x0` TPersistent.AssignTo, `+0x4` TComponent.DefineProperties, `+0x8` TPersistent.Assign, `+0xc` TComponent.Loaded, `+0x10` TComponent.Notification, `+0x14` TComponent.ReadState, `+0x18` TComponent.SetName, `+0x1c` TComponent.UpdateRegistry, `+0x20` TComponent.ValidateRename, `+0x24` TComponent.WriteState, `+0x28` TComponent.QueryInterface, `+0x2c` TApplication.Create

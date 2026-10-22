@@ -10,7 +10,7 @@ src/game, src/tests en src/web, en op symbols/names/*.json (zodat de Ghidra-symb
   identifiers, en nieuwe namen die al als andere identifier in de code voorkomen of die
   dubbel gebruikt worden.
 
-Gebruik: python tools/pas-hernoem.py build/beschermd.txt build/vertaling [--droog]
+Gebruik: python tools/pas-hernoem.py <beschermd.txt> <voorstelmap> [--droog] [--mappen=src/game,src/tests,src/web]
 """
 import glob
 import json
@@ -100,9 +100,12 @@ def main():
     beschermd = {l.strip().lower() for l in open(sys.argv[1]) if l.strip()}
     voorstel, meldingen = laad_voorstellen(sys.argv[2])
     droog = '--droog' in sys.argv
-    paden = sorted(glob.glob('src/game/*.pas') + glob.glob('src/game/*.dpr') +
-                   glob.glob('src/tests/*.pas') + glob.glob('src/tests/*.dpr') +
-                   glob.glob('src/web/*.pas') + glob.glob('src/web/*.dpr'))
+    mappen = ['src/game', 'src/tests', 'src/web']
+    for arg in sys.argv[3:]:
+        if arg.startswith('--mappen='):
+            mappen = arg.split('=', 1)[1].split(',')
+    paden = sorted(p for m in mappen for patroon in ('*.pas', '*.dpr', '*.inc')
+                   for p in glob.glob(os.path.join(m, '**', patroon), recursive=True))
     bestaand = bestaande_identifiers(paden)
     kaart, exact, nieuw_gebruikt = {}, {}, {}
     for k, (oud, nieuw) in sorted(voorstel.items()):
