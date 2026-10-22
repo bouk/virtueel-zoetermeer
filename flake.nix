@@ -1,5 +1,5 @@
 {
-  description = "Matching decompilation of Virtueel Zoetermeer (ROS.exe, Delphi 5)";
+  description = "Virtueel Zoetermeer (2003): decompilatie van ROS.exe (Delphi 5), opnieuw gebouwd voor macOS, Linux en de browser";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -7,68 +7,93 @@
 
   outputs = { self, nixpkgs }:
     let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
-
-      python = pkgs.python3.withPackages (ps: with ps; [
-        pefile    # PE header / section / resource parsing
-        capstone  # x86 disassembly for diff tooling
-        unicorn   # emulating original routines for differential tests
-        lief      # PE rewriting / layout inspection
-        playwright  # headless browser tests of the web build (tools/test-web.py)
-        pillow    # rendering bitmap fonts for the compat layer (tools/gen-fonts.py)
-      ]);
-
-      fpc-wasm = pkgs.callPackage ./nix/fpc-wasm.nix { };
+      lib = nixpkgs.lib;
+      systemen = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
+      perSysteem = f: lib.genAttrs systemen (system: f system (import nixpkgs { inherit system; }));
     in
     {
-      packages.${system}.fpc-wasm = fpc-wasm;
+      packages = perSysteem (system: pkgs:
+        let
+          spelData = pkgs.callPackage ./nix/spel-data.nix { };
+          zoetermeer = pkgs.callPackage ./nix/zoetermeer.nix { inherit spelData; };
+        in
+        {
+          inherit zoetermeer;
+          spel-data = spelData;
+          default = zoetermeer;
+        } // lib.optionalAttrs (system == "x86_64-linux") (
+          let fpc-wasm = pkgs.callPackage ./nix/fpc-wasm.nix { };
+          in {
+            # De WebAssembly-compiler (FPC trunk) wordt alleen op x86_64-linux gebouwd.
+            inherit fpc-wasm;
+            web = pkgs.callPackage ./nix/web.nix { inherit spelData fpc-wasm; };
+          }));
 
-      devShells.${system}.default = pkgs.mkShell {
-        packages = with pkgs; [
-          # Unpacking the original distribution
-          unzip
-          p7zip      # NSIS installer extraction
-          innoextract
+      apps = perSysteem (system: pkgs: {
+        default = {
+          type = "app";
+          program = "${self.packages.${system}.zoetermeer}/bin/virtueel-zoetermeer";
+        };
+      });
 
-          # Binary inspection
-          binutils   # objdump, strings, nm
-          file
-          icoutils   # wrestool: PE resources (DFM forms, PACKAGEINFO, bitmaps)
-          xxd
-          upx
+      # Ontwikkelomgeving voor het decompileren (Ghidra, Wine, ...): alleen x86_64-linux.
+      devShells.x86_64-linux.default =
+        let
+          pkgs = import nixpkgs { system = "x86_64-linux"; };
+          python = pkgs.python3.withPackages (ps: with ps; [
+            pefile      # PE-headers, secties en resources lezen
+            capstone    # x86-disassembly voor de analysetools
+            unicorn     # originele routines emuleren
+            lief        # PE-indeling inspecteren
+            playwright  # headless-browsertests van de webversie (tools/test-web.py)
+            pillow      # bitmapfonts renderen voor de compat-laag (tools/gen-fonts.py)
+          ]);
+        in
+        pkgs.mkShell {
+          packages = with pkgs; [
+            # Uitpakken van de originele distributie
+            unzip
+            p7zip      # NSIS-installer
+            innoextract
 
-          # Disassembly / decompilation
-          ghidra
-          rizin
+            # Binaire bestanden inspecteren
+            binutils   # objdump, strings, nm
+            file
+            icoutils   # wrestool: PE-resources (DFM-formulieren, PACKAGEINFO, bitmaps)
+            xxd
+            upx
 
-          # Running the Windows toolchain (Delphi 5 dcc32.exe) and the game itself
-          wineWow64Packages.stable
-          xvfb-run     # headless X for running the original under Wine
-          xdotool      # scripted input for differential tests
-          imagemagick  # screenshots (import) and image diffs
+            # Disassembleren en decompileren
+            ghidra
+            rizin
 
-          # Portable rebuild (Free Pascal) and its platform layer
-          fpc
-          fpc-wasm   # wasm32-wasip1 cross compiler (fpc-wasm)
-          wasmtime
-          binaryen   # wasm-opt --asyncify for the browser build
-          sdl3
-          liberation_ttf  # free Arial/Times/Courier metric clones for the bitmap fonts
-          pkg-config
+            # Het origineel draaien (Wine) voor de differentiële tests
+            wineWow64Packages.stable
+            xvfb-run     # X-server zonder scherm
+            xdotool      # gescripte invoer
+            imagemagick  # screenshots en beeldvergelijking
 
-          # Scripting: splitting, symbol maps, byte-for-byte diffing
-          python
-          jq
-          git
-        ];
+            # De herbouw met Free Pascal en de platformlaag
+            fpc
+            self.packages.x86_64-linux.fpc-wasm   # wasm32-wasip1-crosscompiler (fpc-wasm)
+            wasmtime
+            binaryen   # wasm-opt --asyncify voor de browserversie
+            sdl3
+            liberation_ttf  # vrije, metrisch gelijke vervangers van Arial/Times/Courier
+            pkg-config
 
-        shellHook = ''
-          export WINEPREFIX="$PWD/.wine"
-          export WINEDEBUG=-all
-          export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
-          export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
-        '';
-      };
+            # Scripts
+            python
+            jq
+            git
+          ];
+
+          shellHook = ''
+            export WINEPREFIX="$PWD/.wine"
+            export WINEDEBUG=-all
+            export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
+            export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=true
+          '';
+        };
     };
 }
