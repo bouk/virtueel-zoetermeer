@@ -160,6 +160,28 @@ Steps:
 - [ ] Fallback if FPC's wasm target is too immature: SDL3 via Emscripten with a small C bridge to the FPC-compiled game core. Decide after Phase 4, based on how the platform layer turned out.
 - [ ] Deploy as a static site.
 
+## Fase 6: Verificatie door een volledige playthrough (Haiku-agent)
+
+Naast de differentiële tests (`docs/DIFFTEST.md`), die korte scenario's byte voor byte met het
+origineel vergelijken, speelt een Haiku-agent het hele spel uit om te controleren dat de
+herbouw nergens crasht of vastloopt.
+
+- [ ] Interactieve bediening van het draaiende spel voor een agent: `tools/speel.py` start de
+  portable build (`RosTest`) headless en geeft subcommando's voor één stap tegelijk: `klik x y`,
+  `toets naam`, `wacht ms`, `foto` (screenshot om te bekijken), `toestand` (state dump: level,
+  geld, score, wijken) en `stop`. ZMHarness leest daarvoor commando's live uit een
+  controlebestand in plaats van uit een vooraf geschreven script.
+- [ ] Crash- en hangdetectie: het proces loopt nog, er komen frames, er zijn geen exceptions in
+  de log (`ZM_DEBUG`). Bij een crash worden het commandolog en de laatste screenshots bewaard,
+  zodat het precies na te spelen is als `.zms`-script.
+- [ ] Een Haiku-agent (model `haiku`) speelt alle levels door: wijken openen, wegen, spoor,
+  huizen, kantoren, voorzieningen en stations bouwen, rondes afsluiten, rapporten lezen, de stad
+  bewaren en weer openen, en het spel afsluiten. Hij houdt een logboek bij en rapporteert elke
+  crash, hang of zichtbare fout met het commandolog.
+- [ ] Gevonden fouten worden nagespeeld tegen het origineel onder Wine (zelfde script) om te
+  bepalen of het een fout van de herbouw is of oorspronkelijk gedrag.
+- [ ] Hetzelfde voor de webversie (`tools/test-web.py`), minstens tot en met level 2.
+
 ## Out of scope (for now)
 
 - `Stub.exe` (a 2011 Delphi 7 launcher, trivial) and `update.exe` (unless it holds a different game build worth matching).
