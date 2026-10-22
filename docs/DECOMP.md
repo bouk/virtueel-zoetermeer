@@ -52,7 +52,7 @@ moet nog steeds handmatig naar Pascal worden teruggelezen.
 ## Klassen
 
 * De volgorde van velddeclaraties moet de originele **veldoffsets** reproduceren (Delphi 5 lijnt velden
-  in klassen uit op hun natuurlijke grootte, max 4; records volgen `{$A+}`). Zet de offset in een commentaar:
+  in klassen uit op hun natuurlijke grootte, max 8 (`Double` op 8, zie `docs/SCHAKELAARS.md`); records volgen `{$A+}`). Zet de offset in een commentaar:
   `FWorld: TWorld; { +0x1A4 }`.
 * Virtuele methoden moeten in **VMT-slotvolgorde** worden gedeclareerd. Een slot dat in
   `symbols/classes-1.1.md` als `NEW` is gemarkeerd krijgt `virtual;` (of `virtual; abstract;`), een override
