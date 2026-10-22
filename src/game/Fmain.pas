@@ -199,7 +199,8 @@ implementation
 
 uses
   uString, uTool, uPixie, Uconst, Sprframe, uTrein, uResizeScreen, uQuickDirectX,
-  fReport;
+  fReport
+  {$IFDEF FPC}, ZMRandom{$ENDIF}  { PORT: Delphi's Random };
 
 {$IFNDEF FPC}
 {$R *.dfm}  { Delphi only: the portable build streams forms from the user's ROS.exe }

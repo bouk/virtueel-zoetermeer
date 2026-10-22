@@ -97,7 +97,8 @@ procedure FindFiles(Path: string; Attr: Integer; List: TStrings);
 implementation
 
 uses
-  SysUtils;
+  SysUtils
+  {$IFDEF FPC}, ZMRandom{$ENDIF}  { PORT: Delphi's Random };
 
 { @00460B34 }
 function IMax(A, B: Integer): Integer;

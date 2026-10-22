@@ -129,7 +129,8 @@ const
 implementation
 
 uses
-  SysUtils, Uconst, uString, Fmain, Uview;
+  SysUtils, Uconst, uString, Fmain, Uview
+  {$IFDEF FPC}, ZMRandom{$ENDIF}  { PORT: Delphi's Random };
 
 type
   TNeighbour = record

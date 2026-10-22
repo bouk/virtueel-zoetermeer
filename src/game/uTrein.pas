@@ -115,7 +115,8 @@ var
 implementation
 
 uses
-  Math, Uconst, uString, uTool;
+  Math, Uconst, uString, uTool
+  {$IFDEF FPC}, ZMRandom{$ENDIF}  { PORT: Delphi's Random };
 
 { @00478874 }
 constructor TTrein.Create(ASprite: TSprite; AWorld: TWorld);
