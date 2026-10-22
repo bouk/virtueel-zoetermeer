@@ -1,0 +1,54 @@
+{
+  "functions": {
+    "004750e8": "uAutos.CreateAutos",
+    "00475178": "uAutos.Verkeer",
+    "0047519c": "uAutos.SegmentPos",
+    "00475314": "TAutoSprite.Draw.PlotAuto",
+    "00475440": "TAutoSprite.Draw.DrawAutos",
+    "00475914": "TAutoSprite.Draw.Beide",
+    "00475934": "TAutoSprite.Draw",
+    "00476098": "TSegment.Create",
+    "004760f4": "TSegmentList.Add",
+    "00476104": "TSegmentList.GetItem",
+    "00476124": "uAutos.MaakWeg",
+    "00476274": "uAutos.MaakSnelweg",
+    "004763c4": "uAutos.MaakKlaver",
+    "004764a4": "uAutos.MaakKlaver2",
+    "00476604": "uAutos.Finalization",
+    "00476634": "uAutos.Initialization"
+  },
+  "globals": {
+    "00488edc": "uAutos.BitCount",
+    "0048a990": "uAutos.Heen",
+    "0048a9d0": "uAutos.Terug",
+    "0048aa10": "uAutos.SnelHeen",
+    "0048aa50": "uAutos.SnelTerug",
+    "0048aa90": "uAutos.KlaverHeen",
+    "0048acd0": "uAutos.KlaverTerug",
+    "0048af10": "uAutos.AutoFrame",
+    "0048af58": "uAutos.I",
+    "0048af5c": "uAutos.Punten",
+    "0048b12c": "uAutos.Y2"
+  },
+  "fields": {
+    "TAutoSprite": {
+      "0x13c": ["FReserved13C", "Integer"],
+      "0x140": ["FWorld", "TWorld"],
+      "0x144": ["FView", "TView"],
+      "0x148": ["FSettings", "TSettings"],
+      "0x14c": ["FDrawn", "Boolean"],
+      "0x150": ["FStartTick", "Integer"],
+      "0x154": ["FFase", "Integer"]
+    },
+    "TSegment": {
+      "0x4": ["FVan", "TPoint"],
+      "0xc": ["FNaar", "TPoint"],
+      "0x14": ["FRichting", "Char"]
+    }
+  },
+  "assumes": {
+    "Fmain": ["TfrmMain calls CreateAutos(sbStage, spriteAuto, World +0x424, View +0x428, Settings) and keeps the result in +0x470"],
+    "SprBmp": ["TBmpSurface.Bitmap (field +0x30)"],
+    "Uview": ["TView.Autos (field +0x88) is written by CreateAutos"]
+  }
+}

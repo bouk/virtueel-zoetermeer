@@ -10,3 +10,4 @@
 *.rep/
 /symbols/*.pkl
 __pycache__/
+/src/game/*.dfm

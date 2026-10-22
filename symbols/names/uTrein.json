@@ -1,0 +1,43 @@
+{
+  "functions": {
+    "00478874": "TTrein.Create",
+    "00478b44": "TTrein.Tick",
+    "00478b68": "TTrein.Start",
+    "00478cf0": "TTrein.Step",
+    "00479104": "TTrein.Volgende.GaNaar",
+    "00479168": "TTrein.Volgende",
+    "0047947c": "TTrein.Stop",
+    "00479484": "uTrein.Finalization",
+    "00479508": "uTrein.Initialization"
+  },
+  "globals": {
+    "00488f78": "uTrein.RechtNaarBocht",
+    "00488ff8": "uTrein.BochtNaarRecht",
+    "00489078": "uTrein.BochtNaarBocht",
+    "00489178": "uTrein.BochtA",
+    "00489188": "uTrein.BochtB",
+    "0048b150": "uTrein.RechtA",
+    "0048b158": "uTrein.RechtB",
+    "0048b160": "uTrein.Trein"
+  },
+  "fields": {
+    "TTrein": {
+      "0x4": ["FSprite", "TSprite"],
+      "0x8": ["FWorld", "TWorld"],
+      "0xc": ["FCell", "TCell"],
+      "0x10": ["FNr", "Byte"],
+      "0x11": ["FRichting", "Boolean"],
+      "0x12": ["FActief", "Boolean"],
+      "0x14": ["FStap", "Integer"],
+      "0x18": ["FReserved18", "Integer"],
+      "0x1c": ["FX", "Integer"],
+      "0x20": ["FY", "Integer"],
+      "0x24": ["FWacht", "Integer"],
+      "0x28": ["FInterval", "Integer"],
+      "0x2c": ["FTeller", "Integer"]
+    }
+  },
+  "assumes": {
+    "Fmain": ["TfrmMain creates Trein := TTrein.Create(View.TreinSprite, World) and calls Trein.Tick (0047EA30)"]
+  }
+}

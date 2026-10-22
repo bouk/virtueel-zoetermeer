@@ -39,7 +39,9 @@ procedure ShowBitmap(AGraphic: TGraphic; ACaption: string);
 
 implementation
 
-{$R *.dfm}
+{$IFNDEF FPC}
+{$R *.dfm}  { Delphi only: the portable build streams forms from the user's ROS.exe }
+{$ENDIF}
 
 { @00461898 }
 procedure TformDebugShow.ShowGraphic(AGraphic: TGraphic; ACaption: string);
