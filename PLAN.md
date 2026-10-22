@@ -190,7 +190,7 @@ herbouw nergens crasht of vastloopt.
     aan de weg liggen knipperen (500 ms) zolang de reistijd -1 is, en "Volgende ronde" blijft weg
     (`sloop-weg.zms`, gelijk aan het origineel, ook de foto's). In het logboek bleef het gat
     open: de klik die het moest dichten plaatste Laagbouw.
-- [ ] Hetzelfde voor de webversie (`tools/test-web.py`), minstens tot en met level 2.
+- [x] Hetzelfde voor de webversie (`tools/test-web.py`), minstens tot en met level 2. *Gedaan: `level2-rapport.zms` loopt in de browser door tot en met het rapport van level 2, zonder fouten.*
 
 ## Buiten scope (voorlopig)
 
