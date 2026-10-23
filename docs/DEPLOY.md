@@ -24,13 +24,16 @@ npx --yes wrangler@4.152.0 deploy
 ```
 
 Wrangler runs `node tools/prepare-deploy.mjs` before deployment. It copies the
-WASM and JavaScript unchanged from `build/web/`, and compresses `data.pack` with
-Brotli quality 11. A small Worker serves the compressed pack with
-`Content-Encoding: br` and `encodeBody: manual`, so the browser decodes it
-automatically and Cloudflare does not compress it a second time. Gzip and
-uncompressed responses are available for clients without Brotli support. No
-client-side decompression code or game-data changes are needed. Other files,
-including WASM, keep the existing asset-first delivery.
+WASM, JavaScript, JSON, and data pack unchanged from `build/web/`. Cloudflare
+handles transfer compression and encoding negotiation. There are no precompressed
+files, explicit `Content-Encoding` headers, or custom compression Worker.
+The cache headers allow transformation so Cloudflare can compress responses.
+
+The pack is binary `application/octet-stream`, which is outside Cloudflare's
+default compressible MIME types. A zone-level Compression Rule matches
+`http.host eq "virtueelzoetermeer.bou.ke"` and
+`ends_with(http.request.uri.path, ".pack")` and enables Brotli/Gzip compression.
+Other assets use Cloudflare's standard MIME-based compression.
 
 All game assets (WASM, JavaScript, pack, and data index) have content hashes in
 their URLs and `Cache-Control: public, max-age=31536000, immutable`. Browser
