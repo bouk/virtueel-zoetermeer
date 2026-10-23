@@ -1761,7 +1761,14 @@ begin
   if (Lettertype = nil) or (Lettertype.LF.lfQuality = NONANTIALIASED_QUALITY) then Exit;
   if Lettertype.BitmapLetter < 0 then
     if IsBitmapLetterNaam(StrPas(Lettertype.LF.lfFaceName)) then Lettertype.BitmapLetter := 1 else Lettertype.BitmapLetter := 0;
+  {$IFDEF CPUWASM32}
+  { De browser vergroot het framebuffer vaak met een niet-gehele factor. Gebruik
+    ook bij kleine TrueType-letters de grijze glyphs: mono-randen worden anders
+    ongelijk dik en lastig leesbaar. De tekstmetingen gebruiken deze advances al. }
+  Result := (Lettertype.BitmapLetter = 0) and not ZMGeenAntialias;
+  {$ELSE}
   Result := (Lettertype.BitmapLetter = 0) and not ZMGeenAntialias and GdiGezicht(DC)^.Grijstint;
+  {$ENDIF}
 end;
 
 function GdiGlyfen(DC: TZMDC): PZMTekenbeelden;

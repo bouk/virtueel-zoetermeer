@@ -9,6 +9,13 @@
   `wasm-ld` komt uit lld.
 * `wasm-opt` (binaryen) voor Asyncify.
 
+## Tekstweergave
+
+De browserbuild gebruikt grijswaarden-antialiasing voor TrueType-tekst, ook bij
+kleine lettergroottes. De canvas wordt vloeiend geschaald naar het venster;
+pixelated scaling maakt tekststreken bij fractionele vergrotingen ongelijk dik.
+De native GDI-weergave behoudt de Windows/Wine-regels voor differentiële tests.
+
 ## Blokkerende aanroepen: Asyncify
 
 Het spel is gebouwd rond blokkerende lussen (`Application.Run`, `ShowModal`, `MessageBox`, sleeps).
