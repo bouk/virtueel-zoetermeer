@@ -31,9 +31,14 @@ uncompressed responses are available for clients without Brotli support. No
 client-side decompression code or game-data changes are needed. Other files,
 including WASM, keep the existing asset-first delivery.
 
-The pack and its index share a content hash in their filenames and can be
-cached for a year. Changing either file produces new URLs. Previous packs and
-unrelated files are excluded from uploads using the generated `.assetsignore`.
+All game assets (WASM, JavaScript, pack, and data index) have content hashes in
+their URLs and `Cache-Control: public, max-age=31536000, immutable`. Browser
+revisits reuse them without network revalidation. Each URL changes only when
+its contents change; the pack and index share a hash so they always match.
+The homepage is cached for 60 seconds and then revalidated to discover updates.
+The original unversioned JS/WASM URLs remain available with a one-hour cache
+for compatibility. Their bytes remain unchanged by deployment packaging.
+Previous assets and unrelated files are excluded from uploads using `.assetsignore`.
 `build/web/` remains an ordinary uncompressed build for local development.
 
 To prepare production files or test the packaging independently:

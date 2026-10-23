@@ -18,7 +18,6 @@
   #status { position: absolute; inset: 0; display: grid; place-items: center;
             text-align: center; padding: 16px; background: rgba(0, 0, 0, .8); }
   #status[hidden] { display: none; }
-  #hulp { position: fixed; right: 8px; bottom: 6px; font-size: 12px; opacity: .6; }
 </style>
 </head>
 <body>
@@ -28,7 +27,6 @@
   <canvas id="overlay" width="1024" height="768"></canvas>
   <div id="status">Laden…</div>
 </div>
-<div id="hulp">Klik in het spel om de muis te vangen · Esc laat de muis los</div>
 <script src="zoetermeer.js"></script>
 <script>
   const host = new ZoetermeerHost(document.getElementById('spel'),
