@@ -556,7 +556,13 @@ class Host {
   }
 
   finished(code) {
-    this.status.textContent = 'Het spel is afgesloten. Herlaad de pagina om opnieuw te spelen.';
+    this.stopped = true;
+    this.status.innerHTML = '<div class="quit-screen">' +
+      '<p>Het spel is afgesloten. Herlaad de pagina om opnieuw te spelen.</p>' +
+      '<p class="credits">Deze decompilatie is gemaakt door ' +
+      '<a href="https://bou.ke" target="_blank" rel="noopener">Bouke van der Bijl</a>.<br>' +
+      '<a href="https://github.com/bouk/virtueel-zoetermeer" target="_blank" rel="noopener">Bekijk het project op GitHub</a>.</p>' +
+      '</div>';
     this.status.hidden = false;
     if (document.pointerLockElement) document.exitPointerLock();
   }
@@ -568,6 +574,7 @@ class Host {
   }
 
   push(ev) {
+    if (this.stopped) return;
     if (DEBUG && ev.kind !== EV.MOVE) debug('event', JSON.stringify(ev));
     this.events.push(ev);
     if (this.events.length > 512) this.events.splice(0, this.events.length - 512);
@@ -730,6 +737,7 @@ class Host {
       this.drawCursor();
     });
     window.addEventListener('keydown', (e) => {
+      if (this.stopped) return; // Laat Tab/Enter na afsluiten aan de links in de pagina.
       const key = vkOf(e.code);
       if (key) this.push({ kind: EV.KEYDOWN, key, repeat: e.repeat, ...this.mods(e) });
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey)
@@ -738,6 +746,7 @@ class Host {
         e.preventDefault();
     });
     window.addEventListener('keyup', (e) => {
+      if (this.stopped) return;
       const key = vkOf(e.code);
       if (key) this.push({ kind: EV.KEYUP, key, ...this.mods(e) });
     });

@@ -15,11 +15,12 @@ The output must contain `index.html`, `zoetermeer.js`, `zoetermeer.wasm`,
 resources and is uploaded with the game. Build outputs and original game files
 remain ignored by Git.
 
-With Wrangler installed and authenticated to the configured Cloudflare account:
+With Wrangler authenticated to the configured Cloudflare account (deployment
+verified with Wrangler 4.152.0):
 
 ```sh
-wrangler deploy --dry-run
-wrangler deploy
+npx --yes wrangler@4.152.0 deploy --dry-run
+npx --yes wrangler@4.152.0 deploy
 ```
 
 Wrangler runs `node tools/prepare-deploy.mjs` before deployment. It copies the
