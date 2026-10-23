@@ -1,4 +1,5 @@
 name = "virtueel-zoetermeer"
+main = "web/deploy-worker.mjs"
 account_id = "9c3bd9f3c32cbb933de397e14b950248"
 compatibility_date = "2026-10-22"
 workers_dev = false
@@ -9,4 +10,8 @@ routes = [
 ]
 
 [assets]
-directory = "./build/web"
+directory = "./build/deploy"
+binding = "ASSETS"
+
+[build]
+command = "node tools/prepare-deploy.mjs"

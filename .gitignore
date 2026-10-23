@@ -6,6 +6,7 @@
 /.wine/
 /build/
 /.wrangler/
+/node_modules/
 /result
 *.gpr
 *.rep/
