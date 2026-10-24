@@ -76,8 +76,7 @@ def main():
         pagina.on('console', lambda m: print('[console.%s] %s' % (m.type, m.text)))
         pagina.on('pageerror', lambda e: print('[paginafout]', e))
         pagina.on('crash', lambda *_: print('[CRASH]'))
-        # ?nolock: Playwright stuurt synthetische muisgebeurtenissen zonder relatieve beweging.
-        pagina.goto('http://127.0.0.1:%d/?nolock%s' % (poort, os.environ.get('ZM_URLARGS', '').replace('?', '&')))
+        pagina.goto('http://127.0.0.1:%d/?%s' % (poort, os.environ.get('ZM_URLARGS', '').replace('?', '&')))
         if script:
             voer_uit(pagina, script, uitmap)
         else:

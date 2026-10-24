@@ -32,8 +32,8 @@ nix build .#web          # statische site in ./result
 python3 -m http.server -d result 8000
 ```
 
-Open daarna <http://localhost:8000>. Klik in het spel om de muis te vangen; met Esc laat je
-hem weer los. Opgeslagen steden blijven in de browser bewaard (localStorage).
+Open daarna <http://localhost:8000>. Het spel gebruikt de normale muisaanwijzer.
+Opgeslagen steden blijven in de browser bewaard (localStorage).
 
 ## Hoe ver is het?
 

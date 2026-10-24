@@ -14,14 +14,14 @@ const canvas = () => ({
     moveTo() {}, lineTo() {}, closePath() {}, fill() {}, stroke() {},
   }),
   getBoundingClientRect: () => ({ left: 0, top: 0, width: 1024, height: 768 }),
-  addEventListener() {}, requestPointerLock() {},
+  addEventListener() {}, focus() {},
 });
 const ctx = {
   console, setTimeout, clearTimeout, performance, TextDecoder, crypto: globalThis.crypto,
   WebAssembly, URL, BigInt, DataView, Uint8Array, Uint32Array, Map, Promise, Error, JSON,
   atob, btoa, Math, Number, String, Object, Array, Proxy,
   location: { search: '?debug' },
-  document: { title: '', pointerLockElement: null, addEventListener() {}, exitPointerLock() {} },
+  document: { title: '', addEventListener() {} },
   window: { addEventListener() {} },
   localStorage: { length: 0, key: () => null, getItem: () => null, setItem() {}, removeItem() {} },
   fetch: async (u) => {

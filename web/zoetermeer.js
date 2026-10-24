@@ -7,16 +7,12 @@
 //  * De 'zm'-imports die src/web/ZMWasmBackend.pas gebruikt: framebuffer, invoer, tijd.
 //  * Asyncify (binaryen): zm.wait, zm.delay en poll_oneoff pauzeren de module, zodat de
 //    blokkerende lussen van het spel de besturing aan de browser teruggeven.
-//  * Muisvangst: klikken op het spel vraagt pointer lock aan; terwijl de muis gevangen is ziet
-//    het spel een virtuele aanwijzer die via relatieve beweging wordt aangestuurd; wij tekenen
-//    die als softwarecursor.
+//  * Muisinvoer gebruikt absolute browsercoördinaten en de normale browsercursor.
 
 'use strict';
 
 const SCREEN_W = 1024, SCREEN_H = 768;
 const DEBUG = /[?&]debug\b/.test(location.search);
-// ?nolock: legt de muis nooit vast (geautomatiseerde tests sturen absolute, synthetische events).
-const NO_LOCK = /[?&]nolock\b/.test(location.search);
 const debug = (...a) => { if (DEBUG) console.log('[zm]', ...a); };
 
 // ---------------------------------------------------------------- bestandssysteem
@@ -480,11 +476,9 @@ class Host {
     this.overlay = overlay;
     this.status = status;
     this.ctx = canvas.getContext('2d');
-    this.octx = overlay.getContext('2d');
     this.events = [];
     this.mouse = { x: SCREEN_W / 2, y: SCREEN_H / 2 };
     this.cursorShape = 0;
-    this.locked = false;
     this.wake = null;
     this.image = null;
     this.audio = null;
@@ -564,7 +558,6 @@ class Host {
       '<a href="https://github.com/bouk/virtueel-zoetermeer" target="_blank" rel="noopener">Bekijk het project op GitHub</a>.</p>' +
       '</div>';
     this.status.hidden = false;
-    if (document.pointerLockElement) document.exitPointerLock();
   }
 
   fail(e) {
@@ -623,7 +616,7 @@ class Host {
         while (u8[p]) s += String.fromCharCode(u8[p++]);
         if (s) document.title = s;
       },
-      set_cursor(shape) { self.cursorShape = shape; self.drawCursor(); },
+      set_cursor(shape) { self.cursorShape = shape; self.cssCursor(); },
       beep() {
         try {
           self.audio = self.audio || new AudioContext();
@@ -659,83 +652,42 @@ class Host {
   mods(e) { return { shift: e.shiftKey, ctrl: e.ctrlKey, alt: e.altKey }; }
 
   pointerMoved(e) {
-    if (this.locked) {
-      const r = this.canvas.getBoundingClientRect();
-      this.mouse.x = Math.max(0, Math.min(SCREEN_W - 1, this.mouse.x + (e.movementX || 0) * SCREEN_W / r.width));
-      this.mouse.y = Math.max(0, Math.min(SCREEN_H - 1, this.mouse.y + (e.movementY || 0) * SCREEN_H / r.height));
-    } else {
-      this.mouse = this.toScreen(e);
-    }
-    this.drawCursor();
+    this.mouse = this.toScreen(e);
     this.push({ kind: EV.MOVE, x: Math.round(this.mouse.x), y: Math.round(this.mouse.y), ...this.mods(e) });
   }
 
   button(e, kind) {
     const b = e.button === 0 ? 1 : e.button === 2 ? 2 : 3;
-    if (!this.locked) this.mouse = this.toScreen(e);
+    this.mouse = this.toScreen(e);
     this.push({ kind, x: Math.round(this.mouse.x), y: Math.round(this.mouse.y), button: b, ...this.mods(e) });
-  }
-
-  // Terwijl de aanwijzer is vastgelegd verbergt de browser hem: de cursor van het spel tekenen we zelf.
-  drawCursor() {
-    const c = this.octx;
-    c.clearRect(0, 0, this.overlay.width, this.overlay.height);
-    if (!this.locked || this.cursorShape === 12) return;
-    const x = Math.round(this.mouse.x), y = Math.round(this.mouse.y);
-    c.save();
-    c.translate(x + 0.5, y + 0.5);
-    c.lineWidth = 1;
-    c.strokeStyle = '#000';
-    c.fillStyle = '#fff';
-    c.beginPath();
-    if (this.cursorShape === 4) {                       // hand
-      c.translate(-5, 0);
-      c.moveTo(5, 0); c.lineTo(8, 0); c.lineTo(8, 7); c.lineTo(14, 8); c.lineTo(15, 16);
-      c.lineTo(12, 21); c.lineTo(5, 21); c.lineTo(0, 13); c.lineTo(2, 11); c.lineTo(5, 13);
-    } else if (this.cursorShape === 1) {                // I-balk
-      c.moveTo(-3, -8); c.lineTo(3, -8); c.moveTo(0, -8); c.lineTo(0, 8); c.moveTo(-3, 8); c.lineTo(3, 8);
-      c.stroke(); c.restore(); return;
-    } else {                                            // pijl
-      c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12); c.lineTo(7, 19); c.lineTo(9, 18);
-      c.lineTo(6, 11); c.lineTo(11, 11);
-    }
-    c.closePath(); c.fill(); c.stroke();
-    c.restore();
   }
 
   cssCursor() {
     const css = ['default', 'text', 'wait', 'crosshair', 'pointer', 'move', 'ns-resize', 'ew-resize',
                  'nwse-resize', 'nesw-resize', 'not-allowed', 'progress', 'none'];
-    this.canvas.style.cursor = css[this.cursorShape] || 'default';
+    this.canvas.style.cursor = this.overlay.style.cursor = css[this.cursorShape] || 'default';
   }
 
   installInput() {
     const cv = this.overlay;   // de overlay ligt boven het spelcanvas
+    cv.tabIndex = 0;
     cv.addEventListener('contextmenu', (e) => e.preventDefault());
     cv.addEventListener('mousedown', (e) => {
-      if (!this.locked && !NO_LOCK && cv.requestPointerLock) {
-        // Vang de muis; de klik zelf gaat ook naar het spel.
-        this.mouse = this.toScreen(e);
-        const p = cv.requestPointerLock({ unadjustedMovement: false });
-        if (p && p.catch) p.catch(() => {});
-      }
+      // preventDefault hieronder verhindert de normale focusoverdracht. Neem zelf
+      // focus, ook wanneer het spel in een iframe op een andere pagina staat.
+      cv.focus({ preventScroll: true });
       this.button(e, EV.DOWN);
       e.preventDefault();
     });
     window.addEventListener('mouseup', (e) => this.button(e, EV.UP));
     window.addEventListener('mousemove', (e) => {
-      if (this.locked || e.target === cv) this.pointerMoved(e);
+      if (e.target === cv) this.pointerMoved(e);
     });
     cv.addEventListener('wheel', (e) => {
       this.push({ kind: EV.WHEEL, x: Math.round(this.mouse.x), y: Math.round(this.mouse.y),
                   wheel: e.deltaY < 0 ? 120 : -120, ...this.mods(e) });
       e.preventDefault();
     }, { passive: false });
-    document.addEventListener('pointerlockchange', () => {
-      this.locked = document.pointerLockElement === cv;
-      cv.style.cursor = this.locked ? 'none' : 'default';
-      this.drawCursor();
-    });
     window.addEventListener('keydown', (e) => {
       if (this.stopped) return; // Laat Tab/Enter na afsluiten aan de links in de pagina.
       const key = vkOf(e.code);

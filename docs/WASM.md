@@ -40,6 +40,26 @@ wasm-opt --enable-reference-types --enable-bulk-memory --enable-bulk-memory-opt 
 
 ## Spelgegevens
 
-De repository bevat nooit spelgegevens. De webbuild vraagt de speler om zijn eigen kopie
-(het originele zip-bestand/installatieprogramma of een geïnstalleerde spelmap), pakt die uit in de
-browser en bewaart die in IndexedDB; de WASI-bestandslaag levert ze aan het spel.
+De repository bevat geen originele spelbestanden. De build verpakt ze in `data.json` en
+`data.pack`, die de browserhost in het WASI-bestandssysteem in het geheugen laadt.
+
+## Toetsenbord en bewaarde steden
+
+Het invoercanvas krijgt bij een muisklik expliciet toetsenbordfocus, ook in een iframe.
+Dat is nodig omdat `preventDefault` op de klik de normale focusoverdracht verhindert.
+
+Bij het sluiten van een beschreven bestand bewaart de browserhost de inhoud in
+`localStorage` onder `zoetermeer:file:<pad>`. Bij het starten worden die bestanden
+hersteld voordat het spel begint. Bewaarde steden blijven dus na herladen beschikbaar
+in dezelfde browser en opslagcontext. Ze worden niet naar een server gestuurd en niet
+als download op de computer gezet. Wissen van sitegegevens verwijdert ook de steden.
+Een iframe kan een andere opslagcontext hebben dan het rechtstreeks geopende spel;
+als de browser opslag blokkeert, is bewaren over herladen heen niet mogelijk.
+Opslag in een iframe op een andere site kan tijdelijk zijn en verdwijnen bij het
+afsluiten van de browser, ook als bewaren en herladen binnen die sessie werken.
+
+Controles voor toetsenbordfocus, tekstinvoer en opslag na herladen:
+
+```sh
+node --test web/test/host.test.mjs
+```
